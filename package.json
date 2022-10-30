@@ -1,0 +1,69 @@
+{
+  "name": "vite-plugin-mock-dev-server",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pengzhanbo/vite-plugin-mock-dev-server"
+  },
+  "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "DEBUG=vite:plugin-mock-dev-server vite example --config ./example/vite.config.ts",
+    "build": "tsup",
+    "prepublishOnly": "pnpm run build",
+    "release": "bumpp package.json --commit --push --tag && pnpm publish --access public"
+  },
+  "tsup": {
+    "entry": [
+      "src/index.ts"
+    ],
+    "sourcemap": false,
+    "dts": true,
+    "splitting": false,
+    "clean": true,
+    "format": [
+      "esm",
+      "cjs"
+    ]
+  },
+  "prettier": "@pengzhanbo/prettier-config",
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "co-body": "^6.1.0",
+    "debug": "^4.3.4",
+    "fast-glob": "^3.2.12",
+    "path-to-regexp": "^6.2.1",
+    "vite": "^3.2.0"
+  },
+  "devDependencies": {
+    "@pengzhanbo/eslint-config-ts": "^0.2.10",
+    "@pengzhanbo/prettier-config": "^0.2.10",
+    "@types/co-body": "^6.1.0",
+    "@types/debug": "^4.1.7",
+    "@types/node": "^18.11.7",
+    "bumpp": "^8.2.1",
+    "concurrently": "^7.5.0",
+    "eslint": "^8.26.0",
+    "prettier": "^2.7.1",
+    "tsup": "^6.3.0",
+    "typescript": "^4.8.4",
+    "vite-plugin-mock-dev-server": "file:"
+  },
+  "packageManager": "pnpm@7.14.0",
+  "engines": {
+    "node": ">=16"
+  }
+}

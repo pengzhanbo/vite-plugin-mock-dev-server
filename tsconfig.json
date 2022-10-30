@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "moduleResolution": "node",
+    "strict": true,
+    "declaration": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "lib": ["ESNext"],
+    "sourceMap": false,
+    "noEmitOnError": true
+  },
+  "include": ["./src", "./example"],
+  "exclude": ["dist", "node_modules"],
+  "references": [{"path": "./tsconfig.esm.json"}]
+}
