@@ -2,6 +2,7 @@ import fs from 'node:fs/promises'
 import type * as http from 'node:http'
 import path from 'node:path'
 import { parse as urlParse } from 'node:url'
+import { createFilter } from '@rollup/pluginutils'
 import chokidar from 'chokidar'
 import bodyParser from 'co-body'
 import Debug from 'debug'
@@ -25,9 +26,12 @@ const debug = Debug('vite:plugin-mock-dev-server')
 export async function mockServerMiddleware(
   httpServer: http.Server | null,
   config: ResolvedConfig,
-  options: MockServerPluginOptions
+  options: Required<MockServerPluginOptions>
 ): Promise<Connect.NextHandleFunction> {
   const include = isArray(options.include) ? options.include : [options.include]
+  const fileFilter = createFilter(options.include, options.exclude, {
+    resolve: false,
+  })
   const includePaths = await fastGlob(include, { cwd: process.cwd() })
   const external = await getExternal(process.cwd())
   const modules: Record<string, MockOptions | MockOptionsItem> =
@@ -40,7 +44,12 @@ export async function mockServerMiddleware(
 
   setupMockList()
 
-  debug('start watcher: ', include)
+  debug(
+    'start watcher: ',
+    include,
+    includePaths,
+    includePaths.map((url) => `${url}: ${fileFilter(url)}`)
+  )
   debug('watcher api length: ', mockList.length)
 
   const watcher = chokidar.watch(include.splice(0)[0], {
@@ -50,11 +59,13 @@ export async function mockServerMiddleware(
   include.length > 0 && include.forEach((item) => watcher.add(item))
 
   watcher.on('add', async (filepath) => {
+    if (!fileFilter(filepath)) return
     debug('watcher add: ', filepath)
     modules[filepath] = await loadModule(filepath, external)
     setupMockList()
   })
   watcher.on('change', async (filepath) => {
+    if (!fileFilter(filepath)) return
     debug('watcher change', filepath)
     modules[filepath] = await loadModule(filepath, external)
     setupMockList()

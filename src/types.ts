@@ -3,10 +3,16 @@ import type { Connect } from 'vite'
 
 export interface MockServerPluginOptions {
   /**
-   * glob字符串匹配 mock数据文件
+   * glob 字符串匹配 mock 包含的文件
+   * @see https://github.com/micromatch/picomatch#globbing-features
    * @default []
    */
-  include: string | string[]
+  include?: string | string[]
+  /**
+   * glob 字符串匹配 mock 过滤的文件
+   * @see https://github.com/micromatch/picomatch#globbing-features
+   */
+  exclude?: string | string[]
 }
 
 export type Method =

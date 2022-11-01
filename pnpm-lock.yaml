@@ -3,6 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@pengzhanbo/eslint-config-ts': ^0.2.10
   '@pengzhanbo/prettier-config': ^0.2.10
+  '@rollup/pluginutils': ^5.0.2
   '@types/co-body': ^6.1.0
   '@types/debug': ^4.1.7
   '@types/node': ^18.11.7
@@ -22,6 +23,7 @@ specifiers:
   vite-plugin-mock-dev-server: 'file:'
 
 dependencies:
+  '@rollup/pluginutils': 5.0.2
   chokidar: 3.5.3
   co-body: 6.1.0
   debug: 4.3.4
@@ -218,6 +220,20 @@ packages:
       prettier: 2.7.1
     dev: true
 
+  /@rollup/pluginutils/5.0.2:
+    resolution: {integrity: sha512-pTd9rIsP92h+B6wWwFbW8RkZv4hiR/xKsqre4SIuAOaOEQRxi0lqLke9k2/7WegC85GgUs9pjmOjCUi3In4vwA==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+    dependencies:
+      '@types/estree': 1.0.0
+      estree-walker: 2.0.2
+      picomatch: 2.3.1
+    dev: false
+
   /@types/co-body/6.1.0:
     resolution: {integrity: sha512-3e0q2jyDAnx/DSZi0z2H0yoZ2wt5yRDZ+P7ymcMObvq0ufWRT4tsajyO+Q1VwVWiv9PRR4W3YEjEzBjeZlhF+w==}
     dependencies:
@@ -230,6 +246,10 @@ packages:
     dependencies:
       '@types/ms': 0.7.31
     dev: true
+
+  /@types/estree/1.0.0:
+    resolution: {integrity: sha512-WulqXMDUTYAXCjZnk6JtIHPigp55cVtDgDrO2gHRwhyJto21+1zbVCtOYB2L1F9w4qCQ0rOGWBnBe0FNTiEJIQ==}
+    dev: false
 
   /@types/json-schema/7.0.11:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
@@ -1404,6 +1424,10 @@ packages:
     resolution: {integrity: sha512-MMdARuVEQziNTeJD8DgMqmhwR11BRQ/cBP+pLtYdSTnf3MIO8fFeiINEbX36ZdNlfU/7A9f3gUw49B3oQsvwBA==}
     engines: {node: '>=4.0'}
     dev: true
+
+  /estree-walker/2.0.2:
+    resolution: {integrity: sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==}
+    dev: false
 
   /esutils/2.0.3:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
@@ -2948,7 +2972,7 @@ packages:
   'file:':
     resolution: {directory: '', type: directory}
     name: vite-plugin-mock-dev-server
-    version: 0.1.0
+    version: 0.1.1
     engines: {node: '>=16'}
     dependencies:
       chokidar: 3.5.3
