@@ -5,9 +5,9 @@ import { parse as urlParse } from 'node:url'
 import chokidar from 'chokidar'
 import bodyParser from 'co-body'
 import Debug from 'debug'
+import { build } from 'esbuild'
 import fastGlob from 'fast-glob'
 import { match, pathToRegexp } from 'path-to-regexp'
-import { transformWithEsbuild } from 'vite'
 import type { Connect, ResolvedConfig } from 'vite'
 import type {
   Method,
@@ -29,12 +29,13 @@ export async function mockServerMiddleware(
 ): Promise<Connect.NextHandleFunction> {
   const include = isArray(options.include) ? options.include : [options.include]
   const includePaths = await fastGlob(include, { cwd: process.cwd() })
+  const external = await getExternal(process.cwd())
   const modules: Record<string, MockOptions | MockOptionsItem> =
     Object.create(null)
   let mockList!: MockOptions
 
   for (const filepath of includePaths) {
-    modules[filepath] = await loadModule(filepath)
+    modules[filepath] = await loadModule(filepath, external)
   }
 
   setupMockList()
@@ -50,12 +51,12 @@ export async function mockServerMiddleware(
 
   watcher.on('add', async (filepath) => {
     debug('watcher add: ', filepath)
-    modules[filepath] = await loadModule(filepath)
+    modules[filepath] = await loadModule(filepath, external)
     setupMockList()
   })
   watcher.on('change', async (filepath) => {
     debug('watcher change', filepath)
-    modules[filepath] = await loadModule(filepath)
+    modules[filepath] = await loadModule(filepath, external)
     setupMockList()
   })
   watcher.on('unlink', (filepath) => {
@@ -208,16 +209,22 @@ async function parseReqBody(req: Connect.IncomingMessage): Promise<any> {
 }
 
 async function loadModule(
-  filepath: string
+  filepath: string,
+  external: string[]
 ): Promise<MockOptions | MockOptionsItem> {
-  const ext = path.extname(filepath)
-  if (ext === '.ts') {
-    const tsText = await fs.readFile(filepath, 'utf-8')
-    const { code } = await transformWithEsbuild(tsText, filepath, {
+  try {
+    const result = await build({
+      entryPoints: [filepath],
+      outfile: 'out.js',
+      write: false,
       target: 'es2020',
       platform: 'node',
+      bundle: true,
+      external,
+      metafile: true,
       format: 'esm',
     })
+
     const tempFile = path.join(
       process.cwd(),
       MOCK_TEMP,
@@ -225,19 +232,27 @@ async function loadModule(
     )
     const tempBasename = path.dirname(tempFile)
     await fs.mkdir(tempBasename, { recursive: true })
-    await fs.writeFile(tempFile, code, 'utf8')
-    return await loadESModule(tempFile)
+    await fs.writeFile(tempFile, result.outputFiles[0].text, 'utf8')
+    const handle = await import(`${tempFile}?${Date.now()}`)
+    if (handle && handle.default)
+      return handle.default as MockOptions | MockOptionsItem
+    return Object.keys(handle || {}).map((key) => handle[key]) as MockOptions
+  } catch (e) {
+    console.error(e)
   }
-  return await loadESModule(filepath)
+  return { url: '' }
 }
 
-async function loadESModule(
-  filepath: string
-): Promise<MockOptions | MockOptionsItem> {
-  const handle = await import(`${filepath}?${Date.now()}`)
-  if (handle && handle.default)
-    return handle.default as MockOptions | MockOptionsItem
-  return Object.keys(handle || {}).map((key) => handle[key]) as MockOptions
+async function getExternal(cwd: string) {
+  const filepath = path.resolve(cwd, 'package.json')
+  const content = await fs.readFile(filepath, 'utf-8')
+  const pkg = JSON.parse(content)
+  const { dependencies = {}, devDependencies = {} } = pkg
+  const external = [
+    ...Object.keys(dependencies),
+    ...Object.keys(devDependencies),
+  ]
+  return external
 }
 
 function validate(

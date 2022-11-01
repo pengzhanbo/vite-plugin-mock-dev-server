@@ -1,4 +1,5 @@
 import { defineMock } from 'vite-plugin-mock-dev-server'
+import post from './post'
 
 /**
  * 可以通过这种方式，将 变量名与 项目源代码中的请求封装函数的名称相对应，
@@ -25,7 +26,12 @@ export const fetchPostList = defineMock({
       result: {
         page: body.page,
         total: 10,
-        list: [{ title: 'post1' }, { title: 'post2' }, { title: 'post3' }],
+        list: [
+          { title: 'post1' },
+          { title: 'post2' },
+          { title: 'post3' },
+          ...post,
+        ],
       },
     }
   },
