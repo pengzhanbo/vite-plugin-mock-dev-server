@@ -11,7 +11,7 @@ export const fetchLogin = defineMock({
   },
   body: {
     login: true,
-    token: 'aaa',
+    token: 'aaaaaaaaaaaa',
   },
 })
 

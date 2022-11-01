@@ -4,7 +4,7 @@ import mockServer from 'vite-plugin-mock-dev-server'
 export default defineConfig({
   plugins: [
     mockServer({
-      include: 'example/mock/**/*',
+      include: 'example/mock/**/*.mock.ts',
     }),
   ],
   server: {
