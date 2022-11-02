@@ -1,7 +1,9 @@
 {
     "cSpell.words": [
         "esbuild",
+        "metafile",
         "middlewares",
-        "mockjs"
+        "mockjs",
+        "outfile"
     ]
 }
