@@ -1,4 +1,3 @@
-// import fs from 'node:fs/promises'
 import type * as http from 'node:http'
 import { parse as urlParse } from 'node:url'
 import { match, pathToRegexp } from 'path-to-regexp'
@@ -28,6 +27,12 @@ export async function mockServerMiddleware(
   await loader.load()
   httpServer?.on('close', () => loader.close())
 
+  /**
+   * 获取 服务代理配置中，配置的 请求前缀，
+   * 作为判断接口是否需要mock的首要条件。
+   *
+   * 在一般开发场景中，我们也只需要对通过 vite server 进行代理的请求 进行 mock
+   */
   const proxies: string[] = Object.keys(config.server.proxy || {})
 
   return async function (req, res, next) {
@@ -48,6 +53,7 @@ export async function mockServerMiddleware(
           ? mock.method
           : [mock.method]
         : ['GET', 'POST']
+      // 判断发起的请求方法是否符合当前 mock 允许的方法
       if (!methods.includes(req.method!.toUpperCase() as Method)) return false
       const hasMock = pathToRegexp(mock.url).test(pathname)
 
@@ -75,6 +81,9 @@ export async function mockServerMiddleware(
 
     debug('middleware: ', method, pathname)
 
+    /**
+     * 接口响应延迟
+     */
     if (currentMock.delay && currentMock.delay > 0) {
       await sleep(currentMock.delay)
     }
@@ -87,6 +96,9 @@ export async function mockServerMiddleware(
     ) || { params: {} }
     const params = urlMatch.params || {}
 
+    /**
+     * 在 请求对象中，注入信息
+     */
     ;(req as any).body = reqBody
     ;(req as any).query = query
     ;(req as any).params = params

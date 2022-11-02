@@ -8,6 +8,7 @@ export default defineMock([
         params,
         body,
         isLogin: true,
+        development: __IS_DEVELOPMENT__,
       }
     },
   },

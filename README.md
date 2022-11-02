@@ -15,6 +15,7 @@ vite mock开发服务（mock-dev-server）插件。
 - ⚙️ 随意开启或关闭对某个接口的 mock配置
 - 🔥 热更新
 - ⚖️ 使用 `server.proxy` 配置
+- 🍕 支持在 mock文件中使用 `viteConfig.define`配置字段
 
 
 ## 使用
@@ -41,6 +42,8 @@ export default defineConfig({
   plugins: [
     mockDevServerPlugin(),
   ],
+  // 这里定义的字段，在mock中也能使用
+  define: {},
   server: {
     proxy: {
       '^/api': {
@@ -50,8 +53,9 @@ export default defineConfig({
   }
 })
 ```
-插件会读取 `server.proxy` 的配置， 仅对设置了代理的 url 匹配，启用
-mock 匹配。
+插件会读取 `server.proxy` 的配置， 仅对设置了代理的 url 匹配，启用mock 匹配。
+
+插件也会读取 `define` 配置， 支持在 mock 文件中直接使用。
 
 > 因为一般场景下，我们只需要对有代理的url进行mock，这样才能通过 vite 提供的 http 服务进行 代理和 mock
 
@@ -98,6 +102,12 @@ export default defineConfig({
   配置读取 mock文件，可以是一个 目录，glob，或者一个数组
 
   默认值： `['mock/**/*.mock.*']` (相对于根目录)
+
+- `options.exclude`
+  
+  配置读取 mock文件时，需要排除的文件， 可以是一个 目录、glob、或者一个数组
+
+  默认值：`['**/node_modules/**','**/test/**','**/cypress/**','src/**','**/.vscode/**','**/.git/**','**/dist/**',]`
 
 
 ### defineMock(config)
@@ -223,6 +233,8 @@ export default defineMock({
 ```
 
 `mock/**/*.mock.ts`
+
+查看更多示例： [example](/example/)
 
 #### 示例1：
 命中 `/api/test` 请求，并返回一个 数据为空的响应体内容

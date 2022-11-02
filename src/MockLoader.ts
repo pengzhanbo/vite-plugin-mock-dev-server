@@ -18,6 +18,9 @@ export interface MockLoaderOptions {
   define: Record<string, any>
 }
 
+/**
+ * mock配置加载器
+ */
 export class MockLoader extends EventEmitter {
   moduleCache: Map<string, MockOptions | MockOptionsItem> = new Map()
   moduleDeps: Map<string, Set<string>> = new Map()
@@ -44,6 +47,10 @@ export class MockLoader extends EventEmitter {
     const includePaths = await fastGlob(include, {
       cwd: this.cwd,
     })
+    /**
+     * 使用 rollup 提供的 include/exclude 规则，
+     * 过滤包含文件
+     */
     const includeFilter = createFilter(include, exclude, {
       resolve: false,
     })
@@ -54,6 +61,8 @@ export class MockLoader extends EventEmitter {
     for (const filepath of includePaths.filter(includeFilter)) {
       await this.loadModule(filepath)
     }
+    this.updateMockList()
+
     this.on('mock:update', async (filepath: string) => {
       if (!includeFilter(filepath)) return
       await this.loadModule(filepath)
@@ -90,6 +99,10 @@ export class MockLoader extends EventEmitter {
     this.mockWatcher = watcher
   }
 
+  /**
+   * 监听 mock文件依赖的本地文件变动，
+   * mock依赖文件更新，mock文件也一并更新
+   */
   private watchDeps() {
     const oldDeps: string[] = []
     this.on('update:deps', () => {
