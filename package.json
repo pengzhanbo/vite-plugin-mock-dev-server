@@ -1,6 +1,13 @@
 {
   "name": "vite-plugin-mock-dev-server",
   "version": "0.2.0",
+  "keywords": [
+    "vite",
+    "plugin",
+    "vite-plugin",
+    "mock",
+    "mock-server"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/pengzhanbo/vite-plugin-mock-dev-server"
