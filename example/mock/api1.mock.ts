@@ -1,9 +1,11 @@
 import { defineMock } from 'vite-plugin-mock-dev-server'
+import post from './post'
 export default defineMock([
   {
     url: '/api/test',
     body: {
       aaa: 11122,
+      post,
     },
   },
   {

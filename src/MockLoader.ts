@@ -47,6 +47,10 @@ export class MockLoader extends EventEmitter {
     const includeFilter = createFilter(include, exclude, {
       resolve: false,
     })
+
+    this.watchMockEntry()
+    this.watchDeps()
+
     for (const filepath of includePaths.filter(includeFilter)) {
       await this.loadModule(filepath)
     }
@@ -60,8 +64,6 @@ export class MockLoader extends EventEmitter {
       this.moduleCache.delete(filepath)
       this.updateMockList()
     })
-    this.watchMockEntry()
-    this.watchDeps()
   }
 
   private watchMockEntry() {
@@ -142,7 +144,6 @@ export class MockLoader extends EventEmitter {
         cur.add(filepath)
       })
     })
-    debug('moduleDeps', this.moduleDeps)
     this.emit('update:deps')
   }
 
