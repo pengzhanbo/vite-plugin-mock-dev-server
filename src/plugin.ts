@@ -16,6 +16,8 @@ export function mockDevServerPlugin({
 }: MockServerPluginOptions = {}): Plugin {
   return {
     name: 'vite-plugin-mock-dev-server',
+    enforce: 'pre',
+    apply: 'serve',
 
     async configureServer({ middlewares, config, httpServer }) {
       const middleware = await mockServerMiddleware(httpServer, config, {

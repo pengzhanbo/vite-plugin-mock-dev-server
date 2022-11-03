@@ -104,6 +104,7 @@ export async function mockServerMiddleware(
     ;(req as any).params = params
 
     res.setHeader('Content-Type', 'application/json')
+    res.setHeader('X-Mock', 'generate by vite:mock-dev-server')
     if (currentMock.headers) {
       const headers = isFunction(currentMock.headers)
         ? await currentMock.headers({
