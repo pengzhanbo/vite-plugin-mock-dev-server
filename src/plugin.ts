@@ -3,7 +3,7 @@ import { mockServerMiddleware } from './mockMiddleware'
 import type { MockServerPluginOptions } from './types'
 
 export function mockDevServerPlugin({
-  include = ['mock/**/*.mock.*'],
+  include = ['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}'],
   exclude = [
     '**/node_modules/**',
     '**/test/**',

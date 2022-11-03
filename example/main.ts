@@ -38,6 +38,12 @@ async function mockData() {
   })
 
   await fetch('/api/custom/fail')
+
+  await fetch('/api/json')
+  await fetch('/api/json5')
+  await fetch('/api/esm/config')
+  await fetch('/api/cjs/config')
+  await fetch('/api/js/config')
 }
 mockUser()
 mockPost()

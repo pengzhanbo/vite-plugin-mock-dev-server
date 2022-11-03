@@ -14,6 +14,7 @@ specifiers:
   esbuild: ^0.15.12
   eslint: ^8.26.0
   fast-glob: ^3.2.12
+  json5: ^2.2.1
   mockjs: ^1.1.0
   path-to-regexp: ^6.2.1
   prettier: ^2.7.1
@@ -29,6 +30,7 @@ dependencies:
   debug: 4.3.4
   esbuild: 0.15.12
   fast-glob: 3.2.12
+  json5: 2.2.1
   path-to-regexp: 6.2.1
   vite: 3.2.0
 
@@ -1882,6 +1884,12 @@ packages:
       minimist: 1.2.7
     dev: true
 
+  /json5/2.2.1:
+    resolution: {integrity: sha512-1hqLFMSrGHRHxav9q9gNjJ5EXznIxGVO09xQRrwplcS8qs28pZ8s8hupZAmqDwZUmVZ2Qb2jnyPOWcDH8m8dlA==}
+    engines: {node: '>=6'}
+    hasBin: true
+    dev: false
+
   /jsonc-eslint-parser/2.1.0:
     resolution: {integrity: sha512-qCRJWlbP2v6HbmKW7R3lFbeiVWHo+oMJ0j+MizwvauqnCV/EvtAeEeuCgoc/ErtsuoKgYB8U4Ih8AxJbXoE6/g==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
@@ -2856,7 +2864,7 @@ packages:
   'file:':
     resolution: {directory: '', type: directory}
     name: vite-plugin-mock-dev-server
-    version: 0.1.1
+    version: 0.2.2
     engines: {node: '>=16'}
     dependencies:
       '@rollup/pluginutils': 5.0.2

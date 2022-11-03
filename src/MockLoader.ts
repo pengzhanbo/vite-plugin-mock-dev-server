@@ -6,6 +6,7 @@ import chokidar from 'chokidar'
 import type { Metafile } from 'esbuild'
 import { build } from 'esbuild'
 import fastGlob from 'fast-glob'
+import JSON5 from 'json5'
 import type { MockOptions, MockOptionsItem } from './types'
 import { debug, isArray } from './utils'
 
@@ -22,6 +23,7 @@ export interface MockLoaderOptions {
  * mock配置加载器
  */
 export class MockLoader extends EventEmitter {
+  static EXT_JSON = /\.json5?$/
   moduleCache: Map<string, MockOptions | MockOptionsItem> = new Map()
   moduleDeps: Map<string, Set<string>> = new Map()
   cwd: string
@@ -42,7 +44,7 @@ export class MockLoader extends EventEmitter {
     return this._mockList
   }
 
-  async load() {
+  public async load() {
     const { include, exclude } = this.options
     const includePaths = await fastGlob(include, {
       cwd: this.cwd,
@@ -131,7 +133,7 @@ export class MockLoader extends EventEmitter {
     })
   }
 
-  close() {
+  public close() {
     this.mockWatcher?.close()
     this.depsWatcher?.close()
   }
@@ -160,28 +162,49 @@ export class MockLoader extends EventEmitter {
     this.emit('update:deps')
   }
 
-  private async loadModule(filepath?: string) {
+  private async loadModule(filepath?: string): Promise<void> {
     if (!filepath) return
-    const { code, deps } = await this.transform(filepath)
+    if (MockLoader.EXT_JSON.test(filepath)) {
+      await this.loadJson(filepath)
+    } else {
+      await this.loadESModule(filepath)
+    }
+  }
+
+  private async loadJson(filepath: string) {
+    const content = await fs.readFile(filepath, 'utf-8')
+    try {
+      const mockConfig = JSON5.parse(content)
+      this.moduleCache.set(filepath, mockConfig)
+    } catch (e) {}
+  }
+
+  private async loadESModule(filepath?: string) {
+    if (!filepath) return
+    const { code, deps } = await this.transformWithEsbuild(filepath)
 
     const tempFile = path.join(
       this.cwd,
       this.tempDir,
-      filepath.replace(/\.ts$/, '.mjs')
+      filepath.replace(/\.(ts|js|cjs)$/, '.mjs')
     )
-    const tempBasename = path.dirname(tempFile)
-    await fs.mkdir(tempBasename, { recursive: true })
+    const tempDirname = path.dirname(tempFile)
+    await fs.mkdir(tempDirname, { recursive: true })
     await fs.writeFile(tempFile, code, 'utf8')
-    const handle = await import(`${tempFile}?${Date.now()}`)
-    const mockConfig =
-      handle && handle.default
-        ? handle.default
-        : Object.keys(handle || {}).map((key) => handle[key])
-    this.moduleCache.set(filepath, mockConfig)
-    this.updateModuleDeps(filepath, deps)
+    try {
+      const handle = await import(`${tempFile}?${Date.now()}`)
+      const mockConfig =
+        handle && handle.default
+          ? handle.default
+          : Object.keys(handle || {}).map((key) => handle[key])
+      this.moduleCache.set(filepath, mockConfig)
+      this.updateModuleDeps(filepath, deps)
+    } catch (e) {
+      console.error(e)
+    }
   }
 
-  private async transform(filepath: string) {
+  private async transformWithEsbuild(filepath: string) {
     try {
       const result = await build({
         entryPoints: [filepath],
@@ -199,9 +222,7 @@ export class MockLoader extends EventEmitter {
         code: result.outputFiles[0].text,
         deps: result.metafile?.inputs || {},
       }
-    } catch (e) {
-      console.error(e)
-    }
+    } catch (e) {}
     return {
       code: '',
       deps: {},

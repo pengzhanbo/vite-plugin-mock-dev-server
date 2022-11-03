@@ -4,7 +4,7 @@ import mockServer from 'vite-plugin-mock-dev-server'
 export default defineConfig(({ mode }) => ({
   plugins: [
     mockServer({
-      include: 'example/mock/**/*.mock.ts',
+      include: 'example/mock/**/*.mock.{ts,js,cjs,mjs,json,json5}',
     }),
   ],
   // define 注入的变量， 在 mock文件中也可以使用
