@@ -16,4 +16,5 @@
     "forceConsistentCasingInFileNames": true,
   },
   "include": ["./example", "./src"],
+  "exclude": ["./example/**/*.mjs", "./example/**/*.cjs", "./example/**/*.js"]
 }
