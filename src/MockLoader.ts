@@ -1,6 +1,8 @@
 import EventEmitter from 'node:events'
-import fs from 'node:fs/promises'
+import fs from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { createFilter } from '@rollup/pluginutils'
 import chokidar from 'chokidar'
 import type { Metafile } from 'esbuild'
@@ -8,16 +10,16 @@ import { build } from 'esbuild'
 import fastGlob from 'fast-glob'
 import JSON5 from 'json5'
 import type { MockOptions, MockOptionsItem } from './types'
-import { debug, isArray } from './utils'
+import { debug, isArray, lookupFile } from './utils'
 
 export interface MockLoaderOptions {
   cwd?: string
-  tempDir?: string
   include: string[]
   exclude: string[]
-  external: string[]
   define: Record<string, any>
 }
+
+const _require = createRequire(import.meta.url)
 
 /**
  * mock配置加载器
@@ -27,17 +29,21 @@ export class MockLoader extends EventEmitter {
   moduleCache: Map<string, MockOptions | MockOptionsItem> = new Map()
   moduleDeps: Map<string, Set<string>> = new Map()
   cwd: string
-  tempDir: string
   options: MockLoaderOptions
   mockWatcher!: chokidar.FSWatcher
   depsWatcher!: chokidar.FSWatcher
   _mockList: MockOptions = []
+  moduleType: 'cjs' | 'esm' = 'cjs'
 
   constructor(options: MockLoaderOptions) {
     super()
     this.options = options
     this.cwd = options.cwd || process.cwd()
-    this.tempDir = options.tempDir || 'node_modules/.cache/.mock_server'
+    try {
+      const pkg = lookupFile(this.cwd, ['package.json'])
+      this.moduleType =
+        !!pkg && JSON.parse(pkg).type === 'module' ? 'esm' : 'cjs'
+    } catch (e) {}
   }
 
   get mockList() {
@@ -61,13 +67,13 @@ export class MockLoader extends EventEmitter {
     this.watchDeps()
 
     for (const filepath of includePaths.filter(includeFilter)) {
-      await this.loadModule(filepath)
+      await this.loadMock(filepath)
     }
     this.updateMockList()
 
     this.on('mock:update', async (filepath: string) => {
       if (!includeFilter(filepath)) return
-      await this.loadModule(filepath)
+      await this.loadMock(filepath)
       this.updateMockList()
     })
     this.on('mock:unlink', async (filepath: string) => {
@@ -162,41 +168,41 @@ export class MockLoader extends EventEmitter {
     this.emit('update:deps')
   }
 
-  private async loadModule(filepath?: string): Promise<void> {
+  private async loadMock(filepath?: string): Promise<void> {
     if (!filepath) return
     if (MockLoader.EXT_JSON.test(filepath)) {
       await this.loadJson(filepath)
     } else {
-      await this.loadESModule(filepath)
+      await this.loadModule(filepath)
     }
   }
 
   private async loadJson(filepath: string) {
-    const content = await fs.readFile(filepath, 'utf-8')
+    const content = await fs.promises.readFile(filepath, 'utf-8')
     try {
       const mockConfig = JSON5.parse(content)
       this.moduleCache.set(filepath, mockConfig)
     } catch (e) {}
   }
 
-  private async loadESModule(filepath?: string) {
+  private async loadModule(filepath?: string) {
     if (!filepath) return
-    const { code, deps } = await this.transformWithEsbuild(filepath)
+    let isESM = false
+    if (/\.m[jt]s$/.test(filepath)) {
+      isESM = true
+    } else if (/\.c[jt]s$/.test(filepath)) {
+      isESM = false
+    } else {
+      isESM = this.moduleType === 'esm'
+    }
+    const { code, deps } = await this.transformWithEsbuild(filepath, isESM)
 
-    const tempFile = path.join(
-      this.cwd,
-      this.tempDir,
-      filepath.replace(/\.(ts|js|cjs)$/, '.mjs')
-    )
-    const tempDirname = path.dirname(tempFile)
-    await fs.mkdir(tempDirname, { recursive: true })
-    await fs.writeFile(tempFile, code, 'utf8')
     try {
-      const handle = await import(`${tempFile}?${Date.now()}`)
+      const raw = await this.loadFromCode(filepath, code, isESM)
       const mockConfig =
-        handle && handle.default
-          ? handle.default
-          : Object.keys(handle || {}).map((key) => handle[key])
+        raw && raw.default
+          ? raw.default
+          : Object.keys(raw || {}).map((key) => raw[key])
       this.moduleCache.set(filepath, mockConfig)
       this.updateModuleDeps(filepath, deps)
     } catch (e) {
@@ -204,19 +210,69 @@ export class MockLoader extends EventEmitter {
     }
   }
 
-  private async transformWithEsbuild(filepath: string) {
+  private async loadFromCode(filepath: string, code: string, isESM: boolean) {
+    if (isESM) {
+      const fileBase = `${filepath}.timestamp-${Date.now()}`
+      const fileNameTmp = `${fileBase}.mjs`
+      const fileUrl = `${pathToFileURL(fileBase)}.mjs`
+      await fs.promises.writeFile(fileNameTmp, code, 'utf8')
+      try {
+        return await import(fileUrl)
+      } finally {
+        try {
+          fs.unlinkSync(fileNameTmp)
+        } catch {}
+      }
+    } else {
+      filepath = path.resolve(this.cwd, filepath)
+      const extension = path.extname(filepath)
+      const realFileName = fs.realpathSync(filepath)
+      const loaderExt = extension in _require.extensions ? extension : '.js'
+      const defaultLoader = _require.extensions[loaderExt]!
+      _require.extensions[loaderExt] = (
+        module: NodeModule,
+        filename: string
+      ) => {
+        if (filename === realFileName) {
+          // eslint-disable-next-line @typescript-eslint/no-extra-semi
+          ;(module as any)._compile(code, filename)
+        } else {
+          defaultLoader(module, filename)
+        }
+      }
+      delete _require.cache[_require.resolve(filepath)]
+      const raw = _require(filepath)
+      _require.extensions[loaderExt] = defaultLoader
+      return raw.__esModule ? raw : { default: raw }
+    }
+  }
+
+  private async transformWithEsbuild(filepath: string, isESM: boolean) {
     try {
       const result = await build({
         entryPoints: [filepath],
         outfile: 'out.js',
         write: false,
-        target: 'es2020',
+        target: ['node14.18', 'node16'],
         platform: 'node',
         bundle: true,
-        external: this.options.external,
         metafile: true,
-        format: 'esm',
+        format: isESM ? 'esm' : 'cjs',
         define: this.options.define,
+        plugins: [
+          {
+            name: 'externalize-deps',
+            setup(build) {
+              build.onResolve({ filter: /.*/ }, ({ path: id }) => {
+                if (id[0] !== '.' && !path.isAbsolute(id)) {
+                  return {
+                    external: true,
+                  }
+                }
+              })
+            },
+          },
+        ],
       })
       return {
         code: result.outputFiles[0].text,

@@ -5,7 +5,7 @@ import type { Connect, ResolvedConfig } from 'vite'
 import { MockLoader } from './MockLoader'
 import { parseReqBody } from './parseReqBody'
 import type { Method, MockServerPluginOptions, ResponseReq } from './types'
-import { debug, getPackageDeps, isArray, isFunction, sleep } from './utils'
+import { debug, isArray, isFunction, sleep } from './utils'
 import { validate } from './validator'
 
 export async function mockServerMiddleware(
@@ -15,12 +15,10 @@ export async function mockServerMiddleware(
 ): Promise<Connect.NextHandleFunction> {
   const include = isArray(options.include) ? options.include : [options.include]
   const exclude = isArray(options.exclude) ? options.exclude : [options.exclude]
-  const external = await getPackageDeps(process.cwd())
 
   const loader = new MockLoader({
     include,
     exclude,
-    external,
     define: config.define || {},
   })
 

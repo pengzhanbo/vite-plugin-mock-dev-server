@@ -1,4 +1,4 @@
-import fs from 'fs/promises'
+import fs from 'node:fs'
 import path from 'node:path'
 import Debug from 'debug'
 
@@ -13,11 +13,33 @@ export function sleep(timeout: number) {
 
 export const debug = Debug('vite:plugin-mock-dev-server')
 
-export async function getPackageDeps(cwd: string) {
-  const filepath = path.resolve(cwd, 'package.json')
-  const content = await fs.readFile(filepath, 'utf-8')
-  const pkg = JSON.parse(content)
-  const { dependencies = {}, devDependencies = {} } = pkg
-  const deps = [...Object.keys(dependencies), ...Object.keys(devDependencies)]
-  return deps
+interface LookupFileOptions {
+  pathOnly?: boolean
+  rootDir?: string
+  predicate?: (file: string) => boolean
+}
+
+export function lookupFile(
+  dir: string,
+  formats: string[],
+  options?: LookupFileOptions
+): string | undefined {
+  for (const format of formats) {
+    const fullPath = path.join(dir, format)
+    if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
+      const result = options?.pathOnly
+        ? fullPath
+        : fs.readFileSync(fullPath, 'utf-8')
+      if (!options?.predicate || options.predicate(result)) {
+        return result
+      }
+    }
+  }
+  const parentDir = path.dirname(dir)
+  if (
+    parentDir !== dir &&
+    (!options?.rootDir || parentDir.startsWith(options?.rootDir))
+  ) {
+    return lookupFile(parentDir, formats, options)
+  }
 }
