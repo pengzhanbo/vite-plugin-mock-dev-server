@@ -8,7 +8,7 @@ vite mock开发服务（mock-dev-server）插件。
 
 - ⚡️ 轻量，灵活，快速
 - 🧲 非注入式，对客户端代码无侵入
-- 💡 ESModule
+- 💡 ESModule/commonjs
 - 🦾 Typescript
 - 🏷 支持 json / json5 编写 mock 数据
 - 📦 自动加载 mock 文件
