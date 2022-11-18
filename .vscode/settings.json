@@ -5,6 +5,5 @@
         "middlewares",
         "mockjs",
         "outfile"
-    ],
-    "commentTranslate.targetLanguage": "zh-CN"
+    ]
 }
