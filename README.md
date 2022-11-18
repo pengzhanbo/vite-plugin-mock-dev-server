@@ -1,28 +1,35 @@
 # vite-plugin-mock-dev-server
 
-vite mock开发服务（mock-dev-server）插件。
+<p align="center">Vite Plugin for API mock dev server.</p>
 
-在 vite 开发环境中，注入一个 mock-dev-server。
+<br>
+<br>
+<p align="center">
+<span>English</span> | <a href="/README.zh-CN.md">简体中文</a>
+</p>
+<br>
+<br>
 
-## 特性
 
-- ⚡️ 轻量，灵活，快速
-- 🧲 非注入式，对客户端代码无侵入
+## Feature
+
+- ⚡️ light weight，flexible，fast
+- 🧲 Non - injection, no intrusion to client code
 - 💡 ESModule/commonjs
 - 🦾 Typescript
-- 🏷 支持 json / json5 编写 mock 数据
-- 📦 自动加载 mock 文件
-- 🎨 可选择你喜欢的任意用于生成mock数据库，如 `mockjs`，或者不是用其他库
-- 📥 路径规则匹配，请求参数匹配
-- ⚙️ 随意开启或关闭对某个接口的 mock配置
-- 🔥 热更新
-- ⚖️ 使用 `server.proxy` 配置
-- 🍕 支持在 mock文件中使用 `viteConfig.define`配置字段
+- 🏷 Support json / json5
+- 📦 Auto import mock file
+- 🎨 Support any lib，like `mockjs`，or not use it.
+- 📥 Path rules match and request parameters match
+- ⚙️ Support Enabled/Disabled any one of api mock
+- 🔥 Hot reload
+- ⚖️ Use `server.proxy`
+- 🍕 Support `viteConfig.define` in mock file
 
 
-## 使用
+## Usage
 
-### 安装
+### Install
 
 ```sh
 # npm
@@ -33,7 +40,7 @@ yarn add vite-plugin-mock-dev-server
 pnpm add -D vite-plugin-mock-dev-server
 ```
 
-### 配置
+### Configuration
 
 `vite.config.ts`
 ```ts
@@ -44,7 +51,6 @@ export default defineConfig({
   plugins: [
     mockDevServerPlugin(),
   ],
-  // 这里定义的字段，在mock中也能使用
   define: {},
   server: {
     proxy: {
@@ -55,15 +61,15 @@ export default defineConfig({
   }
 })
 ```
-插件会读取 `server.proxy` 的配置， 仅对设置了代理的 url 匹配，启用mock 匹配。
+The plugin reads the configuration for `server.proxy` and enables mock matching only for urls where the proxy is set.
 
-插件也会读取 `define` 配置， 支持在 mock 文件中直接使用。
+The plugin also reads the `define` configuration and supports direct use in mock files.
 
-> 因为一般场景下，我们只需要对有代理的url进行mock，这样才能通过 vite 提供的 http 服务进行 代理和 mock
+> In a general case, we only need to mock the url with the proxy so that we can proxy and mock through the http service provided by vite
 
-### 编写mock文件
+### Edit Mock File
 
-默认配置，在你的项目根目录的 `mock` 目录中编写mock数据：
+By default, write mock data in the `mock` directory of your project root:
 
 `mock/api.mock.ts` :
 ```ts
@@ -78,7 +84,7 @@ export default defineMock({
 })
 ```
 
-## 方法
+## Methods
 
 ### mockDevServerPlugin(options)
 
@@ -101,20 +107,31 @@ export default defineConfig({
 
 - `option.include` 
   
-  配置读取 mock文件，可以是一个 目录，glob，或者一个数组
+  Configure to read mock files, which can be a directory, glob, or array
 
-  默认值： `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']` (相对于根目录)
+  Default： `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']` (relative for `process.cwd()`)
 
 - `options.exclude`
   
-  配置读取 mock文件时，需要排除的文件， 可以是一个 目录、glob、或者一个数组
+  When you configure the mock files to be read, the files you want to exclude can be a directory, a glob, or an array
 
-  默认值：`['**/node_modules/**','**/test/**','**/cypress/**','src/**','**/.vscode/**','**/.git/**','**/dist/**',]`
+  Default：
+  ```ts
+  [
+    '**/node_modules/**',
+    '**/test/**',
+    '**/cypress/**',
+    'src/**',
+    '**/.vscode/**',
+    '**/.git/**',
+    '**/dist/**'
+  ]
+  ```
 
 
 ### defineMock(config)
 
-mock 配置帮助函数，提供类型检查帮助
+Mock Type Helper
 
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
@@ -125,16 +142,16 @@ export default defineMock({
 })
 ```
 
-## Mock 配置
+## Mock Configuration
 
 ```ts
 export default defineMock({
   /**
-   * 请求地址，支持 `/api/user/:id` 格式 
+   * Address of request，support `/api/user/:id`
    */
   url: '/api/test',
   /**
-   * 接口支持的请求方法
+   * The request method supported by the API
    * 
    * @type string | string[]
    * @default ['POST','GET']
@@ -142,45 +159,52 @@ export default defineMock({
    */
   method: ['GET', 'POST'],
   /**
-   * 是否启用当前 mock请求
+   * enable/disable the current mock request
    * 
-   * 在实际场景中，我们一般只需要某几个mock接口生效，
-   * 而不是所以mock接口都启用。
-   * 对当前不需要mock的接口，可设置为 false
+   * we typically only need a few mock interfaces to work.
+   * set `false` to disable current mock
    * 
    * @default true
    */
   enable: true,
   /**
-   * 设置接口响应延迟， 单位：ms
+   * response delay， unit：ms
    * 
    * @default 0
    */
   delay: 1000,
   /**
-   * 响应状态码
+   * response status
    * 
    * @default 200
    */
   status: 200,
   /**
-   * 响应状态文本
+   * response status text
    */
   statusText: 'OK',
   /**
-   * 请求验证器，通过验证器则返回 mock数据，否则不是用当前mock。
-   * 这对于一些场景中，某个接口需要通过不同的入参来返回不同的数据，
-   * 验证器可以很好的解决这一类问题，将同个 url 分为多个 mock配置，
-   * 根据 验证器来判断哪个mock配置生效。
+   * Request a validator, through which the mock data 
+   * is returned, otherwise not the current mock.
+   * In some scenarios where an interface needs to 
+   * return different data through different inputs, 
+   * the validator can solve this kind of problem well. 
+   * It divides the same url into multiple mock 
+   * configurations and determines which mock configuration
+   * is valid according to the validator.
    * 
    * @type { header?: object; body?: object; query?: object; params?: object  }
    * 
-   * 如果 validator 传入的是一个对象，那么验证方式是严格比较 请求的接口
-   * 中，headers/body/query/params 的各个`key`的`value`是否全等，
-   * 全等则校验通过
+   * If the validator incoming is an object, 
+   * then the validation method is the comparison of the 
+   * strict request of interface, headers/body/query/params 
+   * each `key-value` congruent, congruent check through
    * 
    * @type ({ header: object; body: object; query: object; params: object }) => boolean
-   * 如果 validator 传入的是一个函数，那么会讲 请求的接口相关数据作为入参，提供给使用者进行自定义校验，并返回一个 boolean
+   * If the validator is passed a function, 
+   * it takes the requested interface-related data as an input,
+   * gives it to the consumer for custom validation, 
+   * and returns a boolean
    * 
    */
   validator: {
@@ -191,41 +215,31 @@ export default defineMock({
   },
   /**
    * 
-   * 响应状态 headers
+   * response headers
    * 
    * @type Record<string, any>
    * 
    * @type (({ query, body, params, headers }) => Record<string, any>)
-   * 入参部分为 请求相关信息
    */
   headers: {
     'Content-Type': 'application/json'
   },
 
   /**
-   * 响应体数据
-   * 定义返回的响应体数据内容。
-   * 在这里，你可以直接返回JavaScript支持的数据类型如 `string/number/array/object` 等
-   * 同时，你也可以使用如 `mockjs` 等库来生成数据内容
+   * Response Body
+   * Support `string/number/array/object` 
+   * You can also use libraries such as' mockjs' to generate data content
    * 
    * @type string | number | array | object
-   *  直接返回定义的数据
    * 
    * @type (request: { header, query, body, params }) => any | Promise<any>
-   * 如果传入一个函数，那么可以更加灵活的定义返回响应体数据
    */
   body: {},
 
   /**
-   * 如果通过 body 配置不能解决mock需求，
-   * 那么可以通过 配置 response，暴露http server 的接口，
-   * 实现完全可控的自定义配置
-   * 
-   * 在 req参数中，已内置了 query、body、params 的解析，
-   * 你可以直接使用它们
-   * 
-   * 别忘了，需要通过 `res.end()` 返回响应体数据，
-   * 或者需要跳过mock，那么别忘了调用 `next()`
+   * If the mock requirement cannot be addressed with the body configuration,
+   * Then you can expose the http server interface by configuring response,
+   * Achieve fully controlled custom configuration.
    */
   response(req, res, next) {
     res.end()
@@ -234,24 +248,26 @@ export default defineMock({
 
 ```
 
-> 注意：
+> Tips：
 > 
-> 如果使用 json/json5 编写 mock文件，则不支持使用 `response` 方法，以及不支持使用其他字段的函数形式。
+> If you write mock files using json/json5, 
+> the 'response' method is not supported, 
+> as is the function form that uses other fields.
 
 `mock/**/*.mock.{ts,js,mjs,cjs,json,json5}`
 
-查看更多示例： [example](/example/)
+See more examples： [example](/example/)
 
-#### 示例1：
-命中 `/api/test` 请求，并返回一个 数据为空的响应体内容
+#### Example 1：
+Match `/api/test`，And returns a response body content with empty data
 ```ts
 export default defineMock({
   url: '/api/test',
 })
 ```
 
-#### 示例2：
-命中 `/api/test` 请求，并返回一个固定内容数据
+#### Example 2：
+Match `/api/test` ，And returns a fixed content data
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -261,8 +277,8 @@ export default defineMock({
 })
 ```
 
-#### 示例3：
-限定只允许 `GET` 请求
+#### Example 3：
+Only Support `GET` Method
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -270,8 +286,8 @@ export default defineMock({
 })
 ```
 
-#### 示例4：
-在返回的响应头中，添加自定义header
+#### Example 4：
+In the response header, add a custom header
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -291,11 +307,11 @@ export default defineMock({
 })
 ```
 
-#### 示例5：
-定义多个相同url请求mock，并使用验证器匹配生效规则
+#### Example 5：
+Define multiple mock requests for the same url and match valid rules with validators
 ```ts
 export default defineMock([
-  // 命中 /api/test?a=1
+  // Match /api/test?a=1
   {
     url: '/api/test',
     validator: {
@@ -307,7 +323,7 @@ export default defineMock([
       message: 'query.a === 1'
     }
   },
-  // 命中 /api/test?a=2
+  // Match /api/test?a=2
   {
     url: '/api/test',
     validator: {
@@ -322,8 +338,8 @@ export default defineMock([
 ])
 ```
 
-#### 示例6：
-延迟接口响应：
+#### Example 6：
+Response Delay
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -331,8 +347,8 @@ export default defineMock({
 })
 ```
 
-#### 示例7：
-使接口请求失败
+#### Example 7：
+The interface request failed
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -341,8 +357,8 @@ export default defineMock({
 })
 ```
 
-#### 示例8：
-使用 `mockjs` 生成响应数据:
+#### Example 8：
+Use `mockjs`:
 ```ts
 import Mock from 'mockjs'
 export default defineMock({
@@ -354,10 +370,10 @@ export default defineMock({
   })
 })
 ```
-请先安装 `mockjs`
+You need installed `mockjs`
 
-### 示例9：
-使用 `response` 自定义响应
+### Example 9：
+Use `response` to customize the response
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -376,11 +392,11 @@ export default defineMock({
 })
 ```
 
-### 示例10：
-使用 json / json5
+### Example 10：
+Use json / json5
 ```json
 {
-  // 支持 comment
+  // Support comment
   "url": "/api/test",
   "body": {
     "a": 1
