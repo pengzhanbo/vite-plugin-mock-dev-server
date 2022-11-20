@@ -113,26 +113,24 @@ export class MockLoader extends EventEmitter {
    */
   private watchDeps() {
     const oldDeps: string[] = []
+    this.depsWatcher = chokidar.watch([], {
+      ignoreInitial: true,
+      cwd: this.cwd,
+    })
+    this.depsWatcher.on('change', (filepath) => {
+      const mockFiles = this.moduleDeps.get(filepath)
+      mockFiles &&
+        mockFiles.forEach((file) => {
+          this.emit('mock:update', file)
+        })
+    })
+    this.depsWatcher.on('unlink', (filepath) => {
+      this.moduleDeps.delete(filepath)
+    })
     this.on('update:deps', () => {
       const deps = []
       for (const [dep] of this.moduleDeps.entries()) {
         deps.push(dep)
-      }
-      if (!this.depsWatcher && deps.length > 0) {
-        this.depsWatcher = chokidar.watch(deps, {
-          ignoreInitial: true,
-          cwd: this.cwd,
-        })
-        this.depsWatcher.on('change', (filepath) => {
-          const mockFiles = this.moduleDeps.get(filepath)
-          mockFiles &&
-            mockFiles.forEach((file) => {
-              this.emit('mock:update', file)
-            })
-        })
-        this.depsWatcher.on('unlink', (filepath) => {
-          this.moduleDeps.delete(filepath)
-        })
       }
       const exactDeps = deps.filter((dep) => !oldDeps.includes(dep))
       exactDeps.length > 0 && this.depsWatcher.add(exactDeps)
