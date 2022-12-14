@@ -13,7 +13,7 @@
     "url": "https://github.com/pengzhanbo/vite-plugin-mock-dev-server"
   },
   "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
