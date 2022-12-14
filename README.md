@@ -9,7 +9,7 @@
 <a href="https://www.npmjs.com/package/vite-plugin-mock-dev-server"><img alt="npm" src="https://img.shields.io/npm/v/vite-plugin-mock-dev-server?style=flat-square"></a>
 <img alt="node-current" src="https://img.shields.io/node/v/vite-plugin-mock-dev-server?style=flat-square">
 <img alt="GitHub package.json dependency version (prod)" src="https://img.shields.io/github/package-json/dependency-version/pengzhanbo/vite-plugin-mock-dev-server/vite?style=flat-square">
-<img alt="NPM" src="https://img.shields.io/npm/l/vite-plugin-mock-dev-server?style=flat-square">
+<img alt="GitHub" src="https://img.shields.io/github/license/pengzhanbo/vite-plugin-mock-dev-server?style=flat-square">
 </p>
 <br>
 <p align="center">
