@@ -30,7 +30,7 @@
 - 🎨 Support any lib，like `mockjs`，or not use it.
 - 📥 Path rules match and request parameters match
 - ⚙️ Support Enabled/Disabled any one of api mock
-- 🔥 Hot reload
+- 🔥 HMR
 - ⚖️ Use `server.proxy`
 - 🍕 Support `viteConfig.define` in mock file
 
