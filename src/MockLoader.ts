@@ -10,7 +10,7 @@ import { build } from 'esbuild'
 import fastGlob from 'fast-glob'
 import JSON5 from 'json5'
 import type { MockOptions, MockOptionsItem } from './types'
-import { debug, isArray, lookupFile } from './utils'
+import { debug, getDirname, isArray, lookupFile } from './utils'
 
 export interface MockLoaderOptions {
   cwd?: string
@@ -19,7 +19,9 @@ export interface MockLoaderOptions {
   define: Record<string, any>
 }
 
-const _require = createRequire(import.meta.url)
+const _dirname =
+  typeof __dirname !== 'undefined' ? __dirname : getDirname(import.meta.url)
+const _require = createRequire(_dirname)
 
 /**
  * mock配置加载器

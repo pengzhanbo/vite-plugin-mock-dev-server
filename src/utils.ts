@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import Debug from 'debug'
 
 export const isArray = <T = any>(val: unknown): val is T[] => Array.isArray(val)
@@ -9,6 +10,10 @@ export const isFunction = (val: unknown): val is Function =>
 
 export function sleep(timeout: number) {
   return new Promise((resolve) => setTimeout(resolve, timeout))
+}
+
+export function getDirname(importMetaUrl: string): string {
+  return path.dirname(fileURLToPath(importMetaUrl))
 }
 
 export const debug = Debug('vite:plugin-mock-dev-server')
