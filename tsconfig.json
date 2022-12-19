@@ -11,7 +11,7 @@
     "sourceMap": false,
     "noEmitOnError": true
   },
-  "include": ["./src", "./example"],
+  "include": ["./src", "./example", "./docs/.vitePress"],
   "exclude": ["dist", "node_modules"],
   "references": [{"path": "./tsconfig.esm.json"}]
 }

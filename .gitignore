@@ -2,6 +2,7 @@
 
 node_modules
 dist
+docs/.vitepress/cache
 
 # Log files
 npm-debug.log*
