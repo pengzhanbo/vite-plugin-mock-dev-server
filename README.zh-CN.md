@@ -38,7 +38,7 @@
 
 ## 文档
 
-查看 [Document](https://vite-plugin-mock-dev-server.netlify.app/) 了解更多。
+查看 [Documentation](https://vite-plugin-mock-dev-server.netlify.app/) 了解更多。
 
 ## 使用
 
