@@ -12,6 +12,7 @@
     "type": "git",
     "url": "https://github.com/pengzhanbo/vite-plugin-mock-dev-server"
   },
+  "homepage": "https://vite-plugin-mock-dev-server.netlify.app",
   "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
   "license": "GPL-3.0",
   "type": "module",
