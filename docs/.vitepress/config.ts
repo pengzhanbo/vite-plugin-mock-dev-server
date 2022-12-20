@@ -39,7 +39,7 @@ export default defineConfig({
     nav: [
       { text: '使用指南', link: '/guide/introduce', activeMatch: '/guide/' },
       { text: '使用示例', link: '/examples/easy', activeMatch: '/example/' },
-      { text: `version ${version}`, link: '/' },
+      { text: `version ${version}`, link: '/', activeMatch: '!' },
     ],
     sidebar: {
       '/guide/': [
@@ -76,15 +76,33 @@ export default defineConfig({
       ],
       '/examples/': [
         {
-          text: '使用示例',
+          text: '类型格式',
           collapsible: true,
           items: [
             { text: 'Commonjs', link: '/examples/cjs' },
             { text: 'ESModule', link: '/examples/esm' },
             { text: 'JSON/JSON5', link: '/examples/json' },
+          ],
+        },
+        {
+          text: '基础示例',
+          collapsible: true,
+          items: [
             { text: '简单例子', link: '/examples/easy' },
             { text: '自定义响应体', link: '/examples/body' },
+            { text: '自定义响应头', link: '/examples/header' },
+            { text: '自定义状态码', link: '/examples/status' },
+            { text: '自定义请求方法', link: '/examples/method' },
             { text: '延迟响应', link: '/examples/delay' },
+            { text: '开启/关闭Mock', link: '/examples/enable' },
+          ],
+        },
+        {
+          text: '进阶示例',
+          collapsible: true,
+          items: [
+            { text: '使用mockjs库', link: '/examples/mockjs' },
+            { text: '相同URL返回不同响应内容', link: '/examples/validator' },
           ],
         },
       ],
