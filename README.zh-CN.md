@@ -36,6 +36,10 @@
 - 🍕 支持在 mock文件中使用 `viteConfig.define`配置字段
 
 
+## 文档
+
+查看 [Document](https://vite-plugin-mock-dev-server.netlify.app/) 了解更多。
+
 ## 使用
 
 ### 安装

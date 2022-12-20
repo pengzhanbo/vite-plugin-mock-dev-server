@@ -34,6 +34,10 @@
 - ⚖️ Use `server.proxy`
 - 🍕 Support `viteConfig.define` in mock file
 
+## Document
+
+See the [Document](https://vite-plugin-mock-dev-server.netlify.app/) to learn more.
+
 
 ## Usage
 
