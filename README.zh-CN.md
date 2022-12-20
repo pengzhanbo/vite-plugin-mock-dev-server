@@ -39,7 +39,7 @@
 ## 文档
 
 查看 [Documentation](https://vite-plugin-mock-dev-server.netlify.app/) 了解更多。
-
+[![Netlify Status](https://api.netlify.com/api/v1/badges/9ccda610-2c6a-4cd0-aeaa-a8932f2b477c/deploy-status)](https://app.netlify.com/sites/vite-plugin-mock-dev-server/deploys)
 ## 使用
 
 ### 安装
@@ -407,3 +407,11 @@ export default defineMock({
   }
 }
 ```
+
+## Archives
+
+[awesome-vite](https://github.com/vitejs/awesome-vite#helpers)
+
+## LICENSE
+
+[GPL-3.0](/LICENSE)

@@ -37,7 +37,7 @@
 ## Documentation
 
 See the [documentation](https://vite-plugin-mock-dev-server.netlify.app/) to learn more.
-
+[![Netlify Status](https://api.netlify.com/api/v1/badges/9ccda610-2c6a-4cd0-aeaa-a8932f2b477c/deploy-status)](https://app.netlify.com/sites/vite-plugin-mock-dev-server/deploys)
 
 ## Usage
 
@@ -415,3 +415,11 @@ Use json / json5
   }
 }
 ```
+
+## Archives
+
+[awesome-vite](https://github.com/vitejs/awesome-vite#helpers)
+
+## LICENSE
+
+[GPL-3.0](/LICENSE)
