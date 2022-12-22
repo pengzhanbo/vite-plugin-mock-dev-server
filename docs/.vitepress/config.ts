@@ -71,7 +71,11 @@ export default defineConfig({
         {
           text: '实践建议',
           collapsible: true,
-          items: [{ text: '目录文件管理', link: '/guide/file-management' }],
+          items: [
+            { text: '目录文件管理', link: '/guide/file-management' },
+            { text: '不建议的文件管理', link: '/guide/no-recommend' },
+            { text: '共享内容', link: '/guide/shared' },
+          ],
         },
       ],
       '/examples/': [
