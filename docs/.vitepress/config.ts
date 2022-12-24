@@ -8,7 +8,7 @@ export default defineConfig({
     'Mock-dev-server is injected into the Vite development environment to simulate API request and response data.',
   lastUpdated: true,
   cleanUrls: 'with-subfolders',
-  head: [['meta', { name: 'theme-color', content: '#3c8772' }]],
+  head: [['meta', { name: 'theme-color', content: '#FF9900' }]],
   markdown: {
     theme: 'material-palenight',
     headers: {
