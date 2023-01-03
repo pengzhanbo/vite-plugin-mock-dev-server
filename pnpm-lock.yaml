@@ -65,6 +65,9 @@ packages:
     peerDependencies:
       '@algolia/client-search': '>= 4.9.1 < 6'
       algoliasearch: '>= 4.9.1 < 6'
+    peerDependenciesMeta:
+      '@algolia/client-search':
+        optional: true
     dependencies:
       '@algolia/autocomplete-shared': 1.7.2
       algoliasearch: 4.14.2
@@ -3531,7 +3534,7 @@ packages:
     resolution: {directory: '', type: directory}
     id: 'file:'
     name: vite-plugin-mock-dev-server
-    version: 0.3.5
+    version: 0.3.7
     engines: {node: ^14.18.0 || >=16}
     peerDependencies:
       vite: '>=3.0.0'

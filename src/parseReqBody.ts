@@ -14,5 +14,5 @@ export async function parseReqBody(req: Connect.IncomingMessage): Promise<any> {
   if (type === 'text/plain') {
     return await bodyParser.text(req)
   }
-  return await bodyParser(req)
+  return undefined
 }
