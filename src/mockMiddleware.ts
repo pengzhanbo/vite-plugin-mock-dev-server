@@ -42,7 +42,7 @@ export async function mockServerMiddleware(
     }
     const method = req.method!.toUpperCase()
     const { query, pathname } = urlParse(req.url!, true)
-    const reqBody = await parseReqBody(req)
+    const reqBody = await parseReqBody(req, options.formidableOptions)
 
     const currentMock = loader.mockList.find((mock) => {
       if (!pathname || !mock || !mock.url) return false

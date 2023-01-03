@@ -140,6 +140,20 @@ export default defineConfig({
   ]
   ```
 
+- `options.formidableOptions`
+  
+  Configure to `formidable`，see [formidable options](https://github.com/node-formidable/formidable#options)
+
+  Default: `{}`
+
+  example: Configure to file upload dir
+  ```ts
+  MockDevServerPlugin({
+    formidableOptions: {
+      uploadDir: path.join(process.cwd(), 'uploads'),
+    }
+  })
+  ```
 
 ### defineMock(config)
 

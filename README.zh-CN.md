@@ -132,6 +132,21 @@ export default defineConfig({
 
   默认值：`['**/node_modules/**','**/test/**','**/cypress/**','src/**','**/.vscode/**','**/.git/**','**/dist/**',]`
 
+- `options.formidableOptions`
+  
+  配置 `formidable`，查看 [formidable options](https://github.com/node-formidable/formidable#options)
+
+  默认值: `{}`
+
+  示例: 配置文件上传的存放目录
+  ```ts
+  MockDevServerPlugin({
+    formidableOptions: {
+      uploadDir: path.join(process.cwd(), 'uploads'),
+    }
+  })
+  ```
+
 
 ### defineMock(config)
 

@@ -11,6 +11,7 @@ export default defineConfig({
     mockDevServerPlugin({
       include: '',
       exclude: '',
+      formidableOptions: {}
     }),
   ]
 })
@@ -29,6 +30,12 @@ interface MockServerPluginOptions {
    * @see https://github.com/micromatch/picomatch#globbing-features
    */
   exclude?: string | string[]
+
+  /**
+   * formidable options
+   * @see https://github.com/node-formidable/formidable#options
+   */
+  formidableOptions?: formidable.Options
 }
 ```
 
@@ -57,3 +64,10 @@ interface MockServerPluginOptions {
   '**/dist/**'
 ]
 ```
+
+## formidableOptions
+
+配置 `formidable`。 用于处理对 `content-type` 为 `multipart` 的类型。
+详细配置查看 [formidable](https://github.com/node-formidable/formidable#options)
+
+文件上传资源默认临时存放于 `os.tmpdir()` 目录。

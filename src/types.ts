@@ -1,4 +1,5 @@
 import type http from 'node:http'
+import type formidable from 'formidable'
 import type { Connect } from 'vite'
 
 export interface MockServerPluginOptions {
@@ -13,6 +14,12 @@ export interface MockServerPluginOptions {
    * @see https://github.com/micromatch/picomatch#globbing-features
    */
   exclude?: string | string[]
+
+  /**
+   * formidable options
+   * @see https://github.com/node-formidable/formidable#options
+   */
+  formidableOptions?: formidable.Options
 }
 
 export type Method =
@@ -130,3 +137,5 @@ export interface MockOptionsItem {
 }
 
 export type MockOptions = MockOptionsItem[]
+
+export type FormidableFile = formidable.File | formidable.File[]

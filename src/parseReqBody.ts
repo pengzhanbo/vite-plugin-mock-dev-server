@@ -3,7 +3,10 @@ import formidable from 'formidable'
 import type { Connect } from 'vite'
 import { debug } from './utils'
 
-export async function parseReqBody(req: Connect.IncomingMessage): Promise<any> {
+export async function parseReqBody(
+  req: Connect.IncomingMessage,
+  options: formidable.Options
+): Promise<any> {
   const method = req.method!.toUpperCase()
   if (['GET', 'DELETE', 'HEAD'].includes(method)) return undefined
   const type = req.headers['content-type']
@@ -17,13 +20,16 @@ export async function parseReqBody(req: Connect.IncomingMessage): Promise<any> {
     return await bodyParser.text(req)
   }
   if (type?.startsWith('multipart/form-data;')) {
-    return await parseMultipart(req)
+    return await parseMultipart(req, options)
   }
   return undefined
 }
 
-async function parseMultipart(req: Connect.IncomingMessage): Promise<any> {
-  const form = formidable({ multiples: true })
+async function parseMultipart(
+  req: Connect.IncomingMessage,
+  options: formidable.Options
+): Promise<any> {
+  const form = formidable(options)
   debug('multiparty start')
   return new Promise((resolve, reject) => {
     form.parse(req, (error, fields, files) => {

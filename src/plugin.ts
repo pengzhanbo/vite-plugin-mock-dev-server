@@ -13,6 +13,7 @@ export function mockDevServerPlugin({
     '**/.git/**',
     '**/dist/**',
   ],
+  formidableOptions = {},
 }: MockServerPluginOptions = {}): Plugin {
   return {
     name: 'vite-plugin-mock-dev-server',
@@ -23,6 +24,7 @@ export function mockDevServerPlugin({
       const middleware = await mockServerMiddleware(httpServer, config, {
         include,
         exclude,
+        formidableOptions,
       })
       middlewares.use(middleware)
     },
