@@ -33,7 +33,7 @@
 - 🔥 HMR
 - ⚖️ Use `server.proxy`
 - 🍕 Support `viteConfig.define` in mock file
-
+- 📤 Support `multipart` content-type，mock upload file.
 ## Documentation
 
 See the [documentation](https://vite-plugin-mock-dev-server.netlify.app/) to learn more.
