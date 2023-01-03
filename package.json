@@ -58,6 +58,7 @@
     "debug": "^4.3.4",
     "esbuild": "^0.16.9",
     "fast-glob": "^3.2.12",
+    "formidable": "^2.1.1",
     "json5": "^2.2.2",
     "path-to-regexp": "^6.2.1"
   },
@@ -66,6 +67,7 @@
     "@pengzhanbo/prettier-config": "^0.2.10",
     "@types/co-body": "^6.1.0",
     "@types/debug": "^4.1.7",
+    "@types/formidable": "^2.0.5",
     "@types/node": "^18.11.7",
     "bumpp": "^8.2.1",
     "eslint": "^8.30.0",
