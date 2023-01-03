@@ -248,10 +248,12 @@ export class MockLoader extends EventEmitter {
   }
 
   private async transformWithEsbuild(filepath: string, isESM: boolean) {
-    const { define } = this.options
-    Object.keys(define).forEach((key) => {
-      define[key] = String(define[key])
-    })
+    const userDefine: Record<string, string> = {}
+    for (const key in this.options.define) {
+      const val = this.options.define[key]
+      userDefine[key] = typeof val === 'string' ? val : JSON.stringify(val)
+    }
+
     try {
       const result = await build({
         entryPoints: [filepath],
@@ -262,7 +264,7 @@ export class MockLoader extends EventEmitter {
         bundle: true,
         metafile: true,
         format: isESM ? 'esm' : 'cjs',
-        define,
+        define: userDefine,
         plugins: [
           {
             name: 'externalize-deps',
