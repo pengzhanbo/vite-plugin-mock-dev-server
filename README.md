@@ -416,6 +416,42 @@ Use json / json5
 }
 ```
 
+### Example 11:
+
+multipart, upload file.
+
+use [`formidable`](https://www.npmjs.com/package/formidable#readme) to supported.
+``` html
+<form action="/api/upload" method="post" enctype="multipart/form-data">
+    <p>
+      <span>file: </span>
+      <input type="file" name="files" multiple />
+    </p>
+    <p>
+      <span>name:</span>
+      <input type="text" name="name" value="mark">
+    </p>
+    <p>
+      <input type="submit" value="submit">
+    </p>
+  </form>
+```
+
+fields `files` mapping to `formidable.File` 
+``` ts
+export default defineMock({
+  url: '/api/upload',
+  method: 'POST',
+  body(req) {
+    const body = req.body
+    return {
+      name: body.name,
+      files: body.files.map((file: any) => file.originalFilename),
+    }
+  },
+})
+```
+
 ## Archives
 
 [awesome-vite](https://github.com/vitejs/awesome-vite#helpers)
