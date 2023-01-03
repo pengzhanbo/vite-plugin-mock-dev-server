@@ -75,6 +75,7 @@ export default defineConfig({
             { text: '目录文件管理', link: '/guide/file-management' },
             { text: '不建议的文件管理', link: '/guide/no-recommend' },
             { text: '共享内容', link: '/guide/shared' },
+            { text: '文件上传', link: '/guide/upload' },
           ],
         },
       ],
@@ -107,6 +108,7 @@ export default defineConfig({
           items: [
             { text: '使用mockjs库', link: '/examples/mockjs' },
             { text: '相同URL返回不同响应内容', link: '/examples/validator' },
+            { text: '文件上传', link: '/examples/upload' },
           ],
         },
       ],
