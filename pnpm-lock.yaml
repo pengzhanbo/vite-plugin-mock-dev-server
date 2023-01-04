@@ -15,7 +15,7 @@ specifiers:
   esbuild: ^0.16.9
   eslint: ^8.30.0
   fast-glob: ^3.2.12
-  formidable: v3
+  formidable: ^2.1.1
   json5: ^2.2.2
   mockjs: ^1.1.0
   path-to-regexp: ^6.2.1
@@ -34,7 +34,7 @@ dependencies:
   debug: 4.3.4
   esbuild: 0.16.9
   fast-glob: 3.2.12
-  formidable: 3.2.5
+  formidable: 2.1.1
   json5: 2.2.2
   path-to-regexp: 6.2.1
 
@@ -1251,8 +1251,8 @@ packages:
     resolution: {integrity: sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==}
     engines: {node: '>= 0.8'}
 
-  /dezalgo/1.0.3:
-    resolution: {integrity: sha512-K7i4zNfT2kgQz3GylDw40ot9GAE47sFZ9EXHFSPP6zONLgH6kWXE0KWJchkbQJLBkRazq4APwZ4OwiFFlT95OQ==}
+  /dezalgo/1.0.4:
+    resolution: {integrity: sha512-rXSP0bf+5n0Qonsb+SVVfNfIsimO4HEtmnIpPHY8Q1UCzKlQrDMfdobr8nJOOsRgWCyMRqeSBQzmWUMq7zvVig==}
     dependencies:
       asap: 2.0.6
       wrappy: 1.0.2
@@ -2059,12 +2059,13 @@ packages:
     resolution: {integrity: sha512-5nqDSxl8nn5BSNxyR3n4I6eDmbolI6WT+QqR547RwxQapgjQBmtktdP+HTBb/a/zLsbzERTONyUB5pefh5TtjQ==}
     dev: true
 
-  /formidable/3.2.5:
-    resolution: {integrity: sha512-GRGDJTWAZ3H+umZbF2bKcqjsTov25zgon1St05ziKdiSw3kxvI+meMJrXx3ylRmuSADOpviSakBuS4yvGCGnSg==}
+  /formidable/2.1.1:
+    resolution: {integrity: sha512-0EcS9wCFEzLvfiks7omJ+SiYJAiD+TzK4Pcw1UlUoGnhUxDcMKjt0P7x8wEb0u6OHu8Nb98WG3nxtlF5C7bvUQ==}
     dependencies:
-      dezalgo: 1.0.3
+      dezalgo: 1.0.4
       hexoid: 1.0.0
       once: 1.4.0
+      qs: 6.11.0
 
   /fs.realpath/1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
@@ -3562,7 +3563,7 @@ packages:
     resolution: {directory: '', type: directory}
     id: 'file:'
     name: vite-plugin-mock-dev-server
-    version: 0.3.10
+    version: 0.3.12
     engines: {node: ^14.18.0 || >=16}
     peerDependencies:
       vite: '>=3.0.0'
@@ -3573,7 +3574,7 @@ packages:
       debug: 4.3.4
       esbuild: 0.16.9
       fast-glob: 3.2.12
-      formidable: 3.2.5
+      formidable: 2.1.1
       json5: 2.2.2
       path-to-regexp: 6.2.1
       vite: 4.0.2_@types+node@18.11.7

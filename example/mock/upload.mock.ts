@@ -5,9 +5,10 @@ export default defineMock({
   method: 'POST',
   body(req) {
     const body = req.body
+    const files = Array.isArray(body.files) ? body.files : [body.files]
     return {
       name: body.name,
-      files: body.files.map((file: any) => file.originalFilename),
+      files: files.map((file: any) => file.originalFilename),
     }
   },
 })
