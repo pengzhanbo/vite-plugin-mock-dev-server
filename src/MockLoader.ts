@@ -150,7 +150,7 @@ export class MockLoader extends EventEmitter {
       isArray(handle) ? mockList.push(...handle) : mockList.push(handle)
     }
     this._mockList = mockList.filter(
-      (mock) => mock.enabled || typeof mock.enabled === 'undefined'
+      (mock) => mock.enabled || typeof mock.enabled === 'undefined',
     )
   }
 
@@ -231,7 +231,7 @@ export class MockLoader extends EventEmitter {
       const defaultLoader = _require.extensions[loaderExt]!
       _require.extensions[loaderExt] = (
         module: NodeModule,
-        filename: string
+        filename: string,
       ) => {
         if (filename === realFileName) {
           // eslint-disable-next-line @typescript-eslint/no-extra-semi

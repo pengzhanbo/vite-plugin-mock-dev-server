@@ -1,5 +1,6 @@
 import { mockDevServerPlugin } from './plugin'
 import type {
+  FormidableFile,
   MockOptions,
   MockOptionsItem,
   MockServerPluginOptions,
@@ -7,6 +8,6 @@ import type {
 
 export * from './define'
 export { mockDevServerPlugin }
-export { MockOptions, MockOptionsItem, MockServerPluginOptions }
+export { MockOptions, MockOptionsItem, MockServerPluginOptions, FormidableFile }
 
 export default mockDevServerPlugin

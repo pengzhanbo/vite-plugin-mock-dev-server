@@ -18,7 +18,7 @@ import type { MockOptions, MockOptionsItem } from './types'
 export function defineMock(config: MockOptionsItem): MockOptionsItem
 export function defineMock(config: MockOptions): MockOptions
 export function defineMock(
-  config: MockOptions | MockOptionsItem
+  config: MockOptions | MockOptionsItem,
 ): MockOptions | MockOptionsItem {
   return config
 }

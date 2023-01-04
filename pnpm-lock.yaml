@@ -1,8 +1,8 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@pengzhanbo/eslint-config-ts': ^0.2.10
-  '@pengzhanbo/prettier-config': ^0.2.10
+  '@pengzhanbo/eslint-config-ts': ^0.2.13
+  '@pengzhanbo/prettier-config': ^0.2.13
   '@rollup/pluginutils': ^5.0.2
   '@types/co-body': ^6.1.0
   '@types/debug': ^4.1.7
@@ -39,8 +39,8 @@ dependencies:
   path-to-regexp: 6.2.1
 
 devDependencies:
-  '@pengzhanbo/eslint-config-ts': 0.2.10_ahtophbrd2laqvxoyg4c2wfe7i
-  '@pengzhanbo/prettier-config': 0.2.10_prettier@2.8.1
+  '@pengzhanbo/eslint-config-ts': 0.2.13_ahtophbrd2laqvxoyg4c2wfe7i
+  '@pengzhanbo/prettier-config': 0.2.13_prettier@2.8.1
   '@types/co-body': 6.1.0
   '@types/debug': 4.1.7
   '@types/formidable': 2.0.5
@@ -511,8 +511,8 @@ packages:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.13.0
 
-  /@pengzhanbo/eslint-config-basic/0.2.10_cy6ete7nj4pzfbbbnhdohnc3pi:
-    resolution: {integrity: sha512-N19Ks4OIc39IVpfWA4oWs73Z7o/3fZBLF89rnlgE9BvjD/7zbB4WfYx7Gthn/5kZvc5myhct868QNxAEJO7hGQ==}
+  /@pengzhanbo/eslint-config-basic/0.2.13_cy6ete7nj4pzfbbbnhdohnc3pi:
+    resolution: {integrity: sha512-UrFFLsYdfQQCTZ5ya5PxDmkZaf6OFJ+wTUydSFFemgyNnuxiqQCDDknnzZDG3VmI7R89E60tUp8kEqjkvJCURA==}
     peerDependencies:
       eslint: '>=7.4.0'
     dependencies:
@@ -539,8 +539,8 @@ packages:
       - supports-color
     dev: true
 
-  /@pengzhanbo/eslint-config-ts/0.2.10_ahtophbrd2laqvxoyg4c2wfe7i:
-    resolution: {integrity: sha512-s6paNUgtiPnNNQYfdYt2NMA7JPBYsP35FEs9Mn3FmrtIJzfJ0Z7i/AbbkOSSYQ8dDPhJ8gRQbBIbgyORnwXJhQ==}
+  /@pengzhanbo/eslint-config-ts/0.2.13_ahtophbrd2laqvxoyg4c2wfe7i:
+    resolution: {integrity: sha512-93v0XidiAj1raKxBpF5tWZGHhSayH4jOxgtMKyCz7l34XL9a6IavPLOtLIHhzdyqb5te7Ahe9KrhSHcpbitX7A==}
     peerDependencies:
       eslint: '>=7.4.0'
       prettier: '>=2.7.1'
@@ -549,7 +549,7 @@ packages:
       prettier:
         optional: true
     dependencies:
-      '@pengzhanbo/eslint-config-basic': 0.2.10_cy6ete7nj4pzfbbbnhdohnc3pi
+      '@pengzhanbo/eslint-config-basic': 0.2.13_cy6ete7nj4pzfbbbnhdohnc3pi
       '@typescript-eslint/eslint-plugin': 5.41.0_dvff3co3tynvbsclb7nsxxyfya
       '@typescript-eslint/parser': 5.41.0_lzzuuodtsqwxnvqeq4g4likcqa
       eslint: 8.30.0
@@ -573,8 +573,8 @@ packages:
       - supports-color
     dev: true
 
-  /@pengzhanbo/prettier-config/0.2.10_prettier@2.8.1:
-    resolution: {integrity: sha512-Mw3EusqTR5ZbuYW0v7rbHs/6aAdOkBDldTmA7yr/1xLjdmTEC4B6O0Y1NFPi+2BaR+A6TgVA8awz+qfxDaovdw==}
+  /@pengzhanbo/prettier-config/0.2.13_prettier@2.8.1:
+    resolution: {integrity: sha512-ND86Ahvzn9gaToGun3ag5GetaUfLrjkoCooZlbdxCvB2wohuLOXCMTf/qbtV04aCYzhBngOazn3JXlXJVNHk0g==}
     peerDependencies:
       prettier: ^2.7.1
     dependencies:
@@ -3563,7 +3563,7 @@ packages:
     resolution: {directory: '', type: directory}
     id: 'file:'
     name: vite-plugin-mock-dev-server
-    version: 0.3.12
+    version: 0.3.13
     engines: {node: ^14.18.0 || >=16}
     peerDependencies:
       vite: '>=3.0.0'

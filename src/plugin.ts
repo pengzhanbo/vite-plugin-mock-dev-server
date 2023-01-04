@@ -24,7 +24,10 @@ export function mockDevServerPlugin({
       const middleware = await mockServerMiddleware(httpServer, config, {
         include,
         exclude,
-        formidableOptions,
+        formidableOptions: {
+          multiples: true,
+          ...formidableOptions,
+        },
       })
       middlewares.use(middleware)
     },

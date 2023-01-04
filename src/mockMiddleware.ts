@@ -11,7 +11,7 @@ import { validate } from './validator'
 export async function mockServerMiddleware(
   httpServer: http.Server | null,
   config: ResolvedConfig,
-  options: Required<MockServerPluginOptions>
+  options: Required<MockServerPluginOptions>,
 ): Promise<Connect.NextHandleFunction> {
   const include = isArray(options.include) ? options.include : [options.include]
   const exclude = isArray(options.exclude) ? options.exclude : [options.exclude]
@@ -57,7 +57,7 @@ export async function mockServerMiddleware(
 
       if (hasMock && mock.validator) {
         const urlMatch = match(mock.url, { decode: decodeURIComponent })(
-          pathname!
+          pathname!,
         ) || { params: {} }
         const params = urlMatch.params || {}
         const request = {
@@ -90,7 +90,7 @@ export async function mockServerMiddleware(
     res.statusMessage = currentMock.statusText || 'OK'
 
     const urlMatch = match(currentMock.url, { decode: decodeURIComponent })(
-      pathname!
+      pathname!,
     ) || { params: {} }
     const params = urlMatch.params || {}
 
@@ -137,7 +137,7 @@ export async function mockServerMiddleware(
       await currentMock.response(
         req as Connect.IncomingMessage & ResponseReq,
         res,
-        next
+        next,
       )
       return
     }

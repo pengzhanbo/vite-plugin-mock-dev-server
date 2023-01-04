@@ -13,5 +13,5 @@
   },
   "include": ["./src", "./example", "./docs/.vitePress"],
   "exclude": ["dist", "node_modules"],
-  "references": [{"path": "./tsconfig.esm.json"}]
+  "references": [{ "path": "./tsconfig.esm.json" }]
 }

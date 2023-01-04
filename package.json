@@ -63,8 +63,8 @@
     "path-to-regexp": "^6.2.1"
   },
   "devDependencies": {
-    "@pengzhanbo/eslint-config-ts": "^0.2.10",
-    "@pengzhanbo/prettier-config": "^0.2.10",
+    "@pengzhanbo/eslint-config-ts": "^0.2.13",
+    "@pengzhanbo/prettier-config": "^0.2.13",
     "@types/co-body": "^6.1.0",
     "@types/debug": "^4.1.7",
     "@types/formidable": "^2.0.5",

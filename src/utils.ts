@@ -27,7 +27,7 @@ interface LookupFileOptions {
 export function lookupFile(
   dir: string,
   formats: string[],
-  options?: LookupFileOptions
+  options?: LookupFileOptions,
 ): string | undefined {
   for (const format of formats) {
     const fullPath = path.join(dir, format)

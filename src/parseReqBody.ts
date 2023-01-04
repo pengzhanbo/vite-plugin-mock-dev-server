@@ -4,7 +4,7 @@ import type { Connect } from 'vite'
 
 export async function parseReqBody(
   req: Connect.IncomingMessage,
-  options: formidable.Options
+  options: formidable.Options,
 ): Promise<any> {
   const method = req.method!.toUpperCase()
   if (['GET', 'DELETE', 'HEAD'].includes(method)) return undefined
@@ -30,7 +30,7 @@ export async function parseReqBody(
 
 async function parseMultipart(
   req: Connect.IncomingMessage,
-  options: formidable.Options
+  options: formidable.Options,
 ): Promise<any> {
   const form = formidable(options)
   return new Promise((resolve, reject) => {

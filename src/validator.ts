@@ -2,7 +2,7 @@ import type { ResponseReq } from './types'
 
 export function validate(
   request: ResponseReq,
-  validator: Partial<ResponseReq>
+  validator: Partial<ResponseReq>,
 ): boolean {
   return (
     equalObj(request.headers, validator.headers) &&
@@ -14,7 +14,7 @@ export function validate(
 
 function equalObj(
   left: Record<string, any>,
-  right?: Record<string, any>
+  right?: Record<string, any>,
 ): boolean {
   if (!right) return true
   for (const key in right) {

@@ -123,7 +123,7 @@ export interface MockOptionsItem {
   response?: (
     req: Connect.IncomingMessage & ResponseReq,
     res: http.ServerResponse<http.IncomingMessage>,
-    next: Connect.NextFunction
+    next: Connect.NextFunction,
   ) => void | Promise<void>
 
   /**
