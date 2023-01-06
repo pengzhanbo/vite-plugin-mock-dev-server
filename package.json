@@ -1,15 +1,6 @@
 {
   "name": "vite-plugin-mock-dev-server",
-  "type": "module",
   "version": "0.3.14",
-  "packageManager": "pnpm@7.18.2",
-  "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
-  "license": "GPL-3.0",
-  "homepage": "https://vite-plugin-mock-dev-server.netlify.app",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/pengzhanbo/vite-plugin-mock-dev-server"
-  },
   "keywords": [
     "vite",
     "plugin",
@@ -17,6 +8,14 @@
     "mock",
     "mock-server"
   ],
+  "homepage": "https://vite-plugin-mock-dev-server.netlify.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pengzhanbo/vite-plugin-mock-dev-server"
+  },
+  "license": "GPL-3.0",
+  "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
+  "type": "module",
   "exports": {
     ".": {
       "require": "./dist/index.cjs",
@@ -29,36 +28,17 @@
   "files": [
     "dist"
   ],
-  "engines": {
-    "node": "^14.18.0 || >=16"
-  },
   "scripts": {
-    "dev": "DEBUG=vite:plugin-mock-dev-server vite example --config ./example/vite.config.ts",
     "build": "tsup",
-    "docs:dev": "vitepress dev docs",
+    "dev": "DEBUG=vite:plugin-mock-dev-server vite example --config ./example/vite.config.ts",
     "docs:build": "vitepress build docs",
+    "docs:dev": "vitepress dev docs",
     "docs:preview": "vitepress preview docs",
-    "prepublishOnly": "pnpm run build",
     "lint": "eslint .",
+    "prepublishOnly": "pnpm run build",
     "release": "bumpp package.json --commit --push --tag && pnpm publish --access public"
   },
-  "tsup": {
-    "entry": [
-      "src/index.ts"
-    ],
-    "sourcemap": false,
-    "dts": true,
-    "splitting": false,
-    "clean": true,
-    "format": [
-      "esm",
-      "cjs"
-    ]
-  },
   "prettier": "@pengzhanbo/prettier-config",
-  "peerDependencies": {
-    "vite": ">=3.0.0"
-  },
   "dependencies": {
     "@rollup/pluginutils": "^5.0.2",
     "chokidar": "^3.5.3",
@@ -71,8 +51,8 @@
     "path-to-regexp": "^6.2.1"
   },
   "devDependencies": {
-    "@pengzhanbo/eslint-config-ts": "^0.3.1",
-    "@pengzhanbo/prettier-config": "^0.3.1",
+    "@pengzhanbo/eslint-config-ts": "^0.3.2",
+    "@pengzhanbo/prettier-config": "^0.3.2",
     "@types/co-body": "^6.1.0",
     "@types/debug": "^4.1.7",
     "@types/formidable": "^2.0.5",
@@ -88,11 +68,31 @@
     "vitepress": "1.0.0-alpha.32",
     "vue": "^3.2.45"
   },
+  "peerDependencies": {
+    "vite": ">=3.0.0"
+  },
+  "packageManager": "pnpm@7.18.2",
+  "engines": {
+    "node": "^14.18.0 || >=16"
+  },
   "pnpm": {
     "peerDependencyRules": {
       "ignoreMissing": [
         "@algolia/client-search"
       ]
     }
+  },
+  "tsup": {
+    "entry": [
+      "src/index.ts"
+    ],
+    "sourcemap": false,
+    "dts": true,
+    "splitting": false,
+    "clean": true,
+    "format": [
+      "esm",
+      "cjs"
+    ]
   }
 }
