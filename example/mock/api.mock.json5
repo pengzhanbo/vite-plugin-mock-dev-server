@@ -3,5 +3,5 @@
   // 支持 comment
   body: {
     message: "json5 data type"
-  }
+  },
 }
