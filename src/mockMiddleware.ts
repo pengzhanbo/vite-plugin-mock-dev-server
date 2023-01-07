@@ -16,10 +16,18 @@ export async function mockServerMiddleware(
   const include = isArray(options.include) ? options.include : [options.include]
   const exclude = isArray(options.exclude) ? options.exclude : [options.exclude]
 
+  const define: ResolvedConfig['define'] = {}
+  if (config.define) {
+    for (const key in config.define) {
+      const val = config.define[key]
+      define[key] = typeof val === 'string' ? val : JSON.stringify(val)
+    }
+  }
+
   const loader = new MockLoader({
     include,
     exclude,
-    define: config.define || {},
+    define,
   })
 
   await loader.load()

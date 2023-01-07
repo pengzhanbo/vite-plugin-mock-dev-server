@@ -3,7 +3,6 @@ lockfileVersion: 5.4
 specifiers:
   '@pengzhanbo/eslint-config-ts': ^0.3.2
   '@pengzhanbo/prettier-config': ^0.3.2
-  '@rollup/pluginutils': ^5.0.2
   '@types/co-body': ^6.1.0
   '@types/debug': ^4.1.7
   '@types/formidable': ^2.0.5
@@ -28,7 +27,6 @@ specifiers:
   vue: ^3.2.45
 
 dependencies:
-  '@rollup/pluginutils': 5.0.2
   chokidar: 3.5.3
   co-body: 6.1.0
   debug: 4.3.4
@@ -593,6 +591,7 @@ packages:
       '@types/estree': 1.0.0
       estree-walker: 2.0.2
       picomatch: 2.3.1
+    dev: true
 
   /@types/co-body/6.1.0:
     resolution: {integrity: sha512-3e0q2jyDAnx/DSZi0z2H0yoZ2wt5yRDZ+P7ymcMObvq0ufWRT4tsajyO+Q1VwVWiv9PRR4W3YEjEzBjeZlhF+w==}
@@ -609,6 +608,7 @@ packages:
 
   /@types/estree/1.0.0:
     resolution: {integrity: sha512-WulqXMDUTYAXCjZnk6JtIHPigp55cVtDgDrO2gHRwhyJto21+1zbVCtOYB2L1F9w4qCQ0rOGWBnBe0FNTiEJIQ==}
+    dev: true
 
   /@types/formidable/2.0.5:
     resolution: {integrity: sha512-uvMcdn/KK3maPOaVUAc3HEYbCEhjaGFwww4EsX6IJfWIJ1tzHtDHczuImH3GKdusPnAAmzB07St90uabZeCKPA==}
@@ -1967,6 +1967,7 @@ packages:
 
   /estree-walker/2.0.2:
     resolution: {integrity: sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==}
+    dev: true
 
   /esutils/2.0.3:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
@@ -3618,6 +3619,5 @@ packages:
       path-to-regexp: 6.2.1
       vite: 4.0.2_@types+node@18.11.7
     transitivePeerDependencies:
-      - rollup
       - supports-color
     dev: true

@@ -3,12 +3,12 @@ import fs from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { createFilter } from '@rollup/pluginutils'
 import chokidar from 'chokidar'
 import type { Metafile } from 'esbuild'
 import { build } from 'esbuild'
 import fastGlob from 'fast-glob'
 import JSON5 from 'json5'
+import { createFilter } from 'vite'
 import type { MockOptions, MockOptionsItem } from './types'
 import { debug, getDirname, isArray, lookupFile } from './utils'
 
@@ -31,15 +31,13 @@ export class MockLoader extends EventEmitter {
   moduleCache: Map<string, MockOptions | MockOptionsItem> = new Map()
   moduleDeps: Map<string, Set<string>> = new Map()
   cwd: string
-  options: MockLoaderOptions
   mockWatcher!: chokidar.FSWatcher
   depsWatcher!: chokidar.FSWatcher
   _mockList: MockOptions = []
   moduleType: 'cjs' | 'esm' = 'cjs'
 
-  constructor(options: MockLoaderOptions) {
+  constructor(public options: MockLoaderOptions) {
     super()
-    this.options = options
     this.cwd = options.cwd || process.cwd()
     try {
       const pkg = lookupFile(this.cwd, ['package.json'])
@@ -248,12 +246,6 @@ export class MockLoader extends EventEmitter {
   }
 
   private async transformWithEsbuild(filepath: string, isESM: boolean) {
-    const userDefine: Record<string, string> = {}
-    for (const key in this.options.define) {
-      const val = this.options.define[key]
-      userDefine[key] = typeof val === 'string' ? val : JSON.stringify(val)
-    }
-
     try {
       const result = await build({
         entryPoints: [filepath],
@@ -264,7 +256,7 @@ export class MockLoader extends EventEmitter {
         bundle: true,
         metafile: true,
         format: isESM ? 'esm' : 'cjs',
-        define: userDefine,
+        define: this.options.define,
         plugins: [
           {
             name: 'externalize-deps',

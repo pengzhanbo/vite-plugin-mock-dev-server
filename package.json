@@ -40,7 +40,6 @@
   },
   "prettier": "@pengzhanbo/prettier-config",
   "dependencies": {
-    "@rollup/pluginutils": "^5.0.2",
     "chokidar": "^3.5.3",
     "co-body": "^6.1.0",
     "debug": "^4.3.4",
