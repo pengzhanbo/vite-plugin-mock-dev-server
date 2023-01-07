@@ -2,7 +2,9 @@
 
 <br>
 <br>
-<p align="center">Vite Plugin for API mock dev server.</p>
+<p align="center">
+ <b>Vite Plugin for API mock dev server.</b>
+</p>
 
 <br>
 <p align="center">
@@ -126,14 +128,13 @@ export default defineConfig({
 
 - `options.exclude`
   
-  When you configure the mock files to be read, the files you want to exclude can be a directory, a glob, or an array
+  When you configure the mock files to be read, the files you want to exclude can be a directory, glob, or array
 
   Default：
   ```ts
   [
     '**/node_modules/**',
     '**/test/**',
-    '**/cypress/**',
     'src/**',
     '**/.vscode/**',
     '**/.git/**',
@@ -294,7 +295,7 @@ export default defineMock({
 ```
 
 #### Example 2：
-Match `/api/test` ，And returns a fixed content data
+Match `/api/test` ，And returns a static content data
 ```ts
 export default defineMock({
   url: '/api/test',

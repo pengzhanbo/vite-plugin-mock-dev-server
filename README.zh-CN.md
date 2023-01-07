@@ -2,7 +2,9 @@
 
 <br>
 <br>
-<p align="center">vite mock开发服务（mock-dev-server）插件。</p>
+<p align="center">
+  <b>vite mock开发服务（mock-dev-server）插件。</b>
+</p>
 
 <p align="center">在 vite 开发环境中，注入一个 mock-dev-server。</p>
 
