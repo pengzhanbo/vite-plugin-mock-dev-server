@@ -36,7 +36,8 @@
     "docs:preview": "vitepress preview docs",
     "lint": "eslint .",
     "prepublishOnly": "pnpm run build",
-    "release": "bumpp package.json --commit --push --tag && pnpm publish --access public"
+    "release:changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
+    "release": "bumpp package.json --execute=\"pnpm release:changelog\" --commit --push --tag && pnpm publish --access public"
   },
   "prettier": "@pengzhanbo/prettier-config",
   "dependencies": {
@@ -57,6 +58,7 @@
     "@types/formidable": "^2.0.5",
     "@types/node": "^18.11.7",
     "bumpp": "^8.2.1",
+    "conventional-changelog-cli": "^2.2.2",
     "eslint": "^8.31.0",
     "mockjs": "^1.1.0",
     "prettier": "^2.8.1",
