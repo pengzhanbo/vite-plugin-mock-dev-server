@@ -1,3 +1,7 @@
+## [0.3.15](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.3.14...v0.3.15) (2023-01-07)
+
+
+
 ## [0.3.14](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.3.13...v0.3.14) (2023-01-06)
 
 
