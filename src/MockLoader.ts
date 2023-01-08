@@ -33,7 +33,7 @@ export class MockLoader extends EventEmitter {
   cwd: string
   mockWatcher!: chokidar.FSWatcher
   depsWatcher!: chokidar.FSWatcher
-  _mockList: MockOptions = []
+  _mockList: Record<string, MockOptions> = {}
   moduleType: 'cjs' | 'esm' = 'cjs'
 
   constructor(public options: MockLoaderOptions) {
@@ -143,13 +143,22 @@ export class MockLoader extends EventEmitter {
   }
 
   private updateMockList() {
-    const mockList = []
+    const mockList: MockOptions = []
     for (const [, handle] of this.moduleCache.entries()) {
       isArray(handle) ? mockList.push(...handle) : mockList.push(handle)
     }
-    this._mockList = mockList.filter(
-      (mock) => mock.enabled || typeof mock.enabled === 'undefined',
-    )
+    const mocks: MockLoader['_mockList'] = {}
+
+    mockList
+      .filter((mock) => mock.enabled || typeof mock.enabled === 'undefined')
+      .forEach((mock) => {
+        if (!mocks[mock.url]) {
+          mocks[mock.url] = []
+        }
+        const list = mocks[mock.url]
+        mock.validator ? list.unshift(mock) : list.push(mock)
+      })
+    this._mockList = mocks
   }
 
   private updateModuleDeps(filepath: string, deps: Metafile['inputs']) {

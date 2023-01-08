@@ -42,17 +42,28 @@ export async function mockServerMiddleware(
   const proxies: string[] = Object.keys(config.server.proxy || {})
 
   return async function (req, res, next) {
+    const method = req.method!.toUpperCase()
+    const { query, pathname } = urlParse(req.url!, true)
+
     if (
+      !pathname ||
       proxies.length === 0 ||
       !proxies.some((context) => doesProxyContextMatchUrl(context, req.url!))
     ) {
       return next()
     }
-    const method = req.method!.toUpperCase()
-    const { query, pathname } = urlParse(req.url!, true)
+
+    const mockUrl = Object.keys(loader._mockList).find((key) => {
+      return pathToRegexp(key).test(pathname)
+    })
+    if (!mockUrl) {
+      return next()
+    }
+    const mockList = loader.mockList[mockUrl]
+
     const reqBody = await parseReqBody(req, options.formidableOptions)
 
-    const currentMock = loader.mockList.find((mock) => {
+    const currentMock = mockList.find((mock) => {
       if (!pathname || !mock || !mock.url) return false
       const methods: Method[] = mock.method
         ? isArray(mock.method)
@@ -61,11 +72,12 @@ export async function mockServerMiddleware(
         : ['GET', 'POST']
       // 判断发起的请求方法是否符合当前 mock 允许的方法
       if (!methods.includes(req.method!.toUpperCase() as Method)) return false
+
       const hasMock = pathToRegexp(mock.url).test(pathname)
 
       if (hasMock && mock.validator) {
         const urlMatch = match(mock.url, { decode: decodeURIComponent })(
-          pathname!,
+          pathname,
         ) || { params: {} }
         const params = urlMatch.params || {}
         const request = {
