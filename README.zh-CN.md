@@ -133,7 +133,17 @@ export default defineConfig({
   
   配置读取 mock文件时，需要排除的文件， 可以是一个 目录、glob、或者一个数组
 
-  默认值：`['**/node_modules/**','**/test/**','**/cypress/**','src/**','**/.vscode/**','**/.git/**','**/dist/**',]`
+  默认值：
+  ```ts
+  [
+    '**/node_modules/**',
+    '**/test/**',
+    'src/**',
+    '**/.vscode/**',
+    '**/.git/**',
+    '**/dist/**'
+  ]
+  ```
 
 - `options.formidableOptions`
   
@@ -218,7 +228,7 @@ export default defineMock({
    * 中，headers/body/query/params 的各个`key`的`value`是否全等，
    * 全等则校验通过
    * 
-   * @type ({ header: object; body: object; query: object; params: object }) => boolean
+   * @type ({ headers: object; body: object; query: object; params: object }) => boolean
    * 如果 validator 传入的是一个函数，那么会讲 请求的接口相关数据作为入参，提供给使用者进行自定义校验，并返回一个 boolean
    * 
    */

@@ -260,7 +260,7 @@ export default defineMock({
    * 
    * @type string | number | array | object
    * 
-   * @type (request: { header, query, body, params }) => any | Promise<any>
+   * @type (request: { headers, query, body, params }) => any | Promise<any>
    */
   body: {},
 
