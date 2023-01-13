@@ -40,7 +40,12 @@
 ## Documentation
 
 See the [documentation](https://vite-plugin-mock-dev-server.netlify.app/) to learn more.
+
 [![Netlify Status](https://api.netlify.com/api/v1/badges/9ccda610-2c6a-4cd0-aeaa-a8932f2b477c/deploy-status)](https://app.netlify.com/sites/vite-plugin-mock-dev-server/deploys)
+
+## Playground
+
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/pengzhanbo/vite-plugin-mock-dev-server/tree/main/playground)
 
 ## Usage
 
@@ -221,14 +226,14 @@ export default defineMock({
    * configurations and determines which mock configuration
    * is valid according to the validator.
    * 
-   * @type { header?: object; body?: object; query?: object; params?: object  }
+   * @type { headers?: object; body?: object; query?: object; params?: object  }
    * 
    * If the validator incoming is an object, 
    * then the validation method is the comparison of the 
    * strict request of interface, headers/body/query/params 
    * each `key-value` congruent, congruent check through
    * 
-   * @type ({ header: object; body: object; query: object; params: object }) => boolean
+   * @type ({ headers: object; body: object; query: object; params: object }) => boolean
    * If the validator is passed a function, 
    * it takes the requested interface-related data as an input,
    * gives it to the consumer for custom validation, 

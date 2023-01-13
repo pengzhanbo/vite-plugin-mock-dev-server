@@ -43,7 +43,12 @@
 ## 文档
 
 查看 [Documentation](https://vite-plugin-mock-dev-server.netlify.app/) 了解更多。
+
 [![Netlify Status](https://api.netlify.com/api/v1/badges/9ccda610-2c6a-4cd0-aeaa-a8932f2b477c/deploy-status)](https://app.netlify.com/sites/vite-plugin-mock-dev-server/deploys)
+
+## Playground
+
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/pengzhanbo/vite-plugin-mock-dev-server/tree/main/playground)
 ## 使用
 
 ### 安装
@@ -222,7 +227,7 @@ export default defineMock({
    * 验证器可以很好的解决这一类问题，将同个 url 分为多个 mock配置，
    * 根据 验证器来判断哪个mock配置生效。
    * 
-   * @type { header?: object; body?: object; query?: object; params?: object  }
+   * @type { headers?: object; body?: object; query?: object; params?: object  }
    * 
    * 如果 validator 传入的是一个对象，那么验证方式是严格比较 请求的接口
    * 中，headers/body/query/params 的各个`key`的`value`是否全等，
@@ -260,7 +265,7 @@ export default defineMock({
    * @type string | number | array | object
    *  直接返回定义的数据
    * 
-   * @type (request: { header, query, body, params }) => any | Promise<any>
+   * @type (request: { headers, query, body, params }) => any | Promise<any>
    * 如果传入一个函数，那么可以更加灵活的定义返回响应体数据
    */
   body: {},
