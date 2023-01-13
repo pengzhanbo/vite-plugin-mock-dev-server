@@ -1,0 +1,7 @@
+{
+  url: "/api/json5",
+  // 支持 comment
+  body: {
+    message: "json5 data type"
+  },
+}
