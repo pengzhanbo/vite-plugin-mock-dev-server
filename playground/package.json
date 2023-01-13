@@ -11,7 +11,7 @@
   "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
   "type": "module",
   "scripts": {
-    "dev": "vite"
+    "dev": "DEBUG=vite:plugin-mock-dev-server vite"
   },
   "devDependencies": {
     "@types/node": "^18.11.18",
