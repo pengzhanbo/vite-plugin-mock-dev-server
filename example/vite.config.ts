@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { defineConfig } from 'vite'
-import mockServer from 'vite-plugin-mock-dev-server'
+import mockServer from '../src'
 
 export default defineConfig(({ mode }) => ({
   plugins: [
