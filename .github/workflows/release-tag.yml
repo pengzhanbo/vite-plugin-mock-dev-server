@@ -7,7 +7,7 @@ on:
 
 jobs:
   release:
-    if: github.repository == 'pengzhanbo/vite-plugin-mock-server'
+    if: github.repository == 'pengzhanbo/vite-plugin-mock-dev-server'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
