@@ -1,3 +1,12 @@
+## [0.3.16](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.3.15...v0.3.16) (2023-01-28)
+
+
+### Performance Improvements
+
+* optimize matching  and  `validator` priority ([72cb7e7](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/72cb7e7ff2c1f2948ccb945e54131ba16e51c803))
+
+
+
 ## [0.3.15](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.3.14...v0.3.15) (2023-01-07)
 
 

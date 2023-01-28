@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-mock-dev-server",
-  "version": "0.3.15",
+  "version": "0.3.16",
   "keywords": [
     "vite",
     "plugin",
