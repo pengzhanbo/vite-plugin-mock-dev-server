@@ -2,7 +2,7 @@ import type { Plugin, ResolvedConfig } from 'vite'
 import { mockServerMiddleware } from './mockMiddleware'
 import type { MockServerPluginOptions } from './types'
 
-let viteConfig = {} as ResolvedConfig;
+let viteConfig = {} as ResolvedConfig
 
 export function mockDevServerPlugin({
   include = ['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}'],
@@ -22,11 +22,11 @@ export function mockDevServerPlugin({
     apply: 'serve',
 
     configResolved(config) {
-      viteConfig = config;
+      viteConfig = config
 
       // This is a hack to prevent Vite from nuking useful logs,
       // pending https://github.com/vitejs/vite/issues/9378
-      config.logger.warn('');
+      config.logger.warn('')
     },
 
     async configureServer({ middlewares, config, httpServer }) {
