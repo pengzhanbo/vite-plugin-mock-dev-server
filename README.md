@@ -37,6 +37,7 @@
 - ⚖️ Use `server.proxy`
 - 🍕 Support `viteConfig.define` in mock file
 - 📤 Support `multipart` content-type，mock upload file.
+- 🌈 Support `vite preview` mode.
 ## Documentation
 
 See the [documentation](https://vite-plugin-mock-dev-server.netlify.app/) to learn more.
