@@ -7,6 +7,7 @@ import type {
 } from './types'
 
 export * from './define'
+export * from './baseMiddleware'
 export { mockDevServerPlugin }
 export { MockOptions, MockOptionsItem, MockServerPluginOptions, FormidableFile }
 

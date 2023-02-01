@@ -1,8 +1,7 @@
 import type { Plugin, ResolvedConfig } from 'vite'
+import { generateMockServer } from './build'
 import { mockServerMiddleware } from './mockMiddleware'
 import type { MockServerPluginOptions } from './types'
-
-let viteConfig = {} as ResolvedConfig
 
 export function mockDevServerPlugin({
   include = ['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}'],
@@ -15,7 +14,56 @@ export function mockDevServerPlugin({
     '**/dist/**',
   ],
   formidableOptions = {},
-}: MockServerPluginOptions = {}): Plugin {
+  build = false,
+}: MockServerPluginOptions = {}): Plugin[] {
+  const pluginOptions: Required<MockServerPluginOptions> = {
+    include,
+    exclude,
+    formidableOptions: {
+      multiples: true,
+      ...formidableOptions,
+    },
+    build: build
+      ? Object.assign(
+          {
+            serverPort: 8080,
+            dist: 'mockServer',
+          },
+          typeof build === 'object' ? build : {},
+        )
+      : false,
+  }
+  const plugins: Plugin[] = [serverPlugin(pluginOptions)]
+  if (pluginOptions.build) {
+    plugins.push(buildPlugin(pluginOptions))
+  }
+  return plugins
+}
+
+export function buildPlugin(
+  pluginOptions: Required<MockServerPluginOptions>,
+): Plugin {
+  let viteConfig = {} as ResolvedConfig
+  return {
+    name: 'vite-plugin-mock-dev-server-generator',
+    enforce: 'post',
+    apply: 'build',
+    configResolved(config) {
+      viteConfig = config
+      config.logger.warn('')
+    },
+    async buildEnd(error) {
+      if (error) return
+      if (viteConfig.command !== 'build') return
+      await generateMockServer(this, viteConfig, pluginOptions)
+    },
+  }
+}
+
+export function serverPlugin(
+  pluginOptions: Required<MockServerPluginOptions>,
+): Plugin {
+  let viteConfig = {} as ResolvedConfig
   return {
     name: 'vite-plugin-mock-dev-server',
     enforce: 'pre',
@@ -30,14 +78,11 @@ export function mockDevServerPlugin({
     },
 
     async configureServer({ middlewares, config, httpServer }) {
-      const middleware = await mockServerMiddleware(httpServer, config, {
-        include,
-        exclude,
-        formidableOptions: {
-          multiples: true,
-          ...formidableOptions,
-        },
-      })
+      const middleware = await mockServerMiddleware(
+        httpServer,
+        config,
+        pluginOptions,
+      )
       middlewares.use(middleware)
     },
 
@@ -46,14 +91,11 @@ export function mockDevServerPlugin({
       // pending...
       // feat: use preview server parameter in preview server hook #11647
       // https://github.com/vitejs/vite/pull/11647
-      const middleware = await mockServerMiddleware(httpServer, viteConfig, {
-        include,
-        exclude,
-        formidableOptions: {
-          multiples: true,
-          ...formidableOptions,
-        },
-      })
+      const middleware = await mockServerMiddleware(
+        httpServer,
+        viteConfig,
+        pluginOptions,
+      )
       middlewares.use(middleware)
     },
   }

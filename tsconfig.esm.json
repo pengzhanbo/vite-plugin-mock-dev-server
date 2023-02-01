@@ -15,7 +15,7 @@
     "allowJs": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["./example", "./playground", "./src"],
+  "include": ["./example", "./playground", "./src", "./package.json"],
   "exclude": [
     "./example/**/*.mjs",
     "./example/**/*.cjs",

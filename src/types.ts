@@ -20,6 +20,13 @@ export interface MockServerPluginOptions {
    * @see https://github.com/node-formidable/formidable#options
    */
   formidableOptions?: formidable.Options
+
+  build?: boolean | ServerBuildOption
+}
+
+export interface ServerBuildOption {
+  serverPort?: number
+  dist?: string
 }
 
 export type Method =

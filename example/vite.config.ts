@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => ({
           return part.originalFilename!
         },
       },
+      build: true,
     }),
   ],
   // define 注入的变量， 在 mock文件中也可以使用

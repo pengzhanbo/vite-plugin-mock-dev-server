@@ -9,6 +9,7 @@ import { build } from 'esbuild'
 import fastGlob from 'fast-glob'
 import JSON5 from 'json5'
 import { createFilter } from 'vite'
+import { externalizeDeps } from './esbuildPlugin'
 import type { MockOptions, MockOptionsItem } from './types'
 import { debug, getDirname, isArray, lookupFile } from './utils'
 
@@ -33,8 +34,9 @@ export class MockLoader extends EventEmitter {
   cwd: string
   mockWatcher!: chokidar.FSWatcher
   depsWatcher!: chokidar.FSWatcher
-  _mockList: Record<string, MockOptions> = {}
   moduleType: 'cjs' | 'esm' = 'cjs'
+
+  private _mockData: Record<string, MockOptions> = {}
 
   constructor(public options: MockLoaderOptions) {
     super()
@@ -46,8 +48,8 @@ export class MockLoader extends EventEmitter {
     } catch (e) {}
   }
 
-  get mockList() {
-    return this._mockList
+  get mockData() {
+    return this._mockData
   }
 
   public async load() {
@@ -147,7 +149,7 @@ export class MockLoader extends EventEmitter {
     for (const [, handle] of this.moduleCache.entries()) {
       isArray(handle) ? mockList.push(...handle) : mockList.push(handle)
     }
-    const mocks: MockLoader['_mockList'] = {}
+    const mocks: MockLoader['mockData'] = {}
 
     mockList
       .filter((mock) => mock.enabled || typeof mock.enabled === 'undefined')
@@ -158,7 +160,7 @@ export class MockLoader extends EventEmitter {
         const list = mocks[mock.url]
         mock.validator ? list.unshift(mock) : list.push(mock)
       })
-    this._mockList = mocks
+    this._mockData = mocks
   }
 
   private updateModuleDeps(filepath: string, deps: Metafile['inputs']) {
@@ -266,20 +268,7 @@ export class MockLoader extends EventEmitter {
         metafile: true,
         format: isESM ? 'esm' : 'cjs',
         define: this.options.define,
-        plugins: [
-          {
-            name: 'externalize-deps',
-            setup(build) {
-              build.onResolve({ filter: /.*/ }, ({ path: id }) => {
-                if (id[0] !== '.' && !path.isAbsolute(id)) {
-                  return {
-                    external: true,
-                  }
-                }
-              })
-            },
-          },
-        ],
+        plugins: [externalizeDeps],
       })
       return {
         code: result.outputFiles[0].text,
