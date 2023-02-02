@@ -37,7 +37,10 @@
 - ⚖️ Use `server.proxy`
 - 🍕 Support `viteConfig.define` in mock file
 - 📤 Support `multipart` content-type，mock upload file.
-- 🌈 Support `vite preview` mode.
+- 🌈 Support `vite preview` mode
+- 🗂 Support for building small mock services that can be deployed independently
+
+
 ## Documentation
 
 See the [documentation](https://vite-plugin-mock-dev-server.netlify.app/) to learn more.
@@ -161,6 +164,29 @@ export default defineConfig({
       uploadDir: path.join(process.cwd(), 'uploads'),
     }
   })
+  ```
+
+- `options.build`
+  
+  When building a small, independently deployable mock service.
+
+  Type： `boolean | ServerBuildOptions` 
+
+  Default：`false`
+
+  ```ts
+  interface ServerBuildOptions {
+    /**
+     * server port
+     * @default 8080
+     */
+    serverPort?: number
+    /**
+     * build output dir
+     @default 'mockServer'
+     */
+    dist?: string
+  }
   ```
 
 ### defineMock(config)
@@ -473,6 +499,26 @@ export default defineMock({
   },
 })
 ```
+
+## Mock Services
+
+In some scenarios, you may need to use the data support provided by the mock service for display purposes, but it is possible that the project has been packaged and deployed as a build and is out of the mock service support provided by `vite` and this plugin. Since this plugin was designed to support the import of `node` modules into mock files, it cannot package mock files inline into client-side build code.
+
+To cater for such scenarios, the plugin provides support under `vite preview` as well as the ability to build a small, independently deployable mock service application at `vite build` that can be deployed to the relevant environment. The mock support is then implemented by proxy forwarding to the actual port by another http server such as `nginx`.
+
+Build the default output into the `dist/mockServer` directory and generate the following file:
+```sh
+./mockServer
+├── index.js
+├── mock-data.js
+└── package.json
+```
+
+In this directory, after `npm install` to install the dependencies, `npm start` can be executed to start the mock server.
+
+default port: `8080`。
+
+Access the associated `mock` interface via `localhost:8080/`.
 
 ## Archives
 
