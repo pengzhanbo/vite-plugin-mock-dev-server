@@ -1,3 +1,13 @@
+## <small>0.3.17 (2023-02-02)</small>
+
+* feat: add `build` options types ([5a814a3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/5a814a3))
+* feat: add generator server ([65ee84f](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/65ee84f))
+* docs(readme):  add mock-services ([824afe6](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/824afe6))
+* docs(vitepress): add mock server doc ([deca4f1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/deca4f1))
+* ci: fix release workflow ([ff66c21](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/ff66c21))
+
+
+
 ## [0.3.16](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.3.15...v0.3.16) (2023-01-28)
 
 
