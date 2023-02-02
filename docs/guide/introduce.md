@@ -22,6 +22,10 @@
 - ⚖️ 使用 `server.proxy` 配置
 - 🍕 支持在 mock文件中使用 `viteConfig.define`配置字段
 - 📤 支持 multipart 类型，模拟文件上传
+- 🌈 支持 `vite preview` 模式
+- 🗂 支持构建可独立部署的小型mock服务
+
+
 
 <!-- ## Why?
 

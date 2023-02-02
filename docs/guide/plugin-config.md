@@ -36,6 +36,13 @@ interface MockServerPluginOptions {
    * @see https://github.com/node-formidable/formidable#options
    */
   formidableOptions?: formidable.Options
+
+  /**
+   * 当需要构建一个小型mock服务时，可配置此项
+   *
+   * @default false
+   */
+  build?: boolean | ServerBuildOption
 }
 ```
 
@@ -71,3 +78,26 @@ interface MockServerPluginOptions {
 详细配置查看 [formidable](https://github.com/node-formidable/formidable#options)
 
 文件上传资源默认临时存放于 `os.tmpdir()` 目录。
+
+## build
+
+当需要构建一个可独立部署的mock server 时，可启用此配置。
+
+默认为 `false`，当设置为 `true` 是，默认配置为 `{ serverPort: 8080, dist: 'mockServer' }`。
+
+```ts
+export interface ServerBuildOption {
+  /**
+   * 服务启动端口
+   *
+   * @default 8080
+   */
+  serverPort?: number
+  /**
+   * 服务应用输出目录
+   *
+   * @default 'mockServer'
+   */
+  dist?: string
+}
+```

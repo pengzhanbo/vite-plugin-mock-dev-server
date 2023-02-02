@@ -33,4 +33,7 @@ features:
   - title: 开启/关闭任意mock配置
     icon: ⚙️
     details: 支持对任意一个或多个mock配置进行单独的开启/关闭，无需重启服务。
+  - title: 可独立部署的mock服务
+    icon: 🗂
+    details: 支持构建生成可独立部署的mock服务。
 ---
