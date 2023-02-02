@@ -21,11 +21,26 @@ export interface MockServerPluginOptions {
    */
   formidableOptions?: formidable.Options
 
+  /**
+   * 当需要构建一个小型mock服务时，可配置此项
+   *
+   * @default false
+   */
   build?: boolean | ServerBuildOption
 }
 
 export interface ServerBuildOption {
+  /**
+   * 服务启动端口
+   *
+   * @default 8080
+   */
   serverPort?: number
+  /**
+   * 服务应用输出目录
+   *
+   * @default 'dist/mockServer'
+   */
   dist?: string
 }
 
