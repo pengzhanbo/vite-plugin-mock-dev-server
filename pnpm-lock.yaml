@@ -6,6 +6,7 @@ specifiers:
   '@types/co-body': ^6.1.0
   '@types/debug': ^4.1.7
   '@types/formidable': ^2.0.5
+  '@types/is-core-module': ^2.2.0
   '@types/node': ^18.11.7
   bumpp: ^8.2.1
   chokidar: ^3.5.3
@@ -16,6 +17,7 @@ specifiers:
   eslint: ^8.31.0
   fast-glob: ^3.2.12
   formidable: ^2.1.1
+  is-core-module: ^2.11.0
   json5: ^2.2.2
   mockjs: ^1.1.0
   path-to-regexp: ^6.2.1
@@ -33,6 +35,7 @@ dependencies:
   esbuild: 0.16.9
   fast-glob: 3.2.12
   formidable: 2.1.1
+  is-core-module: 2.11.0
   json5: 2.2.2
   path-to-regexp: 6.2.1
 
@@ -42,6 +45,7 @@ devDependencies:
   '@types/co-body': 6.1.0
   '@types/debug': 4.1.7
   '@types/formidable': 2.0.5
+  '@types/is-core-module': 2.2.0
   '@types/node': 18.11.7
   bumpp: 8.2.1
   conventional-changelog-cli: 2.2.2
@@ -601,6 +605,10 @@ packages:
     resolution: {integrity: sha512-uvMcdn/KK3maPOaVUAc3HEYbCEhjaGFwww4EsX6IJfWIJ1tzHtDHczuImH3GKdusPnAAmzB07St90uabZeCKPA==}
     dependencies:
       '@types/node': 18.11.7
+    dev: true
+
+  /@types/is-core-module/2.2.0:
+    resolution: {integrity: sha512-4jdbEoadP1B6v5/6YoVFPKUr2NC+knEWMSllpX3cL4FAZktVmveeWTcUHQY7bU6Vx8TEt/ARbQyQapkZvGgFog==}
     dev: true
 
   /@types/json-schema/7.0.11:
@@ -2689,7 +2697,6 @@ packages:
     resolution: {integrity: sha512-RRjxlvLDkD1YJwDbroBHMb+cukurkDWNyHx7D3oNB5x9rb5ogcksMC5wHCadcXoo67gVr/+3GFySh3134zi6rw==}
     dependencies:
       has: 1.0.3
-    dev: true
 
   /is-date-object/1.0.5:
     resolution: {integrity: sha512-9YQaSxsAiSwcvS33MBk3wTCVnWK+HhF8VZR2jRxehM16QcVOdHqPn4VPHmRK4lSr38n9JriurInLcP90xsYNfQ==}

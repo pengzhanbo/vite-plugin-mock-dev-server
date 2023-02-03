@@ -1,4 +1,4 @@
-import fsp from 'fs/promises'
+import fsp from 'node:fs/promises'
 import path from 'node:path'
 import type { Plugin } from 'esbuild'
 import JSON5 from 'json5'
