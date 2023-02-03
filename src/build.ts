@@ -4,7 +4,6 @@ import path from 'node:path'
 import type { Metafile } from 'esbuild'
 import { build } from 'esbuild'
 import fg from 'fast-glob'
-import type formidable from 'formidable'
 import isCore from 'is-core-module'
 import type { Plugin, ResolvedConfig } from 'vite'
 import { createFilter } from 'vite'
@@ -59,7 +58,6 @@ export async function generateMockServer(
     {
       filename: path.join(outputDir, 'index.js'),
       source: generatorServerEntryCode(
-        options.formidableOptions,
         config.server.proxy || {},
         (options.build as ServerBuildOption).serverPort,
       ),
@@ -125,22 +123,16 @@ function generatePackageJson(pkg: any, mockDeps: string[]) {
   return JSON.stringify(mockPkg, null, 2)
 }
 
-function generatorServerEntryCode(
-  // TODO formidable options method property
-  formidableOptions: formidable.Options = { multiples: true },
-  proxy = {},
-  port = 8080,
-) {
+function generatorServerEntryCode(proxy = {}, port = 8080) {
   const proxies: string[] = Object.keys(proxy || {})
   return `import connect from 'connect'
 import { baseMiddleware } from 'vite-plugin-mock-dev-server'
 import mockData from './mock-data.js'
 const app = connect()
-app.use(baseMiddleware(mockData,
-  { formidableOptions: ${JSON.stringify(formidableOptions)},
-    proxies: ${JSON.stringify(proxies)} 
-  })
-)
+app.use(baseMiddleware(mockData, {
+  formidableOptions: { multiples: true },
+  proxies: ${JSON.stringify(proxies)} 
+}))
 app.listen(${port})
 console.log('listen: http://localhost:${port}')
 `
