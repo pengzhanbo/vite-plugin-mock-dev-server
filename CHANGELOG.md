@@ -1,3 +1,13 @@
+## [0.3.18](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.3.17...v0.3.18) (2023-02-03)
+
+
+### Bug Fixes
+
+* **build:** entryCode `formidableOptions` options ([38c8fe9](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/38c8fe968a7754277dc38693662080ea7872e7c8))
+* **build:** exclude node modules ([fd5b823](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/fd5b8230ce427c39cdb4ca250e1d3ef52ebd5208))
+
+
+
 ## <small>0.3.17 (2023-02-02)</small>
 
 * feat: add `build` options types ([5a814a3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/5a814a3))
