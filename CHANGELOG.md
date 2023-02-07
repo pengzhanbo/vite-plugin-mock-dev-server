@@ -1,3 +1,13 @@
+## [0.3.19](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.3.18...v0.3.19) (2023-02-07)
+
+
+### Bug Fixes
+
+* **build:**  hot update ([#9](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/9)) ([0564210](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/0564210238590e5656e20aaf173c9d7eea4f0630))
+* **middleware:** hot update failure ([4394a43](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/4394a43b0ea8ca28aa667121724f8bd22063ce5e))
+
+
+
 ## [0.3.18](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.3.17...v0.3.18) (2023-02-03)
 
 
