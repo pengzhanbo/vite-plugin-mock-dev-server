@@ -38,7 +38,7 @@ export async function mockServerMiddleware(
    */
   const proxies: string[] = Object.keys(config.server.proxy || {})
 
-  return baseMiddleware(loader.mockData, {
+  return baseMiddleware(loader, {
     formidableOptions: options.formidableOptions,
     proxies,
   })

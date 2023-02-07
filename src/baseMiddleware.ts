@@ -13,7 +13,7 @@ export interface BaseMiddlewareOptions {
 }
 
 export function baseMiddleware(
-  mockData: MockLoader['mockData'],
+  mockLoader: MockLoader,
   { formidableOptions = {}, proxies }: BaseMiddlewareOptions,
 ): Connect.NextHandleFunction {
   return async function (req, res, next) {
@@ -28,6 +28,7 @@ export function baseMiddleware(
       return next()
     }
 
+    const mockData = mockLoader.mockData
     const mockUrl = Object.keys(mockData).find((key) => {
       return pathToRegexp(key).test(pathname)
     })
