@@ -129,7 +129,7 @@ function generatorServerEntryCode(proxy = {}, port = 8080) {
 import { baseMiddleware } from 'vite-plugin-mock-dev-server'
 import mockData from './mock-data.js'
 const app = connect()
-app.use(baseMiddleware(mockData, {
+app.use(baseMiddleware({ mockData }, {
   formidableOptions: { multiples: true },
   proxies: ${JSON.stringify(proxies)} 
 }))
