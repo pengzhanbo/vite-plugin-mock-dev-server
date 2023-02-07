@@ -74,7 +74,7 @@
   "peerDependencies": {
     "vite": ">=3.0.0"
   },
-  "packageManager": "pnpm@7.18.2",
+  "packageManager": "pnpm@7.26.3",
   "engines": {
     "node": "^14.18.0 || >=16"
   },
