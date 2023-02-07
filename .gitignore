@@ -2,6 +2,7 @@
 
 node_modules
 dist
+.idea
 docs/.vitepress/cache
 
 # Log files
