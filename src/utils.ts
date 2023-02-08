@@ -18,6 +18,12 @@ export function getDirname(importMetaUrl: string): string {
 
 export const debug = Debug('vite:plugin-mock-dev-server')
 
+export const ensureArray = <T>(thing: T[] | T | undefined | null): T[] => {
+  if (isArray(thing)) return thing
+  if (thing === null || thing === undefined) return []
+  return [thing as T]
+}
+
 interface LookupFileOptions {
   pathOnly?: boolean
   rootDir?: string

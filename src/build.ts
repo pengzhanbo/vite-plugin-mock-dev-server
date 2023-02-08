@@ -10,7 +10,7 @@ import { createFilter } from 'vite'
 import { name, version } from '../package.json'
 import { externalizeDeps, json5Loader, jsonLoader } from './esbuildPlugin'
 import type { MockServerPluginOptions, ServerBuildOption } from './types'
-import { isArray, lookupFile } from './utils'
+import { ensureArray, lookupFile } from './utils'
 
 type PluginContext<T = Plugin['buildEnd']> = T extends (
   this: infer R,
@@ -24,8 +24,8 @@ export async function generateMockServer(
   config: ResolvedConfig,
   options: Required<MockServerPluginOptions>,
 ) {
-  const include = isArray(options.include) ? options.include : [options.include]
-  const exclude = isArray(options.exclude) ? options.exclude : [options.exclude]
+  const include = ensureArray(options.include)
+  const exclude = ensureArray(options.exclude)
   const define: ResolvedConfig['define'] = {}
   if (config.define) {
     for (const key in config.define) {
@@ -33,6 +33,9 @@ export async function generateMockServer(
       define[key] = typeof val === 'string' ? val : JSON.stringify(val)
     }
   }
+  const proxies: string[] = Object.keys(config.server.proxy || {})
+  const prefix = ensureArray(options.prefix)
+
   let pkg = {}
   try {
     const pkgStr = lookupFile(config.root, ['package.json'])
@@ -58,7 +61,7 @@ export async function generateMockServer(
     {
       filename: path.join(outputDir, 'index.js'),
       source: generatorServerEntryCode(
-        config.server.proxy || {},
+        [...prefix, ...proxies],
         (options.build as ServerBuildOption).serverPort,
       ),
     },
@@ -123,8 +126,7 @@ function generatePackageJson(pkg: any, mockDeps: string[]) {
   return JSON.stringify(mockPkg, null, 2)
 }
 
-function generatorServerEntryCode(proxy = {}, port = 8080) {
-  const proxies: string[] = Object.keys(proxy || {})
+function generatorServerEntryCode(proxies: string[], port = 8080) {
   return `import connect from 'connect'
 import { baseMiddleware } from 'vite-plugin-mock-dev-server'
 import mockData from './mock-data.js'

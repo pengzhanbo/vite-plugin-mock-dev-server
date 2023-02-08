@@ -3,15 +3,15 @@ import type { Connect, ResolvedConfig } from 'vite'
 import { baseMiddleware } from './baseMiddleware'
 import { MockLoader } from './MockLoader'
 import type { MockServerPluginOptions } from './types'
-import { isArray } from './utils'
+import { ensureArray } from './utils'
 
 export async function mockServerMiddleware(
   httpServer: http.Server | null,
   config: ResolvedConfig,
   options: Required<MockServerPluginOptions>,
 ): Promise<Connect.NextHandleFunction> {
-  const include = isArray(options.include) ? options.include : [options.include]
-  const exclude = isArray(options.exclude) ? options.exclude : [options.exclude]
+  const include = ensureArray(options.include)
+  const exclude = ensureArray(options.exclude)
 
   const define: ResolvedConfig['define'] = {}
   if (config.define) {
@@ -37,9 +37,10 @@ export async function mockServerMiddleware(
    * 在一般开发场景中，我们也只需要对通过 vite server 进行代理的请求 进行 mock
    */
   const proxies: string[] = Object.keys(config.server.proxy || {})
+  const prefix = ensureArray(options.prefix)
 
   return baseMiddleware(loader, {
     formidableOptions: options.formidableOptions,
-    proxies,
+    proxies: [...prefix, ...proxies],
   })
 }
