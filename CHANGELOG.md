@@ -1,3 +1,12 @@
+## [0.3.20](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.3.19...v0.3.20) (2023-02-08)
+
+
+### Features
+
+* add `prefix` options ([6682e0e](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/6682e0e117479293f05896f8fb60cced60e8d8c9))
+
+
+
 ## [0.3.19](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.3.18...v0.3.19) (2023-02-07)
 
 
