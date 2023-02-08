@@ -86,11 +86,12 @@ export default defineConfig({
   }
 })
 ```
-插件会读取 `server.proxy` 的配置， 仅对设置了代理的 url 匹配，启用mock 匹配。
+插件会读取 `server.proxy` 或 `options.prefix` 的配置，对匹配的 url 启用mock 匹配。
 
 插件也会读取 `define` 配置， 支持在 mock 文件中直接使用。
 
-> 因为一般场景下，我们只需要对有代理的url进行mock，这样才能通过 vite 提供的 http 服务进行 代理和 mock
+> 因为一般场景下，我们只需要对有代理的url进行mock，这样才能通过 vite 提供的 http 服务进行 代理和 mock，
+> 但你也可以使用 `options.prefix`配置 mock 
 
 ### 编写mock文件
 
@@ -129,6 +130,16 @@ export default defineConfig({
 ```
 
 #### options
+
+- `options.prefix`
+
+  Type: `string | string[]`
+  
+  为mock服务器配置自定义匹配规则。任何请求路径以 `prefix` 值开头的请求将被代理到对应的目标。如果 `prefix` 值以 ^ 开头，将被识别为 RegExp。
+
+  > 一般情况下, `server.proxy` 已经足够满足需求，添加此项是为了与某些场景兼容。
+
+  Default: `[]`
 
 - `option.include` 
   

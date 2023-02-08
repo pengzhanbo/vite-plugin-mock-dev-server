@@ -85,11 +85,11 @@ export default defineConfig({
   }
 })
 ```
-The plugin reads the configuration for `server.proxy` and enables mock matching only for urls where the proxy is set.
+The plugin reads the configuration for `server.proxy` or `options.prefix` and enables mock matching.
 
 The plugin also reads the `define` configuration and supports direct use in mock files.
 
-> In a general case, we only need to mock the url with the proxy so that we can proxy and mock through the http service provided by vite
+> In a general case, we only need to mock the url with the proxy so that we can proxy and mock through the http service provided by vite, but you can also configure the mock using 'options.prefix'
 
 ### Edit Mock File
 
@@ -128,6 +128,16 @@ export default defineConfig({
 ```
 
 #### options
+
+- `options.prefix`
+
+  Type: `string | string[]`
+  
+  Configure custom matches rules for the mock server. Any requests that request path starts with that `prefix` will be proxied to that specified target. If the `prefix` starts with ^, it will be interpreted as a RegExp.
+
+  > In general, `server.proxy` is sufficient to meet the requirements, and this options is added to be compatible with some scenarios.
+
+  Default: `[]`
 
 - `option.include` 
   
