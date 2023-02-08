@@ -13,9 +13,12 @@
     "noUnusedLocals": true,
     "strictNullChecks": true,
     "allowJs": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "vite-plugin-mock-dev-server": ["./src/index.ts"]
+    }
   },
-  "include": ["./example", "./playground", "./src", "./package.json"],
+  "include": ["./example", "./src"],
   "exclude": [
     "./example/**/*.mjs",
     "./example/**/*.cjs",
