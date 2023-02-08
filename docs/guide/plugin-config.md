@@ -9,6 +9,7 @@ import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
 export default defineConfig({
   plugins: [
     mockDevServerPlugin({
+      prefix: [],
       include: '',
       exclude: '',
       formidableOptions: {}
@@ -19,6 +20,13 @@ export default defineConfig({
 
 ``` ts
 interface MockServerPluginOptions {
+  /**
+   * 为 mock 服务配置 路径匹配规则，任何请求路径以 prefix 开头的都将被拦截代理。
+   * 如果 prefix 以 `^` 开头，将被识别为 `RegExp`。
+   *
+   * @default []
+   */
+  prefix?: string | string[]
   /**
    * glob 字符串匹配 mock 包含的文件
    * @see https://github.com/micromatch/picomatch#globbing-features
@@ -45,6 +53,13 @@ interface MockServerPluginOptions {
   build?: boolean | ServerBuildOption
 }
 ```
+
+## prefix
+
+为 mock 服务配置 路径匹配规则，任何请求路径以 prefix 开头的都将被拦截代理。
+如果 prefix 以 `^` 开头，将被识别为 `RegExp`。
+
+默认值： `[]`
 
 ## include
 
