@@ -44,6 +44,7 @@ async function mockData() {
   await fetch('/api/esm/config')
   await fetch('/api/cjs/config')
   await fetch('/api/js/config')
+  await fetch('/api-dev/list/get')
 }
 mockUser()
 mockPost()

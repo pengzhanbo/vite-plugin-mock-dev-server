@@ -5,6 +5,7 @@ import mockServer from '../src'
 export default defineConfig(({ mode }) => ({
   plugins: [
     mockServer({
+      prefix: '^/api-dev/',
       include: 'example/mock/**/*.mock.{ts,js,cjs,mjs,json,json5}',
       formidableOptions: {
         // 配置上传资源存放目录
