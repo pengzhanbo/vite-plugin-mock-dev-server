@@ -7,10 +7,10 @@ export default defineConfig({
   description:
     'Mock-dev-server is injected into the Vite development environment to simulate API request and response data.',
   lastUpdated: true,
-  cleanUrls: 'with-subfolders',
+  cleanUrls: true,
   head: [['meta', { name: 'theme-color', content: '#FF9900' }]],
   markdown: {
-    theme: 'material-palenight',
+    theme: 'material-theme-palenight',
     headers: {
       level: [0, 0],
     },
@@ -50,7 +50,6 @@ export default defineConfig({
       '/guide/': [
         {
           text: '快速开始',
-          collapsible: true,
           items: [
             { text: '介绍', link: '/guide/introduce' },
             { text: '安装', link: '/guide/install' },
@@ -59,7 +58,6 @@ export default defineConfig({
         },
         {
           text: 'API',
-          collapsed: true,
           items: [
             { text: 'mockDevServerPlugin', link: '/guide/mock-plugin' },
             { text: 'defineMock', link: '/guide/define-mock' },
@@ -67,7 +65,6 @@ export default defineConfig({
         },
         {
           text: '配置',
-          collapsible: true,
           items: [
             { text: 'pluginConfig', link: '/guide/plugin-config' },
             { text: 'mockConfig', link: '/guide/mock-config' },
@@ -75,7 +72,6 @@ export default defineConfig({
         },
         {
           text: '实践建议',
-          collapsible: true,
           items: [
             { text: '目录文件管理', link: '/guide/file-management' },
             { text: '不建议的文件管理', link: '/guide/no-recommend' },
@@ -88,7 +84,6 @@ export default defineConfig({
       '/examples/': [
         {
           text: '类型格式',
-          collapsible: true,
           items: [
             { text: 'Commonjs', link: '/examples/cjs' },
             { text: 'ESModule', link: '/examples/esm' },
@@ -97,7 +92,6 @@ export default defineConfig({
         },
         {
           text: '基础示例',
-          collapsible: true,
           items: [
             { text: '简单例子', link: '/examples/easy' },
             { text: '自定义响应体', link: '/examples/body' },
@@ -110,7 +104,6 @@ export default defineConfig({
         },
         {
           text: '进阶示例',
-          collapsible: true,
           items: [
             { text: '使用mockjs库', link: '/examples/mockjs' },
             { text: '相同URL返回不同响应内容', link: '/examples/validator' },
