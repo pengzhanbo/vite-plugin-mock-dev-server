@@ -1,3 +1,18 @@
+## [0.3.21](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.3.20...v0.3.21) (2023-02-15)
+
+
+### Bug Fixes
+
+* **build:** empty-import-meta warning ([#13](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/13)) ([3a8e854](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/3a8e854e06a40273d54d78f3140395adb2e5b731))
+* TS6307: File '/xxx/vite-plugin-mock-dev-server/package.json' is not listed within the file list of project '/xxx/vite-plugin-mock-dev-server/tsconfig.esm.json'. Projects must list all files or use an 'include' pattern. ([8a4ae76](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/8a4ae762728162fb988ec7f431f393944842063f))
+
+
+### Features
+
+* **validator:** supports referer query ([a11db47](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/a11db47eced4668ffc606abc6e491d5365ef65cd))
+
+
+
 ## [0.3.20](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.3.19...v0.3.20) (2023-02-08)
 
 
