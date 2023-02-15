@@ -133,7 +133,16 @@ type ResponseBody = string | number | array | object
 
 ## validator
 
-- Type: `{ header?: object; body?: object; query?: object; params?: object: refererQuery?: object  }`
+- Type: 
+  ```ts
+  interface Validator {
+    header?: object
+    body?: object
+    query?: object
+    params?: object
+    refererQuery?: object
+  }
+  ```
 - Type: `(request: RequestOptions) => boolean`
 - 选填
 - 默认值： `null`
@@ -146,6 +155,8 @@ type ResponseBody = string | number | array | object
 如果 validator 传入的是一个对象，那么验证方式是严格比较 请求的接口中，headers/body/query/params 的各个`key`的`value`是否全等，全等则校验通过
 
 如果 validator 传入的是一个函数，那么会讲 请求的接口相关数据作为入参，提供给使用者进行自定义校验，并返回一个 boolean。
+
+在插件内，会解析请求该mock api 的来源页面地址，通过获取  `request.referer`，提取 url 中 `query`部分，解析为`refererQuery` 。这使得可以通过直接在浏览器地址栏中，修改页面 `queryString`, 根据不同的 `queryString` 来决定 mock api 返回的数据内容。
 
 ```ts
 export default defineMock([

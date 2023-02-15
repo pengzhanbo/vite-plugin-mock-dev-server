@@ -77,6 +77,7 @@ export default defineConfig({
             { text: '不建议的文件管理', link: '/guide/no-recommend' },
             { text: '共享内容', link: '/guide/shared' },
             { text: '文件上传', link: '/guide/upload' },
+            { text: '团队协作', link: '/guide/teamwork' },
             { text: 'mock服务部署', link: '/guide/mock-service' },
           ],
         },
