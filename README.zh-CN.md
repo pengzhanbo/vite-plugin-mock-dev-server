@@ -262,13 +262,13 @@ export default defineMock({
    * 验证器可以很好的解决这一类问题，将同个 url 分为多个 mock配置，
    * 根据 验证器来判断哪个mock配置生效。
    * 
-   * @type { headers?: object; body?: object; query?: object; params?: object  }
+   * @type { headers?: object; body?: object; query?: object; params?: object; refererQuery?: object  }
    * 
    * 如果 validator 传入的是一个对象，那么验证方式是严格比较 请求的接口
    * 中，headers/body/query/params 的各个`key`的`value`是否全等，
    * 全等则校验通过
    * 
-   * @type ({ headers: object; body: object; query: object; params: object }) => boolean
+   * @type ({ headers: object; body: object; query: object; params: object; refererQuery: object }) => boolean
    * 如果 validator 传入的是一个函数，那么会讲 请求的接口相关数据作为入参，提供给使用者进行自定义校验，并返回一个 boolean
    * 
    */
@@ -277,6 +277,12 @@ export default defineMock({
     body: {},
     query: {},
     params: {},
+    /**
+     * refererQuery validates the query in the url of the page from which the request originated, 
+     * which makes it possible to modify parameters directly in the browser address bar to get 
+     * different mock data
+     */
+    refererQuery: {}
   },
   /**
    * 

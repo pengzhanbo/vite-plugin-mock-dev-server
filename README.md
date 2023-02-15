@@ -263,14 +263,14 @@ export default defineMock({
    * configurations and determines which mock configuration
    * is valid according to the validator.
    * 
-   * @type { headers?: object; body?: object; query?: object; params?: object  }
+   * @type { headers?: object; body?: object; query?: object; params?: object; refererQuery?: object  }
    * 
    * If the validator incoming is an object, 
    * then the validation method is the comparison of the 
    * strict request of interface, headers/body/query/params 
    * each `key-value` congruent, congruent check through
    * 
-   * @type ({ headers: object; body: object; query: object; params: object }) => boolean
+   * @type ({ headers: object; body: object; query: object; params: object; refererQuery: object }) => boolean
    * If the validator is passed a function, 
    * it takes the requested interface-related data as an input,
    * gives it to the consumer for custom validation, 
@@ -282,6 +282,12 @@ export default defineMock({
     body: {},
     query: {},
     params: {},
+    /**
+     * refererQuery validates the query in the url of the page from which the request originated, 
+     * which makes it possible to modify parameters directly in the browser address bar to get 
+     * different mock data
+     */
+    refererQuery: {}
   },
   /**
    * 
