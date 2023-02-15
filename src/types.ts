@@ -69,6 +69,10 @@ export interface ResponseReq {
    */
   query: Record<string, any>
   /**
+   * 请求 referer 中位于 `?` 后面的 queryString，已解析为 json
+   */
+  refererQuery: Record<string, any>
+  /**
    * 请求体中 body 数据
    */
   body: Record<string, any>

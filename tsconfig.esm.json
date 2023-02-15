@@ -18,7 +18,7 @@
       "vite-plugin-mock-dev-server": ["./src/index.ts"]
     }
   },
-  "include": ["./example", "./src"],
+  "include": ["./package.json", "./example", "./src"],
   "exclude": [
     "./example/**/*.mjs",
     "./example/**/*.cjs",

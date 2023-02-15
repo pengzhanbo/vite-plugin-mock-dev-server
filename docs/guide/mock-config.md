@@ -133,7 +133,7 @@ type ResponseBody = string | number | array | object
 
 ## validator
 
-- Type: `{ header?: object; body?: object; query?: object; params?: object  }`
+- Type: `{ header?: object; body?: object; query?: object; params?: object: refererQuery?: object  }`
 - Type: `(request: RequestOptions) => boolean`
 - 选填
 - 默认值： `null`

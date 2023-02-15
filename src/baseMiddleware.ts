@@ -19,6 +19,7 @@ export function baseMiddleware(
   return async function (req, res, next) {
     const method = req.method!.toUpperCase()
     const { query, pathname } = urlParse(req.url!, true)
+    const { query: refererQuery } = urlParse(req.headers.referer || '', true)
 
     if (
       !pathname ||
@@ -58,6 +59,7 @@ export function baseMiddleware(
         const params = urlMatch.params || {}
         const request = {
           query,
+          refererQuery,
           params,
           body: reqBody,
           headers: req.headers,
@@ -95,6 +97,7 @@ export function baseMiddleware(
      */
     ;(req as any).body = reqBody
     ;(req as any).query = query
+    ;(req as any).refererQuery = refererQuery
     ;(req as any).params = params
 
     res.setHeader('Content-Type', 'application/json')
@@ -103,6 +106,7 @@ export function baseMiddleware(
       const headers = isFunction(currentMock.headers)
         ? await currentMock.headers({
             query,
+            refererQuery,
             body: reqBody,
             params,
             headers: req.headers,
@@ -118,6 +122,7 @@ export function baseMiddleware(
       if (isFunction(currentMock.body)) {
         body = await currentMock.body({
           query,
+          refererQuery,
           body: reqBody,
           params,
           headers: req.headers,
