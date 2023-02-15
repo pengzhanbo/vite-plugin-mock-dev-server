@@ -20,8 +20,7 @@ export interface MockLoaderOptions {
   define: Record<string, any>
 }
 
-const _dirname =
-  typeof __dirname !== 'undefined' ? __dirname : getDirname(import.meta.url)
+const _dirname = getDirname(import.meta.url)
 const _require = createRequire(_dirname)
 
 /**
