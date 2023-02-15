@@ -8,7 +8,8 @@ export function validate(
     equalObj(request.headers, validator.headers) &&
     equalObj(request.body, validator.body) &&
     equalObj(request.params, validator.params) &&
-    equalObj(request.query, validator.query)
+    equalObj(request.query, validator.query) &&
+    equalObj(request.refererQuery, validator.refererQuery)
   )
 }
 
