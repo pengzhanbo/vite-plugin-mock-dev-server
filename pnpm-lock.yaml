@@ -17,6 +17,7 @@ specifiers:
   eslint: ^8.33.0
   fast-glob: ^3.2.12
   formidable: ^2.1.1
+  http-status: ^1.6.2
   is-core-module: ^2.11.0
   json5: ^2.2.3
   mockjs: ^1.1.0
@@ -35,6 +36,7 @@ dependencies:
   esbuild: 0.17.6
   fast-glob: 3.2.12
   formidable: 2.1.1
+  http-status: 1.6.2
   is-core-module: 2.11.0
   json5: 2.2.3
   path-to-regexp: 6.2.1
@@ -2641,6 +2643,11 @@ packages:
       setprototypeof: 1.2.0
       statuses: 2.0.1
       toidentifier: 1.0.1
+    dev: false
+
+  /http-status/1.6.2:
+    resolution: {integrity: sha512-oUExvfNckrpTpDazph7kNG8sQi5au3BeTo0idaZFXEhTaJKu7GNJCLHI0rYY2wljm548MSTM+Ljj/c6anqu2zQ==}
+    engines: {node: '>= 0.4.0'}
     dev: false
 
   /human-signals/2.1.0:

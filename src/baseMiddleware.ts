@@ -1,4 +1,5 @@
 import { parse as urlParse } from 'node:url'
+import HTTP_STATUS from 'http-status'
 import { match, pathToRegexp } from 'path-to-regexp'
 import type { Connect } from 'vite'
 import type { MockLoader } from './MockLoader'
@@ -85,7 +86,8 @@ export function baseMiddleware(
     }
 
     res.statusCode = currentMock.status || 200
-    res.statusMessage = currentMock.statusText || 'OK'
+    res.statusMessage =
+      currentMock.statusText || getHTTPStatusText(res.statusCode)
 
     const urlMatch = match(currentMock.url, { decode: decodeURIComponent })(
       pathname!,
@@ -152,4 +154,8 @@ function doesProxyContextMatchUrl(context: string, url: string): boolean {
     (context.startsWith('^') && new RegExp(context).test(url)) ||
     url.startsWith(context)
   )
+}
+
+function getHTTPStatusText(status: number): string {
+  return HTTP_STATUS[status] || 'Unknown'
 }

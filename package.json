@@ -48,6 +48,7 @@
     "esbuild": "^0.17.6",
     "fast-glob": "^3.2.12",
     "formidable": "^2.1.1",
+    "http-status": "^1.6.2",
     "is-core-module": "^2.11.0",
     "json5": "^2.2.3",
     "path-to-regexp": "^6.2.1"
