@@ -3,7 +3,7 @@ import type { Connect, ResolvedConfig } from 'vite'
 import { baseMiddleware } from './baseMiddleware'
 import { MockLoader } from './MockLoader'
 import type { MockServerPluginOptions } from './types'
-import { ensureArray } from './utils'
+import { ensureArray, ensureProxies } from './utils'
 
 export async function mockServerMiddleware(
   httpServer: http.Server | null,
@@ -36,7 +36,7 @@ export async function mockServerMiddleware(
    *
    * 在一般开发场景中，我们也只需要对通过 vite server 进行代理的请求 进行 mock
    */
-  const proxies: string[] = Object.keys(config.server.proxy || {})
+  const proxies: string[] = ensureProxies(config.server.proxy || {})
   /**
    * 保留直接通过 plugin option 直接配置 路径匹配规则，
    * 但在大多数场景下，共用 `server.proxy` 以足够

@@ -10,7 +10,7 @@ import { createFilter } from 'vite'
 import { name, version } from '../package.json'
 import { externalizeDeps, json5Loader, jsonLoader } from './esbuildPlugin'
 import type { MockServerPluginOptions, ServerBuildOption } from './types'
-import { ensureArray, lookupFile } from './utils'
+import { ensureArray, ensureProxies, lookupFile } from './utils'
 
 type PluginContext<T = Plugin['buildEnd']> = T extends (
   this: infer R,
@@ -33,7 +33,7 @@ export async function generateMockServer(
       define[key] = typeof val === 'string' ? val : JSON.stringify(val)
     }
   }
-  const proxies: string[] = Object.keys(config.server.proxy || {})
+  const proxies: string[] = ensureProxies(config.server.proxy || {})
   const prefix = ensureArray(options.prefix)
 
   let pkg = {}
@@ -133,7 +133,7 @@ import mockData from './mock-data.js'
 const app = connect()
 app.use(baseMiddleware({ mockData }, {
   formidableOptions: { multiples: true },
-  proxies: ${JSON.stringify(proxies)} 
+  proxies: ${JSON.stringify(proxies)}
 }))
 app.listen(${port})
 console.log('listen: http://localhost:${port}')

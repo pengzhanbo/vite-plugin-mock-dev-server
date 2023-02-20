@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import Debug from 'debug'
+import type { ResolvedConfig } from 'vite'
 
 export const isArray = <T = any>(val: unknown): val is T[] => Array.isArray(val)
 
@@ -53,4 +54,16 @@ export function lookupFile(
   ) {
     return lookupFile(parentDir, formats, options)
   }
+}
+
+export const ensureProxies = (
+  serverProxy: ResolvedConfig['server']['proxy'] = {},
+): string[] => {
+  const proxies: string[] = Object.keys(serverProxy)
+    .map((key) => {
+      const value = serverProxy[key]
+      return typeof value === 'string' ? key : value.ws === true ? '' : key
+    })
+    .filter(Boolean)
+  return proxies
 }
