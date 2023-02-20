@@ -1,3 +1,12 @@
+# [0.4.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.3.21...v0.4.0) (2023-02-20)
+
+
+### Features
+
+* add automatic statusText  acquisition ([7d190c2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/7d190c2a0595ce8288e71c2992ff3a76bc6ad01f))
+
+
+
 ## [0.3.21](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.3.20...v0.3.21) (2023-02-15)
 
 
