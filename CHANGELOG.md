@@ -1,3 +1,17 @@
+## [0.4.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.4.0...v0.4.1) (2023-02-23)
+
+
+### Bug Fixes
+
+* modified `content-type` match error ([16d55ed](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/16d55eddec77438ec232a051f12ad6125260a666))
+
+
+### Features
+
+* add `cache-control` header to clear cache ([5a8ce24](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/5a8ce24f02171b037f48a24b826fda2c7479d74e))
+
+
+
 # [0.4.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.3.21...v0.4.0) (2023-02-20)
 
 
