@@ -1,3 +1,13 @@
+## [0.4.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.4.1...v0.4.2) (2023-02-23)
+
+
+### Bug Fixes
+
+* HMR failure caused by `posix` in windows ([7dda6fc](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/7dda6fc753f40923f25fac2811f33743203ecbe5))
+* HMR failure caused by `posix` in windows ([607e5cb](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/607e5cba0c8382eb5391bb7f61f77b62c89dd40a))
+
+
+
 ## [0.4.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.4.0...v0.4.1) (2023-02-23)
 
 
