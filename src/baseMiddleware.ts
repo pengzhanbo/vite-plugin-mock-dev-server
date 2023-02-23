@@ -103,6 +103,7 @@ export function baseMiddleware(
     ;(req as any).params = params
 
     res.setHeader('Content-Type', 'application/json')
+    res.setHeader('Cache-Control', 'no-cache,max-age=0')
     res.setHeader('X-Mock', 'generate by vite:mock-dev-server')
     if (currentMock.headers) {
       const headers = isFunction(currentMock.headers)
