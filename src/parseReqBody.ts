@@ -8,18 +8,18 @@ export async function parseReqBody(
 ): Promise<any> {
   const method = req.method!.toUpperCase()
   if (['GET', 'DELETE', 'HEAD'].includes(method)) return undefined
-  const type = req.headers['content-type']
+  const type = req.headers['content-type']?.toLocaleLowerCase() || ''
   try {
-    if (type === 'application/json') {
+    if (type.startsWith('application/json')) {
       return await bodyParser.json(req)
     }
-    if (type === 'application/x-www-form-urlencoded') {
+    if (type.startsWith('application/x-www-form-urlencoded')) {
       return await bodyParser.form(req)
     }
-    if (type === 'text/plain') {
+    if (type.startsWith('text/plain')) {
       return await bodyParser.text(req)
     }
-    if (type?.startsWith('multipart/form-data;')) {
+    if (type.startsWith('multipart/form-data')) {
       return await parseMultipart(req, options)
     }
   } catch (e) {
