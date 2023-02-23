@@ -8,7 +8,7 @@ import type { Metafile } from 'esbuild'
 import { build } from 'esbuild'
 import fastGlob from 'fast-glob'
 import JSON5 from 'json5'
-import { createFilter } from 'vite'
+import { createFilter, normalizePath } from 'vite'
 import { externalizeDeps } from './esbuildPlugin'
 import type { MockOptions, MockOptionsItem } from './types'
 import { debug, getDirname, isArray, lookupFile } from './utils'
@@ -73,11 +73,13 @@ export class MockLoader extends EventEmitter {
     this.updateMockList()
 
     this.on('mock:update', async (filepath: string) => {
+      filepath = normalizePath(filepath)
       if (!includeFilter(filepath)) return
       await this.loadMock(filepath)
       this.updateMockList()
     })
     this.on('mock:unlink', async (filepath: string) => {
+      filepath = normalizePath(filepath)
       if (!includeFilter(filepath)) return
       this.moduleCache.delete(filepath)
       this.updateMockList()
@@ -94,14 +96,17 @@ export class MockLoader extends EventEmitter {
     otherGlob.length > 0 && otherGlob.forEach((glob) => watcher.add(glob))
 
     watcher.on('add', async (filepath: string) => {
+      filepath = normalizePath(filepath)
       this.emit('mock:update', filepath)
       debug('watcher:add', filepath)
     })
     watcher.on('change', async (filepath: string) => {
+      filepath = normalizePath(filepath)
       this.emit('mock:update', filepath)
       debug('watcher:change', filepath)
     })
     watcher.on('unlink', async (filepath: string) => {
+      filepath = normalizePath(filepath)
       this.emit('mock:unlink', filepath)
       debug('watcher:unlink', filepath)
     })
