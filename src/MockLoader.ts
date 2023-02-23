@@ -73,13 +73,11 @@ export class MockLoader extends EventEmitter {
     this.updateMockList()
 
     this.on('mock:update', async (filepath: string) => {
-      filepath = normalizePath(filepath)
       if (!includeFilter(filepath)) return
       await this.loadMock(filepath)
       this.updateMockList()
     })
     this.on('mock:unlink', async (filepath: string) => {
-      filepath = normalizePath(filepath)
       if (!includeFilter(filepath)) return
       this.moduleCache.delete(filepath)
       this.updateMockList()
@@ -124,6 +122,7 @@ export class MockLoader extends EventEmitter {
       cwd: this.cwd,
     })
     this.depsWatcher.on('change', (filepath) => {
+      filepath = normalizePath(filepath)
       const mockFiles = this.moduleDeps.get(filepath)
       mockFiles &&
         mockFiles.forEach((file) => {
@@ -131,6 +130,7 @@ export class MockLoader extends EventEmitter {
         })
     })
     this.depsWatcher.on('unlink', (filepath) => {
+      filepath = normalizePath(filepath)
       this.moduleDeps.delete(filepath)
     })
     this.on('update:deps', () => {
