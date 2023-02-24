@@ -451,7 +451,7 @@ export default defineMock({
 
 路由中的 `userId`将会解析到 `request.params` 对象中.
 
-#### 示例8：
+#### 示例9：
 使用 `mockjs` 生成响应数据:
 ```ts
 import Mock from 'mockjs'
@@ -466,7 +466,7 @@ export default defineMock({
 ```
 请先安装 `mockjs`
 
-### 示例9：
+### 示例10：
 使用 `response` 自定义响应
 ```ts
 export default defineMock({
@@ -486,7 +486,7 @@ export default defineMock({
 })
 ```
 
-### 示例10：
+### 示例11：
 使用 json / json5
 ```json
 {
@@ -498,7 +498,7 @@ export default defineMock({
 }
 ```
 
-### Example 11:
+### Example 12:
 
 multipart, 文件上传.
 
