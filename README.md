@@ -433,7 +433,22 @@ export default defineMock({
 })
 ```
 
-#### Example 8：
+#### Example 8:
+Dynamic route matching
+```ts
+export default defineMock({
+  url: '/api/user/:userId',
+  body({ params }) {
+    return {
+      userId: params.userId,
+    }
+  }
+})
+```
+
+The `userId` in the route will be resolved into the `request.params` object.
+
+#### Example 9：
 Use `mockjs`:
 ```ts
 import Mock from 'mockjs'
@@ -448,7 +463,7 @@ export default defineMock({
 ```
 You need installed `mockjs`
 
-### Example 9：
+### Example 10：
 Use `response` to customize the response
 ```ts
 export default defineMock({
@@ -468,7 +483,7 @@ export default defineMock({
 })
 ```
 
-### Example 10：
+### Example 11：
 Use json / json5
 ```json
 {
@@ -480,7 +495,7 @@ Use json / json5
 }
 ```
 
-### Example 11:
+### Example 12:
 
 multipart, upload file.
 

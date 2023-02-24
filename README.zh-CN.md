@@ -436,6 +436,21 @@ export default defineMock({
 })
 ```
 
+#### 示例8:
+动态路由匹配
+```ts
+export default defineMock({
+  url: '/api/user/:userId',
+  body({ params }) {
+    return {
+      userId: params.userId,
+    }
+  }
+})
+```
+
+路由中的 `userId`将会解析到 `request.params` 对象中.
+
 #### 示例8：
 使用 `mockjs` 生成响应数据:
 ```ts
