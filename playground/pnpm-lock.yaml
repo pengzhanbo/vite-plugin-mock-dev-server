@@ -5,14 +5,14 @@ specifiers:
   mockjs: ^1.1.0
   typescript: ^4.9.5
   vite: ^4.1.4
-  vite-plugin-mock-dev-server: ^0.4.0
+  vite-plugin-mock-dev-server: ^0.4.3
 
 devDependencies:
   '@types/node': 18.14.0
   mockjs: 1.1.0
   typescript: 4.9.5
   vite: 4.1.4_@types+node@18.14.0
-  vite-plugin-mock-dev-server: 0.4.0_vite@4.1.4
+  vite-plugin-mock-dev-server: 0.4.3_vite@4.1.4
 
 packages:
 
@@ -937,8 +937,8 @@ packages:
     engines: {node: '>= 0.8'}
     dev: true
 
-  /vite-plugin-mock-dev-server/0.4.0_vite@4.1.4:
-    resolution: {integrity: sha512-vEO292fFzUfgdt2jvO9fJk/JCcGXz78tyZ9lTVO6sQ3hGW0ec5up3O5wApLeGVCs/jMXT7yPciwM82TDIYZJKQ==}
+  /vite-plugin-mock-dev-server/0.4.3_vite@4.1.4:
+    resolution: {integrity: sha512-pHY9RBQBVYZJrjlvNHm9QYEn2Gqn+doAF8i0rDuFrB4yoH/3Tfee6Wpu7c/Gi7qFdcHF9X+1miXdHQ25RKZGcQ==}
     engines: {node: ^14.18.0 || >=16}
     peerDependencies:
       vite: '>=3.0.0'
@@ -953,6 +953,7 @@ packages:
       is-core-module: 2.11.0
       json5: 2.2.3
       path-to-regexp: 6.2.1
+      picocolors: 1.0.0
       vite: 4.1.4_@types+node@18.14.0
     transitivePeerDependencies:
       - supports-color

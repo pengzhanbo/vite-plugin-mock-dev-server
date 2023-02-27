@@ -3,7 +3,7 @@
 
 ### Features
 
-* deal with execution error ([0c91629](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/0c91629a39ab4f1817f4e33ecfd3ad77a6cbc21b))
+* deal with execution error [#17](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/17) ([0c91629](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/0c91629a39ab4f1817f4e33ecfd3ad77a6cbc21b))
 
 
 ### Performance Improvements
