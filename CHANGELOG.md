@@ -1,3 +1,17 @@
+## [0.4.3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.4.2...v0.4.3) (2023-02-27)
+
+
+### Features
+
+* deal with execution error ([0c91629](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/0c91629a39ab4f1817f4e33ecfd3ad77a6cbc21b))
+
+
+### Performance Improvements
+
+* optimize types declaration ([ba948ed](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/ba948ed833ce5b98b57ad3b644eafb79b52c5be8))
+
+
+
 ## [0.4.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.4.1...v0.4.2) (2023-02-23)
 
 
