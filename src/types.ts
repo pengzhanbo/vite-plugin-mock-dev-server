@@ -61,9 +61,11 @@ export type Method =
   | 'TRACE'
   | 'OPTIONS'
 
+type Headers = http.IncomingHttpHeaders
+
 type ResponseBody = Record<string, any> | any[] | string | number | null
 
-export interface ResponseReq {
+export interface ExtraRequest {
   /**
    * 请求地址中位于 `?` 后面的 queryString，已解析为 json
    */
@@ -80,22 +82,19 @@ export interface ResponseReq {
    * 请求地址中，/api/id/:id 解析后的 params 参数
    */
   params: Record<string, any>
-
   /**
-   * 请求 中的 headers
+   * 请求体中 headers
    */
-  headers: Record<string, any>
+  headers: Headers
 }
 
-interface ResponseBodyFn {
-  (request: ResponseReq): ResponseBody | Promise<ResponseBody>
-}
+export type MockRequest = ExtraRequest & http.IncomingMessage
 
-interface ResponseHeaderFn {
-  (request: ResponseReq): Headers | Promise<Headers>
-}
+type ResponseBodyFn = (
+  request: MockRequest,
+) => ResponseBody | Promise<ResponseBody>
 
-type Headers = Record<string, any>
+type ResponseHeaderFn = (request: MockRequest) => Headers | Promise<Headers>
 
 export interface MockOptionsItem {
   /**
@@ -154,7 +153,7 @@ export interface MockOptionsItem {
    * 在 req 中，还可以拿到 query、params、body等已解析的请求信息
    */
   response?: (
-    req: Connect.IncomingMessage & ResponseReq,
+    req: MockRequest,
     res: http.ServerResponse<http.IncomingMessage>,
     next: Connect.NextFunction,
   ) => void | Promise<void>
@@ -166,7 +165,7 @@ export interface MockOptionsItem {
    * 但全部都在单个 mock中的 body或者 response 中写，内容会很庞杂，不好管理，
    * 验证器的功能，允许你同时配置多条相同url的mock，通过验证器来判断使哪个mock生效。
    */
-  validator?: Partial<ResponseReq> | ((request: ResponseReq) => boolean)
+  validator?: Partial<ExtraRequest> | ((request: ExtraRequest) => boolean)
 }
 
 export type MockOptions = MockOptionsItem[]
