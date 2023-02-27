@@ -1,11 +1,17 @@
 import { parse as urlParse } from 'node:url'
 import HTTP_STATUS from 'http-status'
 import { match, pathToRegexp } from 'path-to-regexp'
+import colors from 'picocolors'
 import type { Connect } from 'vite'
 import type { MockLoader } from './MockLoader'
 import { parseReqBody } from './parseReqBody'
-import type { Method, MockServerPluginOptions, ResponseReq } from './types'
-import { debug, isArray, isFunction, sleep } from './utils'
+import type {
+  ExtraRequest,
+  Method,
+  MockRequest,
+  MockServerPluginOptions,
+} from './types'
+import { debug, isArray, isFunction, log, sleep } from './utils'
 import { validate } from './validator'
 
 export interface BaseMiddlewareOptions {
@@ -58,7 +64,7 @@ export function baseMiddleware(
           pathname,
         ) || { params: {} }
         const params = urlMatch.params || {}
-        const request = {
+        const request: ExtraRequest = {
           query,
           refererQuery,
           params,
@@ -79,7 +85,7 @@ export function baseMiddleware(
     debug('middleware: ', method, pathname)
 
     /**
-     * 接口响应延迟
+     * response delay
      */
     if (currentMock.delay && currentMock.delay > 0) {
       await sleep(currentMock.delay)
@@ -94,55 +100,60 @@ export function baseMiddleware(
     ) || { params: {} }
     const params = urlMatch.params || {}
 
+    const request = req as MockRequest
+
     /**
-     * 在 请求对象中，注入信息
+     * provide mock data
      */
-    ;(req as any).body = reqBody
-    ;(req as any).query = query
-    ;(req as any).refererQuery = refererQuery
-    ;(req as any).params = params
+    request.body = reqBody
+    request.query = query
+    request.refererQuery = refererQuery
+    request.params = params
 
     res.setHeader('Content-Type', 'application/json')
     res.setHeader('Cache-Control', 'no-cache,max-age=0')
-    res.setHeader('X-Mock', 'generate by vite:mock-dev-server')
+    res.setHeader('X-Mock', 'generate by vite:plugin-mock-dev-server')
+
     if (currentMock.headers) {
-      const headers = isFunction(currentMock.headers)
-        ? await currentMock.headers({
-            query,
-            refererQuery,
-            body: reqBody,
-            params,
-            headers: req.headers,
-          })
-        : currentMock.headers
-      Object.keys(headers).forEach((key) => {
-        res.setHeader(key, headers[key])
-      })
+      try {
+        const headers = isFunction(currentMock.headers)
+          ? await currentMock.headers(request)
+          : currentMock.headers
+        Object.keys(headers).forEach((key) => {
+          res.setHeader(key, headers[key]!)
+        })
+      } catch (e) {
+        log.error(`${colors.red('[headers error]')} ${req.url} \n`, e)
+      }
     }
 
     if (currentMock.body) {
-      let body: any
-      if (isFunction(currentMock.body)) {
-        body = await currentMock.body({
-          query,
-          refererQuery,
-          body: reqBody,
-          params,
-          headers: req.headers,
-        })
-      } else {
-        body = currentMock.body
+      try {
+        let body: any
+        if (isFunction(currentMock.body)) {
+          body = await currentMock.body(request)
+        } else {
+          body = currentMock.body
+        }
+        res.end(JSON.stringify(body))
+      } catch (e) {
+        log.error(`${colors.red('[body error]')} ${req.url} \n`, e)
+        res.statusCode = 500
+        res.statusMessage = getHTTPStatusText(res.statusCode)
+        res.end('')
       }
-      res.end(JSON.stringify(body))
       return
     }
 
     if (currentMock.response) {
-      await currentMock.response(
-        req as Connect.IncomingMessage & ResponseReq,
-        res,
-        next,
-      )
+      try {
+        await currentMock.response(request, res, next)
+      } catch (e) {
+        log.error(`${colors.red('[response error]')} ${req.url} \n`, e)
+        res.statusCode = 500
+        res.statusMessage = getHTTPStatusText(res.statusCode)
+        res.end('')
+      }
       return
     }
 

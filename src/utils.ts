@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import Debug from 'debug'
+import colors from 'picocolors'
 import type { ResolvedConfig } from 'vite'
 
 export const isArray = <T = any>(val: unknown): val is T[] => Array.isArray(val)
@@ -23,6 +24,16 @@ export const ensureArray = <T>(thing: T[] | T | undefined | null): T[] => {
   if (isArray(thing)) return thing
   if (thing === null || thing === undefined) return []
   return [thing as T]
+}
+
+export const log = {
+  info(...args: any) {
+    // eslint-disable-next-line no-console
+    console.info(colors.cyan('mock-dev-server: '), ...args)
+  },
+  error(...args: any[]) {
+    console.error('\n', colors.cyan('mock-dev-server: '), ...args, '\n')
+  },
 }
 
 interface LookupFileOptions {

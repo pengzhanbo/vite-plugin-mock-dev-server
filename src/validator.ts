@@ -1,8 +1,8 @@
-import type { ResponseReq } from './types'
+import type { ExtraRequest } from './types'
 
 export function validate(
-  request: ResponseReq,
-  validator: Partial<ResponseReq>,
+  request: ExtraRequest,
+  validator: Partial<ExtraRequest>,
 ): boolean {
   return (
     equalObj(request.headers, validator.headers) &&

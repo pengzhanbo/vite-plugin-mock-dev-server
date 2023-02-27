@@ -51,7 +51,8 @@
     "http-status": "^1.6.2",
     "is-core-module": "^2.11.0",
     "json5": "^2.2.3",
-    "path-to-regexp": "^6.2.1"
+    "path-to-regexp": "^6.2.1",
+    "picocolors": "^1.0.0"
   },
   "devDependencies": {
     "@pengzhanbo/eslint-config-ts": "^0.3.2",

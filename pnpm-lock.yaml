@@ -22,6 +22,7 @@ specifiers:
   json5: ^2.2.3
   mockjs: ^1.1.0
   path-to-regexp: ^6.2.1
+  picocolors: ^1.0.0
   prettier: ^2.8.3
   tsup: ^6.6.3
   typescript: ^4.9.5
@@ -40,6 +41,7 @@ dependencies:
   is-core-module: 2.11.0
   json5: 2.2.3
   path-to-regexp: 6.2.1
+  picocolors: 1.0.0
 
 devDependencies:
   '@pengzhanbo/eslint-config-ts': 0.3.2_ixt4l6ptf47gmhhuxcve5dmsda
@@ -3443,7 +3445,6 @@ packages:
 
   /picocolors/1.0.0:
     resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==}
-    dev: true
 
   /picomatch/2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
