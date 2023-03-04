@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/pengzhanbo/vite-plugin-mock-dev-server"
   },
-  "license": "GPL-3.0",
+  "license": "MIT",
   "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
   "type": "module",
   "scripts": {

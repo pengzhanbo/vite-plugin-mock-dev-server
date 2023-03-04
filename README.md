@@ -581,7 +581,7 @@ Access the associated `mock` interface via `localhost:8080/`.
 
 ## LICENSE
 
-[GPL-3.0](/LICENSE)
+[MIT](/LICENSE)
 
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpengzhanbo%2Fvite-plugin-mock-dev-server.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpengzhanbo%2Fvite-plugin-mock-dev-server?ref=badge_large)
