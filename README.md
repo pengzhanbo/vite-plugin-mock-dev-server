@@ -131,25 +131,29 @@ export default defineConfig({
 
 - `options.prefix`
 
-  Type: `string | string[]`
+  **Type:** `string | string[]`
   
   Configure custom matches rules for the mock server. Any requests that request path starts with that `prefix` will be proxied to that specified target. If the `prefix` starts with ^, it will be interpreted as a RegExp.
 
   > In general, `server.proxy` is sufficient to meet the requirements, and this options is added to be compatible with some scenarios.
 
-  Default: `[]`
+  **Default:** `[]`
 
 - `option.include` 
+
+  **Type:** `string | string[]`
   
   Configure to read mock files, which can be a directory, glob, or array
 
-  Default： `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']` (relative for `process.cwd()`)
+  **Default：** `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']` (relative for `process.cwd()`)
 
 - `options.exclude`
+
+  **Type:** `string | string[]`
   
   When you configure the mock files to be read, the files you want to exclude can be a directory, glob, or array
 
-  Default：
+  **Default：**
   ```ts
   [
     '**/node_modules/**',
@@ -161,11 +165,21 @@ export default defineConfig({
   ]
   ```
 
+- `options.reload`
+  
+  **Type:** `boolean`
+
+  When mock resources are hot updated, only the data content is updated, but the page is not refreshed by default.
+  Turn this on when you want to refresh the page every time you modify the mock file.
+
+
+  **Default:** `true`
+
 - `options.formidableOptions`
   
   Configure to `formidable`，see [formidable options](https://github.com/node-formidable/formidable#options)
 
-  Default: `{}`
+  **Default:** `{}`
 
   example: Configure to file upload dir
   ```ts
@@ -180,9 +194,9 @@ export default defineConfig({
   
   When building a small, independently deployable mock service.
 
-  Type： `boolean | ServerBuildOptions` 
+  **Type：** `boolean | ServerBuildOptions` 
 
-  Default：`false`
+  **Default：** `false`
 
   ```ts
   interface ServerBuildOptions {
@@ -217,7 +231,7 @@ export default defineMock({
 ```ts
 export default defineMock({
   /**
-   * Address of request，support `/api/user/:id`
+   * Address of request，and support like `/api/user/:id`
    */
   url: '/api/test',
   /**
@@ -396,7 +410,7 @@ export default defineMock([
       }
     },
     body: {
-      message: 'query.a === 1'
+      message: 'query.a == 1'
     }
   },
   // Match /api/test?a=2
@@ -408,7 +422,16 @@ export default defineMock([
       }
     },
     body: {
-      message: 'query.a === 2'
+      message: 'query.a == 2'
+    }
+  },
+  {
+    /**
+     * `?a=3` will resolve to `validator.query`
+     */
+    url: '/api/test?a=3',
+    body: {
+      message: 'query.a == 3'
     }
   }
 ])

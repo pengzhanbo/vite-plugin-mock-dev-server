@@ -133,25 +133,29 @@ export default defineConfig({
 
 - `options.prefix`
 
-  Type: `string | string[]`
+  **类型:** `string | string[]`
   
   为mock服务器配置自定义匹配规则。任何请求路径以 `prefix` 值开头的请求将被代理到对应的目标。如果 `prefix` 值以 ^ 开头，将被识别为 RegExp。
 
   > 一般情况下, `server.proxy` 已经足够满足需求，添加此项是为了与某些场景兼容。
 
-  Default: `[]`
+  **默认值:** `[]`
 
 - `option.include` 
+
+  **类型：** `string | string[]`
   
   配置读取 mock文件，可以是一个 目录，glob，或者一个数组
 
-  默认值： `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']` (相对于根目录)
+  **默认值：** `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']` (相对于根目录)
 
 - `options.exclude`
+
+  **类型：** `string | string[]`
   
   配置读取 mock文件时，需要排除的文件， 可以是一个 目录、glob、或者一个数组
 
-  默认值：
+  **默认值：**
   ```ts
   [
     '**/node_modules/**',
@@ -163,11 +167,19 @@ export default defineConfig({
   ]
   ```
 
+- `options.reload`
+
+  **Type:** `boolean`
+
+  mock资源热更新时，仅更新了数据内容，但是默认不重新刷新页面。当你希望每次修改mock文件都刷新页面时，可以打开此选项。
+
+  **Default:** `true`
+
 - `options.formidableOptions`
   
   配置 `formidable`，查看 [formidable options](https://github.com/node-formidable/formidable#options)
 
-  默认值: `{}`
+  **默认值:** `{}`
 
   示例: 配置文件上传的存放目录
   ```ts
@@ -182,9 +194,9 @@ export default defineConfig({
   
   构建可独立部署的小型mock服务时配置。
 
-  类型： `boolean | ServerBuildOptions` 
+  **类型：** `boolean | ServerBuildOptions` 
 
-  默认值：`false`
+  **默认值：**`false`
 
   ```ts
   interface ServerBuildOptions {
@@ -412,6 +424,15 @@ export default defineMock([
     },
     body: {
       message: 'query.a === 2'
+    }
+  },
+  {
+    /**
+     * `?a=3` 将会解析到 `validator.query`
+     */
+    url: '/api/test?a=3',
+    body: {
+      message: 'query.a == 3'
     }
   }
 ])
