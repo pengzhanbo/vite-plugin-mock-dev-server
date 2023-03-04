@@ -173,7 +173,7 @@ export default defineConfig({
   Turn this on when you want to refresh the page every time you modify the mock file.
 
 
-  **Default:** `true`
+  **Default:** `false`
 
 - `options.formidableOptions`
   
