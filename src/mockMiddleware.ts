@@ -1,14 +1,15 @@
 import type * as http from 'node:http'
-import type { Connect, ResolvedConfig } from 'vite'
+import type { Connect, ResolvedConfig, WebSocketServer } from 'vite'
 import { baseMiddleware } from './baseMiddleware'
 import { MockLoader } from './MockLoader'
 import type { MockServerPluginOptions } from './types'
 import { ensureArray, ensureProxies } from './utils'
 
 export async function mockServerMiddleware(
-  httpServer: http.Server | null,
   config: ResolvedConfig,
   options: Required<MockServerPluginOptions>,
+  httpServer: http.Server | null,
+  ws?: WebSocketServer,
 ): Promise<Connect.NextHandleFunction> {
   const include = ensureArray(options.include)
   const exclude = ensureArray(options.exclude)
@@ -29,6 +30,11 @@ export async function mockServerMiddleware(
 
   await loader.load()
   httpServer?.on('close', () => loader.close())
+  loader.on('mock:update-end', () => {
+    if (options.reload) {
+      ws?.send({ type: 'full-reload' })
+    }
+  })
 
   /**
    * 获取 服务代理配置中，配置的 请求前缀，

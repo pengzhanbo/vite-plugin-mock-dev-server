@@ -14,6 +14,7 @@ export function mockDevServerPlugin({
     '**/.git/**',
     '**/dist/**',
   ],
+  reload = false,
   formidableOptions = {},
   build = false,
 }: MockServerPluginOptions = {}): Plugin[] {
@@ -21,6 +22,7 @@ export function mockDevServerPlugin({
     prefix,
     include,
     exclude,
+    reload,
     formidableOptions: {
       multiples: true,
       ...formidableOptions,
@@ -79,11 +81,12 @@ export function serverPlugin(
       config.logger.warn('')
     },
 
-    async configureServer({ middlewares, config, httpServer }) {
+    async configureServer({ middlewares, config, httpServer, ws }) {
       const middleware = await mockServerMiddleware(
-        httpServer,
         config,
         pluginOptions,
+        httpServer,
+        ws,
       )
       middlewares.use(middleware)
     },
@@ -94,9 +97,9 @@ export function serverPlugin(
       // feat: use preview server parameter in preview server hook #11647
       // https://github.com/vitejs/vite/pull/11647
       const middleware = await mockServerMiddleware(
-        httpServer,
         viteConfig,
         pluginOptions,
+        httpServer,
       )
       middlewares.use(middleware)
     },

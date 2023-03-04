@@ -23,6 +23,14 @@ export interface MockServerPluginOptions {
   exclude?: string | string[]
 
   /**
+   * mock资源热更新时，仅更新了数据内容，但是默认不重新刷新页面。
+   * 当你希望每次修改mock文件都刷新页面时，可以打开此选项。
+   *
+   * @default false
+   */
+  reload?: boolean
+
+  /**
    * formidable options
    * @see https://github.com/node-formidable/formidable#options
    */

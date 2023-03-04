@@ -76,11 +76,13 @@ export class MockLoader extends EventEmitter {
       if (!includeFilter(filepath)) return
       await this.loadMock(filepath)
       this.updateMockList()
+      this.emit('mock:update-end')
     })
     this.on('mock:unlink', async (filepath: string) => {
       if (!includeFilter(filepath)) return
       this.moduleCache.delete(filepath)
       this.updateMockList()
+      this.emit('mock:update-end')
     })
   }
 
