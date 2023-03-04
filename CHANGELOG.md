@@ -1,3 +1,13 @@
+# [1.0.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.4.3...v1.0.0) (2023-03-04)
+
+
+### Features
+
+* add `mock.url` parse ([eb0484b](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/eb0484bfefd428ca3c918849e55628e5def3d849))
+* add `reload` option ([9788d2d](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/9788d2d3ed974922c60722149c5f24f58eb662d6))
+
+
+
 ## [0.4.3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v0.4.2...v0.4.3) (2023-02-27)
 
 
