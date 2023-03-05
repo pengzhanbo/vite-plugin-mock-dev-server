@@ -1,3 +1,12 @@
+## [1.0.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.0.1...v1.0.2) (2023-03-05)
+
+
+### Features
+
+* add 'cors' to the deployable mock server ([652a438](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/652a43841ae4c233aed9f6469660aed4c805b9a2))
+
+
+
 ## [1.0.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.0.0...v1.0.1) (2023-03-04)
 
 
