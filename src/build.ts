@@ -118,7 +118,9 @@ function generatePackageJson(pkg: any, mockDeps: string[]) {
     dependencies: {
       'connect': '^3.7.0',
       'vite-plugin-mock-dev-server': `^${version}`,
+      'cors': '^2.8.5',
     } as Record<string, string>,
+    pnpm: { peerDependencyRules: { ignoreMissing: ['vite'] } },
   }
   mockDeps.forEach((dep) => {
     mockPkg.dependencies[dep] = dependents[dep] || 'latest'
@@ -127,16 +129,20 @@ function generatePackageJson(pkg: any, mockDeps: string[]) {
 }
 
 function generatorServerEntryCode(proxies: string[], port = 8080) {
-  return `import connect from 'connect'
-import { baseMiddleware } from 'vite-plugin-mock-dev-server'
-import mockData from './mock-data.js'
-const app = connect()
+  return `import connect from 'connect';
+import corsMiddleware from 'cors';
+import { baseMiddleware } from 'vite-plugin-mock-dev-server';
+import mockData from './mock-data.js';
+
+const app = connect();
+app.use(corsMiddleware());
 app.use(baseMiddleware({ mockData }, {
   formidableOptions: { multiples: true },
   proxies: ${JSON.stringify(proxies)}
-}))
-app.listen(${port})
-console.log('listen: http://localhost:${port}')
+}));
+app.listen(${port});
+
+console.log('listen: http://localhost:${port}');
 `
 }
 
@@ -152,11 +158,11 @@ async function generateMockEntryCode(
   })
   const mockFiles = includePaths.filter(includeFilter)
 
-  let importers = ''
+  let importers = "import { parse as urlParse } from 'node:url';\n"
   let exporters = ''
   mockFiles.forEach((filepath, index) => {
     const file = path.join(cwd, filepath)
-    importers += `import * as m${index} from '${file}'\n`
+    importers += `import * as m${index} from '${file}';\n`
     exporters += `m${index}, `
   })
   return `${importers}const mockData = [${exporters}];\n
@@ -177,10 +183,19 @@ mockData.forEach(mock => {
 data
   .filter((mock) => mock.enabled || typeof mock.enabled === "undefined")
   .forEach((mock) => {
-    if (!mocks[mock.url]) {
-      mocks[mock.url] = [];
+    const { pathname, query } = urlParse(mock.url, true);
+    if (!mocks[pathname]) {
+      mocks[pathname] = [];
     }
-    const list = mocks[mock.url];
+    mock.url = pathname;
+    const list = mocks[pathname];
+    if (query && typeof mock.validator === 'function') {
+      mock.validator ??= {};
+      mock.validator.query = Object.assign(
+        query,
+        mock.validator.query || {},
+      );
+    }
     mock.validator ? list.unshift(mock) : list.push(mock);
   });
 export default mocks;
