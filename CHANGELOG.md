@@ -1,3 +1,12 @@
+## [1.0.3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.0.2...v1.0.3) (2023-03-09)
+
+
+### Bug Fixes
+
+* **MockLoader:** empty mock file compile fail [#19](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/19) ([0f44752](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/0f44752f84b04b207112e1b94a562098bc1981d3))
+
+
+
 ## [1.0.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.0.1...v1.0.2) (2023-03-05)
 
 
