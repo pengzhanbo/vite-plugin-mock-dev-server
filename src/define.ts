@@ -3,7 +3,7 @@ import type { MockOptions, MockOptionsItem } from './types'
 /**
  * mock config helper
  *
- * mock配置帮助函数
+ * mock配置辅助函数
  *
  * @param config
  * @example

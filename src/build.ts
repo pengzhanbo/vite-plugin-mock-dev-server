@@ -158,48 +158,22 @@ async function generateMockEntryCode(
   })
   const mockFiles = includePaths.filter(includeFilter)
 
-  let importers = "import { parse as urlParse } from 'node:url';\n"
+  let importers = ''
   let exporters = ''
   mockFiles.forEach((filepath, index) => {
     const file = path.join(cwd, filepath)
     importers += `import * as m${index} from '${file}';\n`
     exporters += `m${index}, `
   })
-  return `${importers}const mockData = [${exporters}];\n
-const data = [];
-const mocks = {};
-mockData.forEach(mock => {
-  Object.keys(mock).forEach(key => {
-    const mockData = mock[key];
-    if (Array.isArray(mockData)) {
-      data.push(...mockData);
-    } else {
-      if (typeof mockData === 'object' && Object.prototype.hasOwnProperty.call(mockData, 'url')) {
-        data.push(mockData);
-      }
-    }
-  })
-})
-data
-  .filter((mock) => mock.enabled || typeof mock.enabled === "undefined")
-  .forEach((mock) => {
-    const { pathname, query } = urlParse(mock.url, true);
-    if (!mocks[pathname]) {
-      mocks[pathname] = [];
-    }
-    mock.url = pathname;
-    const list = mocks[pathname];
-    if (query && typeof mock.validator === 'function') {
-      mock.validator ??= {};
-      mock.validator.query = Object.assign(
-        query,
-        mock.validator.query || {},
-      );
-    }
-    mock.validator ? list.unshift(mock) : list.push(mock);
-  });
-export default mocks;
-  `
+  return `import { transformMockData } from 'vite-plugin-mock-dev-server';
+${importers}
+const exporters = [${exporters}];
+const mockList = exporters.map((raw) => raw && raw.default
+  ? raw.default
+  : Object.keys(raw || {}).map((key) => raw[key])
+)
+export default transformMockData(mockList);
+`
 }
 
 async function buildMockEntry(

@@ -2,7 +2,7 @@ import EventEmitter from 'node:events'
 import fs from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
-import { pathToFileURL, parse as urlParse } from 'node:url'
+import { pathToFileURL } from 'node:url'
 import chokidar from 'chokidar'
 import type { Metafile } from 'esbuild'
 import { build } from 'esbuild'
@@ -10,8 +10,9 @@ import fastGlob from 'fast-glob'
 import JSON5 from 'json5'
 import { createFilter, normalizePath } from 'vite'
 import { externalizeDeps } from './esbuildPlugin'
+import { transformMockData } from './transform'
 import type { MockOptions, MockOptionsItem } from './types'
-import { debug, getDirname, isArray, isFunction, lookupFile } from './utils'
+import { debug, getDirname, lookupFile } from './utils'
 
 export interface MockLoaderOptions {
   cwd?: string
@@ -151,36 +152,7 @@ export class MockLoader extends EventEmitter {
   }
 
   private updateMockList() {
-    const mockList: MockOptions = []
-    for (const [, handle] of this.moduleCache.entries()) {
-      if (handle) {
-        isArray(handle) ? mockList.push(...handle) : mockList.push(handle)
-      }
-    }
-    const mocks: MockLoader['mockData'] = {}
-
-    mockList
-      .filter(
-        (mock) =>
-          (mock.enabled || typeof mock.enabled === 'undefined') && mock.url,
-      )
-      .forEach((mock) => {
-        const { pathname, query } = urlParse(mock.url, true)
-        if (!mocks[pathname!]) {
-          mocks[pathname!] = []
-        }
-        mock.url = pathname!
-        const list = mocks[pathname!]
-        if (query && !isFunction(mock.validator)) {
-          mock.validator ??= {}
-          mock.validator.query = Object.assign(
-            query,
-            mock.validator.query || {},
-          )
-        }
-        mock.validator ? list.unshift(mock) : list.push(mock)
-      })
-    this._mockData = mocks
+    this._mockData = transformMockData(this.moduleCache)
   }
 
   private updateModuleDeps(filepath: string, deps: Metafile['inputs']) {

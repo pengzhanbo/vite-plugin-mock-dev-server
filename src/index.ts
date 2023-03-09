@@ -8,6 +8,8 @@ import type {
 
 export * from './define'
 export * from './baseMiddleware'
+export * from './transform'
+
 export { mockDevServerPlugin }
 export { MockOptions, MockOptionsItem, MockServerPluginOptions, FormidableFile }
 
