@@ -1,3 +1,12 @@
+## [1.0.4](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.0.3...v1.0.4) (2023-03-09)
+
+
+### Performance Improvements
+
+* optimize mock transformer ([e6d46e1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/e6d46e125591bcbd154b3c94fcb6025dfad00ca1))
+
+
+
 ## [1.0.3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.0.2...v1.0.3) (2023-03-09)
 
 
