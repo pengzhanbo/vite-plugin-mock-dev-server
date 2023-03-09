@@ -40,7 +40,7 @@
 - 🍕 Support `viteConfig.define` in mock file
 - 📤 Support `multipart` content-type，mock upload file.
 - 🌈 Support `vite preview` mode
-- 🗂 Support for building small mock services that can be deployed independently
+- 🗂 Support for building independently deployed mock services
 
 
 ## Documentation
@@ -171,7 +171,7 @@ export default defineConfig({
   
   **Type:** `boolean`
 
-  When mock resources are hot updated, only the data content is updated, but the page is not refreshed by default.
+  When mock resources are hot reload, only the data content is updated, but the page is not refreshed by default.
   Turn this on when you want to refresh the page every time you modify the mock file.
 
 

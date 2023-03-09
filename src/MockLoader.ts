@@ -153,12 +153,17 @@ export class MockLoader extends EventEmitter {
   private updateMockList() {
     const mockList: MockOptions = []
     for (const [, handle] of this.moduleCache.entries()) {
-      isArray(handle) ? mockList.push(...handle) : mockList.push(handle)
+      if (handle) {
+        isArray(handle) ? mockList.push(...handle) : mockList.push(handle)
+      }
     }
     const mocks: MockLoader['mockData'] = {}
 
     mockList
-      .filter((mock) => mock.enabled || typeof mock.enabled === 'undefined')
+      .filter(
+        (mock) =>
+          (mock.enabled || typeof mock.enabled === 'undefined') && mock.url,
+      )
       .forEach((mock) => {
         const { pathname, query } = urlParse(mock.url, true)
         if (!mocks[pathname!]) {
