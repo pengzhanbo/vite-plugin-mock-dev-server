@@ -92,7 +92,7 @@ export async function generateMockServer(
 
 function getMockDependencies(deps: Metafile['inputs']): string[] {
   const list = new Set<string>()
-  const excludeDeps = [name, 'connect']
+  const excludeDeps = [name, 'connect', 'cors']
   Object.keys(deps).forEach((mPath) => {
     const imports = deps[mPath].imports
       .filter((_) => _.external)
