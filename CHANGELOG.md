@@ -1,3 +1,17 @@
+## [1.0.5](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.0.4...v1.0.5) (2023-03-16)
+
+
+### Bug Fixes
+
+* **build:** path posix error [#21](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/21) ([3d5a066](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/3d5a0667e7960ad250c650a3c6afa9330ad7adbd))
+
+
+### Performance Improvements
+
+* **build:** add `cors` to excludeDeps ([a231646](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/a2316465824ac889714f26cce0a10c740d3a4d67))
+
+
+
 ## [1.0.4](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.0.3...v1.0.4) (2023-03-09)
 
 
