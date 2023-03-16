@@ -6,7 +6,7 @@ import { build } from 'esbuild'
 import fg from 'fast-glob'
 import isCore from 'is-core-module'
 import type { Plugin, ResolvedConfig } from 'vite'
-import { createFilter } from 'vite'
+import { createFilter, normalizePath } from 'vite'
 import { name, version } from '../package.json'
 import { externalizeDeps, json5Loader, jsonLoader } from './esbuildPlugin'
 import type { MockServerPluginOptions, ServerBuildOption } from './types'
@@ -52,7 +52,6 @@ export async function generateMockServer(
   const { code, deps } = await buildMockEntry(mockEntry, define)
   const mockDeps = getMockDependencies(deps)
   await fsp.unlink(mockEntry)
-
   const outputList = [
     {
       filename: path.join(outputDir, 'mock-data.js'),
@@ -161,7 +160,8 @@ async function generateMockEntryCode(
   let importers = ''
   let exporters = ''
   mockFiles.forEach((filepath, index) => {
-    const file = path.join(cwd, filepath)
+    // fix: #21
+    const file = normalizePath(path.join(cwd, filepath))
     importers += `import * as m${index} from '${file}';\n`
     exporters += `m${index}, `
   })
