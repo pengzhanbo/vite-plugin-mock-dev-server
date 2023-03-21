@@ -6,11 +6,7 @@ import type { MockServerPluginOptions } from './types'
 export function mockDevServerPlugin({
   prefix = [],
   include = ['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}'],
-  exclude = [
-    '**/node_modules/**',
-    '**/.vscode/**',
-    '**/.git/**',
-  ],
+  exclude = ['**/node_modules/**', '**/.vscode/**', '**/.git/**'],
   reload = false,
   formidableOptions = {},
   build = false,
