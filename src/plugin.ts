@@ -8,10 +8,8 @@ export function mockDevServerPlugin({
   include = ['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}'],
   exclude = [
     '**/node_modules/**',
-    '**/test/**',
     '**/.vscode/**',
     '**/.git/**',
-    '**/dist/**',
   ],
   reload = false,
   formidableOptions = {},

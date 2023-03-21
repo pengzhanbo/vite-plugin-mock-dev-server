@@ -162,10 +162,8 @@ export default defineConfig({
   ```ts
   [
     '**/node_modules/**',
-    '**/test/**',
     '**/.vscode/**',
     '**/.git/**',
-    '**/dist/**'
   ]
   ```
 
