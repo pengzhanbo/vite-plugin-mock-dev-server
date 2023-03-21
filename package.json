@@ -55,8 +55,8 @@
     "picocolors": "^1.0.0"
   },
   "devDependencies": {
-    "@pengzhanbo/eslint-config-ts": "^0.3.2",
-    "@pengzhanbo/prettier-config": "^0.3.2",
+    "@pengzhanbo/eslint-config-ts": "^0.3.4",
+    "@pengzhanbo/prettier-config": "^0.3.4",
     "@types/co-body": "^6.1.0",
     "@types/debug": "^4.1.7",
     "@types/formidable": "^2.0.5",
