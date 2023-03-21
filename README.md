@@ -26,21 +26,21 @@
 
 ## Feature
 
-- ⚡️ light weight，flexible，fast
-- 🧲 Non - injection, no intrusion to client code
-- 💡 ESModule/commonjs
-- 🦾 Typescript
-- 🏷 Support json / json5
-- 📦 Auto import mock file
+- ⚡️ light weight，flexible，fast.
+- 🧲 Not injection-based, non-intrusive to client code.
+- 💡 ESModule/commonjs.
+- 🦾 Typescript.
+- 🏷 Support `json` / `json5`.
+- 📦 Auto import mock file.
 - 🎨 Support any lib，like `mockjs`，or not use it.
-- 📥 Path rules match and request parameters match
+- 📥 Path rule matching, request parameter matching.
 - ⚙️ Support Enabled/Disabled any one of api mock
 - 🔥 HMR
 - ⚖️ Use `server.proxy`
 - 🍕 Support `viteConfig.define` in mock file
 - 📤 Support `multipart` content-type，mock upload file.
 - 🌈 Support `vite preview` mode
-- 🗂 Support for building independently deployed mock services
+- 🗂 Support building small independent deployable mock services.
 
 
 ## Documentation
@@ -77,6 +77,7 @@ export default defineConfig({
   plugins: [
     mockDevServerPlugin(),
   ],
+  // The fields defined here can also be used in mock.
   define: {},
   server: {
     proxy: {
@@ -87,15 +88,17 @@ export default defineConfig({
   }
 })
 ```
-The plugin reads the configuration for `server.proxy` or `options.prefix` and enables mock matching.
+The plugin will read the configuration of `server.proxy` or `options.prefix`, and enable mock matching for matched URLs.
 
-The plugin also reads the `define` configuration and supports direct use in mock files.
+The plugin will also read the `define` configuration, which supports direct use in mock files.
 
-> In a general case, we only need to mock the url with the proxy so that we can proxy and mock through the http service provided by vite, but you can also configure the mock using 'options.prefix'
+> Because in general scenarios, we only need to mock URLs with proxies so that we can use the proxy and mock services provided by Vite's HTTP service.
+>
+> However, you can also configure mocks using `options.prefix`.
 
 ### Edit Mock File
 
-By default, write mock data in the `mock` directory of your project root:
+By default, write mock data in the `mock` directory of your project's root directory:
 
 `mock/api.mock.ts` :
 ```ts
@@ -135,9 +138,9 @@ export default defineConfig({
 
   **Type:** `string | string[]`
   
-  Configure custom matches rules for the mock server. Any requests that request path starts with that `prefix` will be proxied to that specified target. If the `prefix` starts with ^, it will be interpreted as a RegExp.
+  Configure custom matching rules for mock server. Any request path starting with the value of `prefix` will be proxied to the corresponding target. If the `prefix` value starts with ^, it will be recognized as a RegExp.
 
-  > In general, `server.proxy` is sufficient to meet the requirements, and this options is added to be compatible with some scenarios.
+  > In general, `server.proxy` is sufficient to meet the needs. Adding this item is for compatibility with certain scenarios.
 
   **Default:** `[]`
 
@@ -145,22 +148,21 @@ export default defineConfig({
 
   **Type:** `string | string[]`
   
-  Configure to read mock files, which can be a directory, glob, or array
+  Configure to read mock files, which can be a directory, glob, or an array.
 
-  **Default：** `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']` (relative for `process.cwd()`)
+  **Default：** `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']` (Relative to the root directory.)
 
 - `options.exclude`
 
   **Type:** `string | string[]`
   
-  When you configure the mock files to be read, the files you want to exclude can be a directory, glob, or array
+  When reading mock files for configuration, the files that need to be excluded can be a directory, glob, or an array.
 
   **Default：**
   ```ts
   [
     '**/node_modules/**',
     '**/test/**',
-    'src/**',
     '**/.vscode/**',
     '**/.git/**',
     '**/dist/**'
@@ -171,8 +173,7 @@ export default defineConfig({
   
   **Type:** `boolean`
 
-  When mock resources are hot reload, only the data content is updated, but the page is not refreshed by default.
-  Turn this on when you want to refresh the page every time you modify the mock file.
+  When the mock resource is hot updated, only the data content is updated, but the page is not refreshed by default. If you want to refresh the page every time you modify the mock file, you can open this option.
 
 
   **Default:** `false`
@@ -194,7 +195,7 @@ export default defineConfig({
 
 - `options.build`
   
-  When building a small, independently deployable mock service.
+  Configuration needed to build a small, independently deployable mock service.
 
   **Type：** `boolean | ServerBuildOptions` 
 
@@ -233,11 +234,11 @@ export default defineMock({
 ```ts
 export default defineMock({
   /**
-   * Address of request，and support like `/api/user/:id`
+   * Request address, supports the `/api/user/:id` format.
    */
   url: '/api/test',
   /**
-   * The request method supported by the API
+   * Supported request methods of the interface.
    * 
    * @type string | string[]
    * @default ['POST','GET']
@@ -245,16 +246,17 @@ export default defineMock({
    */
   method: ['GET', 'POST'],
   /**
-   * enable/disable the current mock request
-   * 
-   * we typically only need a few mock interfaces to work.
-   * set `false` to disable current mock
+   * In practical scenarios, 
+   * we usually only need certain mock interfaces to take effect, 
+   * rather than enabling all mock interfaces. 
+   * For interfaces that do not currently require mocking, 
+   * they can be set to false.
    * 
    * @default true
    */
   enable: true,
   /**
-   * response delay， unit：ms
+   * Set interface response delay, unit: ms.
    * 
    * @default 0
    */
@@ -270,27 +272,23 @@ export default defineMock({
    */
   statusText: 'OK',
   /**
-   * Request a validator, through which the mock data 
-   * is returned, otherwise not the current mock.
-   * In some scenarios where an interface needs to 
-   * return different data through different inputs, 
-   * the validator can solve this kind of problem well. 
-   * It divides the same url into multiple mock 
-   * configurations and determines which mock configuration
-   * is valid according to the validator.
+   * Request validator, return mock data if validated,
+   *  otherwise do not use current mock. 
+   * This is useful in scenarios where an interface needs to return different data based on different input parameters. 
+   * Validators can solve this type of problem well by dividing the same URL into multiple mock configurations 
+   * and determining which one is effective based on the validator.
    * 
    * @type { headers?: object; body?: object; query?: object; params?: object; refererQuery?: object  }
    * 
-   * If the validator incoming is an object, 
-   * then the validation method is the comparison of the 
-   * strict request of interface, headers/body/query/params 
-   * each `key-value` congruent, congruent check through
+   * If the validator passes in an object, 
+   * then the validation method is to strictly compare whether the `value` 
+   * of each `key` in headers/body/query/params in the request interface is exactly equal. 
+   * If they are all equal, then the validation passes.
    * 
    * @type ({ headers: object; body: object; query: object; params: object; refererQuery: object }) => boolean
-   * If the validator is passed a function, 
-   * it takes the requested interface-related data as an input,
-   * gives it to the consumer for custom validation, 
-   * and returns a boolean
+   * If the validator passed in is a function, 
+   * then the data related to the requested interface will be provided as input parameters 
+   * for users to perform custom validation and return a boolean.
    * 
    */
   validator: {
@@ -299,9 +297,8 @@ export default defineMock({
     query: {},
     params: {},
     /**
-     * refererQuery validates the query in the url of the page from which the request originated, 
-     * which makes it possible to modify parameters directly in the browser address bar to get 
-     * different mock data
+     * refererQuery validates the query parameters in the URL of the request source page, 
+     * which allows for direct modification of parameters in the browser address bar to obtain different simulated data.
      */
     refererQuery: {}
   },
@@ -329,9 +326,10 @@ export default defineMock({
   body: {},
 
   /**
-   * If the mock requirement cannot be addressed with the body configuration,
-   * Then you can expose the http server interface by configuring response,
-   * Achieve fully controlled custom configuration.
+   * If the mock requirement cannot be solved through `body` configuration, 
+   * then it can be achieved by configuring response and exposing the interface of http server to realize fully controllable custom configuration in req parameters. 
+   * The parsing of query, body and params has been built-in, so you can use them directly. 
+   * Don't forget to return response data through `res.end()` or skip mock by calling `next()`.
    */
   response(req, res, next) {
     res.end()
@@ -558,11 +556,11 @@ export default defineMock({
 
 ## Mock Services
 
-In some scenarios, you may need to use the data support provided by the mock service for display purposes, but it is possible that the project has been packaged and deployed as a build and is out of the mock service support provided by `vite` and this plugin. Since this plugin was designed to support the import of `node` modules into mock files, it cannot package mock files inline into client-side build code.
+In some scenarios, it may be necessary to use the data provided by mock services for display purposes, but the project may have already been packaged, built and deployed without support from `vite` and this plugin's mock service. Since this plugin supports importing various `node` modules in mock files at the design stage, the mock file cannot be inline into client build code.
 
-To cater for such scenarios, the plugin provides support under `vite preview` as well as the ability to build a small, independently deployable mock service application at `vite build` that can be deployed to the relevant environment. The mock support is then implemented by proxy forwarding to the actual port by another http server such as `nginx`.
+To meet such scenarios, on one hand, the plugin provides support under `vite preview`, and on the other hand, it also builds a small independent mock service application that can be deployed to relevant environments during `vite build`. This can then be forwarded through other HTTP servers like nginx to actual ports for mock support.
 
-Build the default output into the `dist/mockServer` directory and generate the following file:
+The default output is built into the directory `dist/mockServer`, generating files as follows:
 ```sh
 ./mockServer
 ├── index.js
@@ -570,11 +568,11 @@ Build the default output into the `dist/mockServer` directory and generate the f
 └── package.json
 ```
 
-In this directory, after `npm install` to install the dependencies, `npm start` can be executed to start the mock server.
+In this directory, execute `npm install` to install dependencies, and then execute `npm start` to start the mock server.
 
-default port: `8080`。
+The default port is `8080`.
 
-Access the associated `mock` interface via `localhost:8080/`.
+You can access related `mock` interfaces through `localhost:8080/`.
 
 ## Archives
 

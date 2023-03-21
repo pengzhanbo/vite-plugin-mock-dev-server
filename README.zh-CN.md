@@ -31,7 +31,7 @@
 - 🧲 非注入式，对客户端代码无侵入
 - 💡 ESModule/commonjs
 - 🦾 Typescript
-- 🏷 支持 json / json5 编写 mock 数据
+- 🏷 支持 `json` / `json5` 编写 mock 数据
 - 📦 自动加载 mock 文件
 - 🎨 可选择你喜欢的任意用于生成mock数据库，如 `mockjs`，或者不使用其他库
 - 📥 路径规则匹配，请求参数匹配
@@ -162,7 +162,6 @@ export default defineConfig({
   [
     '**/node_modules/**',
     '**/test/**',
-    'src/**',
     '**/.vscode/**',
     '**/.git/**',
     '**/dist/**'
@@ -194,7 +193,7 @@ export default defineConfig({
 
 - `options.build`
   
-  构建可独立部署的小型mock服务时配置。
+  需要构建可独立部署的小型mock服务时配置。
 
   **类型：** `boolean | ServerBuildOptions` 
 
@@ -271,7 +270,7 @@ export default defineMock({
    */
   statusText: 'OK',
   /**
-   * 请求验证器，通过验证器则返回 mock数据，否则不是用当前mock。
+   * 请求验证器，通过验证器则返回 mock数据，否则不使用当前mock。
    * 这对于一些场景中，某个接口需要通过不同的入参来返回不同的数据，
    * 验证器可以很好的解决这一类问题，将同个 url 分为多个 mock配置，
    * 根据 验证器来判断哪个mock配置生效。
@@ -292,9 +291,8 @@ export default defineMock({
     query: {},
     params: {},
     /**
-     * refererQuery validates the query in the url of the page from which the request originated, 
-     * which makes it possible to modify parameters directly in the browser address bar to get 
-     * different mock data
+     * refererQuery 验证了请求来源页面 URL 中的查询参数，
+     * 这使得可以直接在浏览器地址栏中修改参数以获取不同的模拟数据。
      */
     refererQuery: {}
   },
@@ -571,7 +569,7 @@ export default defineMock({
 └── package.json
 ```
 
-在该目录下，执行 `npm install` 安装依赖后，可执行 `npm start` 即可启动 mock server。
+在该目录下，执行 `npm install` 安装依赖后，执行 `npm start` 即可启动 mock server。
 默认端口为 `8080`。
 可通过 `localhost:8080/` 访问相关的 `mock` 接口。
 
