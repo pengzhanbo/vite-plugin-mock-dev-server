@@ -9,7 +9,6 @@ export function mockDevServerPlugin({
   exclude = [
     '**/node_modules/**',
     '**/test/**',
-    'src/**',
     '**/.vscode/**',
     '**/.git/**',
     '**/dist/**',
