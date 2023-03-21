@@ -272,11 +272,11 @@ export default defineMock({
    */
   statusText: 'OK',
   /**
-   * Request validator, return mock data if validated,
-   *  otherwise do not use current mock. 
-   * This is useful in scenarios where an interface needs to return different data based on different input parameters. 
-   * Validators can solve this type of problem well by dividing the same URL into multiple mock configurations 
-   * and determining which one is effective based on the validator.
+   * Request validator, return mock data if validated, otherwise do not use current mock. 
+   * This is useful in scenarios where an interface needs to return different data based 
+   * on different input parameters. 
+   * Validators can solve this type of problem well by dividing the same URL into multiple 
+   * mock configurations and determining which one is effective based on the validator.
    * 
    * @type { headers?: object; body?: object; query?: object; params?: object; refererQuery?: object  }
    * 
@@ -298,7 +298,8 @@ export default defineMock({
     params: {},
     /**
      * refererQuery validates the query parameters in the URL of the request source page, 
-     * which allows for direct modification of parameters in the browser address bar to obtain different simulated data.
+     * which allows for direct modification of parameters in the browser address bar 
+     * to obtain different simulated data.
      */
     refererQuery: {}
   },
@@ -327,7 +328,8 @@ export default defineMock({
 
   /**
    * If the mock requirement cannot be solved through `body` configuration, 
-   * then it can be achieved by configuring response and exposing the interface of http server to realize fully controllable custom configuration in req parameters. 
+   * then it can be achieved by configuring response and exposing the interface of http server 
+   * to realize fully controllable custom configuration in req parameters. 
    * The parsing of query, body and params has been built-in, so you can use them directly. 
    * Don't forget to return response data through `res.end()` or skip mock by calling `next()`.
    */
