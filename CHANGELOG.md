@@ -1,3 +1,13 @@
+## [1.0.6](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.0.5...v1.0.6) (2023-03-21)
+
+
+### Performance Improvements
+
+* Optimize exclude and remove `src` ([d3c602a](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/d3c602a9f556c378c133f533839f4fb494390064))
+* Optimize exclude and remove `test` ([30f2694](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/30f269431de3ab56db7f41afbccd73a57e588959))
+
+
+
 ## [1.0.5](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.0.4...v1.0.5) (2023-03-16)
 
 
