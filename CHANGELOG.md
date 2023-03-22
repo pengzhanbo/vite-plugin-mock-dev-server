@@ -1,3 +1,13 @@
+## [1.0.7](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.0.6...v1.0.7) (2023-03-22)
+
+
+### Features
+
+* add `createDefineMock` method ([04e8ee8](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/04e8ee818683a3eb8f6c21970629aeb4f0a93e32))
+* support `resolve.alias` [#22](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/22) ([fbf87d1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/fbf87d118f10059a653658a56e3bceda5ceee83d))
+
+
+
 ## [1.0.6](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.0.5...v1.0.6) (2023-03-21)
 
 
