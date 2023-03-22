@@ -38,6 +38,7 @@
 - 🔥 HMR
 - ⚖️ Use `server.proxy`
 - 🍕 Support `viteConfig.define` in mock file
+- ⚓️ Support `resolve.alias`
 - 📤 Support `multipart` content-type，mock upload file.
 - 🌈 Support `vite preview` mode
 - 🗂 Support building small independent deployable mock services.
