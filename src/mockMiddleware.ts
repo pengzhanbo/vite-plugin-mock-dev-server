@@ -26,6 +26,7 @@ export async function mockServerMiddleware(
     include,
     exclude,
     define,
+    alias: config.resolve.alias,
   })
 
   await loader.load()

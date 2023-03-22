@@ -8,7 +8,12 @@ import isCore from 'is-core-module'
 import type { Plugin, ResolvedConfig } from 'vite'
 import { createFilter, normalizePath } from 'vite'
 import { name, version } from '../package.json'
-import { externalizeDeps, json5Loader, jsonLoader } from './esbuildPlugin'
+import {
+  aliasPlugin,
+  externalizeDeps,
+  json5Loader,
+  jsonLoader,
+} from './esbuildPlugin'
 import type { MockServerPluginOptions, ServerBuildOption } from './types'
 import { ensureArray, ensureProxies, lookupFile } from './utils'
 
@@ -49,7 +54,11 @@ export async function generateMockServer(
   const content = await generateMockEntryCode(process.cwd(), include, exclude)
   const mockEntry = path.join(config.root, `mock-data-${Date.now()}.js`)
   await fsp.writeFile(mockEntry, content, 'utf-8')
-  const { code, deps } = await buildMockEntry(mockEntry, define)
+  const { code, deps } = await buildMockEntry(
+    mockEntry,
+    define,
+    config.resolve.alias,
+  )
   const mockDeps = getMockDependencies(deps)
   await fsp.unlink(mockEntry)
   const outputList = [
@@ -179,6 +188,7 @@ export default transformMockData(mockList);
 async function buildMockEntry(
   inputFile: string,
   define: ResolvedConfig['define'],
+  alias: ResolvedConfig['resolve']['alias'],
 ) {
   try {
     const result = await build({
@@ -191,7 +201,7 @@ async function buildMockEntry(
       metafile: true,
       format: 'esm',
       define,
-      plugins: [externalizeDeps, json5Loader, jsonLoader],
+      plugins: [aliasPlugin(alias), externalizeDeps, json5Loader, jsonLoader],
     })
     return {
       code: result.outputFiles[0].text,

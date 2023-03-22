@@ -2,6 +2,7 @@ import fsp from 'node:fs/promises'
 import path from 'node:path'
 import type { Plugin } from 'esbuild'
 import JSON5 from 'json5'
+import type { ResolvedConfig } from 'vite'
 
 export const externalizeDeps: Plugin = {
   name: 'externalize-deps',
@@ -40,4 +41,46 @@ export const jsonLoader: Plugin = {
       }
     })
   },
+}
+
+export const aliasPlugin = (
+  alias: ResolvedConfig['resolve']['alias'],
+): Plugin => {
+  return {
+    name: 'alias-plugin',
+    setup(build) {
+      build.onResolve({ filter: /.*/ }, async ({ path: id }) => {
+        // First match is supposed to be the correct one
+        const matchedEntry = alias.find(({ find }) => matches(find, id))
+        if (!matchedEntry) {
+          return null
+        }
+        const { find, replacement } = matchedEntry
+
+        const result = await build.resolve(id.replace(find, replacement), {
+          kind: 'import-statement',
+          resolveDir: replacement,
+          namespace: 'file',
+        })
+
+        return {
+          path: result.path,
+          external: false,
+        }
+      })
+    },
+  }
+}
+
+function matches(pattern: string | RegExp, importee: string) {
+  if (pattern instanceof RegExp) {
+    return pattern.test(importee)
+  }
+  if (importee.length < pattern.length) {
+    return false
+  }
+  if (importee === pattern) {
+    return true
+  }
+  return importee.startsWith(`${pattern}/`)
 }

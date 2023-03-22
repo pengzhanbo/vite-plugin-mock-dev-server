@@ -8,8 +8,9 @@ import type { Metafile } from 'esbuild'
 import { build } from 'esbuild'
 import fastGlob from 'fast-glob'
 import JSON5 from 'json5'
+import type { ResolvedConfig } from 'vite'
 import { createFilter, normalizePath } from 'vite'
-import { externalizeDeps } from './esbuildPlugin'
+import { aliasPlugin, externalizeDeps } from './esbuildPlugin'
 import { transformMockData } from './transform'
 import type { MockOptions, MockOptionsItem } from './types'
 import { debug, getDirname, lookupFile } from './utils'
@@ -19,6 +20,7 @@ export interface MockLoaderOptions {
   include: string[]
   exclude: string[]
   define: Record<string, any>
+  alias: ResolvedConfig['resolve']['alias']
 }
 
 const _dirname = getDirname(import.meta.url)
@@ -260,7 +262,7 @@ export class MockLoader extends EventEmitter {
         metafile: true,
         format: isESM ? 'esm' : 'cjs',
         define: this.options.define,
-        plugins: [externalizeDeps],
+        plugins: [aliasPlugin(this.options.alias), externalizeDeps],
       })
       return {
         code: result.outputFiles[0].text,
