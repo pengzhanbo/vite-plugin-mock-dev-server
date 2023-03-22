@@ -1,11 +1,11 @@
-import { defineMock } from 'vite-plugin-mock-dev-server'
 import post from './data/post'
+import { defineAPIMock } from './shard'
 
 /**
  * 定义单个接口
  */
-export const fetchPostList = defineMock({
-  url: '/api/post/list',
+export const fetchPostList = defineAPIMock({
+  url: '/post/list',
   method: 'POST',
   body({ body }) {
     return {

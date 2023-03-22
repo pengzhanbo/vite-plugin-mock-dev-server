@@ -225,6 +225,24 @@ export default defineMock({
 })
 ```
 
+### createDefineMock(transformer)
+
+返回一个自定义的 defineMock 函数，用于支持对 mock config 的预处理。
+
+```ts
+import path from 'path'
+import { createDefineMock } from 'vite-plugin-mock-dev-server'
+
+// 预处理 mock url
+const defineAPIMock = createDefineMock((mock) => {
+  mock.url = path.join('/api', mock.url)
+})
+
+export default defineApiMock({
+  url: '/test' // 补全为 '/api/test'
+})
+```
+
 ## Mock 配置
 
 ```ts

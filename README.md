@@ -132,6 +132,7 @@ export default defineConfig({
 })
 ```
 
+
 #### options
 
 - `options.prefix`
@@ -224,6 +225,24 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 export default defineMock({
   url: '/api/test',
   body: {}
+})
+```
+
+### createDefineMock(transformer)
+
+Return a custom defineMock function to support preprocessing of mock config.
+
+```ts
+import path from 'path'
+import { createDefineMock } from 'vite-plugin-mock-dev-server'
+
+// Preprocessed mock url
+const defineAPIMock = createDefineMock((mock) => {
+  mock.url = path.join('/api', mock.url)
+})
+
+export default defineApiMock({
+  url: '/test' // Complete as '/api/test'
 })
 ```
 
