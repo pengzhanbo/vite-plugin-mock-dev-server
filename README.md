@@ -37,8 +37,8 @@
 - ⚙️ Support Enabled/Disabled any one of api mock
 - 🔥 HMR
 - ⚖️ Use `server.proxy`
-- 🍕 Support `viteConfig.define` in mock file
-- ⚓️ Support `resolve.alias`
+- 🍕 Support `viteConfig.define` in mock file.
+- ⚓️ Support `resolve.alias` in mock file.
 - 📤 Support `multipart` content-type，mock upload file.
 - 🌈 Support `vite preview` mode
 - 🗂 Support building small independent deployable mock services.
