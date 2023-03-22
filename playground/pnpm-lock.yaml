@@ -5,14 +5,14 @@ specifiers:
   mockjs: ^1.1.0
   typescript: ^5.0.2
   vite: ^4.2.1
-  vite-plugin-mock-dev-server: ^1.0.6
+  vite-plugin-mock-dev-server: ^1.0.7
 
 devDependencies:
   '@types/node': 18.15.5
   mockjs: 1.1.0
   typescript: 5.0.2
   vite: 4.2.1_@types+node@18.15.5
-  vite-plugin-mock-dev-server: 1.0.6_vite@4.2.1
+  vite-plugin-mock-dev-server: 1.0.7_vite@4.2.1
 
 packages:
 
@@ -937,8 +937,8 @@ packages:
     engines: {node: '>= 0.8'}
     dev: true
 
-  /vite-plugin-mock-dev-server/1.0.6_vite@4.2.1:
-    resolution: {integrity: sha512-0iTwBfuneLouIorO0v4h6Su39HTKDdh6cNPiY/XrRH79NFO4JNrlIFHaMaTJizOC0Y2ODnKf0Dh0r1MaBV2WzA==}
+  /vite-plugin-mock-dev-server/1.0.7_vite@4.2.1:
+    resolution: {integrity: sha512-3wyh8ryH8UOYMIGxndoFJXov98i4LZIvbpXIlnFx436hfCcUdlhW0b6R8Woyanh668zPn3EsU1rp2MXlmYdHkA==}
     engines: {node: ^14.18.0 || >=16}
     peerDependencies:
       vite: '>=3.0.0'
