@@ -108,11 +108,7 @@ export function baseMiddleware(
 
     if (currentMock.response) {
       try {
-        const end = response.end.bind(response)
-        response.end = (...args: any[]) => {
-          realDelay(startTime, currentMock.delay).then(() => end(...args))
-          return response
-        }
+        await realDelay(startTime, currentMock.delay)
         await currentMock.response(request, response, next)
       } catch (e) {
         log.error(`${colors.red('[response error]')} ${req.url} \n`, e)
