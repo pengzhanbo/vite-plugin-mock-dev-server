@@ -334,13 +334,26 @@ export default defineMock({
   },
 
   /**
+   * response cookies
+   * @type Record<string, string | { value: string, option: CookieOption }>
+   * @see https://github.com/pillarjs/cookies#cookiessetname--values--options
+   */
+  cookies: {
+    'your-cookie': 'your cookie value',
+    'cookie&option': {
+      value: 'cookie value',
+      option: { path: '/', httpOnly: true }
+    }
+  },
+
+  /**
    * Response Body
    * Support `string/number/array/object` 
    * You can also use libraries such as' mockjs' to generate data content
    * 
    * @type string | number | array | object
    * 
-   * @type (request: { headers, query, body, params }) => any | Promise<any>
+   * @type (request: { headers, query, body, params, getCookie }) => any | Promise<any>
    */
   body: {},
 

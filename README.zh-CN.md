@@ -327,6 +327,19 @@ export default defineMock({
   },
 
   /**
+   * 响应体 cookies
+   * @type Record<string, string | { value: string, option: CookieOption }>
+   * @see https://github.com/pillarjs/cookies#cookiessetname--values--options
+   */
+  cookies: {
+    'your-cookie': 'your cookie value',
+    'cookie&option': {
+      value: 'cookie value',
+      option: { path: '/', httpOnly: true }
+    }
+  },
+
+  /**
    * 响应体数据
    * 定义返回的响应体数据内容。
    * 在这里，你可以直接返回JavaScript支持的数据类型如 `string/number/array/object` 等
