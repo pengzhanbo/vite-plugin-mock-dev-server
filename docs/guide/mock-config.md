@@ -105,6 +105,22 @@ interface RequestOptions {
 }
 ```
 
+## cookies
+
+- Type: `ResponseCookies | ResponseCookiesFn`
+- 选填
+- 默认值: `undefined`
+
+设置响应体 cookies
+
+```ts
+type CookieValue = string | [string, Cookies.SetOption]
+type ResponseCookies = Record<string, CookieValue>
+type ResponseCookiesFn = (
+  request: MockRequest,
+) => ResponseCookies | Promise<ResponseCookies>
+```
+
 ## body
 
 - Type: `ResponseBody | ((request: RequestOptions) => ResponseBody | Promise<ResponseBody>)`
@@ -147,7 +163,7 @@ type ResponseBody = string | number | array | object
 - 选填
 - 默认值： `null`
 
-请求验证器，通过验证器则返回 mock数据，否则不是用当前mock。
+请求验证器，通过验证器则返回 mock数据，否则不使用当前mock。
 
 这对于一些场景中，某个接口需要通过不同的入参来返回不同的数据， 验证器可以很好的解决这一类问题，将同个 url 分为多个 mock配置，
 根据 验证器来判断哪个mock配置生效。

@@ -13,7 +13,8 @@ export default defineConfig({
       include: '',
       exclude: '',
       reload: false,
-      formidableOptions: {}
+      formidableOptions: {},
+      cookiesOptions: {}
     }),
   ]
 })
@@ -53,6 +54,12 @@ interface MockServerPluginOptions {
    * @see https://github.com/node-formidable/formidable#options
    */
   formidableOptions?: formidable.Options
+
+  /**
+   * cookies options
+   * @see https://github.com/pillarjs/cookies#new-cookiesrequest-response--options
+   */
+  cookiesOptions?: Cookies.Option
 
   /**
    * 当需要构建一个小型mock服务时，可配置此项
@@ -110,6 +117,13 @@ mock资源热更新时，仅更新了数据内容，但是默认不重新刷新�
 详细配置查看 [formidable](https://github.com/node-formidable/formidable#options)
 
 文件上传资源默认临时存放于 `os.tmpdir()` 目录。
+
+## cookiesOptions`
+  
+配置 `cookies`
+
+详细配置信息查看 [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options)
+
 
 ## build
 
