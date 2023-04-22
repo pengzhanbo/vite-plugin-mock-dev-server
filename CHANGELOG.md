@@ -1,3 +1,12 @@
+## [1.1.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.0...v1.1.1) (2023-04-22)
+
+
+### Bug Fixes
+
+* perf real delay `response` option ([72edd1e](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/72edd1ea2681406305e7d8f2e4bcf0a034383de7))
+
+
+
 # [1.1.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.0.7...v1.1.0) (2023-04-22)
 
 
