@@ -5,6 +5,7 @@
     "middlewares",
     "mockjs",
     "outfile",
+    "picocolors",
     "referer"
   ]
 }

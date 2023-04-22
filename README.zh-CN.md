@@ -41,6 +41,7 @@
 - 🍕 支持在 mock文件中使用 `viteConfig.define`配置字段
 - ⚓️ 支持 `resolve.alias`
 - 📤 支持 multipart 类型，模拟文件上传
+- 🍪 支持 cookies
 - 🌈 支持 `vite preview` 模式
 - 🗂 支持构建可独立部署的小型mock服务
 
@@ -189,6 +190,11 @@ export default defineConfig({
     }
   })
   ```
+- `options.cookiesOptions`
+  
+  配置 `cookies`, 查看 [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options)
+
+  **默认值:** `{}`
 
 - `options.build`
   
@@ -328,15 +334,12 @@ export default defineMock({
 
   /**
    * 响应体 cookies
-   * @type Record<string, string | { value: string, option: CookieOption }>
+   * @type Record<string, string | [value: string, option: CookieOption]>
    * @see https://github.com/pillarjs/cookies#cookiessetname--values--options
    */
   cookies: {
     'your-cookie': 'your cookie value',
-    'cookie&option': {
-      value: 'cookie value',
-      option: { path: '/', httpOnly: true }
-    }
+    'cookie&option': ['cookie value', { path: '/', httpOnly: true }]
   },
 
   /**

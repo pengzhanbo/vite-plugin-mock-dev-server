@@ -40,6 +40,7 @@
 - 🍕 Support `viteConfig.define` in mock file.
 - ⚓️ Support `resolve.alias` in mock file.
 - 📤 Support `multipart` content-type，mock upload file.
+- 🍪 Support cookies
 - 🌈 Support `vite preview` mode
 - 🗂 Support building small independent deployable mock services.
 
@@ -193,6 +194,12 @@ export default defineConfig({
   })
   ```
 
+- `options.cookiesOptions`
+  
+  Configure to `cookies`, see [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options)
+
+  **Default:** `{}`
+
 - `options.build`
   
   Configuration needed to build a small, independently deployable mock service.
@@ -335,15 +342,12 @@ export default defineMock({
 
   /**
    * response cookies
-   * @type Record<string, string | { value: string, option: CookieOption }>
+   * @type Record<string, string | [value: string, option: CookieOption]>
    * @see https://github.com/pillarjs/cookies#cookiessetname--values--options
    */
   cookies: {
     'your-cookie': 'your cookie value',
-    'cookie&option': {
-      value: 'cookie value',
-      option: { path: '/', httpOnly: true }
-    }
+    'cookie&option': ['cookie value', { path: '/', httpOnly: true }]
   },
 
   /**
