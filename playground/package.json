@@ -18,7 +18,7 @@
     "mockjs": "^1.1.0",
     "typescript": "^5.0.4",
     "vite": "^4.3.0",
-    "vite-plugin-mock-dev-server": "^1.1.0"
+    "vite-plugin-mock-dev-server": "^1.1.1"
   },
-  "packageManager": "pnpm@7.27.0"
+  "packageManager": "pnpm@8.3.1"
 }
