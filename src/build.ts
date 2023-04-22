@@ -70,6 +70,7 @@ export async function generateMockServer(
       filename: path.join(outputDir, 'index.js'),
       source: generatorServerEntryCode(
         [...prefix, ...proxies],
+        options.cookiesOptions,
         (options.build as ServerBuildOption).serverPort,
       ),
     },
@@ -136,7 +137,11 @@ function generatePackageJson(pkg: any, mockDeps: string[]) {
   return JSON.stringify(mockPkg, null, 2)
 }
 
-function generatorServerEntryCode(proxies: string[], port = 8080) {
+function generatorServerEntryCode(
+  proxies: string[],
+  cookiesOptions: MockServerPluginOptions['cookiesOptions'] = {},
+  port = 8080,
+) {
   return `import connect from 'connect';
 import corsMiddleware from 'cors';
 import { baseMiddleware } from 'vite-plugin-mock-dev-server';
@@ -147,6 +152,7 @@ app.use(corsMiddleware());
 app.use(baseMiddleware({ mockData }, {
   formidableOptions: { multiples: true },
   proxies: ${JSON.stringify(proxies)}
+  cookiesOptions: ${JSON.stringify(cookiesOptions)}
 }));
 app.listen(${port});
 
