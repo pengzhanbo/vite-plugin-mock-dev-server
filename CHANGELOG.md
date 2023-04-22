@@ -1,3 +1,13 @@
+## [1.1.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.1...v1.1.2) (2023-04-22)
+
+
+### Performance Improvements
+
+* optimize cookies options ([230e41c](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/230e41c8b9cd1047fcbdbe0a1595eda242d4968d))
+* Perfect type declaration ([fa16506](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/fa165063fdc91cbae41e43d48fac60afb4668e51))
+
+
+
 ## [1.1.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.0...v1.1.1) (2023-04-22)
 
 
