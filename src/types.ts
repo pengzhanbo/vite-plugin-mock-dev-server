@@ -103,21 +103,35 @@ export interface ExtraRequest {
   headers: Headers
 }
 
-export type MockRequest = ExtraRequest &
-  http.IncomingMessage & {
+export type MockRequest = Connect.IncomingMessage &
+  ExtraRequest & {
     getCookie: (name: string, option?: Cookies.GetOption) => string | undefined
-    setCookie: (
-      name: string,
-      value?: string | null,
-      option?: Cookies.SetOption,
-    ) => void
   }
+
+export type MockResponse = http.ServerResponse<http.IncomingMessage> & {
+  setCookie: (
+    name: string,
+    value?: string | null,
+    option?: Cookies.SetOption,
+  ) => void
+}
 
 type ResponseBodyFn = (
   request: MockRequest,
 ) => ResponseBody | Promise<ResponseBody>
 
 type ResponseHeaderFn = (request: MockRequest) => Headers | Promise<Headers>
+
+type CookieValue =
+  | string
+  | {
+      value: string
+      options?: Cookies.SetOption
+    }
+type ResponseCookies = Record<string, CookieValue>
+type ResponseCookiesFn = (
+  request: MockRequest,
+) => ResponseCookies | Promise<ResponseCookies>
 
 export interface MockOptionsItem {
   /**
@@ -162,6 +176,11 @@ export interface MockOptionsItem {
    * @default 0
    */
   delay?: number
+
+  /**
+   * 设置响应体 cookies
+   */
+  cookies?: ResponseCookies | ResponseCookiesFn
   /**
    * 配置响应体数据内容
    *
@@ -177,7 +196,7 @@ export interface MockOptionsItem {
    */
   response?: (
     req: MockRequest,
-    res: http.ServerResponse<http.IncomingMessage>,
+    res: MockResponse,
     next: Connect.NextFunction,
   ) => void | Promise<void>
 

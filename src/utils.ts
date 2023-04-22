@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import Debug from 'debug'
+import { match } from 'path-to-regexp'
 import colors from 'picocolors'
 import type { ResolvedConfig } from 'vite'
 
@@ -77,4 +78,11 @@ export const ensureProxies = (
     })
     .filter(Boolean)
   return proxies
+}
+
+export function parseParams(pattern: string, url: string): Record<string, any> {
+  const urlMatch = match(pattern, { decode: decodeURIComponent })(url) || {
+    params: {},
+  }
+  return urlMatch.params || {}
 }
