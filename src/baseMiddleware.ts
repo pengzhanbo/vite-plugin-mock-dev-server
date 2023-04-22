@@ -45,24 +45,22 @@ export function baseMiddleware(
     const mockUrl = Object.keys(mockData).find((key) => {
       return pathToRegexp(key).test(pathname)
     })
-    if (!mockUrl) {
-      return next()
-    }
+    if (!mockUrl) return next()
 
     const reqBody = await parseReqBody(req, formidableOptions)
-    const cookies = new Cookies(req, res, cookiesOptions)
 
     const method = req.method!.toUpperCase()
-    const currentMock = fineMock(mockData[mockUrl], pathname, method, {
+    const mock = fineMock(mockData[mockUrl], pathname, method, {
       query,
       refererQuery,
       body: reqBody,
       headers: req.headers,
     })
 
-    if (!currentMock) return next()
+    if (!mock) return next()
     debug('middleware: ', method, pathname)
 
+    const cookies = new Cookies(req, res, cookiesOptions)
     const request = req as MockRequest
     const response = res as MockResponse
 
@@ -72,7 +70,7 @@ export function baseMiddleware(
     request.body = reqBody
     request.query = query
     request.refererQuery = refererQuery
-    request.params = parseParams(currentMock.url, pathname)
+    request.params = parseParams(mock.url, pathname)
     request.getCookie = cookies.get.bind(cookies)
 
     /**
@@ -80,40 +78,32 @@ export function baseMiddleware(
      */
     response.setCookie = cookies.set.bind(cookies)
 
-    await provideHeaders(request, response, currentMock.headers)
-    await provideCookies(request, response, currentMock.cookies)
+    responseStatus(response, mock.status, mock.statusText)
+    await provideHeaders(request, response, mock.headers)
+    await provideCookies(request, response, mock.cookies)
 
-    res.statusCode = currentMock.status || 200
-    res.statusMessage =
-      currentMock.statusText || getHTTPStatusText(res.statusCode)
+    const { body, delay, response: responseFn } = mock
 
-    if (currentMock.body) {
+    if (body) {
       try {
-        let body: any
-        if (isFunction(currentMock.body)) {
-          body = await currentMock.body(request)
-        } else {
-          body = currentMock.body
-        }
-        await realDelay(startTime, currentMock.delay)
-        res.end(JSON.stringify(body))
+        const result = isFunction(body) ? await body(request) : mock.body
+        await realDelay(startTime, delay)
+        res.end(JSON.stringify(result))
       } catch (e) {
         log.error(`${colors.red('[body error]')} ${req.url} \n`, e)
-        res.statusCode = 500
-        res.statusMessage = getHTTPStatusText(res.statusCode)
+        responseStatus(response, 500)
         res.end('')
       }
       return
     }
 
-    if (currentMock.response) {
+    if (responseFn) {
       try {
-        await realDelay(startTime, currentMock.delay)
-        await currentMock.response(request, response, next)
+        await realDelay(startTime, delay)
+        await responseFn(request, response, next)
       } catch (e) {
         log.error(`${colors.red('[response error]')} ${req.url} \n`, e)
-        res.statusCode = 500
-        res.statusMessage = getHTTPStatusText(res.statusCode)
+        responseStatus(response, 500)
         res.end('')
       }
       return
@@ -154,6 +144,15 @@ function fineMock(
   })
 }
 
+function responseStatus(
+  response: MockResponse,
+  status = 200,
+  statusText?: string,
+) {
+  response.statusCode = status
+  response.statusMessage = statusText || getHTTPStatusText(status)
+}
+
 async function provideHeaders(
   req: MockRequest,
   res: MockResponse,
@@ -187,11 +186,11 @@ async function provideCookies(
       : cookiesOption
     Object.keys(cookies).forEach((key) => {
       const optional = cookies[key]
-      if (typeof optional === 'string') {
-        res.setCookie(key, optional)
-      } else {
-        const { value, options } = optional
+      if (isArray(optional)) {
+        const [value, options] = optional
         res.setCookie(key, value, options)
+      } else {
+        res.setCookie(key, optional)
       }
     })
   } catch (e) {

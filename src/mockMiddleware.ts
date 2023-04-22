@@ -46,7 +46,7 @@ export async function mockServerMiddleware(
   const proxies: string[] = ensureProxies(config.server.proxy || {})
   /**
    * 保留直接通过 plugin option 直接配置 路径匹配规则，
-   * 但在大多数场景下，共用 `server.proxy` 以足够
+   * 但在大多数场景下，共用 `server.proxy` 已足够
    */
   const prefix = ensureArray(options.prefix)
 
