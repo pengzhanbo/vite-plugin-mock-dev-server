@@ -1,4 +1,5 @@
 import type http from 'node:http'
+import type Cookies from 'cookies'
 import type formidable from 'formidable'
 import type { Connect } from 'vite'
 
@@ -35,6 +36,12 @@ export interface MockServerPluginOptions {
    * @see https://github.com/node-formidable/formidable#options
    */
   formidableOptions?: formidable.Options
+
+  /**
+   * cookies options
+   * @see https://github.com/pillarjs/cookies#new-cookiesrequest-response--options
+   */
+  cookiesOptions?: Cookies.Option
 
   /**
    * 当需要构建一个小型mock服务时，可配置此项
@@ -96,7 +103,15 @@ export interface ExtraRequest {
   headers: Headers
 }
 
-export type MockRequest = ExtraRequest & http.IncomingMessage
+export type MockRequest = ExtraRequest &
+  http.IncomingMessage & {
+    getCookie: (name: string, option?: Cookies.GetOption) => string | undefined
+    setCookie: (
+      name: string,
+      value?: string | null,
+      option?: Cookies.SetOption,
+    ) => void
+  }
 
 type ResponseBodyFn = (
   request: MockRequest,

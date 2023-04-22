@@ -44,6 +44,7 @@
   "dependencies": {
     "chokidar": "^3.5.3",
     "co-body": "^6.1.0",
+    "cookies": "^0.8.0",
     "debug": "^4.3.4",
     "esbuild": "^0.17.17",
     "fast-glob": "^3.2.12",
@@ -58,6 +59,7 @@
     "@pengzhanbo/eslint-config-ts": "^0.3.4",
     "@pengzhanbo/prettier-config": "^0.3.4",
     "@types/co-body": "^6.1.0",
+    "@types/cookies": "^0.7.7",
     "@types/debug": "^4.1.7",
     "@types/formidable": "^2.0.5",
     "@types/is-core-module": "^2.2.0",

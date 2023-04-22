@@ -1,4 +1,5 @@
 import { parse as urlParse } from 'node:url'
+import Cookies from 'cookies'
 import HTTP_STATUS from 'http-status'
 import { match, pathToRegexp } from 'path-to-regexp'
 import colors from 'picocolors'
@@ -16,12 +17,13 @@ import { validate } from './validator'
 
 export interface BaseMiddlewareOptions {
   formidableOptions: MockServerPluginOptions['formidableOptions']
+  cookiesOptions: MockServerPluginOptions['cookiesOptions']
   proxies: string[]
 }
 
 export function baseMiddleware(
   mockLoader: MockLoader,
-  { formidableOptions = {}, proxies }: BaseMiddlewareOptions,
+  { formidableOptions = {}, proxies, cookiesOptions }: BaseMiddlewareOptions,
 ): Connect.NextHandleFunction {
   return async function (req, res, next) {
     const method = req.method!.toUpperCase()
@@ -46,6 +48,7 @@ export function baseMiddleware(
     const mockList = mockData[mockUrl]
 
     const reqBody = await parseReqBody(req, formidableOptions)
+    const cookies = new Cookies(req, res, cookiesOptions)
 
     const currentMock = mockList.find((mock) => {
       if (!pathname || !mock || !mock.url) return false
@@ -109,6 +112,8 @@ export function baseMiddleware(
     request.query = query
     request.refererQuery = refererQuery
     request.params = params
+    request.setCookie = cookies.set.bind(cookies)
+    request.getCookie = cookies.get.bind(cookies)
 
     res.setHeader('Content-Type', 'application/json')
     res.setHeader('Cache-Control', 'no-cache,max-age=0')

@@ -53,5 +53,6 @@ export async function mockServerMiddleware(
   return baseMiddleware(loader, {
     formidableOptions: options.formidableOptions,
     proxies: [...prefix, ...proxies],
+    cookiesOptions: options.cookiesOptions,
   })
 }

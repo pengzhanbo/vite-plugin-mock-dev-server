@@ -10,12 +10,14 @@ export function mockDevServerPlugin({
   reload = false,
   formidableOptions = {},
   build = false,
+  cookiesOptions = {},
 }: MockServerPluginOptions = {}): Plugin[] {
   const pluginOptions: Required<MockServerPluginOptions> = {
     prefix,
     include,
     exclude,
     reload,
+    cookiesOptions,
     formidableOptions: {
       multiples: true,
       ...formidableOptions,
