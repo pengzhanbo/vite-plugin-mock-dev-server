@@ -1,3 +1,13 @@
+# [1.1.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.0.7...v1.1.0) (2023-04-22)
+
+
+### Features
+
+* add cookies parse support ([51ac8aa](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/51ac8aae4cf8bd96e73014c0c7fa7b5fc83aa6a1))
+* add cookies parse support to `build` ([6d69ead](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/6d69ead0617df9421cb6d3c4b4ff15957a75d80c))
+
+
+
 ## [1.0.7](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.0.6...v1.0.7) (2023-03-22)
 
 
