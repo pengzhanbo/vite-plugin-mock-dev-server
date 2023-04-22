@@ -377,7 +377,7 @@ export default defineMock({
 
 **Request:**
 
-`request`的原始数据类型是`[Connect.IncomingMessage](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/connect/index.d.ts)`. 插件在此基础上，增加了 `query`, `params`, `body`, `refererQuery`，以及 `getCookie(name)` 方法用于获取cookie信息。
+`request`的原始数据类型是[`Connect.IncomingMessage`](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/connect/index.d.ts). 插件在此基础上，增加了 `query`, `params`, `body`, `refererQuery`，以及 `getCookie(name)` 方法用于获取cookie信息。
 
 ```ts
 type Request = Connect.IncomingMessage & {

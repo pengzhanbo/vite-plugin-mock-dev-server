@@ -377,7 +377,7 @@ When defining methods using `headers`, `body`, and `response`, the plugin adds n
 
 **In Request:**
 
-The original type of `request` is `[Connect.IncomingMessage](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/connect/index.d.ts)`. The plugin adds data such as `query`, `params`, `body`, `refererQuery`, and the `getCookie(name)` method for obtaining cookie information on this basis.
+The original type of `request` is [`Connect.IncomingMessage`](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/connect/index.d.ts). The plugin adds data such as `query`, `params`, `body`, `refererQuery`, and the `getCookie(name)` method for obtaining cookie information on this basis.
 
 ```ts
 type Request = Connect.IncomingMessage & {
