@@ -371,6 +371,39 @@ export default defineMock({
 
 ```
 
+### Request/Response 增强
+
+当你配置 `headers`, `body`, and `response` 的函数形式时, 插件在参数 `request` 和 `response` 添加了新的内容用于帮助获取必要的数据.
+
+**Request:**
+
+`request`的原始数据类型是`[Connect.IncomingMessage](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/connect/index.d.ts)`. 插件在此基础上，增加了 `query`, `params`, `body`, `refererQuery`，以及 `getCookie(name)` 方法用于获取cookie信息。
+
+```ts
+type Request = Connect.IncomingMessage & {
+  query: object
+  params: object
+  body: any
+  refererQuery: object
+  getCookie: (name: string, option?: Cookies.GetOption) => string | undefined
+}
+```
+
+**Response:**
+
+`response` 的原始数据类型是`http.ServerResponse<http.IncomingMessage>`. 插件在此基础上增加了 `setCookie(name, value)` 方法用于设置cookie
+
+```ts
+type Response = http.ServerResponse<http.IncomingMessage> & {
+  setCookie: (
+    name: string,
+    value?: string | null,
+    option?: Cookies.SetOption,
+  ) => void
+}
+```
+
+
 > 注意：
 > 
 > 如果使用 json/json5 编写 mock文件，则不支持使用 `response` 方法，以及不支持使用其他字段的函数形式。

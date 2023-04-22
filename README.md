@@ -353,7 +353,7 @@ export default defineMock({
    * 
    * @type string | number | array | object
    * 
-   * @type (request: { headers, query, body, params, getCookie }) => any | Promise<any>
+   * @type (request: { headers, query, body, params, refererQuery, getCookie }) => any | Promise<any>
    */
   body: {},
 
@@ -370,6 +370,39 @@ export default defineMock({
 })
 
 ```
+
+### Request/Response Enhance
+
+When defining methods using `headers`, `body`, and `response`, the plugin adds new content to the `request` and `response` parameters.
+
+**In Request:**
+
+The original type of `request` is `[Connect.IncomingMessage](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/connect/index.d.ts)`. The plugin adds data such as `query`, `params`, `body`, `refererQuery`, and the `getCookie(name)` method for obtaining cookie information on this basis.
+
+```ts
+type Request = Connect.IncomingMessage & {
+  query: object
+  params: object
+  body: any
+  refererQuery: object
+  getCookie: (name: string, option?: Cookies.GetOption) => string | undefined
+}
+```
+
+**In Response:**
+
+The original type of `response` is `http.ServerResponse<http.IncomingMessage>`. The plugin adds `setCookie(name, value)` method for configuration cookie on this basis.
+
+```ts
+type Response = http.ServerResponse<http.IncomingMessage> & {
+  setCookie: (
+    name: string,
+    value?: string | null,
+    option?: Cookies.SetOption,
+  ) => void
+}
+```
+
 
 > Tips：
 > 
