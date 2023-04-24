@@ -513,7 +513,7 @@ export default defineMock({
 ```ts
 export default defineMock({
   url: '/api/test',
-  status: 504,
+  status: 502,
   statusText: 'Bad Gateway'
 })
 ```
