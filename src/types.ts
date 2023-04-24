@@ -1,4 +1,5 @@
 import type http from 'node:http'
+import type { Readable } from 'node:stream'
 import type Cookies from 'cookies'
 import type formidable from 'formidable'
 import type { Connect } from 'vite'
@@ -93,7 +94,14 @@ export type Method =
 
 type Headers = http.IncomingHttpHeaders
 
-type ResponseBody = Record<string, any> | any[] | string | number | null
+export type ResponseBody =
+  | Record<string, any>
+  | any[]
+  | string
+  | number
+  | Readable
+  | Buffer
+  | null
 
 export interface ExtraRequest {
   /**
@@ -249,6 +257,37 @@ export interface MockOptionsItem {
    * ```
    */
   cookies?: ResponseCookies | ResponseCookiesFn
+  /**
+   * Response body data type, optional values include `text, json, buffer`.
+   *
+   * And also support types included in `mime-db`.
+   * When the response body returns a file and you are not sure which type to use,
+   * you can pass the file name as the value. The plugin will internally search for matching
+   * `content-type` based on the file name suffix.
+   *
+   * However, if it is a TypeScript file such as `a.ts`, it may not be correctly matched
+   * as a JavaScript script. You need to modify `a.ts` to `a.js` as the value passed
+   * in order to recognize it correctly.
+   *
+   * 响应体数据类型, 可选值包括 `text, json, buffer`，
+   *
+   * 还支持`mime-db`中的包含的类型。
+   * 当响应体返回的是一个文件，而你不确定应该使用哪个类型时，可以将文件名作为值传入，
+   * 插件内部会根据文件名后缀查找匹配的`content-type`。
+   *
+   * 但如果是 `typescript`文件如 `a.ts`，可能不会被正确匹配为 `javascript`脚本，
+   * 你需要将 `a.ts` 修改为 `a.js`作为值传入才能正确识别。
+   * @see [mime-db](https://github.com/jshttp/mime-db)
+   * @default 'json'
+   * @example
+   * ```txt
+   * json
+   * buffer
+   * my-app.dmg
+   * music.mp4
+   * ```
+   */
+  type?: 'text' | 'json' | 'buffer' | string
   /**
    * Configure response body data content
    *

@@ -1,6 +1,8 @@
+import { Buffer } from 'node:buffer'
 import { parse as urlParse } from 'node:url'
 import Cookies from 'cookies'
 import HTTP_STATUS from 'http-status'
+import * as mime from 'mime-types'
 import { pathToRegexp } from 'path-to-regexp'
 import colors from 'picocolors'
 import type { Connect } from 'vite'
@@ -14,8 +16,17 @@ import type {
   MockRequest,
   MockResponse,
   MockServerPluginOptions,
+  ResponseBody,
 } from './types'
-import { debug, isArray, isFunction, log, parseParams, sleep } from './utils'
+import {
+  debug,
+  isArray,
+  isFunction,
+  isReadableStream,
+  log,
+  parseParams,
+  sleep,
+} from './utils'
 import { validate } from './validator'
 
 export interface BaseMiddlewareOptions {
@@ -78,17 +89,25 @@ export function baseMiddleware(
      */
     response.setCookie = cookies.set.bind(cookies)
 
-    responseStatus(response, mock.status, mock.statusText)
-    await provideHeaders(request, response, mock.headers)
-    await provideCookies(request, response, mock.cookies)
+    const {
+      body,
+      delay,
+      type = 'json',
+      response: responseFn,
+      status = 200,
+      statusText,
+    } = mock
 
-    const { body, delay, response: responseFn } = mock
+    responseStatus(response, status, statusText)
+    await provideHeaders(request, response, mock)
+    await provideCookies(request, response, mock)
 
     if (body) {
       try {
-        const result = isFunction(body) ? await body(request) : mock.body
+        const content = isFunction(body) ? await body(request) : body
         await realDelay(startTime, delay)
-        res.end(JSON.stringify(result))
+        sendData(response, content, type)
+        // res.end(JSON.stringify(content))
       } catch (e) {
         log.error(`${colors.red('[body error]')} ${req.url} \n`, e)
         responseStatus(response, 500)
@@ -156,18 +175,19 @@ function responseStatus(
 async function provideHeaders(
   req: MockRequest,
   res: MockResponse,
-  headersOption: MockOptionsItem['headers'],
+  { headers, type = 'json' }: MockOptionsItem,
 ) {
-  res.setHeader('Content-Type', 'application/json')
+  const contentType =
+    mime.contentType(type) || mime.contentType(mime.lookup(type) || '')
+  contentType && res.setHeader('Content-Type', contentType)
+
   res.setHeader('Cache-Control', 'no-cache,max-age=0')
   res.setHeader('X-Mock', 'generate by vite:plugin-mock-dev-server')
-  if (!headersOption) return
+  if (!headers) return
   try {
-    const headers = isFunction(headersOption)
-      ? await headersOption(req)
-      : headersOption
-    Object.keys(headers).forEach((key) => {
-      res.setHeader(key, headers[key]!)
+    const raw = isFunction(headers) ? await headers(req) : headers
+    Object.keys(raw).forEach((key) => {
+      res.setHeader(key, raw[key]!)
     })
   } catch (e) {
     log.error(`${colors.red('[headers error]')} ${req.url} \n`, e)
@@ -177,24 +197,33 @@ async function provideHeaders(
 async function provideCookies(
   req: MockRequest,
   res: MockResponse,
-  cookiesOption: MockOptionsItem['cookies'],
+  { cookies }: MockOptionsItem,
 ) {
-  if (!cookiesOption) return
+  if (!cookies) return
   try {
-    const cookies = isFunction(cookiesOption)
-      ? await cookiesOption(req)
-      : cookiesOption
-    Object.keys(cookies).forEach((key) => {
-      const optional = cookies[key]
-      if (isArray(optional)) {
-        const [value, options] = optional
+    const raw = isFunction(cookies) ? await cookies(req) : cookies
+    Object.keys(raw).forEach((key) => {
+      const cookie = raw[key]
+      if (isArray(cookie)) {
+        const [value, options] = cookie
         res.setCookie(key, value, options)
       } else {
-        res.setCookie(key, optional)
+        res.setCookie(key, cookie)
       }
     })
   } catch (e) {
     log.error(`${colors.red('[cookies error]')} ${req.url} \n`, e)
+  }
+}
+
+function sendData(res: MockResponse, raw: ResponseBody, type: string) {
+  if (isReadableStream(raw)) {
+    raw.pipe(res)
+  } else if (Buffer.isBuffer(raw)) {
+    res.end(type === 'text' || type === 'json' ? raw.toString('utf-8') : raw)
+  } else {
+    const content = typeof raw === 'string' ? raw : JSON.stringify(raw)
+    res.end(type === 'buffer' ? Buffer.from(content) : content)
   }
 }
 

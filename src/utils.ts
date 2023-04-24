@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import type { Readable, Stream } from 'node:stream'
 import { fileURLToPath } from 'node:url'
 import Debug from 'debug'
 import { match } from 'path-to-regexp'
@@ -10,6 +11,17 @@ export const isArray = <T = any>(val: unknown): val is T[] => Array.isArray(val)
 
 export const isFunction = (val: unknown): val is Function =>
   typeof val === 'function'
+
+export const isStream = (stream: unknown): stream is Stream =>
+  stream !== null &&
+  typeof stream === 'object' &&
+  typeof (stream as any).pipe === 'function'
+
+export const isReadableStream = (stream: unknown): stream is Readable =>
+  isStream(stream) &&
+  (stream as any).readable !== false &&
+  typeof (stream as any)._read === 'function' &&
+  typeof (stream as any)._readableState === 'object'
 
 export function sleep(timeout: number) {
   return new Promise((resolve) => setTimeout(resolve, timeout))
