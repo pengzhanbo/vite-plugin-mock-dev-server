@@ -1,3 +1,17 @@
+## [1.1.3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.2...v1.1.3) (2023-04-24)
+
+
+### Bug Fixes
+
+* correctly exclude all ws when filtering proxy ([c4c2ac7](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/c4c2ac750199e5e9099b5cbdbafe840e7025ee45))
+
+
+### Features
+
+* support `type` option, `text/json/buffer` ([3ac25f1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/3ac25f1f80fba52b44c1a13949da543793dd1163))
+
+
+
 ## [1.1.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.1...v1.1.2) (2023-04-22)
 
 
