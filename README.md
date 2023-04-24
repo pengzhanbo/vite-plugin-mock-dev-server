@@ -30,18 +30,19 @@
 - 🧲 Not injection-based, non-intrusive to client code.
 - 💡 ESModule/commonjs.
 - 🦾 Typescript.
+- 🔥 HMR
 - 🏷 Support `json` / `json5`.
 - 📦 Auto import mock file.
 - 🎨 Support any lib，like `mockjs`，or not use it.
 - 📥 Path rule matching, request parameter matching.
 - ⚙️ Support Enabled/Disabled any one of api mock
-- 🔥 HMR
+- 📀 Supports response body content type such as `text/json/buffer/stream`.
 - ⚖️ Use `server.proxy`
 - 🍕 Support `viteConfig.define` in mock file.
-- ⚓️ Support `resolve.alias` in mock file.
+- ⚓️ Support `viteConfig.resolve.alias` in mock file.
+- 🌈 Support `vite preview` mode.
 - 📤 Support `multipart` content-type，mock upload file.
-- 🍪 Support cookies
-- 🌈 Support `vite preview` mode
+- 📥 Support mock download file.
 - 🗂 Support building small independent deployable mock services.
 
 
