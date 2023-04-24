@@ -260,11 +260,12 @@ export default defineApiMock({
 export default defineMock({
   /**
    * Request address, supports the `/api/user/:id` format.
+   * The plugin matches the path through `path-to-regexp`.
+   * @see https://github.com/pillarjs/path-to-regexp
    */
   url: '/api/test',
   /**
    * Supported request methods of the interface.
-   * 
    * @type string | string[]
    * @default ['POST','GET']
    * 
@@ -282,13 +283,11 @@ export default defineMock({
   enable: true,
   /**
    * Set interface response delay, unit: ms.
-   * 
    * @default 0
    */
   delay: 1000,
   /**
    * response status
-   * 
    * @default 200
    */
   status: 200,
@@ -309,8 +308,8 @@ export default defineMock({
    * then the validation method is to strictly compare whether the `value` 
    * of each `key` in headers/body/query/params in the request interface is exactly equal. 
    * If they are all equal, then the validation passes.
-   * 
    * @type ({ headers: object; body: object; query: object; params: object; refererQuery: object }) => boolean
+   *
    * If the validator passed in is a function, 
    * then the data related to the requested interface will be provided as input parameters 
    * for users to perform custom validation and return a boolean.
@@ -329,11 +328,8 @@ export default defineMock({
     refererQuery: {}
   },
   /**
-   * 
    * response headers
-   * 
    * @type Record<string, any>
-   * 
    * @type (({ query, body, params, headers }) => Record<string, any>)
    */
   headers: {
@@ -349,17 +345,28 @@ export default defineMock({
     'your-cookie': 'your cookie value',
     'cookie&option': ['cookie value', { path: '/', httpOnly: true }]
   },
+  /**
+   * Response body data type, optional values include `text, json, buffer`.
+   * And also support types included in `mime-db`.
+   * When the response body returns a file and you are not sure which type to use,
+   * you can pass the file name as the value. The plugin will internally search for matching
+   * `content-type` based on the file name suffix.
+   * However, if it is a TypeScript file such as `a.ts`, it may not be correctly matched
+   * as a JavaScript script. You need to modify `a.ts` to `a.js` as the value passed
+   * in order to recognize it correctly.
+   * @see https://github.com/jshttp/mime-db
+   * @default 'json'
+   */
+  type: 'json',
 
   /**
    * Response Body
-   * Support `string/number/array/object` 
+   * Support `string/number/array/object/buffer/ReadableStream` 
    * You can also use libraries such as' mockjs' to generate data content
-   * 
-   * @type string | number | array | object
-   * 
+   * @type string | number | array | object | ReadableStream | buffer
    * @type (request: { headers, query, body, params, refererQuery, getCookie }) => any | Promise<any>
    */
-  body: {},
+  body: '',
 
   /**
    * If the mock requirement cannot be solved through `body` configuration, 
@@ -408,37 +415,35 @@ type Response = http.ServerResponse<http.IncomingMessage> & {
 ```
 
 
-> Tips：
+> **Tips：**
 > 
 > If you write mock files using json/json5, 
 > the 'response' method is not supported, 
 > as is the function form that uses other fields.
 
+## Example
+
 `mock/**/*.mock.{ts,js,mjs,cjs,json,json5}`
 
 See more examples： [example](/example/)
 
-#### Example 1：
-Match `/api/test`，And returns a response body content with empty data
+**exp:** Match `/api/test`，And returns a response body content with empty data
 ```ts
 export default defineMock({
   url: '/api/test',
 })
 ```
 
-#### Example 2：
-Match `/api/test` ，And returns a static content data
+**exp:** Match `/api/test` ，And returns a static content data
 ```ts
 export default defineMock({
   url: '/api/test',
-  body: {
-    a: 1
-  }
+  body: { a: 1 },
 })
 ```
 
-#### Example 3：
-Only Support `GET` Method
+
+**exp:** Only Support `GET` Method
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -446,69 +451,56 @@ export default defineMock({
 })
 ```
 
-#### Example 4：
-In the response header, add a custom header
+**exp:** In the response header, add a custom header and cookie
 ```ts
 export default defineMock({
   url: '/api/test',
-  headers: {
-    'X-Custom': '12345678'
-  }
+  headers: { 'X-Custom': '12345678' },
+  cookies: { 'my-cookie': '123456789' },
 })
 ```
 ```ts
 export default defineMock({
   url: '/api/test',
   headers({ query, body, params, headers }) {
-    return {
-      'X-Custom': query.custom
-    }
+    return { 'X-Custom': query.custom }
+  },
+  cookies() {
+    return { 'my-cookie': '123456789' }
   }
 })
 ```
 
-#### Example 5：
-Define multiple mock requests for the same url and match valid rules with validators
+
+**exp:** Define multiple mock requests for the same url and match valid rules with validators
 ```ts
 export default defineMock([
   // Match /api/test?a=1
   {
     url: '/api/test',
     validator: {
-      query: {
-        a: 1
-      }
+      query: { a: 1 },
     },
-    body: {
-      message: 'query.a == 1'
-    }
+    body: { message: 'query.a == 1' },
   },
   // Match /api/test?a=2
   {
     url: '/api/test',
     validator: {
-      query: {
-        a: 2
-      }
+      query: { a: 2 },
     },
-    body: {
-      message: 'query.a == 2'
-    }
+    body: { message: 'query.a == 2' },
   },
   {
-    /**
-     * `?a=3` will resolve to `validator.query`
-     */
+    // `?a=3` will resolve to `validator.query`
     url: '/api/test?a=3',
-    body: {
-      message: 'query.a == 3'
-    }
+    body: { message: 'query.a == 3' }
   }
 ])
 ```
 
-#### Example 6：
-Response Delay
+
+**exp:** Response Delay
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -516,8 +508,8 @@ export default defineMock({
 })
 ```
 
-#### Example 7：
-The interface request failed
+
+**exp:** The interface request failed
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -526,23 +518,57 @@ export default defineMock({
 })
 ```
 
-#### Example 8:
-Dynamic route matching
+
+**exp:** Dynamic route matching
 ```ts
 export default defineMock({
   url: '/api/user/:userId',
   body({ params }) {
-    return {
-      userId: params.userId,
-    }
+    return { userId: params.userId }
   }
 })
 ```
 
 The `userId` in the route will be resolved into the `request.params` object.
 
-#### Example 9：
-Use `mockjs`:
+**exp:** Use buffer to respond data
+```ts
+// Since the default value of type is json,
+// although buffer is used for body during transmission,
+// the content-type is still json.
+export default defineMock({
+  url: 'api/buffer',
+  body: Buffer.from(JSON.stringify({ a: 1 }))
+})
+```
+```ts
+// When the type is buffer, the content-type is application/octet-stream.
+// The data passed in through body will be converted to a buffer.
+export default defineMock({
+  url: 'api/buffer',
+  type: 'buffer',
+  // Convert using Buffer.from(body) for internal use
+  body: { a: 1 }
+})
+```
+
+**exp:** Response file type
+
+Simulate file download, pass in the file reading stream.
+```ts
+import { createReadStream } from 'node:fs'
+export default defineMock({
+  url: '/api/download',
+  // When you are unsure of the type, you can pass in the file name for internal parsing by the plugin.
+  type: 'my-app.dmg',
+  body: createReadStream('./my-app.dmg')
+})
+```
+```html
+<a href="/api/download" download="my-app.dmg">Download File</a>
+```
+
+**exp:** Use `mockjs`:
 ```ts
 import Mock from 'mockjs'
 export default defineMock({
@@ -556,8 +582,8 @@ export default defineMock({
 ```
 You need installed `mockjs`
 
-### Example 10：
-Use `response` to customize the response
+
+**exp:** Use `response` to customize the response
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -576,11 +602,10 @@ export default defineMock({
 })
 ```
 
-### Example 11：
-Use json / json5
+
+**exp:** Use json / json5
 ```json
 {
-  // Support comment
   "url": "/api/test",
   "body": {
     "a": 1
@@ -588,9 +613,9 @@ Use json / json5
 }
 ```
 
-### Example 12:
 
-multipart, upload file.
+
+**exp:** multipart, upload file.
 
 use [`formidable`](https://www.npmjs.com/package/formidable#readme) to supported.
 ``` html

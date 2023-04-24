@@ -255,12 +255,13 @@ export default defineApiMock({
 ```ts
 export default defineMock({
   /**
-   * 请求地址，支持 `/api/user/:id` 格式 
+   * 请求地址，支持 `/api/user/:id` 格式
+   * 插件通过 `path-to-regexp` 匹配路径
+   * @see https://github.com/pillarjs/path-to-regexp
    */
   url: '/api/test',
   /**
    * 接口支持的请求方法
-   * 
    * @type string | string[]
    * @default ['POST','GET']
    * 
@@ -268,23 +269,19 @@ export default defineMock({
   method: ['GET', 'POST'],
   /**
    * 是否启用当前 mock请求
-   * 
    * 在实际场景中，我们一般只需要某几个mock接口生效，
    * 而不是所以mock接口都启用。
    * 对当前不需要mock的接口，可设置为 false
-   * 
    * @default true
    */
   enable: true,
   /**
    * 设置接口响应延迟， 单位：ms
-   * 
    * @default 0
    */
   delay: 1000,
   /**
    * 响应状态码
-   * 
    * @default 200
    */
   status: 200,
@@ -320,11 +317,8 @@ export default defineMock({
     refererQuery: {}
   },
   /**
-   * 
    * 响应状态 headers
-   * 
    * @type Record<string, any>
-   * 
    * @type (({ query, body, params, headers }) => Record<string, any>)
    * 入参部分为 请求相关信息
    */
@@ -341,6 +335,18 @@ export default defineMock({
     'your-cookie': 'your cookie value',
     'cookie&option': ['cookie value', { path: '/', httpOnly: true }]
   },
+
+  /**
+   * 响应体数据类型, 可选值包括 `text, json, buffer`，
+   * 还支持`mime-db`中的包含的类型。
+   * 当响应体返回的是一个文件，而你不确定应该使用哪个类型时，可以将文件名作为值传入，
+   * 插件内部会根据文件名后缀查找匹配的`content-type`。
+   * 但如果是 `typescript`文件如 `a.ts`，可能不会被正确匹配为 `javascript`脚本，
+   * 你需要将 `a.ts` 修改为 `a.js`作为值传入才能正确识别。
+   * @see https://github.com/jshttp/mime-db
+   * @default 'json'
+   */
+  type: 'json',
 
   /**
    * 响应体数据
@@ -360,10 +366,8 @@ export default defineMock({
    * 如果通过 body 配置不能解决mock需求，
    * 那么可以通过 配置 response，暴露http server 的接口，
    * 实现完全可控的自定义配置
-   * 
    * 在 req参数中，已内置了 query、body、params 的解析，
-   * 你可以直接使用它们
-   * 
+   * 你可以直接使用它们。
    * 别忘了，需要通过 `res.end()` 返回响应体数据，
    * 或者需要跳过mock，那么别忘了调用 `next()`
    */
@@ -407,35 +411,38 @@ type Response = http.ServerResponse<http.IncomingMessage> & {
 ```
 
 
-> 注意：
+> **注意：**
 > 
 > 如果使用 json/json5 编写 mock文件，则不支持使用 `response` 方法，以及不支持使用其他字段的函数形式。
+
+## Example
 
 `mock/**/*.mock.{ts,js,mjs,cjs,json,json5}`
 
 查看更多示例： [example](/example/)
 
-#### 示例1：
-命中 `/api/test` 请求，并返回一个 数据为空的响应体内容
+**exp:** 命中 `/api/test` 请求，并返回一个 数据为空的响应体内容
 ```ts
 export default defineMock({
   url: '/api/test',
 })
 ```
 
-#### 示例2：
-命中 `/api/test` 请求，并返回一个固定内容数据
+**exp:** 命中 `/api/test` 请求，并返回一个固定内容数据
 ```ts
 export default defineMock({
   url: '/api/test',
-  body: {
-    a: 1
-  }
+  body: { a: 1 },
+})
+```
+```ts
+export default defineMock({
+  url: '/api/test',
+  body: () => ({ a: 1 })
 })
 ```
 
-#### 示例3：
-限定只允许 `GET` 请求
+**exp:** 限定只允许 `GET` 请求
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -443,69 +450,56 @@ export default defineMock({
 })
 ```
 
-#### 示例4：
-在返回的响应头中，添加自定义header
+
+**exp:**  在返回的响应头中，添加自定义 header 和 cookie
 ```ts
 export default defineMock({
   url: '/api/test',
-  headers: {
-    'X-Custom': '12345678'
-  }
+  headers: { 'X-Custom': '12345678' },
+  cookies: { 'my-cookie': '123456789' },
 })
 ```
 ```ts
 export default defineMock({
   url: '/api/test',
   headers({ query, body, params, headers }) {
-    return {
-      'X-Custom': query.custom
-    }
+    return { 'X-Custom': query.custom }
+  },
+  cookies() {
+    return { 'my-cookie': '123456789' }
   }
 })
 ```
 
-#### 示例5：
-定义多个相同url请求mock，并使用验证器匹配生效规则
+**exp:**  定义多个相同url请求mock，并使用验证器匹配生效规则
 ```ts
 export default defineMock([
   // 命中 /api/test?a=1
   {
     url: '/api/test',
     validator: {
-      query: {
-        a: 1
-      }
+      query: { a: 1 },
     },
-    body: {
-      message: 'query.a === 1'
-    }
+    body: { message: 'query.a === 1' },
   },
   // 命中 /api/test?a=2
   {
     url: '/api/test',
     validator: {
-      query: {
-        a: 2
-      }
+      query: { a: 2 },
     },
-    body: {
-      message: 'query.a === 2'
-    }
+    body: { message: 'query.a === 2' },
   },
   {
-    /**
-     * `?a=3` 将会解析到 `validator.query`
-     */
+    // `?a=3` 将会解析到 `validator.query`
     url: '/api/test?a=3',
-    body: {
-      message: 'query.a == 3'
-    }
+    body: { message: 'query.a == 3' },
   }
 ])
 ```
 
-#### 示例6：
-延迟接口响应：
+
+**exp:**  延迟接口响应：
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -513,33 +507,64 @@ export default defineMock({
 })
 ```
 
-#### 示例7：
-使接口请求失败
+**exp:**  使接口请求失败
 ```ts
 export default defineMock({
   url: '/api/test',
-  status: 504,
+  status: 502,
   statusText: 'Bad Gateway'
 })
 ```
 
-#### 示例8:
-动态路由匹配
+**exp:** 动态路由匹配
 ```ts
 export default defineMock({
   url: '/api/user/:userId',
   body({ params }) {
-    return {
-      userId: params.userId,
-    }
+    return { userId: params.userId }
   }
 })
 ```
 
 路由中的 `userId`将会解析到 `request.params` 对象中.
 
-#### 示例9：
-使用 `mockjs` 生成响应数据:
+**exp:** 使用 buffer 响应数据
+```ts
+// 由于 type 默认值是 json，虽然在传输过程中body使用buffer，
+// 但是 content-type 还是为 json
+export default defineMock({
+  url: 'api/buffer',
+  body: Buffer.from(JSON.stringify({ a: 1 }))
+})
+```
+```ts
+// 当 type 为 buffer 时，content-type 为 application/octet-stream，
+// body 传入的数据会被转为 buffer
+export default defineMock({
+  url: 'api/buffer',
+  type: 'buffer',
+  // 内部使用 Buffer.from(body) 进行转换 
+  body: { a: 1 }
+})
+```
+
+**exp:** 响应文件类型
+
+模拟文件下载，传入文件读取流
+```ts
+import { createReadStream } from 'node:fs'
+export default defineMock({
+  url: '/api/download',
+  // 当你不确定类型，可传入文件名由插件内部进行解析
+  type: 'my-app.dmg',
+  body: createReadStream('./my-app.dmg')
+})
+```
+```html
+<a href="/api/download" download="my-app.dmg">下载文件</a>
+```
+
+**exp:** 使用 `mockjs` 生成响应数据:
 ```ts
 import Mock from 'mockjs'
 export default defineMock({
@@ -553,8 +578,8 @@ export default defineMock({
 ```
 请先安装 `mockjs`
 
-### 示例10：
-使用 `response` 自定义响应
+
+**exp:** 使用 `response` 自定义响应
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -573,11 +598,10 @@ export default defineMock({
 })
 ```
 
-### 示例11：
-使用 json / json5
+
+**exp:** 使用 json / json5
 ```json
 {
-  // 支持 comment
   "url": "/api/test",
   "body": {
     "a": 1
@@ -585,9 +609,8 @@ export default defineMock({
 }
 ```
 
-### Example 12:
 
-multipart, 文件上传.
+**exp:** multipart, 文件上传.
 
 通过 [`formidable`](https://www.npmjs.com/package/formidable#readme) 支持。
 ``` html
