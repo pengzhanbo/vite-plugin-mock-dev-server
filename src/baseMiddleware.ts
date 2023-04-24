@@ -31,7 +31,6 @@ export function baseMiddleware(
   return async function (req, res, next) {
     const startTime = Date.now()
     const { query, pathname } = urlParse(req.url!, true)
-    const { query: refererQuery } = urlParse(req.headers.referer || '', true)
 
     if (
       !pathname ||
@@ -47,6 +46,7 @@ export function baseMiddleware(
     })
     if (!mockUrl) return next()
 
+    const { query: refererQuery } = urlParse(req.headers.referer || '', true)
     const reqBody = await parseReqBody(req, formidableOptions)
 
     const method = req.method!.toUpperCase()

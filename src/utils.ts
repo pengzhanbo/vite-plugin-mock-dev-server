@@ -74,7 +74,13 @@ export const ensureProxies = (
   const proxies: string[] = Object.keys(serverProxy)
     .map((key) => {
       const value = serverProxy[key]
-      return typeof value === 'string' ? key : value.ws === true ? '' : key
+      return typeof value === 'string'
+        ? key
+        : value.ws ||
+          value.target?.toString().startsWith('ws:') ||
+          value.target?.toString().startsWith('wss:')
+        ? ''
+        : key
     })
     .filter(Boolean)
   return proxies
