@@ -562,7 +562,7 @@ export default defineMock({
   url: '/api/download',
   // When you are unsure of the type, you can pass in the file name for internal parsing by the plugin.
   type: 'my-app.dmg',
-  body: createReadStream('./my-app.dmg')
+  body: () => createReadStream('./my-app.dmg')
 })
 ```
 ```html

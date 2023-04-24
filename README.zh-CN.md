@@ -558,7 +558,7 @@ export default defineMock({
   url: '/api/download',
   // 当你不确定类型，可传入文件名由插件内部进行解析
   type: 'my-app.dmg',
-  body: createReadStream('./my-app.dmg')
+  body: () => createReadStream('./my-app.dmg')
 })
 ```
 ```html
