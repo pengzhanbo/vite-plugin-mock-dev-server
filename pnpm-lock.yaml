@@ -31,6 +31,9 @@ dependencies:
   json5:
     specifier: ^2.2.3
     version: 2.2.3
+  mime-types:
+    specifier: ^2.1.35
+    version: 2.1.35
   path-to-regexp:
     specifier: ^6.2.1
     version: 6.2.1
@@ -60,6 +63,9 @@ devDependencies:
   '@types/is-core-module':
     specifier: ^2.2.0
     version: 2.2.0
+  '@types/mime-types':
+    specifier: ^2.1.1
+    version: 2.1.1
   '@types/node':
     specifier: ^18.15.13
     version: 18.15.13
@@ -704,6 +710,10 @@ packages:
     resolution: {integrity: sha512-W864tg/Osz1+9f4lrGTZpCSO5/z4608eUp19tbozkq2HJK6i3z1kT0H9tlADXuYIb1YYOBByU4Jsqkk75q48qA==}
     dependencies:
       '@types/unist': 2.0.6
+    dev: true
+
+  /@types/mime-types@2.1.1:
+    resolution: {integrity: sha512-vXOTGVSLR2jMw440moWTC7H19iUyLtP3Z1YTj7cSsubOICinjMxFeb/V57v9QdyyPGbbWolUFSSmSiRSn94tFw==}
     dev: true
 
   /@types/mime@3.0.1:
