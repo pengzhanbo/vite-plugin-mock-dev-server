@@ -45,6 +45,7 @@ async function mockData() {
   await fetch('/api/cjs/config')
   await fetch('/api/js/config')
   await fetch('/api-dev/list/get')
+  await fetch('/api/buffer/buffer-a')
 }
 mockUser()
 mockPost()

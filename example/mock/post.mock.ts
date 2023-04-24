@@ -1,5 +1,5 @@
 import post from './data/post'
-import { defineAPIMock } from './shard'
+import { defineAPIMock } from './shared'
 
 /**
  * 定义单个接口
