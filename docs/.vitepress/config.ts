@@ -29,7 +29,7 @@ export default defineConfig({
       },
     ],
     footer: {
-      message: 'Released under the GPL-3.0 License.',
+      message: 'Released under the MIT License.',
       copyright: 'Copyright © 2022-present pengzhanbo',
     },
     docFooter: {
@@ -61,6 +61,7 @@ export default defineConfig({
           items: [
             { text: 'mockDevServerPlugin', link: '/guide/mock-plugin' },
             { text: 'defineMock', link: '/guide/define-mock' },
+            { text: 'createDefineMock', link: '/guide/create-define-mock' },
           ],
         },
         {

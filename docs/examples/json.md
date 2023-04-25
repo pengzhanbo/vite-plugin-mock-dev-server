@@ -2,22 +2,6 @@
 
 使用 JSON/JSON5 编写 mock 文件
 
-```json
-{
-  "url": "api/test",
-  "body": {}
-}
-```
+<<< @/../example/mock/file-extension/api.mock.json
 
-```json
-[
-  {
-    "url": "api/post/1",
-    "body": {}
-  },
-  {
-    "url": "api/post/2",
-    "body": {}
-  }
-]
-```
+<<< @/../example/mock/file-extension/api.mock.json5

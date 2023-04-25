@@ -42,7 +42,9 @@ export default defineMock([
 仅符合的请求方法返回 `mock data`，否则忽略。可通过数组配置接口支持多种请求方法。
 
 ```ts
-type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'TRACE' | 'OPTIONS'
+type Method = 
+  | 'GET' | 'POST' | 'PUT' | 'DELETE' 
+  | 'PATCH' | 'HEAD' | 'TRACE' | 'OPTIONS'
 ```
 
 ## enable
@@ -56,20 +58,9 @@ type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'TRACE' | '
 ```ts
 export default defineMock({
   url: 'api/test',
-  enable: false, // 关闭当前 mock，api/test 将会不会生效
+  enable: false, // 关闭当前 mock，api/test 将不会生效
 })
 ```
-
-## delay
-
-- Type: `number`
-- 选填
-- 单位： `ms`
-- 默认值： `0`，表示不延迟
-
-接口延迟响应。
-
-延迟接口一段时间后再返回响应数据。
 
 ## status
 
@@ -87,11 +78,40 @@ export default defineMock({
 
 响应状态文本。
 
+## delay
+
+- Type: `number`
+- 选填
+- 单位： `ms`
+- 默认值： `0`，表示不延迟
+
+接口延迟响应。
+
+延迟接口一段时间后再返回响应数据。
+
+## type
+
+- Type: `'text' | 'json' | 'buffer' | string`
+- 选填
+- 默认值： `'json'`
+
+设置 `content-type` 类型，如果是响应一个文件类型，可以将 文件名 作为值传给 `type`。
+
+插件内部由 `mime-types` 判断获取真实的 `content-type`。
+
 ## headers
 
 - Type: `Record<string, string> | (request: RequestOptions) => Record<string, string>`
 - 选填
-- 默认值： `{ 'Content-Type': 'application/json' }`
+- 默认值：
+  
+  默认值根据 [type](#type) 的值确定：
+  | type | 默认值 |
+  | -- | -- |
+  | `text` | `{ 'Content-Type': 'text/plain' }` |
+  | `json` | `{ 'Content-Type': 'application/json' }` |
+  | `buffer` | `{'Content-Type': 'application/octet-stream'  }` |
+  | 其他值 | 根据传入值由  `mime-types` 判断获取 |
 
 配置请求响应头
 
@@ -102,6 +122,7 @@ interface RequestOptions {
   params: Record<string, string> // params parse
   headers: Record<string, string> // request headers
   body: any // request body
+  getCookie: (name: string, option?: Cookies.GetOption) => string | void
 }
 ```
 
@@ -117,7 +138,7 @@ interface RequestOptions {
 type CookieValue = string | [string, Cookies.SetOption]
 type ResponseCookies = Record<string, CookieValue>
 type ResponseCookiesFn = (
-  request: MockRequest,
+  request: RequestOptions,
 ) => ResponseCookies | Promise<ResponseCookies>
 ```
 
@@ -134,7 +155,7 @@ type ResponseCookiesFn = (
 支持使用 `mockjs` 等第三方库生成 `mock data` body。
 
 ``` ts
-type ResponseBody = string | number | array | object
+type ResponseBody = string | number | array | object | Buffer | ReadableStream
 ```
 
 ## response
@@ -143,13 +164,15 @@ type ResponseBody = string | number | array | object
 - 选填
 - 默认值： `null`
 
-如果通过 body 配置不能解决mock需求，那么可以通过 配置 response，暴露http server 的接口，实现完全可控的自定义配置
-在 req参数中，已内置了 query、body、params 的解析，你可以直接使用它们别忘了，需要通过 `res.end()` 返回响应体数据，
-或者需要跳过mock，那么别忘了调用 `next()`。
+如果通过 body 配置不能解决mock需求，那么可以通过 配置 response，暴露http server 的接口，实现完全可控的自定义配置。
+在 `req` 参数中，已内置了 `query、body、params、refererQuery` 的解析，以及 `getCookie` 方法，
+在 `res`中添加了 `setCookie` 方法， 你可以直接使用它们。
+
+别忘了，需要通过 `res.end()` 返回响应体数据，或者需要跳过mock，那么别忘了调用 `next()`。
 
 ## validator
 
-- Type: 
+- Type: `Validator` | `ValidatorFn`
   ```ts
   interface Validator {
     header?: object
@@ -158,8 +181,10 @@ type ResponseBody = string | number | array | object
     params?: object
     refererQuery?: object
   }
+  interface ValidatorFn {
+    (request: RequestOptions): boolean
+  }
   ```
-- Type: `(request: RequestOptions) => boolean`
 - 选填
 - 默认值： `null`
 
@@ -170,7 +195,7 @@ type ResponseBody = string | number | array | object
 
 如果 validator 传入的是一个对象，那么验证方式是严格比较 请求的接口中，headers/body/query/params 的各个`key`的`value`是否全等，全等则校验通过
 
-如果 validator 传入的是一个函数，那么会讲 请求的接口相关数据作为入参，提供给使用者进行自定义校验，并返回一个 boolean。
+如果 validator 传入的是一个函数，那么会将 请求的接口相关数据作为入参，提供给使用者进行自定义校验，并返回一个 boolean。
 
 在插件内，会解析请求该mock api 的来源页面地址，通过获取  `request.referer`，提取 url 中 `query`部分，解析为`refererQuery` 。这使得可以通过直接在浏览器地址栏中，修改页面 `queryString`, 根据不同的 `queryString` 来决定 mock api 返回的数据内容。
 
