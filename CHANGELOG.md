@@ -1,3 +1,12 @@
+## [1.1.4](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.3...v1.1.4) (2023-04-25)
+
+
+### Features
+
+* validator support cookies ([1f1c8ff](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/1f1c8ff18101cbe792163e33c253bd39a27f2d78))
+
+
+
 ## [1.1.3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.2...v1.1.3) (2023-04-24)
 
 
