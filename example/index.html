@@ -5,10 +5,18 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mock Server Example</title>
+  <style>
+    .container * { margin: 0; padding: 0;}
+    .container { margin: 10px 20px; padding: 10px 20px; border-bottom: solid 1px #ccc; color: #333; }
+    .container p { line-height: 1.7; }
+    .container p b { padding-right: 20px; }
+    .container pre { margin-left: 100px; padding:10px 0 10px 20px; border-left: solid 1px #ccc; }
+    .container pre, .container code {font-size: 1.1em;}
+  </style>
 </head>
 <body>
   <h1>Mock Example</h1>
-  <section style="border:solid 1px #000; padding: 10px 20px;">
+  <section style="border:solid 1px #ccc; padding: 10px 20px; margin-bottom: 20px;">
     <h4>mock upload file:</h4>
     <form action="/api/upload" method="post" enctype="multipart/form-data">
       <p>
@@ -24,7 +32,7 @@
       </p>
     </form>
   </section>
-  <a href="/api/download" download="shared.ts">Download File</a>
+  <a href="/api/download" download="shared.ts">Mock Download File</a>
   <br>
   <h3>Please open the browser Devtools and switch to the network tab to view the interface information.</h3>
   <h3>请打开浏览器 开发者工具 并切换到 network 查看接口信息</h3>
