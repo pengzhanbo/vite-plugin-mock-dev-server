@@ -133,15 +133,13 @@ export interface ExtraRequest {
    * 请求体中 headers
    */
   headers: Headers
+  /**
+   * @see [cookies](https://github.com/pillarjs/cookies#cookiesgetname--options)
+   */
+  getCookie: (name: string, option?: Cookies.GetOption) => string | undefined
 }
 
-export type MockRequest = Connect.IncomingMessage &
-  ExtraRequest & {
-    /**
-     * @see [cookies](https://github.com/pillarjs/cookies#cookiesgetname--options)
-     */
-    getCookie: (name: string, option?: Cookies.GetOption) => string | undefined
-  }
+export type MockRequest = Connect.IncomingMessage & ExtraRequest
 
 export type MockResponse = http.ServerResponse<http.IncomingMessage> & {
   /**
@@ -373,7 +371,9 @@ export interface MockOptionsItem {
    * }
    * ```
    */
-  validator?: Partial<ExtraRequest> | ((request: ExtraRequest) => boolean)
+  validator?:
+    | Partial<Omit<ExtraRequest, 'getCookie'>>
+    | ((request: ExtraRequest) => boolean)
 }
 
 export type MockOptions = MockOptionsItem[]

@@ -59,19 +59,25 @@ export function baseMiddleware(
 
     const { query: refererQuery } = urlParse(req.headers.referer || '', true)
     const reqBody = await parseReqBody(req, formidableOptions)
+    const cookies = new Cookies(req, res, cookiesOptions)
+    const getCookie = cookies.get.bind(cookies)
 
     const method = req.method!.toUpperCase()
-    const mock = fineMock(mockData[mockUrl], pathname, method, {
-      query,
-      refererQuery,
-      body: reqBody,
-      headers: req.headers,
+    const mock = fineMock(mockData[mockUrl], {
+      pathname,
+      method,
+      request: {
+        query,
+        refererQuery,
+        body: reqBody,
+        headers: req.headers,
+        getCookie,
+      },
     })
 
     if (!mock) return next()
     debug('middleware: ', method, pathname)
 
-    const cookies = new Cookies(req, res, cookiesOptions)
     const request = req as MockRequest
     const response = res as MockResponse
 
@@ -82,7 +88,7 @@ export function baseMiddleware(
     request.query = query
     request.refererQuery = refererQuery
     request.params = parseParams(mock.url, pathname)
-    request.getCookie = cookies.get.bind(cookies)
+    request.getCookie = getCookie
 
     /**
      * provide response
@@ -107,7 +113,6 @@ export function baseMiddleware(
         const content = isFunction(body) ? await body(request) : body
         await realDelay(startTime, delay)
         sendData(response, content, type)
-        // res.end(JSON.stringify(content))
       } catch (e) {
         log.error(`${colors.red('[body error]')} ${req.url} \n`, e)
         responseStatus(response, 500)
@@ -134,9 +139,15 @@ export function baseMiddleware(
 
 function fineMock(
   mockList: MockOptions,
-  pathname: string,
-  method: string,
-  request: Omit<ExtraRequest, 'params'>,
+  {
+    pathname,
+    method,
+    request,
+  }: {
+    pathname: string
+    method: string
+    request: Omit<ExtraRequest, 'params'>
+  },
 ): MockOptionsItem | undefined {
   return mockList.find((mock) => {
     if (!pathname || !mock || !mock.url) return false
@@ -152,11 +163,10 @@ function fineMock(
 
     if (hasMock && mock.validator) {
       const params = parseParams(mock.url, pathname)
-      const extraRequest: ExtraRequest = { params, ...request }
       if (isFunction(mock.validator)) {
-        return mock.validator(extraRequest)
+        return mock.validator({ params, ...request })
       } else {
-        return validate(extraRequest, mock.validator)
+        return validate({ params, ...request }, mock.validator)
       }
     }
     return hasMock
