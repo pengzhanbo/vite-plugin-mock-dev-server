@@ -10,7 +10,7 @@ export const fetchPostList = defineAPIMock({
   body({ body }) {
     return {
       code: 200,
-      msg: 'success',
+      message: 'success',
       result: {
         page: body.page,
         total: 10,

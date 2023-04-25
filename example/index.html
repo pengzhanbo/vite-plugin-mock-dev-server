@@ -7,20 +7,27 @@
   <title>Mock Server Example</title>
 </head>
 <body>
-  <div>mock</div>
-  <form action="/api/upload" method="post" enctype="multipart/form-data">
-    <p>
-      <span>file: </span>
-      <input type="file" name="files" multiple />
-    </p>
-    <p>
-      <span>name:</span>
-      <input type="text" name="name" value="mark">
-    </p>
-    <p>
-      <input type="submit" value="submit">
-    </p>
-  </form>
-  <script type="module" src="./main.ts"></script>
+  <h1>Mock Example</h1>
+  <section style="border:solid 1px #000; padding: 10px 20px;">
+    <h4>mock upload file:</h4>
+    <form action="/api/upload" method="post" enctype="multipart/form-data">
+      <p>
+        <span>file: </span>
+        <input type="file" name="files" multiple />
+      </p>
+      <p>
+        <span>name:</span>
+        <input type="text" name="name" value="mark">
+      </p>
+      <p>
+        <input type="submit" value="submit">
+      </p>
+    </form>
+  </section>
+  <a href="/api/download" download="shared.ts">Download File</a>
+  <br>
+  <h3>Please open the browser Devtools and switch to the network tab to view the interface information.</h3>
+  <h3>请打开浏览器 开发者工具 并切换到 network 查看接口信息</h3>
+  <script type="module" src="./src/main.ts"></script>
 </body>
 </html>

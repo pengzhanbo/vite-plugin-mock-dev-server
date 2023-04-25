@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => ({
     __IS_DEVELOPMENT__: JSON.stringify(mode === 'development'),
   },
   server: {
-    // 仅在 proxy 中配置的 代理前缀， mock-dev-server 才会拦截并mock
+    // 在 proxy 中配置的 代理前缀， mock-dev-server 才会拦截并mock
     proxy: {
       '^/api': {
         target: '',

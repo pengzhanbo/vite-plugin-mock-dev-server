@@ -1,12 +1,19 @@
-import { createReadStream } from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { defineAPIMock } from './shared'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
 export const buffer1 = defineAPIMock({
-  url: 'buffer/buffer-a',
+  url: 'buffer/buffer-type',
   type: 'buffer',
-  body: () => createReadStream(path.join(__dirname, './shared.ts')),
+  body: {
+    message: 'The response body data will be converted to buffer',
+  },
+})
+
+export const buffer2 = defineAPIMock({
+  url: 'buffer/buffer-body',
+  type: 'json',
+  body: Buffer.from(
+    JSON.stringify({
+      message: 'The body can also receive buffers',
+    }),
+  ),
 })

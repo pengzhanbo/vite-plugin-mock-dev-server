@@ -1,6 +1,0 @@
-{
-  "url": "/api/json",
-  "body": {
-    "message": "json data type"
-  }
-}
