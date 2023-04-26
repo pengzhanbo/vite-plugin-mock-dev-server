@@ -31,6 +31,9 @@ dependencies:
   json5:
     specifier: ^2.2.3
     version: 2.2.3
+  lodash.sortby:
+    specifier: ^4.7.0
+    version: 4.7.0
   mime-types:
     specifier: ^2.1.35
     version: 2.1.35
@@ -63,6 +66,9 @@ devDependencies:
   '@types/is-core-module':
     specifier: ^2.2.0
     version: 2.2.0
+  '@types/lodash.sortby':
+    specifier: ^4.7.7
+    version: 4.7.7
   '@types/mime-types':
     specifier: ^2.1.1
     version: 2.1.1
@@ -701,6 +707,16 @@ packages:
 
   /@types/keygrip@1.0.2:
     resolution: {integrity: sha512-GJhpTepz2udxGexqos8wgaBx4I/zWIDPh/KOGEwAqtuGDkOUJu5eFvwmdBX4AmB8Odsr+9pHCQqiAqDL/yKMKw==}
+    dev: true
+
+  /@types/lodash.sortby@4.7.7:
+    resolution: {integrity: sha512-J/4IS+jQopGBrrRetBXDCX0KnSeXJZ0rOTmGAxR9MWGV24YdHxX8IRi9LCGAU9GKWlBov9KRSfQpuup9PReqrw==}
+    dependencies:
+      '@types/lodash': 4.14.194
+    dev: true
+
+  /@types/lodash@4.14.194:
+    resolution: {integrity: sha512-r22s9tAS7imvBt2lyHC9B8AGwWnXaYb1tY09oyLkXDs4vArpYJzw09nj8MLx5VfciBPGIb+ZwG0ssYnEPJxn/g==}
     dev: true
 
   /@types/mdast@3.0.10:
@@ -3072,7 +3088,6 @@ packages:
 
   /lodash.sortby@4.7.0:
     resolution: {integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==}
-    dev: true
 
   /lodash@4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}

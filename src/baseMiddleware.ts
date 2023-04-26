@@ -76,7 +76,7 @@ export function baseMiddleware(
     })
 
     if (!mock) return next()
-    debug('middleware: ', method, pathname)
+    debug('middleware: ', method, req.url)
 
     const request = req as MockRequest
     const response = res as MockResponse
@@ -166,7 +166,12 @@ function fineMock(
       if (isFunction(mock.validator)) {
         return mock.validator({ params, ...request })
       } else {
-        return validate({ params, ...request }, mock.validator)
+        try {
+          return validate({ params, ...request }, mock.validator)
+        } catch (e) {
+          log.error(`${colors.red('[validator error]')} ${pathname} \n`, e)
+          return false
+        }
       }
     }
     return hasMock

@@ -12,6 +12,12 @@ export const isArray = <T = any>(val: unknown): val is T[] => Array.isArray(val)
 export const isFunction = (val: unknown): val is Function =>
   typeof val === 'function'
 
+export const isObject = (val: unknown): val is object =>
+  Object.prototype.toString.call(val) === '[object Object]'
+
+export const isEmptyObj = (val: unknown): boolean =>
+  isObject(val) && Object.keys(val).length === 0
+
 export const isStream = (stream: unknown): stream is Stream =>
   stream !== null &&
   typeof stream === 'object' &&

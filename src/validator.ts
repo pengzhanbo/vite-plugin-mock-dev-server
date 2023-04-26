@@ -13,7 +13,7 @@ export function validate(
   )
 }
 
-function equalObj(
+export function equalObj(
   left: Record<string, any>,
   right?: Record<string, any>,
 ): boolean {
