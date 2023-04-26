@@ -1,0 +1,9 @@
+{
+  url: "/api/json5",
+  headers: {
+    "X-Custom-Header": "your custom header"
+  },
+  body: {
+    message: "Write mock configuration using a json5 file."
+  },
+}

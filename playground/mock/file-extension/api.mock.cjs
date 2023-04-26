@@ -2,8 +2,8 @@
  * @type {import('vite-plugin-mock-dev-server').MockOptionsItem}
  */
 module.exports = {
-  url: '/api/cjs/config',
+  url: '/api/common-js',
   body: {
-    message: 'cjs file',
+    message: 'Write mock configuration using a CommonJs file.',
   },
 }
