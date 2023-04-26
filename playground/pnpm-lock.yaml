@@ -14,8 +14,8 @@ devDependencies:
     specifier: ^4.3.3
     version: 4.3.3(@types/node@18.16.1)
   vite-plugin-mock-dev-server:
-    specifier: ^1.1.4
-    version: 1.1.4(vite@4.3.3)
+    specifier: ^1.1.5
+    version: 1.1.5(vite@4.3.3)
 
 packages:
 
@@ -749,6 +749,10 @@ packages:
       tsscmp: 1.0.6
     dev: true
 
+  /lodash.sortby@4.7.0:
+    resolution: {integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==}
+    dev: true
+
   /media-typer@0.3.0:
     resolution: {integrity: sha1-hxDXrwqmJvj/+hzgAWhUUmMlV0g=}
     engines: {node: '>= 0.6'}
@@ -942,8 +946,8 @@ packages:
     engines: {node: '>= 0.8'}
     dev: true
 
-  /vite-plugin-mock-dev-server@1.1.4(vite@4.3.3):
-    resolution: {integrity: sha512-rCrxv8iYneQKpuaWABE6itHcVH9Fc7vTJD3+Uwh68ULpx8HIB/CtKTuvHqiYqcGVncXAVjCDCFxOc5KiJqI67A==}
+  /vite-plugin-mock-dev-server@1.1.5(vite@4.3.3):
+    resolution: {integrity: sha512-NxeA2UVCgGV7WgOUpgZoBcgFYCXQ3eD7RzxgqeU75eNL6lQ35jYZHBaKW2WPFAt98fIVX1tp8gj2Bmu6aGcquQ==}
     engines: {node: ^14.18.0 || >=16}
     peerDependencies:
       vite: '>=3.0.0'
@@ -958,6 +962,7 @@ packages:
       http-status: 1.6.2
       is-core-module: 2.12.0
       json5: 2.2.3
+      lodash.sortby: 4.7.0
       mime-types: 2.1.35
       path-to-regexp: 6.2.1
       picocolors: 1.0.0
