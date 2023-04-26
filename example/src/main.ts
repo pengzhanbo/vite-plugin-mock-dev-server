@@ -13,7 +13,7 @@ async function allowMethod() {
   await get('/api/only-get-method')
   await post('/api/only-get-method')
   await get('/api/allow-get-and-post')
-  await get('/api/allow-get-and-post')
+  await post('/api/allow-get-and-post')
 }
 
 async function apiDev() {
