@@ -1,4 +1,4 @@
-# 多个相同URL返回不同响应内容
+# 请求验证器
 
 有时候，对于相同的URL，我们需要根据不同的请求参数，返回不同的内容，但又不想通过 函数形式的 `body` 在函数内部处理。
 在这种情况下可以通过 `validator` 配置，根据不同的 请求参数，返回不同的响应内容
@@ -8,91 +8,19 @@
 
 链接参数中包含该参数即可，无需全匹配。
 
-```ts
-export default defineMock([
-  // Match /api/post/list?page=1
-  {
-    url: '/api/post/list',
-    method: 'GET',
-    validator: {
-      query: {
-        page: 1
-      }
-    },
-    body: {
-      totalPage: 10,
-      page: 1,
-      postList: [
-        { title: 'post 1' },
-        { title: 'post 2' }
-      ]
-    }
-  },
-  // Match /api/post/list?page=2
-  {
-    url: '/api/post/list',
-    method: 'GET',
-    validator: {
-      query: {
-        page: 2
-      }
-    },
-    body: {
-      totalPage: 10,
-      page: 2,
-      postList: [
-        { title: 'post 3' },
-        { title: 'post 4' }
-      ]
-    }
-  },
-])
-```
+<<< @/../example/mock/validator-query.mock.ts
 
 ## POST请求校验body是否匹配
 
 请求body中包含该参数即可，无需全匹配。
 
-```ts
-export default defineMock([
-  // Match /api/post/list?page=1
-  {
-    url: '/api/post/list',
-    method: 'POST',
-    validator: {
-      body: {
-        page: 1
-      }
-    },
-    body: {
-      totalPage: 10,
-      page: 1,
-      postList: [
-        { title: 'post 1' },
-        { title: 'post 2' }
-      ]
-    }
-  },
-  // Match /api/post/list?page=2
-  {
-    url: '/api/post/list',
-    method: 'POST',
-    validator: {
-      body: {
-        page: 2
-      }
-    },
-    body: {
-      totalPage: 10,
-      page: 2,
-      postList: [
-        { title: 'post 3' },
-        { title: 'post 4' }
-      ]
-    }
-  },
-])
-```
+<<< @/../example/mock/validator-body.mock.ts
+
+## 动态路径校验params是否匹配
+
+校验 动态路径 中的 params 参数是否匹配
+
+<<< @/../example/mock/validator-params.mock.ts
 
 ## 校验请求来源地址参数是否匹配
 
@@ -102,43 +30,12 @@ export default defineMock([
 
 通过 来源地址中的 `query` 参数，来匹配返回的 mock 数据内容
 
-```ts
-export default defineMock([
-  // 在 http://localhost/?page=1 页面发起的 `/api/post/list` 才会匹配这个mock数据内容
-  {
-    url: '/api/post/list',
-    method: 'POST',
-    validator: {
-      refererQuery: {
-        page: 1
-      }
-    },
-    body: {
-      totalPage: 10,
-      page: 1,
-      postList: [
-        { title: 'post 1' },
-        { title: 'post 2' }
-      ]
-    }
-  },
-  // // 在 http://localhost/?page=2 页面发起的 `/api/post/list` 才会匹配这个mock数据内容
-  {
-    url: '/api/post/list',
-    method: 'POST',
-    refererQuery: {
-      body: {
-        page: 2
-      }
-    },
-    body: {
-      totalPage: 10,
-      page: 2,
-      postList: [
-        { title: 'post 3' },
-        { title: 'post 4' }
-      ]
-    }
-  },
-])
-```
+<<< @/../example/mock/validator-refererQuery.mock.ts
+
+## 函数形式的校验器
+
+有时候仅适用严格匹配的方式校验参数并不能满足需要，那么可以使用 函数形式来定义 校验器，并返回 boolean 值。
+
+可以更加灵活的校验请求中的 各种信息
+
+<<< @/../example/mock/validator-request.mock.ts

@@ -2,7 +2,26 @@
 
 返回自定义的响应体内容
 
-## 原始数据类型
+## 数据类型
+
+```ts
+import { defineMock } from 'vite-plugin-mock-dev-server'
+
+export default defineMock({
+  url: '/api/test',
+  body: 'message',
+})
+```
+
+```ts
+import { defineMock } from 'vite-plugin-mock-dev-server'
+
+export default defineMock({
+  url: '/api/test',
+  body: ['apple', 'banana'],
+})
+```
+
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
@@ -13,6 +32,15 @@ export default defineMock({
     message: 'ok',
     result: 'custom data'
   }
+})
+```
+
+```ts
+import { defineMock } from 'vite-plugin-mock-dev-server'
+
+export default defineMock({
+  url: '/api/test',
+  body: Buffer.from('buffer data'),
 })
 ```
 
@@ -36,6 +64,18 @@ export default defineMock({
         query
       }
     }
+  }
+})
+```
+
+```ts
+import { createReadStream } from 'node:fs'
+import { defineMock } from 'vite-plugin-mock-dev-server'
+
+export default defineMock({
+  url: '/api/test',
+  body() {
+    return createReadStream('./my-app.dmg')
   }
 })
 ```

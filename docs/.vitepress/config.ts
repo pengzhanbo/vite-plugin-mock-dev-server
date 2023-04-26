@@ -38,7 +38,7 @@ export default defineConfig({
     },
     nav: [
       { text: '使用指南', link: '/guide/introduce', activeMatch: '/guide/' },
-      { text: '使用示例', link: '/examples/easy', activeMatch: '/example/' },
+      { text: '使用示例', link: '/examples/basic', activeMatch: '/example/' },
       {
         text: 'playground',
         link: 'https://stackblitz.com/github/pengzhanbo/vite-plugin-mock-dev-server/tree/main/playground',
@@ -84,34 +84,15 @@ export default defineConfig({
         },
       ],
       '/examples/': [
-        {
-          text: '类型格式',
-          items: [
-            { text: 'Commonjs', link: '/examples/cjs' },
-            { text: 'ESModule', link: '/examples/esm' },
-            { text: 'JSON/JSON5', link: '/examples/json' },
-          ],
-        },
-        {
-          text: '基础示例',
-          items: [
-            { text: '简单例子', link: '/examples/easy' },
-            { text: '自定义响应体', link: '/examples/body' },
-            { text: '自定义响应头', link: '/examples/header' },
-            { text: '自定义状态码', link: '/examples/status' },
-            { text: '自定义请求方法', link: '/examples/method' },
-            { text: '延迟响应', link: '/examples/delay' },
-            { text: '开启/关闭Mock', link: '/examples/enable' },
-          ],
-        },
-        {
-          text: '进阶示例',
-          items: [
-            { text: '使用mockjs库', link: '/examples/mockjs' },
-            { text: '相同URL返回不同响应内容', link: '/examples/validator' },
-            { text: '文件上传', link: '/examples/upload' },
-          ],
-        },
+        { text: '基础示例', link: '/examples/basic' },
+        { text: '类型格式', link: '/examples/format-extension' },
+        { text: '自定义响应头', link: '/examples/header' },
+        { text: 'cookies', link: '/examples/cookies' },
+        { text: '自定义响应体', link: '/examples/body' },
+        { text: '自定义响应内容', link: '/examples/response' },
+        { text: '文件上传/下载', link: '/examples/file' },
+        { text: '请求验证器', link: '/examples/validator' },
+        { text: '使用mockjs库', link: '/examples/mockjs' },
       ],
     },
   },
