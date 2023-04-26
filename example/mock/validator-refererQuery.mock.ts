@@ -21,9 +21,9 @@ export default defineMock([
     url: '/api/post/list',
     validator: {
       refererQuery: { from: 'recommend-page' },
-      body: {
-        list: postList.slice(0, 4),
-      },
+    },
+    body: {
+      list: postList.slice(0, 4),
     },
   },
 ])
