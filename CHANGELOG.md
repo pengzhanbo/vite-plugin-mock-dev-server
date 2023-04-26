@@ -1,3 +1,13 @@
+## [1.1.5](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.4...v1.1.5) (2023-04-26)
+
+
+### Performance Improvements
+
+* optimize `startsWith` to `===` ([0908397](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/0908397845b62a1209749c2d6241f57d814debaf))
+* Optimize the sorting of the `mockList` ([0a79516](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/0a79516af43451f973025abaa0bf700094515fcc))
+
+
+
 ## [1.1.4](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.3...v1.1.4) (2023-04-25)
 
 
