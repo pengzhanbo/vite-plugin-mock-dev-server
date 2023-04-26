@@ -65,7 +65,7 @@
     "@types/formidable": "^2.0.5",
     "@types/is-core-module": "^2.2.0",
     "@types/mime-types": "^2.1.1",
-    "@types/node": "^18.16.0",
+    "@types/node": "^18.16.1",
     "bumpp": "^9.1.0",
     "conventional-changelog-cli": "^2.2.2",
     "eslint": "^8.39.0",
@@ -73,6 +73,7 @@
     "prettier": "^2.8.8",
     "tsup": "^6.7.0",
     "typescript": "^5.0.4",
+    "vite": "^4.3.3",
     "vitepress": "1.0.0-alpha.74"
   },
   "peerDependencies": {

@@ -14,11 +14,11 @@
     "dev": "DEBUG=vite:plugin-mock-dev-server vite"
   },
   "devDependencies": {
-    "@types/node": "^18.16.0",
+    "@types/node": "^18.16.1",
     "mockjs": "^1.1.0",
     "typescript": "^5.0.4",
-    "vite": "^4.3.1",
-    "vite-plugin-mock-dev-server": "^1.1.3"
+    "vite": "^4.3.3",
+    "vite-plugin-mock-dev-server": "^1.1.4"
   },
   "packageManager": "pnpm@8.3.1"
 }
