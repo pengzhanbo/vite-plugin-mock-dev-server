@@ -93,6 +93,8 @@ export default defineConfig({
         { text: '文件上传/下载', link: '/examples/file' },
         { text: '请求验证器', link: '/examples/validator' },
         { text: '使用mockjs库', link: '/examples/mockjs' },
+        { text: '使用faker-js库', link: '/examples/faker' },
+        { text: 'graphql', link: '/examples/graphql' },
       ],
     },
   },
