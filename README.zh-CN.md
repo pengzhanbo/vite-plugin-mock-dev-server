@@ -645,6 +645,34 @@ export default defineMock({
 })
 ```
 
+**exp:** Graphql
+```ts
+import { buildSchema, graphql } from 'graphql'
+const schema = buildSchema(`
+type Query {
+  hello: String
+}
+`)
+const rootValue = { hello: () => 'Hello world!' }
+
+export default defineMock({
+  url: '/api/graphql',
+  method: 'POST',
+  body: async (request) => {
+    const source = request.body.source
+    const { data } = await graphql({ schema, rootValue, source })
+    return data
+  },
+})
+```
+
+```ts
+fetch('/api/graphql', {
+  method: 'POST',
+  body: JSON.stringify({ source: '{ hello }' }) 
+})
+```
+
 ## 独立部署的小型mock服务
 
 在一些场景中，可能会需要使用mock服务提供的数据支持，用于展示，但可能项目已完成打包构建部署，已脱离 `vite` 和本插件提供的 mock服务支持。由于本插件在设计之初，支持在mock文件中引入各种 `node` 模块，所以不能将 mock文件打包内联到客户端构建代码中。

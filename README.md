@@ -650,6 +650,34 @@ export default defineMock({
 })
 ```
 
+**exp:** Graphql
+```ts
+import { buildSchema, graphql } from 'graphql'
+const schema = buildSchema(`
+type Query {
+  hello: String
+}
+`)
+const rootValue = { hello: () => 'Hello world!' }
+
+export default defineMock({
+  url: '/api/graphql',
+  method: 'POST',
+  body: async (request) => {
+    const source = request.body.source
+    const { data } = await graphql({ schema, rootValue, source })
+    return data
+  },
+})
+```
+
+```ts
+fetch('/api/graphql', {
+  method: 'POST',
+  body: JSON.stringify({ source: '{ hello }' }) 
+})
+```
+
 ## Mock Services
 
 In some scenarios, it may be necessary to use the data provided by mock services for display purposes, but the project may have already been packaged, built and deployed without support from `vite` and this plugin's mock service. Since this plugin supports importing various `node` modules in mock files at the design stage, the mock file cannot be inline into client build code.
