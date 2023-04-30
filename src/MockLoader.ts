@@ -7,13 +7,17 @@ import chokidar from 'chokidar'
 import type { Metafile } from 'esbuild'
 import { build } from 'esbuild'
 import fastGlob from 'fast-glob'
-import JSON5 from 'json5'
 import type { ResolvedConfig } from 'vite'
 import { createFilter, normalizePath } from 'vite'
-import { aliasPlugin, externalizeDeps } from './esbuildPlugin'
+import {
+  aliasPlugin,
+  externalizeDeps,
+  json5Loader,
+  jsonLoader,
+} from './esbuildPlugin'
 import { transformMockData } from './transform'
-import type { MockOptions, MockOptionsItem } from './types'
-import { debug, getDirname, lookupFile } from './utils'
+import type { MockHttpItem, MockOptions, MockWebsocketItem } from './types'
+import { debug, getDirname, isArray, lookupFile } from './utils'
 
 export interface MockLoaderOptions {
   cwd?: string
@@ -30,8 +34,9 @@ const _require = createRequire(_dirname)
  * mock配置加载器
  */
 export class MockLoader extends EventEmitter {
-  static EXT_JSON = /\.json5?$/
-  moduleCache: Map<string, MockOptions | MockOptionsItem> = new Map()
+  moduleCache: Map<string, MockOptions | MockHttpItem | MockWebsocketItem> =
+    new Map()
+
   moduleDeps: Map<string, Set<string>> = new Map()
   cwd: string
   mockWatcher!: chokidar.FSWatcher
@@ -75,17 +80,23 @@ export class MockLoader extends EventEmitter {
     }
     this.updateMockList()
 
+    let timer: NodeJS.Timeout | null = null
+
     this.on('mock:update', async (filepath: string) => {
       if (!includeFilter(filepath)) return
       await this.loadMock(filepath)
-      this.updateMockList()
-      this.emit('mock:update-end')
+      timer && clearTimeout(timer)
+      timer = setTimeout(() => {
+        this.updateMockList()
+        this.emit('mock:update-end', filepath)
+        timer = null
+      }, 0)
     })
     this.on('mock:unlink', async (filepath: string) => {
       if (!includeFilter(filepath)) return
       this.moduleCache.delete(filepath)
       this.updateMockList()
-      this.emit('mock:update-end')
+      this.emit('mock:update-end', filepath)
     })
   }
 
@@ -173,23 +184,6 @@ export class MockLoader extends EventEmitter {
 
   private async loadMock(filepath?: string): Promise<void> {
     if (!filepath) return
-    if (MockLoader.EXT_JSON.test(filepath)) {
-      await this.loadJson(filepath)
-    } else {
-      await this.loadModule(filepath)
-    }
-  }
-
-  private async loadJson(filepath: string) {
-    const content = await fs.promises.readFile(filepath, 'utf-8')
-    try {
-      const mockConfig = JSON5.parse(content)
-      this.moduleCache.set(filepath, mockConfig)
-    } catch (e) {}
-  }
-
-  private async loadModule(filepath?: string) {
-    if (!filepath) return
     let isESM = false
     if (/\.m[jt]s$/.test(filepath)) {
       isESM = true
@@ -206,6 +200,12 @@ export class MockLoader extends EventEmitter {
         raw && raw.default
           ? raw.default
           : Object.keys(raw || {}).map((key) => raw[key])
+
+      if (isArray(mockConfig)) {
+        mockConfig.forEach((mock) => (mock.__filepath__ = filepath))
+      } else {
+        mockConfig.__filepath__ = filepath
+      }
       this.moduleCache.set(filepath, mockConfig)
       this.updateModuleDeps(filepath, deps)
     } catch (e) {
@@ -262,13 +262,20 @@ export class MockLoader extends EventEmitter {
         metafile: true,
         format: isESM ? 'esm' : 'cjs',
         define: this.options.define,
-        plugins: [aliasPlugin(this.options.alias), externalizeDeps],
+        plugins: [
+          aliasPlugin(this.options.alias),
+          externalizeDeps,
+          jsonLoader,
+          json5Loader,
+        ],
       })
       return {
         code: result.outputFiles[0].text,
         deps: result.metafile?.inputs || {},
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error(e)
+    }
     return {
       code: '',
       deps: {},
