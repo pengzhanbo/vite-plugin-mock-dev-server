@@ -38,8 +38,9 @@ export async function generateMockServer(
       define[key] = typeof val === 'string' ? val : JSON.stringify(val)
     }
   }
-  const proxies: string[] = ensureProxies(config.server.proxy || {})
-  const prefix = ensureArray(options.prefix)
+  const { httpProxies } = ensureProxies(config.server.proxy || {})
+  httpProxies.push(...ensureArray(options.prefix))
+  const wsProxies = ensureArray(options.wsPrefix)
 
   let pkg = {}
   try {
@@ -69,7 +70,8 @@ export async function generateMockServer(
     {
       filename: path.join(outputDir, 'index.js'),
       source: generatorServerEntryCode(
-        [...prefix, ...proxies],
+        httpProxies,
+        wsProxies,
         options.cookiesOptions,
         (options.build as ServerBuildOption).serverPort,
       ),
@@ -138,23 +140,33 @@ function generatePackageJson(pkg: any, mockDeps: string[]) {
 }
 
 function generatorServerEntryCode(
-  proxies: string[],
+  httpProxies: string[],
+  wsProxies: string[],
   cookiesOptions: MockServerPluginOptions['cookiesOptions'] = {},
   port = 8080,
 ) {
-  return `import connect from 'connect';
+  return `import { createServer } from 'node:http';
+  import connect from 'connect';
 import corsMiddleware from 'cors';
-import { baseMiddleware } from 'vite-plugin-mock-dev-server';
+import { baseMiddleware, mockWebSocket } from 'vite-plugin-mock-dev-server';
 import mockData from './mock-data.js';
 
 const app = connect();
+const server = createServer(app);
+const httpProxies = ${JSON.stringify(httpProxies)};
+const wxProxies = ${JSON.stringify(wsProxies)}
+const cookiesOptions = ${JSON.stringify(cookiesOptions)};
+
+mockWebSocket({ mockData }, server, wxProxies, cookiesOptions)
+
 app.use(corsMiddleware());
 app.use(baseMiddleware({ mockData }, {
   formidableOptions: { multiples: true },
-  proxies: ${JSON.stringify(proxies)}
-  cookiesOptions: ${JSON.stringify(cookiesOptions)}
+  proxies: httpProxies,
+  cookiesOptions,
 }));
-app.listen(${port});
+
+server.listen(${port});
 
 console.log('listen: http://localhost:${port}');
 `
