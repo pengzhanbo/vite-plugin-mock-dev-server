@@ -1,4 +1,4 @@
-import type { MockOptions, MockOptionsItem } from './types'
+import type { MockHttpItem, MockOptions, MockWebsocketItem } from './types'
 import { isArray } from './utils'
 
 /**
@@ -16,11 +16,12 @@ import { isArray } from './utils'
  * })
  * ```
  */
-export function defineMock(config: MockOptionsItem): MockOptionsItem
+export function defineMock(config: MockHttpItem): MockHttpItem
 export function defineMock(config: MockOptions): MockOptions
+export function defineMock(config: MockWebsocketItem): MockWebsocketItem
 export function defineMock(
-  config: MockOptions | MockOptionsItem,
-): MockOptions | MockOptionsItem {
+  config: MockOptions | MockHttpItem | MockWebsocketItem,
+): MockOptions | MockHttpItem | MockWebsocketItem {
   return config
 }
 
@@ -32,9 +33,11 @@ export function defineMock(
  * @param transformer preprocessing function
  */
 export function createDefineMock(
-  transformer: (mock: MockOptionsItem) => MockOptionsItem | void,
+  transformer: (
+    mock: MockHttpItem | MockWebsocketItem,
+  ) => MockHttpItem | MockWebsocketItem | void,
 ): typeof defineMock {
-  const define = (config: MockOptions | MockOptionsItem) => {
+  const define = (config: MockOptions | MockHttpItem | MockWebsocketItem) => {
     if (isArray(config)) {
       config = config.map((item) => transformer(item) || item)
     } else {

@@ -11,8 +11,8 @@ import { parseReqBody } from './parseReqBody'
 import type {
   ExtraRequest,
   Method,
+  MockHttpItem,
   MockOptions,
-  MockOptionsItem,
   MockRequest,
   MockResponse,
   MockServerPluginOptions,
@@ -20,6 +20,7 @@ import type {
 } from './types'
 import {
   debug,
+  doesProxyContextMatchUrl,
   isArray,
   isFunction,
   isReadableStream,
@@ -148,9 +149,9 @@ function fineMock(
     method: string
     request: Omit<ExtraRequest, 'params'>
   },
-): MockOptionsItem | undefined {
+): MockHttpItem | undefined {
   return mockList.find((mock) => {
-    if (!pathname || !mock || !mock.url) return false
+    if (!pathname || !mock || !mock.url || mock.ws === true) return false
     const methods: Method[] = mock.method
       ? isArray(mock.method)
         ? mock.method
@@ -175,7 +176,7 @@ function fineMock(
       }
     }
     return hasMock
-  })
+  }) as MockHttpItem | undefined
 }
 
 function responseStatus(
@@ -190,7 +191,7 @@ function responseStatus(
 async function provideHeaders(
   req: MockRequest,
   res: MockResponse,
-  { headers, type = 'json' }: MockOptionsItem,
+  { headers, type = 'json' }: MockHttpItem,
 ) {
   const contentType =
     mime.contentType(type) || mime.contentType(mime.lookup(type) || '')
@@ -212,7 +213,7 @@ async function provideHeaders(
 async function provideCookies(
   req: MockRequest,
   res: MockResponse,
-  { cookies }: MockOptionsItem,
+  { cookies }: MockHttpItem,
 ) {
   if (!cookies) return
   try {
@@ -247,13 +248,6 @@ async function realDelay(startTime: number, delay?: number) {
   const diff = Date.now() - startTime
   const realDelay = delay - diff
   if (realDelay > 0) await sleep(realDelay)
-}
-
-function doesProxyContextMatchUrl(context: string, url: string): boolean {
-  return (
-    (context[0] === '^' && new RegExp(context).test(url)) ||
-    url.startsWith(context)
-  )
 }
 
 function getHTTPStatusText(status: number): string {

@@ -3,19 +3,34 @@ import type { Readable } from 'node:stream'
 import type Cookies from 'cookies'
 import type formidable from 'formidable'
 import type { Connect } from 'vite'
+import type { WebSocketServer } from 'ws'
 
 export interface MockServerPluginOptions {
   /**
-   * To configure the path matching rules for mock services,
+   * To configure the path matching rules for http mock services,
    * any request path starting with prefix will be intercepted and proxied.
    * If the prefix starts with `^`, it will be recognized as a `RegExp`.
    *
-   * 为 mock 服务配置 路径匹配规则，任何请求路径以 prefix 开头的都将被拦截代理。
+   * 为 http mock 服务配置 路径匹配规则，任何请求路径以 prefix 开头的都将被拦截代理。
    * 如果 prefix 以 `^` 开头，将被识别为 `RegExp`。
    * @default []
    * @example ['^/api']
    */
   prefix?: string | string[]
+
+  /**
+   * Configure path matching rules for WebSocket mock service.
+   * Any ws/wss requests with a request path starting with wsPrefix
+   * will be intercepted by the proxy.
+   * If wsPrefix starts with `^`, it will be recognized as a `RegExp`.
+   *
+   * 为 websocket mock 服务配置 路径匹配规则， 任何请求路径以 wsPrefix 开头的 ws/wss请求，
+   * 都将被代理拦截。
+   * 如果 wsPrefix 以 `^` 开头，将被识别为 `RegExp`。
+   * @default []
+   * @example ['/socket.io']
+   */
+  wsPrefix?: string | string[]
   /**
    * glob string matching mock includes files
    *
@@ -164,7 +179,7 @@ type ResponseCookiesFn = (
   request: MockRequest,
 ) => ResponseCookies | Promise<ResponseCookies>
 
-export interface MockOptionsItem {
+interface MockBaseItem {
   /**
    * The interface address that needs to be mocked,
    * supported by `path-to-regexp` for path matching.
@@ -180,23 +195,34 @@ export interface MockOptionsItem {
    */
   url: string
   /**
-   * The interface allows request methods, and by default allows both GET and POST.
+   * Enable WebSocket interface simulation
    *
-   * 该接口允许的 请求方法，默认同时支持 GET 和 POST
-   * @default ['POST','GET']
+   * 开启 websocket 接口模拟
+   *
+   * @default false
    */
-  method?: Method | Method[]
+  ws?: boolean
   /**
    * Whether to enable mock for this interface.
    * In most scenarios, we only need to mock some interfaces instead of all requests that
    * have been configured with mock.
    * Therefore, it is important to be able to configure whether to enable it or not.
    *
-   * 是否启动对该接口的mock，在多数场景下，我们进需要对部分接口进行 mock，
+   * 是否启动对该接口的mock，在多数场景下，我们仅需要对部分接口进行 mock，
    * 而不是对所有配置了mock的请求进行全量mock，所以是否能够配置是否启用很重要
    * @default true
    */
   enabled?: boolean
+}
+
+export interface MockHttpItem extends MockBaseItem {
+  /**
+   * The interface allows request methods, and by default allows both GET and POST.
+   *
+   * 该接口允许的 请求方法，默认同时支持 GET 和 POST
+   * @default ['POST','GET']
+   */
+  method?: Method | Method[]
   /**
    * Configure the response body headers
    *
@@ -374,8 +400,35 @@ export interface MockOptionsItem {
   validator?:
     | Partial<Omit<ExtraRequest, 'getCookie'>>
     | ((request: ExtraRequest) => boolean)
+
+  ws?: false
 }
 
-export type MockOptions = MockOptionsItem[]
+export type MockWebsocketServerDestroy = (() => void) | void
+
+export interface MockWebsocketItem extends MockBaseItem {
+  ws: true
+  /**
+   * Configure Websocket Server
+   *
+   * 配置 Websocket Server
+   * @example
+   * ```ts
+   * export default {
+   *   ws: true
+   *   setup: (wss) => {
+   *     wss.on('connection', (ws,req) => {
+   *       ws.on('message', (raw) => console.log(raw))
+   *       ws.send(JSON.stringify({ type: 'connected' }))
+   *     })
+   *     wss.on('error', (error) => console.error(error))
+   *   }
+   * }
+   * ```
+   */
+  setup: (wss: WebSocketServer) => MockWebsocketServerDestroy
+}
+
+export type MockOptions = (MockHttpItem | MockWebsocketItem)[]
 
 export type FormidableFile = formidable.File | formidable.File[]

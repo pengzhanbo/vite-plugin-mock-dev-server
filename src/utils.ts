@@ -88,20 +88,33 @@ export function lookupFile(
 
 export const ensureProxies = (
   serverProxy: ResolvedConfig['server']['proxy'] = {},
-): string[] => {
-  const proxies: string[] = Object.keys(serverProxy)
-    .map((key) => {
-      const value = serverProxy[key]
-      return typeof value === 'string'
-        ? key
-        : value.ws ||
-          value.target?.toString().startsWith('ws:') ||
-          value.target?.toString().startsWith('wss:')
-        ? ''
-        : key
-    })
-    .filter(Boolean)
-  return proxies
+) => {
+  const httpProxies: string[] = []
+  const wsProxies: string[] = []
+  Object.keys(serverProxy).forEach((key) => {
+    const value = serverProxy[key]
+    if (
+      typeof value === 'string' ||
+      (!value.ws &&
+        !value.target?.toString().startsWith('ws:') &&
+        !value.target?.toString().startsWith('wss:'))
+    ) {
+      httpProxies.push(key)
+    } else {
+      wsProxies.push(key)
+    }
+  })
+  return { httpProxies, wsProxies }
+}
+
+export function doesProxyContextMatchUrl(
+  context: string,
+  url: string,
+): boolean {
+  return (
+    (context[0] === '^' && new RegExp(context).test(url)) ||
+    url.startsWith(context)
+  )
 }
 
 export function parseParams(pattern: string, url: string): Record<string, any> {

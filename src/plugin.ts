@@ -5,6 +5,7 @@ import type { MockServerPluginOptions } from './types'
 
 export function mockDevServerPlugin({
   prefix = [],
+  wsPrefix = [],
   include = ['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}'],
   exclude = ['**/node_modules/**', '**/.vscode/**', '**/.git/**'],
   reload = false,
@@ -14,6 +15,7 @@ export function mockDevServerPlugin({
 }: MockServerPluginOptions = {}): Plugin[] {
   const pluginOptions: Required<MockServerPluginOptions> = {
     prefix,
+    wsPrefix,
     include,
     exclude,
     reload,
