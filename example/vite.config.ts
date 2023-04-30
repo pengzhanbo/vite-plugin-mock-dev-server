@@ -6,6 +6,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     mockServer({
       prefix: '^/api-dev/',
+      wsPrefix: ['/socket.io'],
       include: 'example/mock/**/*.mock.{ts,js,cjs,mjs,json,json5}',
       formidableOptions: {
         // 配置上传资源存放目录
