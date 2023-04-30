@@ -111,4 +111,22 @@ async function bootstrap() {
   await delay()
 }
 
+function webSocketMock() {
+  const ws = new WebSocket('ws://localhost:5173/socket.io')
+  ws.addEventListener(
+    'open',
+    () => {
+      // eslint-disable-next-line no-console
+      console.log('isOpen')
+    },
+    { once: true },
+  )
+  setTimeout(() => {
+    if (ws.readyState === ws.OPEN) {
+      ws.send(JSON.stringify({ type: 'message', payload: { a: 1 } }))
+    }
+  }, 3000)
+}
+
 bootstrap()
+webSocketMock()

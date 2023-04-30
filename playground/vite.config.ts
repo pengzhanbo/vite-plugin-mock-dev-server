@@ -6,6 +6,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     mockDevServerPlugin({
       include: 'mock/**/*.mock.{ts,js,cjs,mjs,json,json5}',
+      wsPrefix: ['/socket.io'],
       formidableOptions: {
         // 配置上传资源存放目录
         uploadDir: path.join(process.cwd(), 'uploads'),

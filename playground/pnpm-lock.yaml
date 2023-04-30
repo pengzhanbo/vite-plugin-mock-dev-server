@@ -14,8 +14,8 @@ devDependencies:
     specifier: ^4.3.3
     version: 4.3.3(@types/node@18.16.1)
   vite-plugin-mock-dev-server:
-    specifier: ^1.1.5
-    version: 1.1.5(vite@4.3.3)
+    specifier: ^1.1.6
+    version: 1.1.6(vite@4.3.3)
 
 packages:
 
@@ -946,8 +946,8 @@ packages:
     engines: {node: '>= 0.8'}
     dev: true
 
-  /vite-plugin-mock-dev-server@1.1.5(vite@4.3.3):
-    resolution: {integrity: sha512-NxeA2UVCgGV7WgOUpgZoBcgFYCXQ3eD7RzxgqeU75eNL6lQ35jYZHBaKW2WPFAt98fIVX1tp8gj2Bmu6aGcquQ==}
+  /vite-plugin-mock-dev-server@1.1.6(vite@4.3.3):
+    resolution: {integrity: sha512-4zawtlosHob9MDXWMWJjmQwTXI+RgLfqP80E23oHIAnhJSQi7R/n/WNMzzFLtotm0CoBV/mne3YucB8L4TkLrA==}
     engines: {node: ^14.18.0 || >=16}
     peerDependencies:
       vite: '>=3.0.0'
@@ -967,8 +967,11 @@ packages:
       path-to-regexp: 6.2.1
       picocolors: 1.0.0
       vite: 4.3.3(@types/node@18.16.1)
+      ws: 8.13.0
     transitivePeerDependencies:
+      - bufferutil
       - supports-color
+      - utf-8-validate
     dev: true
 
   /vite@4.3.3(@types/node@18.16.1):
@@ -1006,4 +1009,17 @@ packages:
 
   /wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
+    dev: true
+
+  /ws@8.13.0:
+    resolution: {integrity: sha512-x9vcZYTrFPC7aSIbj7sRCYo7L/Xb8Iy+pW0ng0wt2vCJv7M9HOMy0UoN3rr+IFC7hb7vXoqS+P9ktyLLLhO+LA==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
     dev: true
