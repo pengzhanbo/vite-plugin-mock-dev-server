@@ -55,7 +55,8 @@
     "lodash.sortby": "^4.7.0",
     "mime-types": "^2.1.35",
     "path-to-regexp": "^6.2.1",
-    "picocolors": "^1.0.0"
+    "picocolors": "^1.0.0",
+    "ws": "^8.13.0"
   },
   "devDependencies": {
     "@pengzhanbo/eslint-config-ts": "^0.3.4",
@@ -68,6 +69,7 @@
     "@types/lodash.sortby": "^4.7.7",
     "@types/mime-types": "^2.1.1",
     "@types/node": "^18.16.1",
+    "@types/ws": "^8.5.4",
     "bumpp": "^9.1.0",
     "conventional-changelog-cli": "^2.2.2",
     "eslint": "^8.39.0",
