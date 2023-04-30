@@ -11,7 +11,7 @@
 <a href="https://www.npmjs.com/package/vite-plugin-mock-dev-server"><img alt="npm" src="https://img.shields.io/npm/v/vite-plugin-mock-dev-server?style=flat-square"></a>
 <img alt="node-current" src="https://img.shields.io/node/v/vite-plugin-mock-dev-server?style=flat-square">
 <img alt="npm peer dependency version" src="https://img.shields.io/npm/dependency-version/vite-plugin-mock-dev-server/peer/vite?style=flat-square">
-<img alt="npm" src="https://img.shields.io/npm/dm/vite-plugin-mock-dev-server?style=flat-square">
+<img alt="npm" src="https://img.shields.io/npm/dt/vite-plugin-mock-dev-server?style=flat-square">
 <br>
 <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/pengzhanbo/vite-plugin-mock-dev-server/lint.yml?style=flat-square">
 <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fpengzhanbo%2Fvite-plugin-mock-dev-server?ref=badge_shield"><img alt="fossa status" src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpengzhanbo%2Fvite-plugin-mock-dev-server.svg?type=shield"></a>
@@ -43,6 +43,7 @@
 - 🌈 Support `vite preview` mode.
 - 📤 Support `multipart` content-type，mock upload file.
 - 📥 Support mock download file.
+- ⚜️ Support `WebSocket Mock`
 - 🗂 Support building small independent deployable mock services.
 
 
@@ -148,6 +149,18 @@ export default defineConfig({
 
   **Default:** `[]`
 
+- `options.wsPrefix`
+  
+  **类型:** `string | string[]`
+
+  Configure the matching rules for WebSocket service. Any request path starting with the value of `wsPrefix` and using the `ws/wss` protocol will be proxied to the corresponding target.
+
+If the value of `wsPrefix` starts with `^`, it will be recognized as a RegExp.
+
+  > Different from using `viteConfig.server.proxy` by default for http mock, `websocket mock` does not use the ws-related configuration in `viteConfig.server.proxy`. Also, rules configured in `wsPrefix` cannot be configured simultaneously in `viteConfig.server.proxy`, as it will cause conflicts when starting the vite server because multiple instances of WebSocketServer cannot be implemented for the same request.
+  > This conflict is neither a problem with Vite nor with the plugin; it belongs to a reasonable error type. When switching between WebSocket Mock and WebSocket Proxy, please pay attention to avoid duplicate configurations that may cause conflicts.
+
+
 - `option.include` 
 
   **Type:** `string | string[]`
@@ -162,14 +175,7 @@ export default defineConfig({
   
   When reading mock files for configuration, the files that need to be excluded can be a directory, glob, or an array.
 
-  **Default：**
-  ```ts
-  [
-    '**/node_modules/**',
-    '**/.vscode/**',
-    '**/.git/**',
-  ]
-  ```
+  **Default：** `['**/node_modules/**','**/.vscode/**','**/.git/**']`
 
 - `options.reload`
   
@@ -258,6 +264,7 @@ export default defineApiMock({
 ## Mock Configuration
 
 ```ts
+// Configure the http mock
 export default defineMock({
   /**
    * Request address, supports the `/api/user/:id` format.
@@ -380,7 +387,32 @@ export default defineMock({
     res.end()
   }
 })
-
+```
+```ts
+// Configure the WebSocket mock
+export default defineMock({
+  /**
+   * Request address, supports the `/api/user/:id` format.
+   * The plugin matches the path through `path-to-regexp`.
+   * @see https://github.com/pillarjs/path-to-regexp
+   */
+  url: '/api/test',
+  /**
+   * Value must be explicitly specified as `true`.
+   * The plugin needs to make a judgment based on this field.
+   */
+  ws: true,
+  /**
+   * Configure the WebSocketServer
+   * @see https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocketserver
+   */
+  setup(wss) {
+    wss.on('connection', (ws, request) => {
+      ws.on('message', (rawData) => {})
+      ws.send('data')
+    })
+  }
+})
 ```
 
 ### Request/Response Enhance
@@ -675,6 +707,50 @@ export default defineMock({
 fetch('/api/graphql', {
   method: 'POST',
   body: JSON.stringify({ source: '{ hello }' }) 
+})
+```
+
+**exp:** WebSocket Mock
+```ts
+// ws.mock.ts
+export default defineMock({
+  url: '/socket.io',
+  ws: true,
+  setup(wss) {
+    const wsMap = new Map()
+    wss.on('connection', (ws, req) => {
+      const token = req.getCookie('token')
+      wsMap.set(token, ws)
+      ws.on('message', (raw) => {
+        const data = JSON.parse(String(raw))
+        if (data.type === 'ping') return
+        // Broadcast
+        for (const [_token, _ws] of wsMap.entires()) {
+          if (_token !== token)
+            _ws.send(raw)
+        }
+      })
+    })
+    wss.on('error', (err) => {
+      console.error(err)
+    })
+    return () => {
+      wsMap.clear()
+    }
+  }
+})
+```
+```ts
+// app.ts
+const ws = new WebSocket('ws://localhost:5173/socket.io')
+ws.addEventListener('open', () => {
+  setInterval(() => {
+    // heartbeat
+    ws.send({ type: 'ping' })
+  }, 1000)
+}, { once: true })
+ws.addEventListener('message', (raw) => {
+  console.log(raw)
 })
 ```
 

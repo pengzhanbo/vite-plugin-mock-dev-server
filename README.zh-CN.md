@@ -13,7 +13,7 @@
 <a href="https://www.npmjs.com/package/vite-plugin-mock-dev-server"><img alt="npm" src="https://img.shields.io/npm/v/vite-plugin-mock-dev-server?style=flat-square"></a>
 <img alt="node-current" src="https://img.shields.io/node/v/vite-plugin-mock-dev-server?style=flat-square">
 <img alt="npm peer dependency version" src="https://img.shields.io/npm/dependency-version/vite-plugin-mock-dev-server/peer/vite?style=flat-square">
-<img alt="npm" src="https://img.shields.io/npm/dm/vite-plugin-mock-dev-server?style=flat-square">
+<img alt="npm" src="https://img.shields.io/npm/dt/vite-plugin-mock-dev-server?style=flat-square">
 <br>
 <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/pengzhanbo/vite-plugin-mock-dev-server/lint.yml?style=flat-square">
 <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fpengzhanbo%2Fvite-plugin-mock-dev-server?ref=badge_shield"><img alt="fossa status" src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpengzhanbo%2Fvite-plugin-mock-dev-server.svg?type=shield"></a>
@@ -37,13 +37,14 @@
 - 🎨 可选择你喜欢的任意用于生成mock数据库，如 `mockjs`，或者不使用其他库
 - 📥 路径规则匹配，请求参数匹配
 - ⚙️ 随意开启或关闭对某个接口的 mock配置
-- - 📀 支持多种响应体数据类型，包括 `text/json/buffer/stream`.
+- 📀 支持多种响应体数据类型，包括 `text/json/buffer/stream`.
 - ⚖️ 使用 `server.proxy` 配置
 - 🍕 支持在 mock文件中使用 `viteConfig.define`配置字段
 - ⚓️ 支持在 mock文件中使用 `viteConfig.resolve.alias` 路径别名
 - 🌈 支持 `vite preview` 模式
 - 📤 支持 multipart 类型，模拟文件上传
 - 📥 支持模拟文件下载
+- ⚜️ 支持模拟 `WebSocket`
 - 🗂 支持构建可独立部署的小型mock服务
 
 
@@ -140,11 +141,21 @@ export default defineConfig({
 
   **类型:** `string | string[]`
   
-  为mock服务器配置自定义匹配规则。任何请求路径以 `prefix` 值开头的请求将被代理到对应的目标。如果 `prefix` 值以 ^ 开头，将被识别为 RegExp。
+  为mock服务器配置自定义匹配规则。任何请求路径以 `prefix` 值开头的请求将被代理到对应的目标。如果 `prefix` 值以 `^` 开头，将被识别为 RegExp。
 
   > 一般情况下, `server.proxy` 已经足够满足需求，添加此项是为了与某些场景兼容。
 
   **默认值:** `[]`
+
+- `options.wsPrefix`
+  
+  **类型:** `string | string[]`
+
+  配置 webSocket 服务 匹配规则。任何请求路径以 `wsPrefix` 值开头的 `ws/wss` 协议请求，将被代理到对应的目标。
+  如果`wsPrefix`值以 `^` 开头,将被识别为 RegExp。
+
+  > 与 http mock 默认使用 `viteConfig.server.proxy` 不同的是，`websocket mock` 不会使用 `viteConfig.server.proxy` 中的 ws 相关的配置，且配置在 `wsPrefix` 中的规则，不能同时配置在 `viteConfig.server.proxy`中，因为会导致在 vite 在启动服务时产生冲突，因为不能对同一个请求实现多个的 `WebSocketServer`实例。
+  > 该冲突既不是 `vite` 的问题，也不是插件的问题，这属于合理的错误类型。在进行 `WebSocket Mock`和 `WebSocket Proxy` 切换时，请注意配置不要出现重复导致冲突。 
 
 - `option.include` 
 
@@ -160,14 +171,7 @@ export default defineConfig({
   
   配置读取 mock文件时，需要排除的文件， 可以是一个 目录、glob、或者一个数组
 
-  **默认值：**
-  ```ts
-  [
-    '**/node_modules/**',
-    '**/.vscode/**',
-    '**/.git/**',
-  ]
-  ```
+  **默认值：** `['**/node_modules/**', '**/.vscode/**', '**/.git/**']`
 
 - `options.reload`
 
@@ -254,6 +258,7 @@ export default defineApiMock({
 ## Mock 配置
 
 ```ts
+// 配置 http mock
 export default defineMock({
   /**
    * 请求地址，支持 `/api/user/:id` 格式
@@ -376,7 +381,32 @@ export default defineMock({
     res.end()
   }
 })
-
+```
+```ts
+// 配置 WebSocket mock
+export default defineMock({
+  /**
+   * 请求地址，支持 `/api/user/:id` 格式
+   * 插件通过 `path-to-regexp` 匹配路径
+   * @see https://github.com/pillarjs/path-to-regexp
+   */
+  url: '/api/test',
+  /**
+   * 必须显式的指定值为 `true`
+   * 插件内部需要根据此值进行判断
+   */
+  ws: true,
+  /**
+   * 配置 WebSocketServer
+   * @see https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocketserver
+   */
+  setup(wss) {
+    wss.on('connection', (ws, request) => {
+      ws.on('message', (rawData) => {})
+      ws.send('data')
+    })
+  }
+})
 ```
 
 ### Request/Response 增强
@@ -670,6 +700,50 @@ export default defineMock({
 fetch('/api/graphql', {
   method: 'POST',
   body: JSON.stringify({ source: '{ hello }' }) 
+})
+```
+
+**exp:** WebSocket Mock
+```ts
+// ws.mock.ts
+export default defineMock({
+  url: '/socket.io',
+  ws: true,
+  setup(wss) {
+    const wsMap = new Map()
+    wss.on('connection', (ws, req) => {
+      const token = req.getCookie('token')
+      wsMap.set(token, ws)
+      ws.on('message', (raw) => {
+        const data = JSON.parse(String(raw))
+        if (data.type === 'ping') return
+        // Broadcast
+        for (const [_token, _ws] of wsMap.entires()) {
+          if (_token !== token)
+            _ws.send(raw)
+        }
+      })
+    })
+    wss.on('error', (err) => {
+      console.error(err)
+    })
+    return () => {
+      wsMap.clear()
+    }
+  }
+})
+```
+```ts
+// app.ts
+const ws = new WebSocket('ws://localhost:5173/socket.io')
+ws.addEventListener('open', () => {
+  setInterval(() => {
+    // heartbeat
+    ws.send({ type: 'ping' })
+  }, 1000)
+}, { once: true })
+ws.addEventListener('message', (raw) => {
+  console.log(raw)
 })
 ```
 
