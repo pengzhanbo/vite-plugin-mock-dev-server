@@ -1,3 +1,18 @@
+## [1.1.6](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.5...v1.1.6) (2023-04-30)
+
+
+### Features
+
+* support `WebSocket` mock ([d1e5352](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/d1e5352133d62ecaf440a5cf8eb079186aee7478))
+* support `WebSocket` mock ([49660ff](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/49660fffedf7b3e288b67c2fc3f49fe7f07a552d))
+
+
+### Performance Improvements
+
+* optimize esbuild compile ([3c8916a](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/3c8916a253d5edab5a752e757c92b12d05a934ce))
+
+
+
 ## [1.1.5](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.4...v1.1.5) (2023-04-26)
 
 
