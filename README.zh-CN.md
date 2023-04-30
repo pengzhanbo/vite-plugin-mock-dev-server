@@ -739,7 +739,7 @@ const ws = new WebSocket('ws://localhost:5173/socket.io')
 ws.addEventListener('open', () => {
   setInterval(() => {
     // heartbeat
-    ws.send({ type: 'ping' })
+    ws.send(JSON.stringify({ type: 'ping' }))
   }, 1000)
 }, { once: true })
 ws.addEventListener('message', (raw) => {
