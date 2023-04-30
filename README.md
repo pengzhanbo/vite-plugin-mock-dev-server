@@ -405,6 +405,11 @@ export default defineMock({
   /**
    * Configure the WebSocketServer
    * @see https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocketserver
+   * If there are some additional automatically executed tasks in the setup function,
+   * they need to be terminated in the `Destroy` function that needs to be returned.
+   * The plugin will call the destroy() method during hot update to avoid duplicate
+   * automatic execution tasks after hot update.
+   * @type `(wss: WebSocketServer) => Destroy | void`
    */
   setup(wss) {
     wss.on('connection', (ws, request) => {

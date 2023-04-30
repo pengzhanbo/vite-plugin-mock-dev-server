@@ -9,6 +9,8 @@
 
 插件支持响应多种数据类型包括 `text/json/Buffer/ReadStream`等，还支持设置 headers、cookies。
 
+插件还支持模拟 `WebSocket`，可以轻松的实现在本地开发环境调试 `WebSocket` 服务。
+
 
 ## 特性
 
@@ -29,4 +31,5 @@
 - 🌈 支持 `vite preview` 模式
 - 📤 支持 multipart 类型，模拟文件上传
 - 📥 支持模拟文件下载
+- ⚜️ 支持模拟 `WebSocket`
 - 🗂 支持构建可独立部署的小型mock服务

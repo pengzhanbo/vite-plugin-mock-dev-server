@@ -95,6 +95,7 @@ export default defineConfig({
         { text: '使用mockjs库', link: '/examples/mockjs' },
         { text: '使用faker-js库', link: '/examples/faker' },
         { text: 'graphql', link: '/examples/graphql' },
+        { text: 'websocket', link: '/examples/websocket' },
       ],
     },
   },

@@ -399,6 +399,9 @@ export default defineMock({
   /**
    * 配置 WebSocketServer
    * @see https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocketserver
+   * 如果在 setup 函数中有一些 额外的 自动执行任务，需要返回的 `Destroy` 函数中，执行终止
+   * 插件会在热更新时，调用 destroy() 方法，避免在热更新后导致重复的自动执行任务
+   * @type `(wss: WebSocketServer) => Destroy | void` 
    */
   setup(wss) {
     wss.on('connection', (ws, request) => {
