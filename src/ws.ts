@@ -9,9 +9,27 @@ import type {
   MockRequest,
   MockServerPluginOptions,
   MockWebsocketItem,
-  MockWebsocketServerDestroy,
+  WebSocketSetupContext,
 } from './types'
 import { debug, doesProxyContextMatchUrl, parseParams } from './utils'
+
+interface WSSMapItem {
+  wss: WebSocketServer
+  cleanupList: (() => void)[]
+  context: WebSocketSetupContext
+}
+
+interface HMRMapItem {
+  req: http.IncomingMessage
+  ws: WebSocket
+  pathname: string
+}
+
+interface WaitingUpdateItem {
+  mock: MockWebsocketItem
+  mockUrl: string
+  list: { req: http.IncomingMessage; ws: WebSocket }[]
+}
 
 export function mockWebSocket(
   loader: MockLoader,
@@ -19,52 +37,38 @@ export function mockWebSocket(
   proxies: string[],
   cookiesOptions: MockServerPluginOptions['cookiesOptions'],
 ) {
-  const hmrFileSet = new Set<string>()
-  const wssMap: Map<
-    string,
-    { wss: WebSocketServer; cancel: MockWebsocketServerDestroy }
-  > = new Map()
-  const hmrMap: Map<
-    string,
-    { req: http.IncomingMessage; ws: WebSocket; pathname: string }[]
-  > = new Map()
+  const hmrFileList = new Set<string>()
+  const wssMap = new Map<string, WSSMapItem>()
+  const hmrMap = new Map<string, HMRMapItem[]>()
 
   loader.on?.('mock:update-end', (filepath: string) => {
-    if (!hmrFileSet.has(filepath)) return
-    const map: Record<
-      string,
-      {
-        mock: MockWebsocketItem
-        mockUrl: string
-        list: { req: http.IncomingMessage; ws: WebSocket }[]
-      }
-    > = {}
+    if (!hmrFileList.has(filepath)) return
+
+    const waitingUpdate: Record<string, WaitingUpdateItem> = {}
     for (const [mockUrl, hmr] of hmrMap.entries()) {
       loader.mockData[mockUrl].forEach((mock) => {
-        if ((mock as any).__filepath__ === filepath && mock.ws) {
+        if (mock.ws && (mock as any).__filepath__ === filepath) {
           hmr.forEach(({ pathname, req, ws }) => {
-            map[pathname] ??= { mock, list: [], mockUrl }
-            map[pathname].list.push({ req, ws })
-            ws.removeAllListeners()
+            waitingUpdate[pathname] ??= { mock, list: [], mockUrl }
+            waitingUpdate[pathname].list.push({ req, ws })
           })
         }
       })
     }
-    Object.keys(map).forEach((pathname) => {
-      const current = wssMap.get(pathname)!
-      const { mock, list, mockUrl } = map[pathname]
-      current.wss.removeAllListeners()
-      current.cancel?.()
-      current.cancel = mock.setup?.(current.wss)
-      current.wss.on('close', () => {
-        wssMap.delete(pathname)
-      })
+    Object.keys(waitingUpdate).forEach((pathname) => {
+      const { wss, cleanupList, context } = wssMap.get(pathname)!
+      const { mock, list, mockUrl } = waitingUpdate[pathname]
+      cleanupRunner(cleanupList)
+      wss.removeAllListeners()
+      mock.setup?.(wss, context)
+      wss.on('close', () => wssMap.delete(pathname))
       list.forEach(({ req, ws }) => {
-        current.wss.emit('connection', ws, req)
+        ws.removeAllListeners()
+        wss.emit('connection', ws, req)
         ws.on('close', () => {
           const list = hmrMap.get(mockUrl)
           const i = list?.findIndex((item) => item.ws === ws) || -1
-          if (i >= 0) list?.splice(i, 1)
+          if (i !== -1) list?.splice(i, 1)
         })
       })
     })
@@ -84,23 +88,26 @@ export function mockWebSocket(
       return pathToRegexp(key).test(pathname)
     })
     if (!mockUrl) return
+
     const mock = mockData[mockUrl].find((mock) => {
       return mock.url && mock.ws && pathToRegexp(mock.url).test(pathname)
     }) as MockWebsocketItem
 
     if (!mock) return
 
-    hmrFileSet.add((mock as any).__filepath__)
+    hmrFileList.add((mock as any).__filepath__)
 
-    let current = wssMap.get(pathname)!
+    let current = wssMap.get(pathname)
     if (!current) {
       const wss = new WebSocketServer({ noServer: true })
-      const cancel = mock.setup?.(wss)
-      wss.on('close', () => {
-        wssMap.delete(pathname)
-      })
-      current = { wss, cancel }
-      wssMap.set(pathname, current)
+      const cleanupList: (() => void)[] = []
+      const context: WebSocketSetupContext = {
+        onCleanup: (cleanup) => cleanupList.push(cleanup),
+      }
+      mock.setup?.(wss, context)
+      wss.on('close', () => wssMap.delete(pathname))
+
+      wssMap.set(pathname, (current = { wss, cleanupList, context }))
     }
 
     const request = req as MockRequest
@@ -115,28 +122,34 @@ export function mockWebSocket(
     current.wss.handleUpgrade(request, socket, head, (ws) => {
       debug(`websocket-mock: ${req.url} connected`)
 
-      current.wss.emit('connection', ws, request)
+      current!.wss.emit('connection', ws, request)
 
       let hmr = hmrMap.get(mockUrl)
-      if (!hmr) {
-        hmr = []
-        hmrMap.set(mockUrl, hmr)
-      }
+      if (!hmr) hmrMap.set(mockUrl, (hmr = []))
+
       hmr.push({ req: request, ws, pathname })
       ws.on('close', () => {
         const i = hmr!.findIndex((item) => item.ws === ws)
-        if (i >= 0) hmr!.splice(i, 1)
+        if (i !== -1) hmr!.splice(i, 1)
       })
     })
   })
 
   httpServer?.on('close', () => {
-    wssMap.forEach(({ wss, cancel }) => {
-      cancel?.()
+    wssMap.forEach(({ wss, cleanupList }) => {
+      cleanupRunner(cleanupList)
       wss.close()
     })
     wssMap.clear()
-    hmrFileSet.clear()
     hmrMap.clear()
+    hmrFileList.clear()
   })
+}
+
+function cleanupRunner(cleanupList: WSSMapItem['cleanupList']) {
+  let cleanup: (() => void) | undefined
+  // eslint-disable-next-line no-cond-assign
+  while ((cleanup = cleanupList.shift())) {
+    cleanup?.()
+  }
 }

@@ -404,8 +404,6 @@ export interface MockHttpItem extends MockBaseItem {
   ws?: false
 }
 
-export type MockWebsocketServerDestroy = (() => void) | void
-
 export interface MockWebsocketItem extends MockBaseItem {
   ws: true
   /**
@@ -416,17 +414,29 @@ export interface MockWebsocketItem extends MockBaseItem {
    * ```ts
    * export default {
    *   ws: true
-   *   setup: (wss) => {
+   *   setup: (wss, { onCleanup }) => {
    *     wss.on('connection', (ws,req) => {
    *       ws.on('message', (raw) => console.log(raw))
-   *       ws.send(JSON.stringify({ type: 'connected' }))
+   *       const timer = setInterval(
+   *         () => ws.send(JSON.stringify({ type: 'connected' })),
+   *         1000,
+   *       )
+   *       onCleanup(() => clearInterval(timer))
    *     })
    *     wss.on('error', (error) => console.error(error))
    *   }
    * }
    * ```
    */
-  setup: (wss: WebSocketServer) => MockWebsocketServerDestroy
+  setup: (wss: WebSocketServer, context: WebSocketSetupContext) => void
+}
+
+export interface WebSocketSetupContext {
+  /**
+   * 当你在定义 WSS 时，可能会执行一些自动任务或循环任务，
+   * 但是当热更新时，插件内部会重新执行 setup() ，这可能导致出现
+   */
+  onCleanup: (cleanup: () => void) => void
 }
 
 export type MockOptions = (MockHttpItem | MockWebsocketItem)[]
