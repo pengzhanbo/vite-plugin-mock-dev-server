@@ -3,6 +3,32 @@
 ## 基础示例
 <<< @/../example/mock/ws.mock.ts
 
+## 模拟实时推送
+
+::: code-group
+```ts [ws-real-time-push.mock.ts]
+import { defineMock } from 'vite-plugin-mock-dev-server'
+
+export default defineMock({
+  url: '/socket/push',
+  ws: true,
+  setup(wss, { onCleanup }) {
+    wss.on('connection', (ws, req) => {
+      const timer1 = setInterval(() => {
+        ws.send('push message')
+      }, 1000)
+      onCleanup(() => clearInterval(timer1))
+
+      const timer2 = setInterval(() => {
+        ws.send('push message2')
+      }, 3000)
+      onCleanup(() => clearInterval(timer2))
+    })
+  }
+})
+```
+:::
+
 ## 模拟聊天室
 
 ::: code-group

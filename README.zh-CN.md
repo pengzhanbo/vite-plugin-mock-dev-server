@@ -399,14 +399,17 @@ export default defineMock({
   /**
    * 配置 WebSocketServer
    * @see https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocketserver
-   * 如果在 setup 函数中有一些 额外的 自动执行任务，需要返回的 `Destroy` 函数中，执行终止
-   * 插件会在热更新时，调用 destroy() 方法，避免在热更新后导致重复的自动执行任务
-   * @type `(wss: WebSocketServer) => Destroy | void` 
+   * 如果在 setup 函数中有一些 额外的 自动执行任务或循环任务，
+   * 那么需要在 `onCleanup()` 传入一个回调，用于清除这些任务，
+   * 这是由于插件在热更新时，需要重新执行 setup，需要清除之前的任务，否则可能会导致重复任务产生冲突。
+   * `onCleanup()`可以在 setup 内部多次调用
+   * @type `(wss: WebSocketServer, context: SetupContext) =>  void` 
    */
-  setup(wss) {
+  setup(wss, { onCleanup }) {
     wss.on('connection', (ws, request) => {
       ws.on('message', (rawData) => {})
-      ws.send('data')
+      const timer = setInterval(() => ws.send('data'), 1000)
+      onCleanup(() => clearInterval(timer))
     })
   }
 })
@@ -712,7 +715,7 @@ fetch('/api/graphql', {
 export default defineMock({
   url: '/socket.io',
   ws: true,
-  setup(wss) {
+  setup(wss, { onCleanup }) {
     const wsMap = new Map()
     wss.on('connection', (ws, req) => {
       const token = req.getCookie('token')
@@ -730,9 +733,7 @@ export default defineMock({
     wss.on('error', (err) => {
       console.error(err)
     })
-    return () => {
-      wsMap.clear()
-    }
+    onCleanup(() => wsMap.clear())
   }
 })
 ```

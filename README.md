@@ -405,16 +405,20 @@ export default defineMock({
   /**
    * Configure the WebSocketServer
    * @see https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocketserver
-   * If there are some additional automatically executed tasks in the setup function,
-   * they need to be terminated in the `Destroy` function that needs to be returned.
-   * The plugin will call the destroy() method during hot update to avoid duplicate
-   * automatic execution tasks after hot update.
-   * @type `(wss: WebSocketServer) => Destroy | void`
+   * If there are some additional automatically executed tasks or loop
+   * tasks in the setup function,a callback needs to be passed in
+   * `onCleanup()` to clear these tasks.
+   * This is because when the plugin is hot updated,
+   * it needs to re-execute setup and clear previous tasks; otherwise,
+   * duplicate tasks may cause conflicts. 
+   * `onCleanup()` can be called multiple times within setup.
+   * @type `(wss: WebSocketServer, context: SetupContext) => void`
    */
-  setup(wss) {
+  setup(wss, { onCleanup }) {
     wss.on('connection', (ws, request) => {
       ws.on('message', (rawData) => {})
-      ws.send('data')
+      const timer = setInterval(() => ws.send('data'), 1000)
+      onCleanup(() => clearInterval(timer))
     })
   }
 })
@@ -721,7 +725,7 @@ fetch('/api/graphql', {
 export default defineMock({
   url: '/socket.io',
   ws: true,
-  setup(wss) {
+  setup(wss, { onCleanup }) {
     const wsMap = new Map()
     wss.on('connection', (ws, req) => {
       const token = req.getCookie('token')
@@ -739,9 +743,7 @@ export default defineMock({
     wss.on('error', (err) => {
       console.error(err)
     })
-    return () => {
-      wsMap.clear()
-    }
+    onCleanup(() => wsMap.clear())
   }
 })
 ```
