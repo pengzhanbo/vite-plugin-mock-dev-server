@@ -50,13 +50,11 @@ export function transformMockData(
       const { validator } = item
       if (!validator) return 1
       if (isFunction(validator)) return 0
-      const { query, params, headers, body, refererQuery } = validator
-      const count =
-        keysCount(query) +
-        keysCount(params) +
-        keysCount(headers) +
-        keysCount(body) +
-        keysCount(refererQuery)
+      const count = Object.keys(validator).reduce(
+        (prev, key) =>
+          prev + keysCount(validator[key as keyof typeof validator]),
+        0,
+      )
       return 1 / count
     })
   })
