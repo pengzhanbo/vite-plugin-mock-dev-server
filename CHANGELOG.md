@@ -1,3 +1,14 @@
+## [1.1.8](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.7...v1.1.8) (2023-05-02)
+
+
+### Performance Improvements
+
+* optimize error log ([ecc60fe](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/ecc60fe64db042c34306d77258e324fab6fb5b9c))
+* optimize transformer ([c6e414a](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/c6e414aa3e877213038511911b79e37aeafb6001))
+* optimize ws hmr ([9a93c37](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/9a93c37e0880cf553a9fcecc12e0d9a98564d947))
+
+
+
 ## [1.1.7](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.6...v1.1.7) (2023-05-01)
 
 
