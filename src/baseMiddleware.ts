@@ -115,7 +115,11 @@ export function baseMiddleware(
         await realDelay(startTime, delay)
         sendData(response, content, type)
       } catch (e) {
-        log.error(`${colors.red('[body error]')} ${req.url} \n`, e)
+        log.error(
+          `${colors.red('[body error]')} ${req.url} \n`,
+          `file: ${colors.cyan((mock as any).__filepath__)}`,
+          e,
+        )
         responseStatus(response, 500)
         res.end('')
       }
@@ -127,7 +131,11 @@ export function baseMiddleware(
         await realDelay(startTime, delay)
         await responseFn(request, response, next)
       } catch (e) {
-        log.error(`${colors.red('[response error]')} ${req.url} \n`, e)
+        log.error(
+          `${colors.red('[response error]')} ${req.url} \n`,
+          `file: ${colors.cyan((mock as any).__filepath__)}`,
+          e,
+        )
         responseStatus(response, 500)
         res.end('')
       }
@@ -170,7 +178,11 @@ function fineMock(
         try {
           return validate({ params, ...request }, mock.validator)
         } catch (e) {
-          log.error(`${colors.red('[validator error]')} ${pathname} \n`, e)
+          log.error(
+            `${colors.red('[validator error]')} ${pathname} \n`,
+            `file: ${colors.cyan((mock as any).__filepath__)}`,
+            e,
+          )
           return false
         }
       }
