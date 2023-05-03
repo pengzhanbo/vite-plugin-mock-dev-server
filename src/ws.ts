@@ -35,7 +35,9 @@ export function mockWebSocket(
   proxies: string[],
   cookiesOptions: MockServerPluginOptions['cookiesOptions'],
 ) {
+  // 热更新文件映射
   const hmrMap = new Map<string, Set<string>>()
+  // 连接池
   const poolMap: PoolMap = new Map()
   const wssContextMap: WSSContextMap = new WeakMap()
 
@@ -97,14 +99,16 @@ export function mockWebSocket(
     filepath: string,
   ) => {
     const { cleanupList, connectionList, context } = wssContextMap.get(wss)!
+    // 重启/热更新时， 需要重新执行 setup()，在执行前，需要清除旧的循环/自动任务/监听
+    // 多个客户端 ws 连接，每个 ws连接都需要清除旧的监听，并手动触发一次 connection 监听
     cleanupRunner(cleanupList)
+    connectionList.forEach(({ ws }) => ws.removeAllListeners())
     wss.removeAllListeners()
-    setupWss(wssMap, wss, mock, context, pathname, filepath)
 
-    connectionList.forEach(({ ws, req }) => {
-      ws.removeAllListeners()
-      emitConnection(wss, ws, req, connectionList)
-    })
+    setupWss(wssMap, wss, mock, context, pathname, filepath)
+    connectionList.forEach(({ ws, req }) =>
+      emitConnection(wss, ws, req, connectionList),
+    )
   }
 
   loader.on?.('mock:update-end', (filepath: string) => {

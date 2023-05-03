@@ -6,6 +6,8 @@ export function validate(
 ): boolean {
   return (
     equalObj(request.headers, validator.headers) &&
+    // TODO: body deep equal
+    // 在实际的场景中，body的情况是比较复杂的，仅当做json 浅层对比并不能完全满足需求
     equalObj(request.body, validator.body) &&
     equalObj(request.params, validator.params) &&
     equalObj(request.query, validator.query) &&

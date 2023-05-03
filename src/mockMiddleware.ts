@@ -30,7 +30,7 @@ export async function mockServerMiddleware(
     alias: config.resolve.alias,
   })
 
-  await loader.load()
+  loader.load()
 
   loader.on('mock:update-end', () => {
     if (options.reload) {

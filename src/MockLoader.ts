@@ -59,11 +59,8 @@ export class MockLoader extends EventEmitter {
     return this._mockData
   }
 
-  public async load() {
+  public load() {
     const { include, exclude } = this.options
-    const includePaths = await fastGlob(include, {
-      cwd: this.cwd,
-    })
     /**
      * 使用 rollup 提供的 include/exclude 规则，
      * 过滤包含文件
@@ -72,25 +69,38 @@ export class MockLoader extends EventEmitter {
       resolve: false,
     })
 
+    /**
+     * 由于之前使用 串行 解析加载 mock文件，
+     * 可能在比较大型的项目中，mock文件多的情况下会产生比较长的时间开销，
+     * 改成 并行 解析加载，同时，将 async/await 改为 promise，
+     * 在不影响功能的前提下，首次解析mock文件将不会阻塞 vite 启动开发服务。
+     */
+    fastGlob(include, {
+      cwd: this.cwd,
+    })
+      .then((includePaths) =>
+        Promise.all(
+          includePaths
+            .filter(includeFilter)
+            .map((filepath) => this.loadMock(filepath)),
+        ),
+      )
+      .then(() => this.updateMockList())
+
     this.watchMockEntry()
     this.watchDeps()
 
-    for (const filepath of includePaths.filter(includeFilter)) {
-      await this.loadMock(filepath)
-    }
-    this.updateMockList()
-
-    let timer: NodeJS.Timeout | null = null
+    let timer: NodeJS.Immediate | null = null
 
     this.on('mock:update', async (filepath: string) => {
       if (!includeFilter(filepath)) return
       await this.loadMock(filepath)
-      timer && clearTimeout(timer)
-      timer = setTimeout(() => {
+      timer && clearImmediate(timer)
+      timer = setImmediate(() => {
         this.updateMockList()
         this.emit('mock:update-end', filepath)
         timer = null
-      }, 0)
+      })
     })
     this.on('mock:unlink', async (filepath: string) => {
       if (!includeFilter(filepath)) return

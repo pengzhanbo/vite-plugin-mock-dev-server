@@ -146,7 +146,7 @@ function generatorServerEntryCode(
   port = 8080,
 ) {
   return `import { createServer } from 'node:http';
-  import connect from 'connect';
+import connect from 'connect';
 import corsMiddleware from 'cors';
 import { baseMiddleware, mockWebSocket } from 'vite-plugin-mock-dev-server';
 import mockData from './mock-data.js';
@@ -198,9 +198,8 @@ const exporters = [${exporters}];
 const mockList = exporters.map((raw) => raw && raw.default
   ? raw.default
   : Object.keys(raw || {}).map((key) => raw[key])
-)
-export default transformMockData(mockList);
-`
+);
+export default transformMockData(mockList);`
 }
 
 async function buildMockEntry(
