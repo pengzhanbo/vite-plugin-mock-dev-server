@@ -113,10 +113,11 @@ export function mockWebSocket(
 
   loader.on?.('mock:update-end', (filepath: string) => {
     if (!hmrMap.has(filepath)) return
-    const mockUrlList = hmrMap.get(filepath)!
+    const mockUrlList = hmrMap.get(filepath)
+    if (!mockUrlList) return
     for (const mockUrl of mockUrlList.values()) {
       for (const mock of loader.mockData[mockUrl]) {
-        if (!mock.ws || (mock as any).__filepath !== filepath) return
+        if (!mock.ws || (mock as any).__filepath__ !== filepath) return
         const wssMap = getWssMap(mockUrl)
         for (const [pathname, wss] of wssMap.entries()) {
           restartWss(wssMap, wss, mock, pathname, filepath)
