@@ -1,3 +1,17 @@
+## [1.1.9](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.8...v1.1.9) (2023-05-04)
+
+
+### Bug Fixes
+
+* wx hmr error ([b3a2483](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/b3a2483a810e8f7b985e37c14bdccac96883c2a4))
+
+
+### Performance Improvements
+
+* optimize resolved mock file ([d97c9ac](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/d97c9acb2542faa141061b84dc9b7a0ffc989f72))
+
+
+
 ## [1.1.8](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.7...v1.1.8) (2023-05-02)
 
 
