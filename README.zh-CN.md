@@ -54,9 +54,6 @@
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/9ccda610-2c6a-4cd0-aeaa-a8932f2b477c/deploy-status)](https://app.netlify.com/sites/vite-plugin-mock-dev-server/deploys)
 
-## Playground
-
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/pengzhanbo/vite-plugin-mock-dev-server/tree/main/playground)
 ## 使用
 
 ### 安装

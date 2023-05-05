@@ -19,12 +19,5 @@
     }
   },
   "include": ["./package.json", "./example", "./src"],
-  "exclude": [
-    "./example/**/*.mjs",
-    "./example/**/*.cjs",
-    "./example/**/*.js",
-    "./playground/**/*.mjs",
-    "./playground/**/*.cjs",
-    "./playground/**/*.js"
-  ]
+  "exclude": ["./example/**/*.mjs", "./example/**/*.cjs", "./example/**/*.js"]
 }
