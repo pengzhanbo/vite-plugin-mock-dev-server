@@ -59,8 +59,8 @@
     "ws": "^8.13.0"
   },
   "devDependencies": {
-    "@pengzhanbo/eslint-config-ts": "^0.3.4",
-    "@pengzhanbo/prettier-config": "^0.3.4",
+    "@pengzhanbo/eslint-config-ts": "^0.3.6",
+    "@pengzhanbo/prettier-config": "^0.3.6",
     "@types/co-body": "^6.1.0",
     "@types/cookies": "^0.7.7",
     "@types/debug": "^4.1.7",
@@ -68,7 +68,7 @@
     "@types/is-core-module": "^2.2.0",
     "@types/lodash.sortby": "^4.7.7",
     "@types/mime-types": "^2.1.1",
-    "@types/node": "^18.16.1",
+    "@types/node": "^18.16.4",
     "@types/ws": "^8.5.4",
     "bumpp": "^9.1.0",
     "conventional-changelog-cli": "^2.2.2",
@@ -77,8 +77,8 @@
     "prettier": "^2.8.8",
     "tsup": "^6.7.0",
     "typescript": "^5.0.4",
-    "vite": "^4.3.3",
-    "vitepress": "1.0.0-alpha.74"
+    "vite": "^4.3.4",
+    "vitepress": "1.0.0-alpha.75"
   },
   "peerDependencies": {
     "vite": ">=3.0.0"
