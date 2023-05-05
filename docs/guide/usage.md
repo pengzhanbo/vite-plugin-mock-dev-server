@@ -56,6 +56,7 @@ export default defineConfig({
 ```
 ``` js [javascript]
 const mockDevServerPlugin = require('vite-plugin-mock-dev-server') // [!code focus]
+
 /**
  * @type {import('vite').defineConfig}
  */

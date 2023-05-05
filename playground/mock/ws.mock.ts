@@ -5,8 +5,7 @@ export default defineMock({
   url: '/socket.io',
   ws: true,
   setup(wss) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    wss.on('connection', (ws, req: MockRequest) => {
+    wss.on('connection', (ws, _req: MockRequest) => {
       // req.query
       // req.params
       // req.getCookie

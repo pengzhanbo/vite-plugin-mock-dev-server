@@ -36,6 +36,7 @@ export default defineMock({
 ```
 
 ```ts
+import { Buffer } from 'node:buffer'
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({

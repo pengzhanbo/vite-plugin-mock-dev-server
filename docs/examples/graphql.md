@@ -5,12 +5,14 @@
 ::: code-group
 ```ts [graphql.mock.ts]
 import { buildSchema, graphql } from 'graphql'
+
 const schema = buildSchema(`
 type Query {
   hello: String
 }
 `)
 const rootValue = { hello: () => 'Hello world!' }
+
 export default defineMock({
   url: '/api/graphql',
   method: 'POST',

@@ -242,7 +242,7 @@ export default defineMock({
 返回一个自定义的 defineMock 函数，用于支持对 mock config 的预处理。
 
 ```ts
-import path from 'path'
+import path from 'node:path'
 import { createDefineMock } from 'vite-plugin-mock-dev-server'
 
 // 预处理 mock url
@@ -567,6 +567,8 @@ export default defineMock({
 
 **exp:** 使用 buffer 响应数据
 ```ts
+import { Buffer } from 'node:buffer'
+
 // 由于 type 默认值是 json，虽然在传输过程中body使用buffer，
 // 但是 content-type 还是为 json
 export default defineMock({
@@ -590,6 +592,7 @@ export default defineMock({
 模拟文件下载，传入文件读取流
 ```ts
 import { createReadStream } from 'node:fs'
+
 export default defineMock({
   url: '/api/download',
   // 当你不确定类型，可传入文件名由插件内部进行解析
@@ -604,6 +607,7 @@ export default defineMock({
 **exp:** 使用 `mockjs` 生成响应数据:
 ```ts
 import Mock from 'mockjs'
+
 export default defineMock({
   url: '/api/test',
   body: Mock.mock({
@@ -684,6 +688,7 @@ export default defineMock({
 **exp:** Graphql
 ```ts
 import { buildSchema, graphql } from 'graphql'
+
 const schema = buildSchema(`
 type Query {
   hello: String

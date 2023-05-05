@@ -248,7 +248,7 @@ export default defineMock({
 Return a custom defineMock function to support preprocessing of mock config.
 
 ```ts
-import path from 'path'
+import path from 'node:path'
 import { createDefineMock } from 'vite-plugin-mock-dev-server'
 
 // Preprocessed mock url
@@ -575,6 +575,8 @@ The `userId` in the route will be resolved into the `request.params` object.
 
 **exp:** Use buffer to respond data
 ```ts
+import { Buffer } from 'node:buffer'
+
 // Since the default value of type is json,
 // although buffer is used for body during transmission,
 // the content-type is still json.
@@ -599,6 +601,7 @@ export default defineMock({
 Simulate file download, pass in the file reading stream.
 ```ts
 import { createReadStream } from 'node:fs'
+
 export default defineMock({
   url: '/api/download',
   // When you are unsure of the type, you can pass in the file name for internal parsing by the plugin.
@@ -613,6 +616,7 @@ export default defineMock({
 **exp:** Use `mockjs`:
 ```ts
 import Mock from 'mockjs'
+
 export default defineMock({
   url: '/api/test',
   body: Mock.mock({
@@ -694,6 +698,7 @@ export default defineMock({
 **exp:** Graphql
 ```ts
 import { buildSchema, graphql } from 'graphql'
+
 const schema = buildSchema(`
 type Query {
   hello: String

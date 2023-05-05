@@ -40,6 +40,7 @@ export default defineMock({
 模拟文件下载，传入文件读取流
 ```ts
 import { createReadStream } from 'node:fs'
+
 export default defineMock({
   url: '/api/download',
   // 当你不确定类型，可传入文件名由插件内部进行解析

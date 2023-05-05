@@ -1,3 +1,4 @@
+import type { Buffer } from 'node:buffer'
 import type http from 'node:http'
 import type { Readable } from 'node:stream'
 import type Cookies from 'cookies'

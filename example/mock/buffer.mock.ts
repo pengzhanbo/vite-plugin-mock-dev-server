@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer'
 import { defineAPIMock } from './shared'
 
 export const buffer1 = defineAPIMock({

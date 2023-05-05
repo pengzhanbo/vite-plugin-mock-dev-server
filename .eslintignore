@@ -4,3 +4,7 @@ docs/.vitepress/cache
 docs/.vitepress/dist
 .github
 **/*.json5
+
+**/mock-config.md
+**/usage.md
+**/custom-header.mock.ts
