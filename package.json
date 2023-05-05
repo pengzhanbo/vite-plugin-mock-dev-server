@@ -59,8 +59,8 @@
     "ws": "^8.13.0"
   },
   "devDependencies": {
-    "@pengzhanbo/eslint-config-ts": "^0.3.6",
-    "@pengzhanbo/prettier-config": "^0.3.6",
+    "@pengzhanbo/eslint-config-ts": "^0.3.9",
+    "@pengzhanbo/prettier-config": "^0.3.9",
     "@types/co-body": "^6.1.0",
     "@types/cookies": "^0.7.7",
     "@types/debug": "^4.1.7",
@@ -77,7 +77,7 @@
     "prettier": "^2.8.8",
     "tsup": "^6.7.0",
     "typescript": "^5.0.4",
-    "vite": "^4.3.4",
+    "vite": "^4.3.5",
     "vitepress": "1.0.0-alpha.75"
   },
   "peerDependencies": {
