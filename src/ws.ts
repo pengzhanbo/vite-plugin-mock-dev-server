@@ -1,3 +1,15 @@
+/**
+ * 不复用 `viteConfig.server.proxy` 中 websocket proxy的原因是，
+ * 很难通过一种令人满意的方式，检查 mock 文件中是否有 websocket 相关的 mock 配置，
+ * 对比 `server.proxy` 中被使用的，并从 `viteConfig.server.proxy` 中删除。
+ * 由于不确定 mock 文件的规模，解析所有mock文件后找出相对应的路径匹配规则再修改 `viteConfig`，
+ * 这个链路的时间开销，已经影响了 vite 开发服务的启动时间，这有违 vite 和插件的预期。
+ * 且如果 新增的 mock 文件中 又有其他的规则需要再次 修改 `viteConfig` 导致 vite 服务重启，
+ * 这其实并不是一个合适的处理方案，很难符合用户的预期。
+ * 比较合适的方案还是提供 `wsPrefix` 配置项给用户自定义，并由用户确保 `wsPrefix` 中的项不存在
+ * 于 `server.proxy` 中，避免 vite 内的 http-proxy ws 与 插件的 ws 的冲突。
+ */
+
 import type http from 'node:http'
 import { parse as parseUrl } from 'node:url'
 import Cookies from 'cookies'
@@ -111,6 +123,8 @@ export function mockWebSocket(
     )
   }
 
+  // 检测 ws 相关的 mock 文件更新
+  // 如果 当前的 ws 配置已 建立 wss 连接，则重启该 wss 连接
   loader.on?.('mock:update-end', (filepath: string) => {
     if (!hmrMap.has(filepath)) return
     const mockUrlList = hmrMap.get(filepath)

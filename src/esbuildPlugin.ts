@@ -55,6 +55,9 @@ export const aliasPlugin = (
         if (!matchedEntry) {
           return null
         }
+        // 插件内部 对 alias 的支持并不完善，还缺少对 `customResolver` 的支持
+        // 但是在 esbuild 的插件实现中，暂时不能很好的实现对 `customResolver` 的参数兼容
+        // 这里作为 待优化的 问题
         const { find, replacement } = matchedEntry
 
         const result = await build.resolve(id.replace(find, replacement), {

@@ -6,6 +6,11 @@ import type formidable from 'formidable'
 import type { Connect } from 'vite'
 import type { WebSocketServer } from 'ws'
 
+/**
+ * Configure plugin
+ *
+ * 插件配置项
+ */
 export interface MockServerPluginOptions {
   /**
    * To configure the path matching rules for http mock services,
@@ -119,6 +124,9 @@ export type ResponseBody =
   | Buffer
   | null
 
+/**
+ * 扩展 request，添加额外的属性和方法
+ */
 export interface ExtraRequest {
   /**
    * The query string located after `?` in the request address has been parsed into JSON.
@@ -150,6 +158,9 @@ export interface ExtraRequest {
    */
   headers: Headers
   /**
+   * Get the cookie carried in the request.
+   *
+   * 获取 请求中携带的 cookie
    * @see [cookies](https://github.com/pillarjs/cookies#cookiesgetname--options)
    */
   getCookie: (name: string, option?: Cookies.GetOption) => string | undefined
@@ -159,6 +170,9 @@ export type MockRequest = Connect.IncomingMessage & ExtraRequest
 
 export type MockResponse = http.ServerResponse<http.IncomingMessage> & {
   /**
+   * Set cookie in response
+   *
+   * 向请求响应中设置 cookie
    * @see [cookies](https://github.com/pillarjs/cookies#cookiessetname--values--options)
    */
   setCookie: (
