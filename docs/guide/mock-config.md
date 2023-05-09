@@ -47,7 +47,7 @@ type Method =
   | 'PATCH' | 'HEAD' | 'TRACE' | 'OPTIONS'
 ```
 
-## enable
+## enabled
 
 - Type: `boolean`
 - 选填
@@ -58,7 +58,7 @@ type Method =
 ```ts
 export default defineMock({
   url: 'api/test',
-  enable: false, // 关闭当前 mock，api/test 将不会生效
+  enabled: false, // 关闭当前 mock，api/test 将不会生效
 })
 ```
 

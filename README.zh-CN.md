@@ -277,7 +277,7 @@ export default defineMock({
    * 对当前不需要mock的接口，可设置为 false
    * @default true
    */
-  enable: true,
+  enabled: true,
   /**
    * 设置接口响应延迟， 单位：ms
    * @default 0

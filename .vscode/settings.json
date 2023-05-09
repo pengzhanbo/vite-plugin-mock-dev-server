@@ -1,11 +1,14 @@
 {
   "cSpell.words": [
     "esbuild",
+    "importee",
     "metafile",
     "middlewares",
     "mockjs",
     "outfile",
     "picocolors",
+    "picomatch",
+    "proxied",
     "referer"
-  ]
+  ],
 }

@@ -26,22 +26,22 @@
 
 ## Feature
 
-- ⚡️ light weight，flexible，fast.
+- ⚡️ Lightweight, Flexible, Fast.
 - 🧲 Not injection-based, non-intrusive to client code.
 - 💡 ESModule/commonjs.
 - 🦾 Typescript.
 - 🔥 HMR
 - 🏷 Support `json` / `json5`.
 - 📦 Auto import mock file.
-- 🎨 Support any lib，like `mockjs`，or not use it.
+- 🎨 Support any lib, like `mockjs`, or do not use it.
 - 📥 Path rule matching, request parameter matching.
-- ⚙️ Support Enabled/Disabled any one of api mock
+- ⚙️ Support Enabled/Disabled any one of the API mock.
 - 📀 Supports response body content type such as `text/json/buffer/stream`.
 - ⚖️ Use `server.proxy`
-- 🍕 Support `viteConfig.define` in mock file.
-- ⚓️ Support `viteConfig.resolve.alias` in mock file.
+- 🍕 Support `viteConfig.define` in the mock file.
+- ⚓️ Support `viteConfig.resolve.alias` in the mock file.
 - 🌈 Support `vite preview` mode.
-- 📤 Support `multipart` content-type，mock upload file.
+- 📤 Support `multipart` content-type, mock upload file.
 - 📥 Support mock download file.
 - ⚜️ Support `WebSocket Mock`
 - 🗂 Support building small independent deployable mock services.
@@ -117,7 +117,7 @@ export default defineMock({
 
 ### mockDevServerPlugin(options)
 
-vite plugin
+Vite plugin
 
 
 `vite.config.ts`
@@ -139,7 +139,7 @@ export default defineConfig({
 
   **Type:** `string | string[]`
   
-  Configure custom matching rules for mock server. Any request path starting with the value of `prefix` will be proxied to the corresponding target. If the `prefix` value starts with ^, it will be recognized as a RegExp.
+  Configure custom matching rules for the mock server. Any request path starting with the value of `prefix` will be proxied to the corresponding target. If the `prefix` value starts with ^, it will be recognized as a RegExp.
 
   > In general, `server.proxy` is sufficient to meet the needs. Adding this item is for compatibility with certain scenarios.
 
@@ -149,7 +149,7 @@ export default defineConfig({
   
   **类型:** `string | string[]`
 
-  Configure the matching rules for WebSocket service. Any request path starting with the value of `wsPrefix` and using the `ws/wss` protocol will be proxied to the corresponding target.
+  Configure the matching rules for the WebSocket service. Any request path starting with the value of `wsPrefix` and using the `ws/wss` protocol will be proxied to the corresponding target.
 
   If the value of `wsPrefix` starts with `^`, it will be recognized as a RegExp.
 
@@ -169,7 +169,7 @@ export default defineConfig({
 
   **Type:** `string | string[]`
   
-  When reading mock files for configuration, the files that need to be excluded can be a directory, glob, or an array.
+  When reading mock files for configuration, the files that need to be excluded can be a directory, glob, or array.
 
   **Default：** `['**/node_modules/**','**/.vscode/**','**/.git/**']`
 
@@ -184,7 +184,7 @@ export default defineConfig({
 
 - `options.formidableOptions`
   
-  Configure to `formidable`，see [formidable options](https://github.com/node-formidable/formidable#options)
+  Configure to `formidable`, see [formidable options](https://github.com/node-formidable/formidable#options)
 
   **Default:** `{}`
 
@@ -204,8 +204,8 @@ export default defineConfig({
   **Default:** `{}`
 
 - `options.build`
-  
-  Configuration needed to build a small, independently deployable mock service.
+
+  The configuration needed to build a small, independently deployable mock service.
 
   **Type：** `boolean | ServerBuildOptions` 
 
@@ -284,7 +284,7 @@ export default defineMock({
    * 
    * @default true
    */
-  enable: true,
+  enabled: true,
   /**
    * Set interface response delay, unit: ms.
    * @default 0
@@ -440,7 +440,7 @@ type Request = Connect.IncomingMessage & {
 
 **In Response:**
 
-The original type of `response` is `http.ServerResponse<http.IncomingMessage>`. The plugin adds `setCookie(name, value)` method for configuration cookie on this basis.
+The original type of `response` is `http.ServerResponse<http.IncomingMessage>`. The plugin adds `setCookie(name, value)` method for configuration cookies on this basis.
 
 ```ts
 type Response = http.ServerResponse<http.IncomingMessage> & {
@@ -465,14 +465,14 @@ type Response = http.ServerResponse<http.IncomingMessage> & {
 
 See more examples： [example](/example/)
 
-**exp:** Match `/api/test`，And returns a response body content with empty data
+**exp:** Match `/api/test`, And returns a response body content with empty data
 ```ts
 export default defineMock({
   url: '/api/test',
 })
 ```
 
-**exp:** Match `/api/test` ，And returns a static content data
+**exp:** Match `/api/test` , And returns a static content data
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -510,7 +510,7 @@ export default defineMock({
 ```
 
 
-**exp:** Define multiple mock requests for the same url and match valid rules with validators
+**exp:** Define multiple mock requests for the same URL and match valid rules with validators
 ```ts
 export default defineMock([
   // Match /api/test?a=1
@@ -569,7 +569,7 @@ export default defineMock({
 
 The `userId` in the route will be resolved into the `request.params` object.
 
-**exp:** Use buffer to respond data
+**exp**:** Use the buffer to respond data
 ```ts
 import { Buffer } from 'node:buffer'
 
@@ -594,7 +594,7 @@ export default defineMock({
 
 **exp:** Response file type
 
-Simulate file download, pass in the file reading stream.
+Simulate file download, and pass in the file reading stream.
 ```ts
 import { createReadStream } from 'node:fs'
 
@@ -622,7 +622,7 @@ export default defineMock({
   })
 })
 ```
-You need installed `mockjs`
+You need install `mockjs`
 
 
 **exp:** Use `response` to customize the response
@@ -657,9 +657,9 @@ export default defineMock({
 
 
 
-**exp:** multipart, upload file.
+**exp:** multipart, upload files.
 
-use [`formidable`](https://www.npmjs.com/package/formidable#readme) to supported.
+use [`formidable`](https://www.npmjs.com/package/formidable#readme) to support.
 ``` html
 <form action="/api/upload" method="post" enctype="multipart/form-data">
     <p>
@@ -764,9 +764,9 @@ ws.addEventListener('message', (raw) => {
 
 ## Mock Services
 
-In some scenarios, it may be necessary to use the data provided by mock services for display purposes, but the project may have already been packaged, built and deployed without support from `vite` and this plugin's mock service. Since this plugin supports importing various `node` modules in mock files at the design stage, the mock file cannot be inline into client build code.
+In some scenarios, it may be necessary to use the data provided by mock services for display purposes, but the project may have already been packaged, built and deployed without support from `Vite` and this plugin's mock service. Since this plugin supports importing various `node` modules in mock files at the design stage, the mock file cannot be inline into client build code.
 
-To meet such scenarios, on one hand, the plugin provides support under `vite preview`, and on the other hand, it also builds a small independent mock service application that can be deployed to relevant environments during `vite build`. This can then be forwarded through other HTTP servers like nginx to actual ports for mock support.
+To meet such scenarios, on one hand, the plugin provides support under `vite preview`, and on the other hand, it also builds a small independent mock service application that can be deployed to relevant environments during `vite build`. This can then be forwarded through other HTTP servers like Nginx to actual ports for mock support.
 
 The default output is built into the directory `dist/mockServer`, generating files as follows:
 ```sh

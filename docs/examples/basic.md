@@ -39,11 +39,11 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
   url: '/api/test',
-  enable: false
+  enabled: false
 })
 ```
 
-`enable` 设置为 `false` 后， 发起的 `/api/text` 请求不再经过 `mock-server`，而是经过原来的
+`enabled` 设置为 `false` 后， 发起的 `/api/text` 请求不再经过 `mock-server`，而是经过原来的
 `server.proxy` 配置的代理转发。
 
 ## 动态路径匹配
