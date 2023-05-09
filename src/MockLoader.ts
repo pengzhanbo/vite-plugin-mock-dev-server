@@ -205,11 +205,18 @@ export class MockLoader extends EventEmitter {
     const { code, deps } = await this.transformWithEsbuild(filepath, isESM)
 
     try {
-      const raw = await this.loadFromCode(filepath, code, isESM)
-      const mockConfig =
-        raw && raw.default
-          ? raw.default
-          : Object.keys(raw || {}).map((key) => raw[key])
+      const raw = (await this.loadFromCode(filepath, code, isESM)) || {}
+      let mockConfig
+      if (raw.default) {
+        mockConfig = raw.default
+      } else {
+        mockConfig = []
+        Object.keys(raw).forEach((key) => {
+          isArray(raw[key])
+            ? mockConfig.push(...raw[key])
+            : mockConfig.push(raw[key])
+        })
+      }
 
       if (isArray(mockConfig)) {
         mockConfig.forEach((mock) => (mock.__filepath__ = filepath))
