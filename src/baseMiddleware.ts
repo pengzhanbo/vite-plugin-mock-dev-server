@@ -2,6 +2,7 @@ import { Buffer } from 'node:buffer'
 import { parse as urlParse } from 'node:url'
 import Cookies from 'cookies'
 import HTTP_STATUS from 'http-status'
+import sortBy from 'lodash.sortby'
 import * as mime from 'mime-types'
 import { pathToRegexp } from 'path-to-regexp'
 import colors from 'picocolors'
@@ -36,6 +37,8 @@ export interface BaseMiddlewareOptions {
   proxies: string[]
 }
 
+const RE_DYNAMIC_URL = /:/g
+
 export function baseMiddleware(
   mockLoader: MockLoader,
   { formidableOptions = {}, proxies, cookiesOptions }: BaseMiddlewareOptions,
@@ -53,9 +56,13 @@ export function baseMiddleware(
     }
 
     const mockData = mockLoader.mockData
-    const mockUrl = Object.keys(mockData).find((key) => {
-      return pathToRegexp(key).test(pathname)
-    })
+
+    // 非动态匹配优先前置匹配，动态匹配以参数个数少的优先匹配
+    const mockUrl = sortBy(
+      Object.keys(mockData),
+      (url) => url.match(RE_DYNAMIC_URL)?.length || 0,
+    ).find((key) => pathToRegexp(key).test(pathname))
+
     if (!mockUrl) return next()
 
     const { query: refererQuery } = urlParse(req.headers.referer || '', true)
