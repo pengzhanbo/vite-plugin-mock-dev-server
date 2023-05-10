@@ -1,3 +1,14 @@
+## [1.1.10](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.9...v1.1.10) (2023-05-10)
+
+
+### Bug Fixes
+
+* **build:** mock files named exports resolved fail ([b11320a](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/b11320adb8628287a1ffa4bbf9e7c1a649c5a72b))
+* mock files named exports resolved fail ([56967fe](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/56967fed847c367e09805804bba71c24de21b816))
+* Optimize the path matching priority ([3f0ba10](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/3f0ba102876b083d7347159819053b043910f798))
+
+
+
 ## [1.1.9](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.8...v1.1.9) (2023-05-04)
 
 
