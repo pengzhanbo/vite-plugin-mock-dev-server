@@ -203,10 +203,20 @@ async function generateMockEntryCode(
   return `import { transformMockData } from 'vite-plugin-mock-dev-server';
 ${importers}
 const exporters = [${exporters}];
-const mockList = exporters.map((raw) => raw && raw.default
-  ? raw.default
-  : Object.keys(raw || {}).map((key) => raw[key])
-);
+const mockList = exporters.map((raw) => {
+  let mockConfig
+  if (raw.default) {
+    mockConfig = raw.default
+  } else {
+    mockConfig = []
+    Object.keys(raw || {}).forEach((key) => {
+      isArray(raw[key])
+        ? mockConfig.push(...raw[key])
+        : mockConfig.push(raw[key])
+    })
+  }
+  return mockConfig
+});
 export default transformMockData(mockList);`
 }
 
