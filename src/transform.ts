@@ -60,7 +60,8 @@ export function transformMockData(
     mocks[key] = sortBy(mocks[key], (item) => {
       if (item.ws === true) return 0
       const { validator } = item
-      if (!validator) return 1
+      // fix: #28
+      if (!validator) return 2
       if (isFunction(validator)) return 0
       const count = Object.keys(validator).reduce(
         (prev, key) =>
