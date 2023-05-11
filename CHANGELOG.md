@@ -1,3 +1,12 @@
+## [1.1.11](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.10...v1.1.11) (2023-05-11)
+
+
+### Bug Fixes
+
+* **transform:**  priority sorting error ([#28](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/28)) ([9cdcf59](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/9cdcf599a0b95e7f00cf765becfa245238298946))
+
+
+
 ## [1.1.10](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.9...v1.1.10) (2023-05-10)
 
 
