@@ -61,7 +61,7 @@ export function transformMockData(
       if (item.ws === true) return 0
       const { validator } = item
       // fix: #28
-      if (!validator) return 2
+      if (!validator || isEmptyObj(validator)) return 2
       if (isFunction(validator)) return 0
       const count = Object.keys(validator).reduce(
         (prev, key) =>
