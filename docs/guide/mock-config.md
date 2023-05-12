@@ -248,27 +248,23 @@ export default defineMock([
 ```ts
 export default {
   ws: true,
-  setup(wss) {
+  setup(wss, { onCleanup }) {
     // wss 是 WebSocketServer 的实例，在服务器端，一个请求地址对应一个 wss
     // 但是允许多个客户端同时请求该地址建立 ws连接。
     // 在 `connection` 事件监听中， 回调参数 `ws` 表示其中一个 客户端的 `ws` 连接。
 
-    let timer = null
     wss.on('connection', (ws, res) => {
       ws.on('message', (raw) => {
         console.log(raw)
       })
-      timer = setInterval(() => {
+      const timer = setInterval(() => {
         ws.send('data')
       }, 2000)
+      // 在该函数中 清除 自动执行任务、或者终止其他方法执行
+      // 但是无需在此函数内 删除 wss、ws 的监听事件，
+      // 插件内部在热更新时，会自动处理，避免重复的事件监听
+      onCleanup(() => clearInterval(timer))
     })
-    // 如果你有一些自动执行的任务，那么你需要在 setup 中返回一个 `destroy` 函数
-    // 在该函数中 清除 自动执行任务、或者终止其他方法执行
-    // 但是无需在此函数内 删除 wss、ws 的监听事件，
-    // 插件内部在热更新时，会自动处理，避免重复的事件监听
-    return function destroy() {
-      timer && clearInterval(timer)
-    }
   }
 }
 ```
