@@ -57,7 +57,7 @@ See the [documentation](https://vite-plugin-mock-dev-server.netlify.app/) to lea
 
 ### Install
 
-```sh
+``` sh
 # npm
 npm i -D vite-plugin-mock-dev-server
 # yarn 
@@ -69,7 +69,7 @@ pnpm add -D vite-plugin-mock-dev-server
 ### Configuration
 
 `vite.config.ts`
-```ts
+``` ts
 import { defineConfig } from 'vite'
 import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
 
@@ -101,7 +101,7 @@ The plugin will also read the `define` configuration, which supports direct use 
 By default, write mock data in the `mock` directory of your project's root directory:
 
 `mock/api.mock.ts` :
-```ts
+``` ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
@@ -121,7 +121,7 @@ Vite plugin
 
 
 `vite.config.ts`
-```ts
+``` ts
 import { defineConfig } from 'vite'
 import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
 
@@ -189,7 +189,7 @@ export default defineConfig({
   **Default:** `{}`
 
   example: Configure to file upload dir
-  ```ts
+  ``` ts
   MockDevServerPlugin({
     formidableOptions: {
       uploadDir: path.join(process.cwd(), 'uploads'),
@@ -211,7 +211,7 @@ export default defineConfig({
 
   **Default：** `false`
 
-  ```ts
+  ``` ts
   interface ServerBuildOptions {
     /**
      * server port
@@ -230,7 +230,7 @@ export default defineConfig({
 
 Mock Type Helper
 
-```ts
+``` ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
@@ -243,7 +243,7 @@ export default defineMock({
 
 Return a custom defineMock function to support preprocessing of mock config.
 
-```ts
+``` ts
 import path from 'node:path'
 import { createDefineMock } from 'vite-plugin-mock-dev-server'
 
@@ -259,7 +259,7 @@ export default defineApiMock({
 
 ## Mock Configuration
 
-```ts
+``` ts
 // Configure the http mock
 export default defineMock({
   /**
@@ -384,7 +384,7 @@ export default defineMock({
   }
 })
 ```
-```ts
+``` ts
 // Configure the WebSocket mock
 export default defineMock({
   /**
@@ -442,7 +442,7 @@ type Request = Connect.IncomingMessage & {
 
 The original type of `response` is `http.ServerResponse<http.IncomingMessage>`. The plugin adds `setCookie(name, value)` method for configuration cookies on this basis.
 
-```ts
+``` ts
 type Response = http.ServerResponse<http.IncomingMessage> & {
   setCookie: (
     name: string,
@@ -466,14 +466,14 @@ type Response = http.ServerResponse<http.IncomingMessage> & {
 See more examples： [example](/example/)
 
 **exp:** Match `/api/test`, And returns a response body content with empty data
-```ts
+``` ts
 export default defineMock({
   url: '/api/test',
 })
 ```
 
 **exp:** Match `/api/test` , And returns a static content data
-```ts
+``` ts
 export default defineMock({
   url: '/api/test',
   body: { a: 1 },
@@ -482,7 +482,7 @@ export default defineMock({
 
 
 **exp:** Only Support `GET` Method
-```ts
+``` ts
 export default defineMock({
   url: '/api/test',
   method: 'GET'
@@ -490,14 +490,14 @@ export default defineMock({
 ```
 
 **exp:** In the response header, add a custom header and cookie
-```ts
+``` ts
 export default defineMock({
   url: '/api/test',
   headers: { 'X-Custom': '12345678' },
   cookies: { 'my-cookie': '123456789' },
 })
 ```
-```ts
+``` ts
 export default defineMock({
   url: '/api/test',
   headers({ query, body, params, headers }) {
@@ -511,7 +511,7 @@ export default defineMock({
 
 
 **exp:** Define multiple mock requests for the same URL and match valid rules with validators
-```ts
+``` ts
 export default defineMock([
   // Match /api/test?a=1
   {
@@ -539,7 +539,7 @@ export default defineMock([
 
 
 **exp:** Response Delay
-```ts
+``` ts
 export default defineMock({
   url: '/api/test',
   delay: 6000, // delay 6 seconds
@@ -548,7 +548,7 @@ export default defineMock({
 
 
 **exp:** The interface request failed
-```ts
+``` ts
 export default defineMock({
   url: '/api/test',
   status: 502,
@@ -558,7 +558,7 @@ export default defineMock({
 
 
 **exp:** Dynamic route matching
-```ts
+``` ts
 export default defineMock({
   url: '/api/user/:userId',
   body({ params }) {
@@ -581,7 +581,7 @@ export default defineMock({
   body: Buffer.from(JSON.stringify({ a: 1 }))
 })
 ```
-```ts
+``` ts
 // When the type is buffer, the content-type is application/octet-stream.
 // The data passed in through body will be converted to a buffer.
 export default defineMock({
@@ -595,7 +595,7 @@ export default defineMock({
 **exp:** Response file type
 
 Simulate file download, and pass in the file reading stream.
-```ts
+``` ts
 import { createReadStream } from 'node:fs'
 
 export default defineMock({
@@ -610,7 +610,7 @@ export default defineMock({
 ```
 
 **exp:** Use `mockjs`:
-```ts
+``` ts
 import Mock from 'mockjs'
 
 export default defineMock({
@@ -626,7 +626,7 @@ You need install `mockjs`
 
 
 **exp:** Use `response` to customize the response
-```ts
+``` ts
 export default defineMock({
   url: '/api/test',
   response(req, res, next) {
@@ -646,7 +646,7 @@ export default defineMock({
 
 
 **exp:** Use json / json5
-```json
+``` json
 {
   "url": "/api/test",
   "body": {
@@ -692,7 +692,7 @@ export default defineMock({
 ```
 
 **exp:** Graphql
-```ts
+``` ts
 import { buildSchema, graphql } from 'graphql'
 
 const schema = buildSchema(`
@@ -713,7 +713,7 @@ export default defineMock({
 })
 ```
 
-```ts
+``` ts
 fetch('/api/graphql', {
   method: 'POST',
   body: JSON.stringify({ source: '{ hello }' }) 
@@ -721,7 +721,7 @@ fetch('/api/graphql', {
 ```
 
 **exp:** WebSocket Mock
-```ts
+``` ts
 // ws.mock.ts
 export default defineMock({
   url: '/socket.io',
@@ -748,7 +748,7 @@ export default defineMock({
   }
 })
 ```
-```ts
+``` ts
 // app.ts
 const ws = new WebSocket('ws://localhost:5173/socket.io')
 ws.addEventListener('open', () => {
@@ -769,7 +769,7 @@ In some scenarios, it may be necessary to use the data provided by mock services
 To meet such scenarios, on one hand, the plugin provides support under `vite preview`, and on the other hand, it also builds a small independent mock service application that can be deployed to relevant environments during `vite build`. This can then be forwarded through other HTTP servers like Nginx to actual ports for mock support.
 
 The default output is built into the directory `dist/mockServer`, generating files as follows:
-```sh
+``` sh
 ./mockServer
 ├── index.js
 ├── mock-data.js

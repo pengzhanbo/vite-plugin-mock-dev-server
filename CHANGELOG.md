@@ -23,7 +23,7 @@
 
 ### Bug Fixes
 
-* wx hmr error ([b3a2483](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/b3a2483a810e8f7b985e37c14bdccac96883c2a4))
+* ws hmr error ([b3a2483](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/b3a2483a810e8f7b985e37c14bdccac96883c2a4))
 
 
 ### Performance Improvements

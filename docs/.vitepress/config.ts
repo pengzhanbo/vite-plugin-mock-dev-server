@@ -39,11 +39,6 @@ export default defineConfig({
     nav: [
       { text: '使用指南', link: '/guide/introduce', activeMatch: '/guide/' },
       { text: '使用示例', link: '/examples/basic', activeMatch: '/example/' },
-      {
-        text: 'playground',
-        link: 'https://stackblitz.com/github/pengzhanbo/vite-plugin-mock-dev-server/tree/main/playground',
-        activeMatch: '!',
-      },
       { text: `version ${version}`, link: '/', activeMatch: '!' },
     ],
     sidebar: {
