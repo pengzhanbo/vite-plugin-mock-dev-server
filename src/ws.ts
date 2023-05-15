@@ -82,9 +82,7 @@ export function mockWebSocket(
   ) => {
     try {
       mock.setup?.(wss, context)
-      wss.on('close', () => {
-        wssMap.delete(pathname)
-      })
+      wss.on('close', () => wssMap.delete(pathname))
     } catch (e) {
       log.error(`${colors.red('[websocket server error]')} ${filepath}\n`, e)
     }
@@ -139,7 +137,6 @@ export function mockWebSocket(
       }
     }
   })
-
   httpServer?.on('upgrade', (req, socket, head) => {
     const { pathname, query } = parseUrl(req.url!, true)
     if (
