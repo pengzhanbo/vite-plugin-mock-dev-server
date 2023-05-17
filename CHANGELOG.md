@@ -53,7 +53,6 @@
 ### Features
 
 * support `WebSocket` mock ([d1e5352](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/d1e5352133d62ecaf440a5cf8eb079186aee7478))
-* support `WebSocket` mock ([49660ff](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/49660fffedf7b3e288b67c2fc3f49fe7f07a552d))
 
 
 ### Performance Improvements
