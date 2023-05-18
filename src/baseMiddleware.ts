@@ -210,15 +210,20 @@ function responseStatus(
 async function provideHeaders(
   req: MockRequest,
   res: MockResponse,
-  { headers, type = 'json' }: MockHttpItem,
+  mock: MockHttpItem,
 ) {
+  const { headers, type = 'json' } = mock
+  const filepath = (mock as any).__filepath__ as string
   const contentType =
     mime.contentType(type) || mime.contentType(mime.lookup(type) || '')
   contentType && res.setHeader('Content-Type', contentType)
 
   res.setHeader('Cache-Control', 'no-cache,max-age=0')
-  res.setHeader('X-Mock', 'generate by vite:plugin-mock-dev-server')
+  res.setHeader('X-Mock-Power-By', 'vite-plugin-mock-dev-server')
+  res.setHeader('X-File-Path', filepath)
+
   if (!headers) return
+
   try {
     const raw = isFunction(headers) ? await headers(req) : headers
     Object.keys(raw).forEach((key) => {
