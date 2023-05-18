@@ -1,3 +1,23 @@
+## [1.1.12](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.11...v1.1.12) (2023-05-18)
+
+
+### Bug Fixes
+
+* **transform:** empty validator sorting ([b114023](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/b114023c4f6b0de9670c5a910532e28380c49903))
+
+
+### Features
+
+* add `env` support ([66a0420](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/66a04207e40a06c6f17c2a639bbe7c7f2c9e5580))
+* add custom header `X-File-Path` ([d3ee0f7](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/d3ee0f791ddb2e40fca11ad8fe86250ca1ee0ac8))
+
+
+### Performance Improvements
+
+* optimize websocket mock options ([76db7fb](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/76db7fb34bed0fb396bd2023b6dd821e7caebc2c))
+
+
+
 ## [1.1.11](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.10...v1.1.11) (2023-05-11)
 
 
