@@ -56,6 +56,7 @@ export function viteDefine(config: ResolvedConfig) {
 
   return {
     ...importMetaKeys,
+    ...userDefine,
     ...importMetaFallbackKeys,
     ...processNodeEnv,
   }
