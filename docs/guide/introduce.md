@@ -26,7 +26,7 @@
 - ⚙️ 随意开启或关闭对某个接口的 mock配置
 - 📀 支持多种响应体数据类型，包括 `text/json/buffer/stream`.
 - ⚖️ 使用 `server.proxy` 配置
-- 🍕 支持在 mock文件中使用 `viteConfig.define`配置字段
+- 🍕 支持在 mock文件中使用 `viteConfig.define`配置字段 和 `env` 环境变量
 - ⚓️ 支持在 mock文件中使用 `viteConfig.resolve.alias` 路径别名
 - 🌈 支持 `vite preview` 模式
 - 📤 支持 multipart 类型，模拟文件上传

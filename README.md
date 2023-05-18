@@ -38,7 +38,7 @@
 - ⚙️ Support Enabled/Disabled any one of the API mock.
 - 📀 Supports response body content type such as `text/json/buffer/stream`.
 - ⚖️ Use `server.proxy`
-- 🍕 Support `viteConfig.define` in the mock file.
+- 🍕 Support `viteConfig.define` and `env` in the mock file.
 - ⚓️ Support `viteConfig.resolve.alias` in the mock file.
 - 🌈 Support `vite preview` mode.
 - 📤 Support `multipart` content-type, mock upload file.
