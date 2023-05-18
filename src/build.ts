@@ -8,6 +8,7 @@ import isCore from 'is-core-module'
 import type { Plugin, ResolvedConfig } from 'vite'
 import { createFilter, normalizePath } from 'vite'
 import { name, version } from '../package.json'
+import { viteDefine } from './define'
 import {
   aliasPlugin,
   externalizeDeps,
@@ -31,13 +32,8 @@ export async function generateMockServer(
 ) {
   const include = ensureArray(options.include)
   const exclude = ensureArray(options.exclude)
-  const define: ResolvedConfig['define'] = {}
-  if (config.define) {
-    for (const key in config.define) {
-      const val = config.define[key]
-      define[key] = typeof val === 'string' ? val : JSON.stringify(val)
-    }
-  }
+  const define = viteDefine(config)
+
   const { httpProxies } = ensureProxies(config.server.proxy || {})
   httpProxies.push(...ensureArray(options.prefix))
   const wsProxies = ensureArray(options.wsPrefix)

@@ -1,6 +1,7 @@
 import type * as http from 'node:http'
 import type { Connect, ResolvedConfig, WebSocketServer } from 'vite'
 import { baseMiddleware } from './baseMiddleware'
+import { viteDefine } from './define'
 import { MockLoader } from './MockLoader'
 import type { MockServerPluginOptions } from './types'
 import { ensureArray, ensureProxies } from './utils'
@@ -12,21 +13,10 @@ export async function mockServerMiddleware(
   httpServer: http.Server | null,
   ws?: WebSocketServer,
 ): Promise<Connect.NextHandleFunction> {
-  const include = ensureArray(options.include)
-  const exclude = ensureArray(options.exclude)
-
-  const define: ResolvedConfig['define'] = {}
-  if (config.define) {
-    for (const key in config.define) {
-      const val = config.define[key]
-      define[key] = typeof val === 'string' ? val : JSON.stringify(val)
-    }
-  }
-
   const loader = new MockLoader({
-    include,
-    exclude,
-    define,
+    include: ensureArray(options.include),
+    exclude: ensureArray(options.exclude),
+    define: viteDefine(config),
     alias: config.resolve.alias,
   })
 
@@ -58,8 +48,9 @@ export async function mockServerMiddleware(
    * 但是由于 vite 内部在启动时，直接对 ws相关的请求，通过 upgrade 事件，发送给 http-proxy
    * 的 ws 代理方法。如果插件直接使用 config.server.proxy 中的 ws 配置，
    * 就会导致两次 upgrade 事件 对 wss 实例的冲突。
-   * 且由于 vite 内部并没有提供其他的方式跳过 内部 upgrade 的方式，（个人认为也没有必要提供此类方式）
+   * 由于 vite 内部并没有提供其他的方式跳过 内部 upgrade 的方式，（个人认为也没有必要提供此类方式）
    * 所以插件选择了通过插件的配置项 `wsPrefix` 来做 判断的首要条件。
+   * 当前插件默认会将已配置在 wsPrefix 的值，从 config.server.proxy 的删除，避免发生冲突问题。
    */
   mockWebSocket(
     loader,
