@@ -1,3 +1,12 @@
+## [1.1.13](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.12...v1.1.13) (2023-05-18)
+
+
+### Performance Improvements
+
+* optimize `define` ([ee5fa3f](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/ee5fa3fc2669a63a7b383214f43077e17a1c932c))
+
+
+
 ## [1.1.12](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.11...v1.1.12) (2023-05-18)
 
 
