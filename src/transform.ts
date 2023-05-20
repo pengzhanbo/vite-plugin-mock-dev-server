@@ -1,8 +1,7 @@
-import { parse as urlParse } from 'node:url'
 import sortBy from 'lodash.sortby'
 import type { MockHttpItem, MockOptions, MockWebsocketItem } from './types'
-import { isArray, isEmptyObj, isFunction } from './utils'
-import { equalObj } from './validator'
+import { isArray, isEmptyObj, isFunction, urlParse } from './utils'
+import { includeObject } from './validator'
 
 export function transformMockData(
   mockList:
@@ -21,7 +20,7 @@ export function transformMockData(
         (mock.enabled || typeof mock.enabled === 'undefined') && mock.url,
     )
     .forEach((mock) => {
-      const { pathname, query } = urlParse(mock.url, true)
+      const { pathname, query } = urlParse(mock.url)
       const list = (mocks[pathname!] ??= [])
 
       const current = { ...mock, url: pathname! }
@@ -30,7 +29,7 @@ export function transformMockData(
         if (!isEmptyObj(query)) {
           if (isFunction(validator)) {
             current.validator = function (request) {
-              return equalObj(request.query, query) && validator(request)
+              return includeObject(request.query, query) && validator(request)
             }
           } else if (validator) {
             current.validator = { ...validator }
