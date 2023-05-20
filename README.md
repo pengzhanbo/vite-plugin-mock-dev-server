@@ -81,9 +81,7 @@ export default defineConfig({
   define: {},
   server: {
     proxy: {
-      '^/api': {
-        target: 'http://example.com'
-      }
+      '^/api': { target: 'http://example.com' }
     }
   }
 })
@@ -106,10 +104,7 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
   url: '/api/test',
-  body: {
-    a: 1,
-    b: 2,
-  }
+  body: { a: 1, b: 2 }
 })
 ```
 
@@ -220,7 +215,7 @@ export default defineConfig({
     serverPort?: number
     /**
      * build output dir
-     @default 'mockServer'
+     * @default 'mockServer'
      */
     dist?: string
   }
@@ -300,38 +295,6 @@ export default defineMock({
    */
   statusText: 'OK',
   /**
-   * Request validator, return mock data if validated, otherwise do not use current mock. 
-   * This is useful in scenarios where an interface needs to return different data based 
-   * on different input parameters. 
-   * Validators can solve this type of problem well by dividing the same URL into multiple 
-   * mock configurations and determining which one is effective based on the validator.
-   * 
-   * @type { headers?: object; body?: object; query?: object; params?: object; refererQuery?: object  }
-   * 
-   * If the validator passes in an object, 
-   * then the validation method is to strictly compare whether the `value` 
-   * of each `key` in headers/body/query/params in the request interface is exactly equal. 
-   * If they are all equal, then the validation passes.
-   * @type ({ headers: object; body: object; query: object; params: object; refererQuery: object }) => boolean
-   *
-   * If the validator passed in is a function, 
-   * then the data related to the requested interface will be provided as input parameters 
-   * for users to perform custom validation and return a boolean.
-   * 
-   */
-  validator: {
-    headers: {},
-    body: {},
-    query: {},
-    params: {},
-    /**
-     * refererQuery validates the query parameters in the URL of the request source page, 
-     * which allows for direct modification of parameters in the browser address bar 
-     * to obtain different simulated data.
-     */
-    refererQuery: {}
-  },
-  /**
    * response headers
    * @type Record<string, any>
    * @type (({ query, body, params, headers }) => Record<string, any>)
@@ -381,7 +344,38 @@ export default defineMock({
    */
   response(req, res, next) {
     res.end()
-  }
+  },
+  /**
+   * Request validator, return mock data if validated, otherwise do not use current mock. 
+   * This is useful in scenarios where an interface needs to return different data based 
+   * on different input parameters. 
+   * Validators can solve this type of problem well by dividing the same URL into multiple 
+   * mock configurations and determining which one is effective based on the validator.
+   * 
+   * @type { headers, body, query, params, refererQuery }
+   * If the validator passed in is an object, 
+   * then the validation method is to deeply compare whether 
+   * `headers/body/query/params/refererQuery` of the requested interface contain 
+   * the `key-value` of the validator.
+   * 
+   * @type (request) => boolean
+   * If the validator passed in is a function, 
+   * then the data related to the requested interface will be provided as input parameters 
+   * for users to perform custom validation and return a boolean.
+   * 
+   */
+  validator: {
+    headers: {},
+    body: {},
+    query: {},
+    params: {},
+    /**
+     * refererQuery validates the query parameters in the URL of the request source page, 
+     * which allows for direct modification of parameters in the browser address bar 
+     * to obtain different simulated data.
+     */
+    refererQuery: {}
+  },
 })
 ```
 ``` ts
@@ -533,6 +527,13 @@ export default defineMock([
     // `?a=3` will resolve to `validator.query`
     url: '/api/test?a=3',
     body: { message: 'query.a == 3' }
+  },
+  // Hitting the POST /api/test request, and in the request body,
+  // field a is an array that contains items with values of 1 and 2.
+  {
+    url: '/api/test',
+    method: ['POST'],
+    validator: { body: { a: [1, 2] } }
   }
 ])
 ```

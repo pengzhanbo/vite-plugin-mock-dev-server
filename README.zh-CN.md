@@ -82,9 +82,7 @@ export default defineConfig({
   define: {},
   server: {
     proxy: {
-      '^/api': {
-        target: 'http://example.com'
-      }
+      '^/api': { target: 'http://example.com' }
     }
   }
 })
@@ -106,10 +104,7 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
   url: '/api/test',
-  body: {
-    a: 1,
-    b: 2,
-  }
+  body: { a: 1, b: 2 }
 })
 ```
 
@@ -215,7 +210,7 @@ export default defineConfig({
     serverPort?: number
     /**
      * 构建输出目录
-     @default 'mockServer'
+     * @default 'mockServer'
      */
     dist?: string
   }
@@ -293,33 +288,6 @@ export default defineMock({
    */
   statusText: 'OK',
   /**
-   * 请求验证器，通过验证器则返回 mock数据，否则不使用当前mock。
-   * 这对于一些场景中，某个接口需要通过不同的入参来返回不同的数据，
-   * 验证器可以很好的解决这一类问题，将同个 url 分为多个 mock配置，
-   * 根据 验证器来判断哪个mock配置生效。
-   * 
-   * @type { headers?: object; body?: object; query?: object; params?: object; refererQuery?: object  }
-   * 
-   * 如果 validator 传入的是一个对象，那么验证方式是严格比较 请求的接口
-   * 中，headers/body/query/params 的各个`key`的`value`是否全等，
-   * 全等则校验通过
-   * 
-   * @type ({ headers: object; body: object; query: object; params: object; refererQuery: object }) => boolean
-   * 如果 validator 传入的是一个函数，那么会讲 请求的接口相关数据作为入参，提供给使用者进行自定义校验，并返回一个 boolean
-   * 
-   */
-  validator: {
-    headers: {},
-    body: {},
-    query: {},
-    params: {},
-    /**
-     * refererQuery 验证了请求来源页面 URL 中的查询参数，
-     * 这使得可以直接在浏览器地址栏中修改参数以获取不同的模拟数据。
-     */
-    refererQuery: {}
-  },
-  /**
    * 响应状态 headers
    * @type Record<string, any>
    * @type (({ query, body, params, headers }) => Record<string, any>)
@@ -363,7 +331,7 @@ export default defineMock({
    * @type (request: { headers, query, body, params }) => any | Promise<any>
    * 如果传入一个函数，那么可以更加灵活的定义返回响应体数据
    */
-  body: {},
+  body: '',
 
   /**
    * 如果通过 body 配置不能解决mock需求，
@@ -376,7 +344,32 @@ export default defineMock({
    */
   response(req, res, next) {
     res.end()
-  }
+  },
+  /**
+   * 请求验证器，通过验证器则返回 mock数据，否则不使用当前mock。
+   * 这对于一些场景中，某个接口需要通过不同的入参来返回不同的数据，验证器可以很好的解决这一类问题，
+   * 将同个 url 分为多个 mock配置，根据 验证器来判断哪个mock配置生效。
+   * 
+   * @type { headers, body, query, params, refererQuery }
+   * 如果 validator 传入的是一个对象，那么验证方式是 深度比较 请求的接口
+   * 中 headers/body/query/params/refererQuery 是否包含 validator 的 key-value。
+   * 
+   * @type (request) => boolean
+   * 如果 validator 传入的是一个函数，那么会将 请求的接口相关数据作为入参，
+   * 提供给使用者进行自定义校验，并返回一个 boolean
+   *
+   */
+  validator: {
+    headers: {},
+    body: {},
+    query: {},
+    params: {},
+    /**
+     * refererQuery 验证了请求来源页面 URL 中的查询参数，
+     * 这使得可以直接在浏览器地址栏中修改参数以获取不同的模拟数据。
+     */
+    refererQuery: {}
+  },
 })
 ```
 ```ts
@@ -528,6 +521,12 @@ export default defineMock([
     // `?a=3` 将会解析到 `validator.query`
     url: '/api/test?a=3',
     body: { message: 'query.a == 3' },
+  },
+  // 命中 POST /api/test 请求，且 请求体中，字段 a 为数组，且数组包含值为 1， 2 的项
+  {
+    url: '/api/test',
+    method: ['POST'],
+    validator: { body: { a: [1, 2] } }
   }
 ])
 ```
