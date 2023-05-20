@@ -11,7 +11,6 @@
  */
 
 import type http from 'node:http'
-import { parse as parseUrl } from 'node:url'
 import Cookies from 'cookies'
 import { pathToRegexp } from 'path-to-regexp'
 import colors from 'picocolors'
@@ -24,7 +23,13 @@ import type {
   MockWebsocketItem,
   WebSocketSetupContext,
 } from './types'
-import { debug, doesProxyContextMatchUrl, log, parseParams } from './utils'
+import {
+  debug,
+  doesProxyContextMatchUrl,
+  log,
+  parseParams,
+  urlParse,
+} from './utils'
 
 type PoolMap = Map<string, WSSMap>
 type WSSMap = Map<string, WebSocketServer>
@@ -138,7 +143,7 @@ export function mockWebSocket(
     }
   })
   httpServer?.on('upgrade', (req, socket, head) => {
-    const { pathname, query } = parseUrl(req.url!, true)
+    const { pathname, query } = urlParse(req.url!)
     if (
       !pathname ||
       proxies.length === 0 ||
@@ -179,7 +184,7 @@ export function mockWebSocket(
 
     const request = req as MockRequest
     const cookies = new Cookies(req, req as any, cookiesOptions)
-    const { query: refererQuery } = parseUrl(req.headers.referer || '', true)
+    const { query: refererQuery } = urlParse(req.headers.referer || '')
 
     request.query = query
     request.refererQuery = refererQuery

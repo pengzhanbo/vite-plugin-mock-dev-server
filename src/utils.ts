@@ -1,7 +1,8 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { parse as queryParse } from 'node:querystring'
 import type { Readable, Stream } from 'node:stream'
-import { fileURLToPath } from 'node:url'
+import { URL, fileURLToPath } from 'node:url'
 import Debug from 'debug'
 import { match } from 'path-to-regexp'
 import colors from 'picocolors'
@@ -122,4 +123,15 @@ export function parseParams(pattern: string, url: string): Record<string, any> {
     params: {},
   }
   return urlMatch.params || {}
+}
+
+/**
+ * nodejs 从 19.0.0 开始不支持 url.parse，因此使用 url.parse 来解析 可能会报错，
+ * 使用 URL 来解析
+ */
+export function urlParse(input: string) {
+  const url = new URL(input, 'http://example.com')
+  const pathname = decodeURIComponent(url.pathname)
+  const query = queryParse(url.search.replace(/^\?/, ''))
+  return { pathname, query }
 }

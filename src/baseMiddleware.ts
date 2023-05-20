@@ -1,5 +1,4 @@
 import { Buffer } from 'node:buffer'
-import { parse as urlParse } from 'node:url'
 import Cookies from 'cookies'
 import HTTP_STATUS from 'http-status'
 import sortBy from 'lodash.sortby'
@@ -28,6 +27,7 @@ import {
   log,
   parseParams,
   sleep,
+  urlParse,
 } from './utils'
 import { validate } from './validator'
 
@@ -45,7 +45,7 @@ export function baseMiddleware(
 ): Connect.NextHandleFunction {
   return async function (req, res, next) {
     const startTime = Date.now()
-    const { query, pathname } = urlParse(req.url!, true)
+    const { query, pathname } = urlParse(req.url!)
 
     if (
       !pathname ||
@@ -65,7 +65,7 @@ export function baseMiddleware(
 
     if (!mockUrl) return next()
 
-    const { query: refererQuery } = urlParse(req.headers.referer || '', true)
+    const { query: refererQuery } = urlParse(req.headers.referer || '')
     const reqBody = await parseReqBody(req, formidableOptions)
     const cookies = new Cookies(req, res, cookiesOptions)
     const getCookie = cookies.get.bind(cookies)

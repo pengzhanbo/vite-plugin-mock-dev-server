@@ -69,12 +69,6 @@ export class MockLoader extends EventEmitter {
       resolve: false,
     })
 
-    /**
-     * 由于之前使用 串行 解析加载 mock文件，
-     * 可能在比较大型的项目中，mock文件多的情况下会产生比较长的时间开销，
-     * 改成 并行 解析加载，同时，将 async/await 改为 promise，
-     * 在不影响功能的前提下，首次解析mock文件将不会阻塞 vite 启动开发服务。
-     */
     fastGlob(include, {
       cwd: this.cwd,
     })
