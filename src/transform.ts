@@ -1,7 +1,7 @@
 import sortBy from 'lodash.sortby'
 import type { MockHttpItem, MockOptions, MockWebsocketItem } from './types'
 import { isArray, isEmptyObj, isFunction, urlParse } from './utils'
-import { includeObject } from './validator'
+import { isObjectSubset } from './validator'
 
 export function transformMockData(
   mockList:
@@ -29,7 +29,7 @@ export function transformMockData(
         if (!isEmptyObj(query)) {
           if (isFunction(validator)) {
             current.validator = function (request) {
-              return includeObject(request.query, query) && validator(request)
+              return isObjectSubset(request.query, query) && validator(request)
             }
           } else if (validator) {
             current.validator = { ...validator }
