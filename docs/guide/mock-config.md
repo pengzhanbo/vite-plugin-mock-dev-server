@@ -193,7 +193,7 @@ type ResponseBody = string | number | array | object | Buffer | ReadableStream
 这对于一些场景中，某个接口需要通过不同的入参来返回不同的数据， 验证器可以很好的解决这一类问题，将同个 url 分为多个 mock配置，
 根据 验证器来判断哪个mock配置生效。
 
-如果 validator 传入的是一个对象，那么验证方式是严格比较 请求的接口中，headers/body/query/params 的各个`key`的`value`是否全等，全等则校验通过
+如果 validator 传入的是一个对象，从 `v1.1.14` 版本开始，将会判断 validator 配置 的 `headers/query/params/body/refererBody` 对象，是否是当前请求的对应的请求数据的子集，比较是深度比较，如果属性值是数组，则需要数组的所有项都在请求数据的对应的数据的数组中。
 
 如果 validator 传入的是一个函数，那么会将 请求的接口相关数据作为入参，提供给使用者进行自定义校验，并返回一个 boolean。
 
@@ -203,25 +203,17 @@ type ResponseBody = string | number | array | object | Buffer | ReadableStream
 export default defineMock([
   {
     url: 'api/list',
-    validator: {
-      query: { p: 1 }
-    },
+    validator: { query: { p: 1 } },
     body: {
-      result: [
-        { title: 'p1' }
-      ],
+      result: [ { title: 'p1' } ],
       page: 1,
     }
   },
   {
     url: 'api/list',
-    validator: {
-      query: { p: 2 }
-    },
+    validator: { query: { p: 2 } },
     body: {
-      result: [
-        { title: 'p2' }
-      ],
+      result: [ { title: 'p2' } ],
       page: 2,
     }
   }

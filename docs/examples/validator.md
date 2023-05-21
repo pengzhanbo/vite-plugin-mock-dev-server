@@ -39,3 +39,37 @@
 可以更加灵活的校验请求中的 各种信息
 
 <<< @/../example/mock/validator-request.mock.ts
+
+## 深度校验 body 是否匹配
+
+对于请求体 body，其数据结构可能相对复杂，需要深度校验。
+插件支持判断 验证器配置的 body 是否 属于 请求体 body 的 子集。
+
+::: code-group
+``` ts [api.mock.ts]
+export default defineMock({
+  url: '/mock/validator-body',
+  validator: {
+    body: {
+      a: [1, 2], // 数组的项 必须都在 请求体 的 a 中
+      b: { c: 1 }
+    }
+  },
+  body: ''
+})
+```
+``` ts [fetch.ts]
+await fetch('/mock/validator-body', {
+  method: 'POST',
+  body: JSON.stringify({
+    a: [1, 2, 3, 4],
+    b: { c: 1, d: 2 },
+    c: 1,
+  })
+})
+```
+:::
+
+::: info
+不仅 验证器中的 body 支持 深度校验，query、refererQuery 等也均支持。
+:::
