@@ -263,12 +263,15 @@ export interface MockHttpItem extends MockBaseItem {
    */
   statusText?: string
   /**
-   * Configure response delay time, unit: `ms`
+   * Configure response delay time,
+   * If an array is passed in, it represents the range of delay time.
+   * unit: `ms`
    *
-   * 配置响应延迟时间, 单位： `ms`
+   * 配置响应延迟时间, 如果传入的是一个数组，则代表延迟时间的范围
+   * 单位： `ms`
    * @default 0
    */
-  delay?: number
+  delay?: number | [number, number]
 
   /**
    * Configure response body cookies

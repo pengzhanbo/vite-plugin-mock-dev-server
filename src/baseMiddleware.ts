@@ -267,10 +267,20 @@ function sendData(res: MockResponse, raw: ResponseBody, type: string) {
   }
 }
 
-async function realDelay(startTime: number, delay?: number) {
-  if (!delay || delay <= 0) return
-  const diff = Date.now() - startTime
-  const realDelay = delay - diff
+async function realDelay(startTime: number, delay?: MockHttpItem['delay']) {
+  if (
+    !delay ||
+    (typeof delay === 'number' && delay <= 0) ||
+    (isArray(delay) && delay.length !== 2)
+  )
+    return
+  let realDelay = 0
+  if (isArray(delay)) {
+    const [min, max] = delay
+    realDelay = Math.floor(Math.random() * (max - min + 1)) + min
+  } else {
+    realDelay = delay - (Date.now() - startTime)
+  }
   if (realDelay > 0) await sleep(realDelay)
 }
 
