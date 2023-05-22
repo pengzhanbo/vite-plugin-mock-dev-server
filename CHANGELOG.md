@@ -1,3 +1,18 @@
+## [1.1.14](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.13...v1.1.14) (2023-05-22)
+
+
+### Features
+
+* add delayed response time range support ([d6f2244](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/d6f22449ebad26ba091114e21a777903eb6fead0))
+* **validator:** support deep object comparison for inclusion relationship ([a293e5f](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/a293e5ffb11cf9100a3955d3f7a34205df281d3f))
+
+
+### Performance Improvements
+
+* Replace `url.parse` to `new URL()` ([21044b3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/21044b370a082e35dda568f326d8e62f77067272))
+
+
+
 ## [1.1.13](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.12...v1.1.13) (2023-05-18)
 
 
