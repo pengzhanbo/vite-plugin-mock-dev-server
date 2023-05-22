@@ -274,7 +274,8 @@ export default defineMock({
    */
   enabled: true,
   /**
-   * 设置接口响应延迟， 单位：ms
+   * 设置接口响应延迟，如果传入的是一个数组，则代表延迟时间的范围
+   * 单位：ms
    * @default 0
    */
   delay: 1000,

@@ -281,7 +281,9 @@ export default defineMock({
    */
   enabled: true,
   /**
-   * Set interface response delay, unit: ms.
+   * Set interface response delay, if an array is passed in,
+   * it represents the range of delay time.
+   * unit: ms.
    * @default 0
    */
   delay: 1000,

@@ -80,14 +80,14 @@ export default defineMock({
 
 ## delay
 
-- Type: `number`
+- Type: `number | [number, number]`
 - 选填
 - 单位： `ms`
 - 默认值： `0`，表示不延迟
 
 接口延迟响应。
 
-延迟接口一段时间后再返回响应数据。
+延迟接口一段时间后再返回响应数据。 如果传入的是一个数组，则表示延迟响应的时间范围。
 
 ## type
 
