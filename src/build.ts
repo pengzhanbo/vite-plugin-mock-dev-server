@@ -102,7 +102,7 @@ function getMockDependencies(deps: Metafile['inputs']): string[] {
   const excludeDeps = [name, 'connect', 'cors']
   Object.keys(deps).forEach((mPath) => {
     const imports = deps[mPath].imports
-      .filter((_) => _.external)
+      .filter((_) => _.external && !_.path.startsWith('<define:'))
       .map((_) => _.path)
     imports.forEach((dep) => {
       if (!excludeDeps.includes(dep) && !isCore(dep)) {
@@ -158,10 +158,10 @@ import mockData from './mock-data.js';
 const app = connect();
 const server = createServer(app);
 const httpProxies = ${JSON.stringify(httpProxies)};
-const wxProxies = ${JSON.stringify(wsProxies)}
+const wxProxies = ${JSON.stringify(wsProxies)};
 const cookiesOptions = ${JSON.stringify(cookiesOptions)};
 
-mockWebSocket({ mockData }, server, wxProxies, cookiesOptions)
+mockWebSocket({ mockData }, server, wxProxies, cookiesOptions);
 
 app.use(corsMiddleware());
 app.use(baseMiddleware({ mockData }, {
