@@ -1,3 +1,12 @@
+## [1.1.16](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.15...v1.1.16) (2023-05-23)
+
+
+### Bug Fixes
+
+* **build:** incorrectly recognize define:import as third-party package ([d3f2ced](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/d3f2cedf5c08e8370ccbef3da9195bcffad3f345))
+
+
+
 ## [1.1.15](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.14...v1.1.15) (2023-05-23)
 
 
