@@ -1,3 +1,12 @@
+## [1.1.15](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.14...v1.1.15) (2023-05-23)
+
+
+### Bug Fixes
+
+* Invalid define value ([#31](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/31)) ([97b8294](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/97b8294691d46426066b37544115f8fd450301b2))
+
+
+
 ## [1.1.14](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.1.13...v1.1.14) (2023-05-22)
 
 
