@@ -7,7 +7,9 @@
 // 在本插件中，简化了处理过程，仅提供 支持在 mock 文件中使用 `define` 和 `env`，并删除了不必要的边界处理。
 // 而存在的问题则是，插件并没有对`.env` 文件进行监听，即 `env` 发生变化，不会触发插件的热更新。
 
+import colors from 'picocolors'
 import type { ResolvedConfig } from 'vite'
+import { log } from './utils'
 
 const metaEnvRe = /import\.meta\.env\.(.+)/
 
@@ -24,18 +26,34 @@ export function viteDefine(config: ResolvedConfig) {
 
   const userDefine: Record<string, string> = {}
   const userDefineEnv: Record<string, string> = {}
+  const defineErrorKeys = []
   for (const key in config.define) {
     // fix: #31 https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/31
-    if (key === 'import.meta.env.LEGACY') continue
     const val = config.define[key]
-    userDefine[key] = typeof val === 'string' ? val : JSON.stringify(val)
+    if (typeof val === 'string') {
+      try {
+        JSON.parse(val)
+        userDefine[key] = val
+      } catch {
+        defineErrorKeys.push(key)
+      }
+    } else {
+      userDefine[key] = JSON.stringify(val)
+    }
 
     // make sure `import.meta.env` object has user define properties
-
     const match = key.match(metaEnvRe)
-    if (match) {
+    if (match && userDefine[key]) {
       userDefineEnv[match[1]] = `__vite__define__${userDefine[key]}`
     }
+  }
+
+  if (defineErrorKeys.length) {
+    log.error(
+      `${colors.yellow('[warn]')} The following keys: ${colors.yellow(
+        colors.underline(defineErrorKeys.join(', ')),
+      )} declared in 'define' cannot be parsed as regular code snippets.`,
+    )
   }
 
   const importMetaKeys: Record<string, string> = {}
