@@ -25,6 +25,8 @@ export function viteDefine(config: ResolvedConfig) {
   const userDefine: Record<string, string> = {}
   const userDefineEnv: Record<string, string> = {}
   for (const key in config.define) {
+    // fix: #31 https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/31
+    if (key === 'import.meta.env.LEGACY') continue
     const val = config.define[key]
     userDefine[key] = typeof val === 'string' ? val : JSON.stringify(val)
 
