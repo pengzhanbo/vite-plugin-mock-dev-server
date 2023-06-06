@@ -1,5 +1,5 @@
 /**
- * @type {import('vite-plugin-mock-dev-server').MockOptionsItem}
+ * @type {import('vite-plugin-mock-dev-server').MockHttpItem}
  */
 module.exports = {
   url: '/api/common-js',

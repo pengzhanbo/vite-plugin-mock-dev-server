@@ -89,18 +89,14 @@ export function baseMiddleware(
     const request = req as MockRequest
     const response = res as MockResponse
 
-    /**
-     * provide request
-     */
+    // provide request
     request.body = reqBody
     request.query = query
     request.refererQuery = refererQuery
     request.params = parseParams(mock.url, pathname)
     request.getCookie = getCookie
 
-    /**
-     * provide response
-     */
+    // provide response
     response.setCookie = cookies.set.bind(cookies)
 
     const {
@@ -112,6 +108,7 @@ export function baseMiddleware(
       statusText,
     } = mock
 
+    // provide headers
     responseStatus(response, status, statusText)
     await provideHeaders(request, response, mock)
     await provideCookies(request, response, mock)
