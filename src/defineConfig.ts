@@ -31,8 +31,8 @@ import { isArray } from './utils'
  * ```
  */
 export function defineMock(config: MockHttpItem): MockHttpItem
-export function defineMock(config: MockOptions): MockOptions
 export function defineMock(config: MockWebsocketItem): MockWebsocketItem
+export function defineMock(config: MockOptions): MockOptions
 export function defineMock(
   config: MockOptions | MockHttpItem | MockWebsocketItem,
 ): MockOptions | MockHttpItem | MockWebsocketItem {

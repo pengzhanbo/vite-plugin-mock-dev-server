@@ -1,6 +1,6 @@
 import sortBy from 'lodash.sortby'
 import type { MockHttpItem, MockOptions, MockWebsocketItem } from './types'
-import { isArray, isEmptyObj, isFunction, urlParse } from './utils'
+import { isArray, isEmptyObj, isFunction, isObject, urlParse } from './utils'
 import { isObjectSubset } from './validator'
 
 export function transformMockData(
@@ -15,10 +15,7 @@ export function transformMockData(
   const mocks: Record<string, MockOptions> = {}
 
   list
-    .filter(
-      (mock) =>
-        (mock.enabled || typeof mock.enabled === 'undefined') && mock.url,
-    )
+    .filter((mock) => isObject(mock) && mock.enabled !== false && mock.url)
     .forEach((mock) => {
       const { pathname, query } = urlParse(mock.url)
       const list = (mocks[pathname!] ??= [])
