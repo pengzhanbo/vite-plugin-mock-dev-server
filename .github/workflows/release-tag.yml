@@ -3,7 +3,7 @@ name: Add Github Release Tag
 on:
   push:
     tags:
-      - "v*"
+      - v*
 
 jobs:
   release:
