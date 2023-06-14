@@ -9,23 +9,22 @@
 ::: code-group
 ``` ts [typescript]
 import { defineConfig } from 'vite'
-
-import mockDevServerPlugin from 'vite-plugin-mock-dev-server' // [!code focus]
+import mockDevServerPlugin from 'vite-plugin-mock-dev-server' // [!code ++]
 
 export default defineConfig({
   plugins: [
-    mockDevServerPlugin(), // [!code focus]
+    mockDevServerPlugin(), // [!code ++]
   ],
 })
 ```
 ``` js [javascript]
-const mockDevServerPlugin = require('vite-plugin-mock-dev-server') // [!code focus]
+const mockDevServerPlugin = require('vite-plugin-mock-dev-server') // [!code ++]
 /**
  * @type {import('vite').defineConfig}
  */
 module.exports = {
   plugins: [
-    mockDevServerPlugin(), // [!code focus]
+    mockDevServerPlugin(), // [!code ++]
   ],
 }
 ```
@@ -48,15 +47,15 @@ export default defineConfig({
   plugins: [
     mockDevServerPlugin(),
   ],
-  server: { // [!code focus]
-    proxy: { // [!code focus]
-      '^/api': 'http://example.com/', // [!code focus]
-    }, // [!code focus]
-  }, // [!code focus]
+  server: { // [!code ++]
+    proxy: { // [!code ++]
+      '^/api': 'http://example.com/', // [!code ++]
+    }, // [!code ++]
+  }, // [!code ++]
 })
 ```
 ``` js [javascript]
-const mockDevServerPlugin = require('vite-plugin-mock-dev-server') // [!code focus]
+const mockDevServerPlugin = require('vite-plugin-mock-dev-server')
 
 /**
  * @type {import('vite').defineConfig}
@@ -65,11 +64,11 @@ module.exports = {
   plugins: [
     mockDevServerPlugin(),
   ],
-  server: { // [!code focus]
-    proxy: { // [!code focus]
-      '^/api': 'http://example.com/', // [!code focus]
-    }, // [!code focus]
-  }, // [!code focus]
+  server: { // [!code ++]
+    proxy: { // [!code ++]
+      '^/api': 'http://example.com/', // [!code ++]
+    }, // [!code ++]
+  }, // [!code ++]
 }
 ```
 :::
@@ -104,12 +103,12 @@ module.exports = {
 ```
 **`.js/.ts` 文件根据 `package.json` 的  `type` 字段值判断， 默认为 `cjs`。**
 
-新增 `api.mock.ts` 文件：
+新增 `*.mock.ts` 文件：
 
 ```sh {3}
 .
 ├── mock
-│   └── api.mock.ts
+│   └── api.mock.ts // [!code ++]
 ├── src
 └── package.json
 ```
