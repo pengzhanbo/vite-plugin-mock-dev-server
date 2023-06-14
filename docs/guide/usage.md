@@ -9,6 +9,7 @@
 ::: code-group
 ``` ts [typescript]
 import { defineConfig } from 'vite'
+
 import mockDevServerPlugin from 'vite-plugin-mock-dev-server' // [!code ++]
 
 export default defineConfig({
