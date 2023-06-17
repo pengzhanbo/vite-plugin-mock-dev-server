@@ -98,7 +98,7 @@ export default defineConfig({
 
 默认配置，在你的项目根目录的 `mock` 目录中编写mock数据：
 
-`mock/api.mock.ts` :
+`mock/**/*.mock.ts` :
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 

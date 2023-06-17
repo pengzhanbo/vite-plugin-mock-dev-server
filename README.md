@@ -98,7 +98,7 @@ The plugin will also read the `define` configuration, which supports direct use 
 
 By default, write mock data in the `mock` directory of your project's root directory:
 
-`mock/api.mock.ts` :
+`mock/**/*.mock.ts` :
 ``` ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
