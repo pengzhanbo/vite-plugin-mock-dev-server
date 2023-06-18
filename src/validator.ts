@@ -51,5 +51,6 @@ function isIncluded(source: unknown, target: unknown): boolean {
   if (isObject(source) && isObject(target)) {
     return isObjectSubset(source, target)
   }
-  return source === target
+  // 相比于 === ， 该方法能够正确的处理 NaN、 0、 +0、 -0 等特殊情况
+  return Object.is(source, target)
 }
