@@ -7,12 +7,12 @@ import type { MockServerPluginOptions } from './types'
 import { ensureArray, ensureProxies } from './utils'
 import { mockWebSocket } from './ws'
 
-export async function mockServerMiddleware(
+export function mockServerMiddleware(
   config: ResolvedConfig,
   options: Required<MockServerPluginOptions>,
   httpServer: http.Server | null,
   ws?: WebSocketServer,
-): Promise<Connect.NextHandleFunction> {
+): Connect.NextHandleFunction {
   const loader = new MockLoader({
     include: ensureArray(options.include),
     exclude: ensureArray(options.exclude),

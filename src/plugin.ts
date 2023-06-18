@@ -101,8 +101,8 @@ export function serverPlugin(
       config.logger.warn('')
     },
 
-    async configureServer({ middlewares, config, httpServer, ws }) {
-      const middleware = await mockServerMiddleware(
+    configureServer({ middlewares, config, httpServer, ws }) {
+      const middleware = mockServerMiddleware(
         config,
         pluginOptions,
         httpServer,
@@ -111,12 +111,12 @@ export function serverPlugin(
       middlewares.use(middleware)
     },
 
-    async configurePreviewServer({ middlewares, httpServer }) {
+    configurePreviewServer({ middlewares, httpServer }) {
       // viteConfig to be made available as configurePreviewServer
       // pending...
       // feat: use preview server parameter in preview server hook #11647
       // https://github.com/vitejs/vite/pull/11647
-      const middleware = await mockServerMiddleware(
+      const middleware = mockServerMiddleware(
         viteConfig,
         pluginOptions,
         httpServer,
