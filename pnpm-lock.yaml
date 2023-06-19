@@ -27,8 +27,8 @@ dependencies:
     specifier: ^3.2.12
     version: 3.2.12
   formidable:
-    specifier: ^3.4.0
-    version: 3.4.0
+    specifier: ^2.1.1
+    version: 2.1.1
   http-status:
     specifier: ^1.6.2
     version: 1.6.2
@@ -2703,12 +2703,13 @@ packages:
       is-callable: 1.2.7
     dev: true
 
-  /formidable@3.4.0:
-    resolution: {integrity: sha512-jVj65eK/bVBpImERgvY64oLf2yP7YKsyGj/u0P25k58G8B1SmpCLmAbh0Gld3J92M7J6oX5H1KnJJM8iDYiUtQ==}
+  /formidable@2.1.1:
+    resolution: {integrity: sha512-0EcS9wCFEzLvfiks7omJ+SiYJAiD+TzK4Pcw1UlUoGnhUxDcMKjt0P7x8wEb0u6OHu8Nb98WG3nxtlF5C7bvUQ==}
     dependencies:
       dezalgo: 1.0.4
       hexoid: 1.0.0
       once: 1.4.0
+      qs: 6.11.0
     dev: false
 
   /fs-minipass@2.1.0:

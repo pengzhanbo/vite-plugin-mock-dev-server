@@ -52,7 +52,7 @@
     "debug": "^4.3.4",
     "esbuild": "^0.18.4",
     "fast-glob": "^3.2.12",
-    "formidable": "^3.4.0",
+    "formidable": "^2.1.1",
     "http-status": "^1.6.2",
     "is-core-module": "^2.12.1",
     "json5": "^2.2.3",
