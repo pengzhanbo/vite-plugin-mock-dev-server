@@ -66,6 +66,13 @@ export interface MockServerPluginOptions {
    */
   reload?: boolean
 
+  /**
+   * Configure to `cors`
+   *
+   * 配置 `cors`
+   * @default true
+   * @see [cors](https://github.com/expressjs/cors#configuration-options)
+   */
   cors?: boolean | CorsOptions
 
   /**
