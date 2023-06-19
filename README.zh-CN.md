@@ -173,6 +173,14 @@ export default defineConfig({
 
   **Default:** `false`
 
+- `options.cors`
+  
+  **Type:** `boolean | CorsOptions`
+
+  默认启用.
+
+  配置 `cors`, 查看 [cors](https://github.com/expressjs/cors#configuration-options)
+
 - `options.formidableOptions`
   
   配置 `formidable`，查看 [formidable options](https://github.com/node-formidable/formidable#options)

@@ -174,6 +174,14 @@ export default defineConfig({
 
   When the mock resource is hot updated, only the data content is updated, but the page is not refreshed by default. If you want to refresh the page every time you modify the mock file, you can open this option.
 
+- `options.cors`
+  
+  **Type:** `boolean | CorsOptions`
+
+  Enable by default.
+
+  Configure to `cors`, see [cors](https://github.com/expressjs/cors#configuration-options)
+
 
   **Default:** `false`
 
