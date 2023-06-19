@@ -1,10 +1,17 @@
 import type * as http from 'node:http'
+import cors, { type CorsOptions } from 'cors'
+import { pathToRegexp } from 'path-to-regexp'
 import type { Connect, ResolvedConfig, WebSocketServer } from 'vite'
 import { baseMiddleware } from './baseMiddleware'
 import { viteDefine } from './define'
 import { MockLoader } from './MockLoader'
 import type { MockServerPluginOptions } from './types'
-import { ensureArray, ensureProxies } from './utils'
+import {
+  doesProxyContextMatchUrl,
+  ensureArray,
+  ensureProxies,
+  urlParse,
+} from './utils'
 import { mockWebSocket } from './ws'
 
 export function mockServerMiddleware(
@@ -12,7 +19,11 @@ export function mockServerMiddleware(
   options: Required<MockServerPluginOptions>,
   httpServer: http.Server | null,
   ws?: WebSocketServer,
-): Connect.NextHandleFunction {
+): Connect.NextHandleFunction[] {
+  /**
+   * 加载 mock 文件, 包括监听 mock 文件的依赖文件变化，
+   * 并注入 vite  `define` / `alias`
+   */
   const loader = new MockLoader({
     include: ensureArray(options.include),
     exclude: ensureArray(options.exclude),
@@ -22,6 +33,10 @@ export function mockServerMiddleware(
 
   loader.load()
 
+  /**
+   * 监听 mock 文件是否发生变更，如何配置了 reload 为 true，
+   * 当发生变更时，通知当前页面进行重新加载
+   */
   loader.on('mock:update-end', () => {
     if (options.reload) {
       ws?.send({ type: 'full-reload' })
@@ -42,6 +57,7 @@ export function mockServerMiddleware(
    * 但在大多数场景下，共用 `server.proxy` 已足够
    */
   const prefix = ensureArray(options.prefix)
+  const proxies = [...prefix, ...httpProxies]
 
   /**
    * 虽然 config.server.proxy 中有关于 ws 的代理配置，
@@ -59,9 +75,79 @@ export function mockServerMiddleware(
     options.cookiesOptions,
   )
 
-  return baseMiddleware(loader, {
-    formidableOptions: options.formidableOptions,
-    proxies: [...prefix, ...httpProxies],
-    cookiesOptions: options.cookiesOptions,
-  })
+  const middlewares: (Connect.NextHandleFunction | undefined)[] = []
+
+  middlewares.push(
+    /**
+     * 在 vite 的开发服务中，由于插件 的 enforce 为 `pre`，
+     * mock 中间件的执行顺序 早于 vite 内部的 cors 中间件执行,
+     * 这导致了 vite 默认开启的 cors 对 mock 请求不生效。
+     * 在一些比如 微前端项目、或者联合项目中，会由于端口不一致而导致跨域问题。
+     * 所以在这里，使用 cors 中间件 来解决这个问题。
+     *
+     * 同时为了使 插件内的 cors 和 vite 的 cors 不产生冲突，并拥有一致的默认行为，
+     * 也会使用 viteConfig.server.cors 配置，并支持 用户可以对 mock 中的 cors 中间件进行配置。
+     * 而用户的配置也仅对 mock 的接口生效。
+     */
+    corsMiddleware(loader, proxies, config, options),
+    baseMiddleware(loader, {
+      formidableOptions: options.formidableOptions,
+      proxies,
+      cookiesOptions: options.cookiesOptions,
+    }),
+  )
+  return middlewares.filter(Boolean) as Connect.NextHandleFunction[]
+}
+
+function corsMiddleware(
+  mockLoader: MockLoader,
+  proxies: string[],
+  config: ResolvedConfig,
+  options: Required<MockServerPluginOptions>,
+): Connect.NextHandleFunction | undefined {
+  let corsOptions: CorsOptions = {}
+
+  // enable cors by default
+  const corsEnabled = options.cors !== false || config.server.cors !== false
+
+  if (config.server.cors !== false) {
+    corsOptions = {
+      ...corsOptions,
+      ...((typeof config.server.cors === 'boolean'
+        ? {}
+        : config.server.cors) as CorsOptions),
+    }
+  }
+
+  if (options.cors !== false) {
+    corsOptions = {
+      ...corsOptions,
+      ...(typeof options.cors === 'boolean' ? {} : options.cors),
+    }
+  }
+
+  return !corsEnabled
+    ? undefined
+    : function (req, res, next) {
+        const { pathname } = urlParse(req.url!)
+        if (
+          !pathname ||
+          proxies.length === 0 ||
+          !proxies.some((context) =>
+            doesProxyContextMatchUrl(context, req.url!),
+          )
+        ) {
+          return next()
+        }
+
+        const mockData = mockLoader.mockData
+
+        const mockUrl = Object.keys(mockData).find((key) =>
+          pathToRegexp(key).test(pathname),
+        )
+
+        if (!mockUrl) return next()
+
+        cors(corsOptions)(req, res, next)
+      }
 }

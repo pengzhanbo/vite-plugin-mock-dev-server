@@ -2,6 +2,7 @@ import type { Buffer } from 'node:buffer'
 import type http from 'node:http'
 import type { Readable } from 'node:stream'
 import type Cookies from 'cookies'
+import type { CorsOptions } from 'cors'
 import type formidable from 'formidable'
 import type { Connect } from 'vite'
 import type { WebSocketServer } from 'ws'
@@ -64,6 +65,8 @@ export interface MockServerPluginOptions {
    * @default false
    */
   reload?: boolean
+
+  cors?: boolean | CorsOptions
 
   /**
    * formidable options

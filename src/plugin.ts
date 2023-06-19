@@ -10,6 +10,7 @@ export function mockDevServerPlugin({
   include = ['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}'],
   exclude = ['**/node_modules/**', '**/.vscode/**', '**/.git/**'],
   reload = false,
+  cors = true,
   formidableOptions = {},
   build = false,
   cookiesOptions = {},
@@ -20,6 +21,7 @@ export function mockDevServerPlugin({
     include,
     exclude,
     reload,
+    cors,
     cookiesOptions,
     formidableOptions: {
       multiples: true,
@@ -102,13 +104,13 @@ export function serverPlugin(
     },
 
     configureServer({ middlewares, config, httpServer, ws }) {
-      const middleware = mockServerMiddleware(
+      const middlewareList = mockServerMiddleware(
         config,
         pluginOptions,
         httpServer,
         ws,
       )
-      middlewares.use(middleware)
+      middlewareList.forEach((middleware) => middlewares.use(middleware))
     },
 
     configurePreviewServer({ middlewares, httpServer }) {
@@ -116,12 +118,12 @@ export function serverPlugin(
       // pending...
       // feat: use preview server parameter in preview server hook #11647
       // https://github.com/vitejs/vite/pull/11647
-      const middleware = mockServerMiddleware(
+      const middlewareList = mockServerMiddleware(
         viteConfig,
         pluginOptions,
         httpServer,
       )
-      middlewares.use(middleware)
+      middlewareList.forEach((middleware) => middlewares.use(middleware))
     },
   }
 }
