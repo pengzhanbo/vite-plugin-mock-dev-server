@@ -108,9 +108,9 @@ function corsMiddleware(
   let corsOptions: CorsOptions = {}
 
   // enable cors by default
-  const corsEnabled = options.cors !== false || config.server.cors !== false
+  const enabled = options.cors === false ? false : config.server.cors !== false
 
-  if (config.server.cors !== false) {
+  if (enabled && config.server.cors !== false) {
     corsOptions = {
       ...corsOptions,
       ...((typeof config.server.cors === 'boolean'
@@ -119,14 +119,14 @@ function corsMiddleware(
     }
   }
 
-  if (options.cors !== false) {
+  if (enabled && options.cors !== false) {
     corsOptions = {
       ...corsOptions,
       ...(typeof options.cors === 'boolean' ? {} : options.cors),
     }
   }
 
-  return !corsEnabled
+  return !enabled
     ? undefined
     : function (req, res, next) {
         const { pathname } = urlParse(req.url!)
