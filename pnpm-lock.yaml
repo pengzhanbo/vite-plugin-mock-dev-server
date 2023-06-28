@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@pengzhanbo/utils':
-    specifier: ^1.0.7
-    version: 1.0.7
+    specifier: ^1.0.8
+    version: 1.0.8
   chokidar:
     specifier: ^3.5.3
     version: 3.5.3
@@ -915,8 +915,8 @@ packages:
       prettier: 2.8.8
     dev: true
 
-  /@pengzhanbo/utils@1.0.7:
-    resolution: {integrity: sha512-yuHYDiO2ofr7J85wnKkHm0/yMm80nKyLtKZ2uO2p7Hoy8qptUsxF7jUpKwDxnuACd1LBaK6WvuFoRMqN3Y+R/g==}
+  /@pengzhanbo/utils@1.0.8:
+    resolution: {integrity: sha512-WhPE8XrTNQbjpPdWkdIgjVqdQDL+QDkUWoQ9NM+idFNnWKfTV3Nlh5FkD7+ZtzEUg1rY2uK2d5KRmOzaJmPJtA==}
     dependencies:
       throttle-debounce: 5.0.0
     dev: false

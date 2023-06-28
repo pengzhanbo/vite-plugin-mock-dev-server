@@ -19,9 +19,14 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.js"
+      "require": {
+        "default": "./dist/index.cjs",
+        "types": "./dist/index.d.cts"
+      },
+      "import": {
+        "default": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
     },
     "./package.json": "./package.json"
   },
@@ -45,7 +50,7 @@
   },
   "prettier": "@pengzhanbo/prettier-config",
   "dependencies": {
-    "@pengzhanbo/utils": "^1.0.7",
+    "@pengzhanbo/utils": "^1.0.8",
     "chokidar": "^3.5.3",
     "co-body": "^6.1.0",
     "cookies": "^0.8.0",
