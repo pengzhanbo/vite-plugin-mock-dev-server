@@ -1,5 +1,5 @@
 import EventEmitter from 'node:events'
-import { isArray, promiseParallel } from '@pengzhanbo/utils'
+import { hasOwn, isArray, promiseParallel, toArray } from '@pengzhanbo/utils'
 import chokidar from 'chokidar'
 import type { Metafile } from 'esbuild'
 import fastGlob from 'fast-glob'
@@ -194,23 +194,29 @@ export class MockLoader extends EventEmitter {
     })
 
     try {
-      const raw = (await loadFromCode(filepath, code, isESM, this.cwd)) || {}
-      let mockConfig
-      if (raw.default) {
+      const raw =
+        (await loadFromCode<MockHttpItem | MockWebsocketItem | MockOptions>(
+          filepath,
+          code,
+          isESM,
+          this.cwd,
+        )) || {}
+      let mockConfig: MockHttpItem | MockWebsocketItem | MockOptions
+
+      if (hasOwn(raw, 'default')) {
         mockConfig = raw.default
       } else {
         mockConfig = []
-        Object.keys(raw).forEach((key) => {
-          isArray(raw[key])
-            ? mockConfig.push(...raw[key])
-            : mockConfig.push(raw[key])
-        })
+        Object.keys(raw).forEach((key) =>
+          (mockConfig as MockOptions).push(...toArray(raw[key])),
+        )
       }
 
       if (isArray(mockConfig)) {
         mockConfig.forEach((mock) => ((mock as any).__filepath__ = filepath))
       } else {
-        mockConfig.__filepath__ = filepath
+        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+        ;(mockConfig as any).__filepath__ = filepath
       }
       this.moduleCache.set(filepath, mockConfig)
       this.updateModuleDeps(filepath, deps)

@@ -134,12 +134,14 @@ export async function transformWithEsbuild(
 const _dirname = getDirname(import.meta.url)
 const _require = createRequire(_dirname)
 
-export async function loadFromCode(
+export async function loadFromCode<T = any>(
   filepath: string,
   code: string,
   isESM: boolean,
   cwd: string,
-) {
+): Promise<{
+  [key: string]: T
+}> {
   if (isESM) {
     const fileBase = `${filepath}.timestamp-${Date.now()}`
     const fileNameTmp = `${fileBase}.mjs`
