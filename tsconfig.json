@@ -12,7 +12,12 @@
     "resolveJsonModule": true,
     "noEmitOnError": true
   },
-  "include": ["./src", "./example", "./docs/.vitePress"],
-  "exclude": ["dist", "node_modules"],
+  "include": ["./src", "./example", "./docs/.vitepress"],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "./docs/.vitepress/cache",
+    "./docs/.vitepress/dist"
+  ],
   "references": [{ "path": "./tsconfig.esm.json" }]
 }
