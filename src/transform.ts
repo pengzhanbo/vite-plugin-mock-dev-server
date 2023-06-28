@@ -1,6 +1,12 @@
-import sortBy from 'lodash.sortby'
+import {
+  isArray,
+  isEmptyObject,
+  isFunction,
+  isObject,
+  sortBy,
+} from '@pengzhanbo/utils'
 import type { MockHttpItem, MockOptions, MockWebsocketItem } from './types'
-import { isArray, isEmptyObj, isFunction, isObject, urlParse } from './utils'
+import { urlParse } from './utils'
 import { isObjectSubset } from './validator'
 
 export function transformMockData(
@@ -23,7 +29,7 @@ export function transformMockData(
       const current = { ...mock, url: pathname! }
       if (current.ws !== true) {
         const validator = current.validator
-        if (!isEmptyObj(query)) {
+        if (!isEmptyObject(query)) {
           if (isFunction(validator)) {
             current.validator = function (request) {
               return isObjectSubset(request.query, query) && validator(request)
@@ -57,7 +63,7 @@ export function transformMockData(
       if (item.ws === true) return 0
       const { validator } = item
       // fix: #28
-      if (!validator || isEmptyObj(validator)) return 2
+      if (!validator || isEmptyObject(validator)) return 2
       if (isFunction(validator)) return 0
       const count = Object.keys(validator).reduce(
         (prev, key) =>

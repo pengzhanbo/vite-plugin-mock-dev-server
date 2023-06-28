@@ -1,22 +1,17 @@
 import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
+import { toArray } from '@pengzhanbo/utils'
 import type { Metafile } from 'esbuild'
-import { build } from 'esbuild'
 import fg from 'fast-glob'
 import isCore from 'is-core-module'
 import type { Plugin, ResolvedConfig } from 'vite'
 import { createFilter, normalizePath } from 'vite'
 import { name, version } from '../package.json'
+import { transformWithEsbuild } from './compiler'
 import { viteDefine } from './define'
-import {
-  aliasPlugin,
-  externalizeDeps,
-  json5Loader,
-  jsonLoader,
-} from './esbuildPlugin'
 import type { MockServerPluginOptions, ServerBuildOption } from './types'
-import { ensureArray, ensureProxies, lookupFile } from './utils'
+import { ensureProxies, lookupFile } from './utils'
 
 type PluginContext<T = Plugin['buildEnd']> = T extends (
   this: infer R,
@@ -30,13 +25,13 @@ export async function generateMockServer(
   config: ResolvedConfig,
   options: Required<MockServerPluginOptions>,
 ) {
-  const include = ensureArray(options.include)
-  const exclude = ensureArray(options.exclude)
+  const include = toArray(options.include)
+  const exclude = toArray(options.exclude)
   const define = viteDefine(config)
 
   const { httpProxies } = ensureProxies(config.server.proxy || {})
-  httpProxies.push(...ensureArray(options.prefix))
-  const wsProxies = ensureArray(options.wsPrefix)
+  httpProxies.push(...toArray(options.prefix))
+  const wsProxies = toArray(options.wsPrefix)
 
   let pkg = {}
   try {
@@ -51,11 +46,10 @@ export async function generateMockServer(
   const content = await generateMockEntryCode(process.cwd(), include, exclude)
   const mockEntry = path.join(config.root, `mock-data-${Date.now()}.js`)
   await fsp.writeFile(mockEntry, content, 'utf-8')
-  const { code, deps } = await buildMockEntry(
-    mockEntry,
+  const { code, deps } = await transformWithEsbuild(mockEntry, {
     define,
-    config.resolve.alias,
-  )
+    alias: config.resolve.alias,
+  })
   const mockDeps = getMockDependencies(deps)
   await fsp.unlink(mockEntry)
   const outputList = [
@@ -158,10 +152,10 @@ import mockData from './mock-data.js';
 const app = connect();
 const server = createServer(app);
 const httpProxies = ${JSON.stringify(httpProxies)};
-const wxProxies = ${JSON.stringify(wsProxies)};
+const wsProxies = ${JSON.stringify(wsProxies)};
 const cookiesOptions = ${JSON.stringify(cookiesOptions)};
 
-mockWebSocket({ mockData }, server, wxProxies, cookiesOptions);
+mockWebSocket({ mockData }, server, wsProxies, cookiesOptions);
 
 app.use(corsMiddleware());
 app.use(baseMiddleware({ mockData }, {
@@ -214,32 +208,4 @@ const mockList = exporters.map((raw) => {
   return mockConfig
 });
 export default transformMockData(mockList);`
-}
-
-async function buildMockEntry(
-  inputFile: string,
-  define: ResolvedConfig['define'],
-  alias: ResolvedConfig['resolve']['alias'],
-) {
-  try {
-    const result = await build({
-      entryPoints: [inputFile],
-      outfile: 'out.js',
-      write: false,
-      target: ['node14.18', 'node16'],
-      platform: 'node',
-      bundle: true,
-      metafile: true,
-      format: 'esm',
-      define,
-      plugins: [aliasPlugin(alias), externalizeDeps, json5Loader, jsonLoader],
-    })
-    return {
-      code: result.outputFiles[0].text,
-      deps: result.metafile?.inputs || {},
-    }
-  } catch (e) {
-    console.error(e)
-  }
-  return { code: '', deps: {} }
 }

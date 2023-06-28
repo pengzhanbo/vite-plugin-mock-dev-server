@@ -8,17 +8,6 @@ import { match } from 'path-to-regexp'
 import colors from 'picocolors'
 import type { ResolvedConfig } from 'vite'
 
-export const isArray = <T = any>(val: unknown): val is T[] => Array.isArray(val)
-
-export const isFunction = (val: unknown): val is Function =>
-  typeof val === 'function'
-
-export const isObject = (val: unknown): val is object =>
-  Object.prototype.toString.call(val) === '[object Object]'
-
-export const isEmptyObj = (val: unknown): boolean =>
-  isObject(val) && Object.keys(val).length === 0
-
 export const isStream = (stream: unknown): stream is Stream =>
   stream !== null &&
   typeof stream === 'object' &&
@@ -30,21 +19,11 @@ export const isReadableStream = (stream: unknown): stream is Readable =>
   typeof (stream as any)._read === 'function' &&
   typeof (stream as any)._readableState === 'object'
 
-export function sleep(timeout: number) {
-  return new Promise((resolve) => setTimeout(resolve, timeout))
-}
-
 export function getDirname(importMetaUrl: string): string {
   return path.dirname(fileURLToPath(importMetaUrl))
 }
 
 export const debug = Debug('vite:plugin-mock-dev-server')
-
-export const ensureArray = <T>(thing: T[] | T | undefined | null): T[] => {
-  if (isArray(thing)) return thing
-  if (thing === null || thing === undefined) return []
-  return [thing as T]
-}
 
 export const log = {
   info(...args: any) {

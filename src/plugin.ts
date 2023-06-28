@@ -1,8 +1,8 @@
+import { toArray } from '@pengzhanbo/utils'
 import type { Plugin, ResolvedConfig } from 'vite'
 import { generateMockServer } from './build'
 import { mockServerMiddleware } from './mockMiddleware'
 import type { MockServerPluginOptions } from './types'
-import { ensureArray } from './utils'
 
 export function mockDevServerPlugin({
   prefix = [],
@@ -78,7 +78,7 @@ export function serverPlugin(
       // 可以避免 wss 初始化时的冲突，带来潜在的影响是，可能存在指定了 `wsPrefix`，
       // 但在实际的 mock 中没有对该规则进行配置，从而导致默认的 websocket 代理失效。
       // 这时候就需要用户自行在 wsPrefix 中注释掉对应的规则。
-      const wsPrefix = ensureArray(pluginOptions.wsPrefix)
+      const wsPrefix = toArray(pluginOptions.wsPrefix)
       if (
         wsPrefix.length === 0 ||
         !config.server?.proxy ||

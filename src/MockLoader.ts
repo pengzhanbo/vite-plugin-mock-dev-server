@@ -1,23 +1,14 @@
 import EventEmitter from 'node:events'
-import fs from 'node:fs'
-import { createRequire } from 'node:module'
-import path from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { isArray, promiseParallel } from '@pengzhanbo/utils'
 import chokidar from 'chokidar'
 import type { Metafile } from 'esbuild'
-import { build } from 'esbuild'
 import fastGlob from 'fast-glob'
 import type { ResolvedConfig } from 'vite'
 import { createFilter, normalizePath } from 'vite'
-import {
-  aliasPlugin,
-  externalizeDeps,
-  json5Loader,
-  jsonLoader,
-} from './esbuildPlugin'
+import { loadFromCode, transformWithEsbuild } from './compiler'
 import { transformMockData } from './transform'
 import type { MockHttpItem, MockOptions, MockWebsocketItem } from './types'
-import { debug, getDirname, isArray, lookupFile } from './utils'
+import { debug, lookupFile } from './utils'
 
 export interface MockLoaderOptions {
   cwd?: string
@@ -26,9 +17,6 @@ export interface MockLoaderOptions {
   define: Record<string, any>
   alias: ResolvedConfig['resolve']['alias']
 }
-
-const _dirname = getDirname(import.meta.url)
-const _require = createRequire(_dirname)
 
 /**
  * mock配置加载器
@@ -59,7 +47,7 @@ export class MockLoader extends EventEmitter {
     return this._mockData
   }
 
-  public load() {
+  load() {
     const { include, exclude } = this.options
     /**
      * 使用 rollup 提供的 include/exclude 规则，
@@ -69,16 +57,18 @@ export class MockLoader extends EventEmitter {
       resolve: false,
     })
 
-    fastGlob(include, {
-      cwd: this.cwd,
-    })
-      .then((includePaths) =>
-        Promise.all(
-          includePaths
-            .filter(includeFilter)
-            .map((filepath) => this.loadMock(filepath)),
-        ),
+    fastGlob(include, { cwd: this.cwd })
+      /**
+       * 控制 文件编译 并发 数量。
+       * 当使用 Promise.all 时，可能在一些比较大型的项目中，过多的 mock 文件
+       * 可能导致实例化过多的 esbuild 实例而导致带来过多的内存开销，导致额外的
+       * 性能开销，从而影响编译速度。
+       * 实测在控制并发数的前提下，总编译时间 差异不大，但内存开销更小更加稳定。
+       */
+      .then((files) =>
+        files.filter(includeFilter).map((file) => () => this.loadMock(file)),
       )
+      .then((loadList) => promiseParallel(loadList, 10))
       .then(() => this.updateMockList())
 
     this.watchMockEntry()
@@ -163,7 +153,7 @@ export class MockLoader extends EventEmitter {
     })
   }
 
-  public close() {
+  close() {
     this.mockWatcher?.close()
     this.depsWatcher?.close()
   }
@@ -196,10 +186,15 @@ export class MockLoader extends EventEmitter {
     } else {
       isESM = this.moduleType === 'esm'
     }
-    const { code, deps } = await this.transformWithEsbuild(filepath, isESM)
+    const { define, alias } = this.options
+    const { code, deps } = await transformWithEsbuild(filepath, {
+      isESM,
+      define,
+      alias,
+    })
 
     try {
-      const raw = (await this.loadFromCode(filepath, code, isESM)) || {}
+      const raw = (await loadFromCode(filepath, code, isESM, this.cwd)) || {}
       let mockConfig
       if (raw.default) {
         mockConfig = raw.default
@@ -213,7 +208,7 @@ export class MockLoader extends EventEmitter {
       }
 
       if (isArray(mockConfig)) {
-        mockConfig.forEach((mock) => (mock.__filepath__ = filepath))
+        mockConfig.forEach((mock) => ((mock as any).__filepath__ = filepath))
       } else {
         mockConfig.__filepath__ = filepath
       }
@@ -221,75 +216,6 @@ export class MockLoader extends EventEmitter {
       this.updateModuleDeps(filepath, deps)
     } catch (e) {
       console.error(e)
-    }
-  }
-
-  private async loadFromCode(filepath: string, code: string, isESM: boolean) {
-    if (isESM) {
-      const fileBase = `${filepath}.timestamp-${Date.now()}`
-      const fileNameTmp = `${fileBase}.mjs`
-      const fileUrl = `${pathToFileURL(fileBase)}.mjs`
-      await fs.promises.writeFile(fileNameTmp, code, 'utf8')
-      try {
-        return await import(fileUrl)
-      } finally {
-        try {
-          fs.unlinkSync(fileNameTmp)
-        } catch {}
-      }
-    } else {
-      filepath = path.resolve(this.cwd, filepath)
-      const extension = path.extname(filepath)
-      const realFileName = fs.realpathSync(filepath)
-      const loaderExt = extension in _require.extensions ? extension : '.js'
-      const defaultLoader = _require.extensions[loaderExt]!
-      _require.extensions[loaderExt] = (
-        module: NodeModule,
-        filename: string,
-      ) => {
-        if (filename === realFileName) {
-          // eslint-disable-next-line @typescript-eslint/no-extra-semi
-          ;(module as any)._compile(code, filename)
-        } else {
-          defaultLoader(module, filename)
-        }
-      }
-      delete _require.cache[_require.resolve(filepath)]
-      const raw = _require(filepath)
-      _require.extensions[loaderExt] = defaultLoader
-      return raw.__esModule ? raw : { default: raw }
-    }
-  }
-
-  private async transformWithEsbuild(filepath: string, isESM: boolean) {
-    try {
-      const result = await build({
-        entryPoints: [filepath],
-        outfile: 'out.js',
-        write: false,
-        target: ['node14.18', 'node16'],
-        platform: 'node',
-        bundle: true,
-        metafile: true,
-        format: isESM ? 'esm' : 'cjs',
-        define: this.options.define,
-        plugins: [
-          aliasPlugin(this.options.alias),
-          externalizeDeps,
-          jsonLoader,
-          json5Loader,
-        ],
-      })
-      return {
-        code: result.outputFiles[0].text,
-        deps: result.metafile?.inputs || {},
-      }
-    } catch (e) {
-      console.error(e)
-    }
-    return {
-      code: '',
-      deps: {},
     }
   }
 }

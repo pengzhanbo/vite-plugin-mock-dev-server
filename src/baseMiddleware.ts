@@ -1,7 +1,14 @@
 import { Buffer } from 'node:buffer'
+import {
+  isArray,
+  isFunction,
+  random,
+  sleep,
+  sortBy,
+  timestamp,
+} from '@pengzhanbo/utils'
 import Cookies from 'cookies'
 import HTTP_STATUS from 'http-status'
-import sortBy from 'lodash.sortby'
 import * as mime from 'mime-types'
 import { pathToRegexp } from 'path-to-regexp'
 import colors from 'picocolors'
@@ -21,12 +28,9 @@ import type {
 import {
   debug,
   doesProxyContextMatchUrl,
-  isArray,
-  isFunction,
   isReadableStream,
   log,
   parseParams,
-  sleep,
   urlParse,
 } from './utils'
 import { validate } from './validator'
@@ -44,7 +48,7 @@ export function baseMiddleware(
   { formidableOptions = {}, proxies, cookiesOptions }: BaseMiddlewareOptions,
 ): Connect.NextHandleFunction {
   return async function (req, res, next) {
-    const startTime = Date.now()
+    const startTime = timestamp()
     const { query, pathname } = urlParse(req.url!)
 
     if (
@@ -274,9 +278,9 @@ async function realDelay(startTime: number, delay?: MockHttpItem['delay']) {
   let realDelay = 0
   if (isArray(delay)) {
     const [min, max] = delay
-    realDelay = Math.floor(Math.random() * (max - min + 1)) + min
+    realDelay = random(min, max)
   } else {
-    realDelay = delay - (Date.now() - startTime)
+    realDelay = delay - (timestamp() - startTime)
   }
   if (realDelay > 0) await sleep(realDelay)
 }

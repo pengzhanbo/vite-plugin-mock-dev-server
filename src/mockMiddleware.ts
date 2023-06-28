@@ -1,4 +1,5 @@
 import type * as http from 'node:http'
+import { toArray } from '@pengzhanbo/utils'
 import cors, { type CorsOptions } from 'cors'
 import { pathToRegexp } from 'path-to-regexp'
 import type { Connect, ResolvedConfig, WebSocketServer } from 'vite'
@@ -6,12 +7,7 @@ import { baseMiddleware } from './baseMiddleware'
 import { viteDefine } from './define'
 import { MockLoader } from './MockLoader'
 import type { MockServerPluginOptions } from './types'
-import {
-  doesProxyContextMatchUrl,
-  ensureArray,
-  ensureProxies,
-  urlParse,
-} from './utils'
+import { doesProxyContextMatchUrl, ensureProxies, urlParse } from './utils'
 import { mockWebSocket } from './ws'
 
 export function mockServerMiddleware(
@@ -25,8 +21,8 @@ export function mockServerMiddleware(
    * 并注入 vite  `define` / `alias`
    */
   const loader = new MockLoader({
-    include: ensureArray(options.include),
-    exclude: ensureArray(options.exclude),
+    include: toArray(options.include),
+    exclude: toArray(options.exclude),
     define: viteDefine(config),
     alias: config.resolve.alias,
   })
@@ -56,7 +52,7 @@ export function mockServerMiddleware(
    * 保留直接通过 plugin option 直接配置 路径匹配规则，
    * 但在大多数场景下，共用 `server.proxy` 已足够
    */
-  const prefix = ensureArray(options.prefix)
+  const prefix = toArray(options.prefix)
   const proxies = [...prefix, ...httpProxies]
 
   /**
@@ -71,7 +67,7 @@ export function mockServerMiddleware(
   mockWebSocket(
     loader,
     httpServer,
-    ensureArray(options.wsPrefix),
+    toArray(options.wsPrefix),
     options.cookiesOptions,
   )
 
