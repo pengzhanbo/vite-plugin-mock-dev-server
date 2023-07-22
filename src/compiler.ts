@@ -162,7 +162,6 @@ export async function loadFromCode<T = any>(
     const defaultLoader = _require.extensions[loaderExt]!
     _require.extensions[loaderExt] = (module: NodeModule, filename: string) => {
       if (filename === realFileName) {
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;(module as any)._compile(code, filename)
       } else {
         defaultLoader(module, filename)

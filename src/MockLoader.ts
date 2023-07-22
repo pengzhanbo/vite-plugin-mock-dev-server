@@ -215,7 +215,6 @@ export class MockLoader extends EventEmitter {
       if (isArray(mockConfig)) {
         mockConfig.forEach((mock) => ((mock as any).__filepath__ = filepath))
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;(mockConfig as any).__filepath__ = filepath
       }
       this.moduleCache.set(filepath, mockConfig)
