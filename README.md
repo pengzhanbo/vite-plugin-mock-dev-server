@@ -183,7 +183,13 @@ export default defineConfig({
   Configure to `cors`, see [cors](https://github.com/expressjs/cors#configuration-options)
 
 
-  **Default:** `false`
+  **Default:** `true`
+
+- `options.log`
+  
+  **Type:** `true | 'info' | 'warn' | 'error' | 'silent'`
+
+  Enable log and configure log level.
 
 - `options.formidableOptions`
   

@@ -181,6 +181,12 @@ export default defineConfig({
 
   配置 `cors`, 查看 [cors](https://github.com/expressjs/cors#configuration-options)
 
+- `options.log`
+  
+  **Type:** `true | 'info' | 'warn' | 'error' | 'silent'`
+
+  启动日志，以及配置日志打印级别
+
 - `options.formidableOptions`
   
   配置 `formidable`，查看 [formidable options](https://github.com/node-formidable/formidable#options)
