@@ -38,8 +38,8 @@
   ],
   "scripts": {
     "build": "tsup",
-    "dev": "DEBUG=vite:plugin-mock-dev-server vite example --config ./example/vite.config.ts",
-    "example:build": "DEBUG=vite:plugin-mock-dev-server vite build example --config ./example/vite.config.ts",
+    "dev": "DEBUG=vite:mock-dev-server vite example --config ./example/vite.config.ts",
+    "example:build": "DEBUG=vite:mock-dev-server vite build example --config ./example/vite.config.ts",
     "docs:build": "vitepress build docs",
     "docs:dev": "vitepress dev docs",
     "docs:preview": "vitepress preview docs",

@@ -1,6 +1,7 @@
 import { Buffer } from 'node:buffer'
 import {
   isArray,
+  isEmptyObject,
   isFunction,
   random,
   sleep,
@@ -13,6 +14,7 @@ import * as mime from 'mime-types'
 import { pathToRegexp } from 'path-to-regexp'
 import colors from 'picocolors'
 import type { Connect } from 'vite'
+import type { Logger } from './logger'
 import type { MockLoader } from './MockLoader'
 import { parseReqBody } from './parseReqBody'
 import type {
@@ -29,7 +31,6 @@ import {
   debug,
   doesProxyContextMatchUrl,
   isReadableStream,
-  log,
   parseParams,
   urlParse,
 } from './utils'
@@ -39,13 +40,19 @@ export interface BaseMiddlewareOptions {
   formidableOptions: MockServerPluginOptions['formidableOptions']
   cookiesOptions: MockServerPluginOptions['cookiesOptions']
   proxies: string[]
+  logger: Logger
 }
 
 const RE_DYNAMIC_URL = /:/g
 
 export function baseMiddleware(
   mockLoader: MockLoader,
-  { formidableOptions = {}, proxies, cookiesOptions }: BaseMiddlewareOptions,
+  {
+    formidableOptions = {},
+    proxies,
+    cookiesOptions,
+    logger,
+  }: BaseMiddlewareOptions,
 ): Connect.NextHandleFunction {
   return async function (req, res, next) {
     const startTime = timestamp()
@@ -75,7 +82,7 @@ export function baseMiddleware(
     const getCookie = cookies.get.bind(cookies)
 
     const method = req.method!.toUpperCase()
-    const mock = fineMock(mockData[mockUrl], {
+    const mock = fineMock(mockData[mockUrl], logger, {
       pathname,
       method,
       request: {
@@ -110,12 +117,16 @@ export function baseMiddleware(
       response: responseFn,
       status = 200,
       statusText,
-    } = mock
+      log: logLevel,
+      __filepath__: filepath,
+    } = mock as MockHttpItem & { __filepath__: string }
 
     // provide headers
     responseStatus(response, status, statusText)
-    await provideHeaders(request, response, mock)
-    await provideCookies(request, response, mock)
+    await provideHeaders(request, response, mock, logger)
+    await provideCookies(request, response, mock, logger)
+
+    logger.info(requestLog(request, filepath), logLevel)
 
     if (body) {
       try {
@@ -123,10 +134,11 @@ export function baseMiddleware(
         await realDelay(startTime, delay)
         sendData(response, content, type)
       } catch (e) {
-        log.error(
-          `${colors.red('[body error]')} ${req.url} \n`,
-          `file: ${colors.cyan((mock as any).__filepath__)}`,
-          e,
+        logger.error(
+          `${colors.red(
+            `mock error at ${pathname}`,
+          )}\n${e}\n  at body (${colors.underline(filepath)})`,
+          logLevel,
         )
         responseStatus(response, 500)
         res.end('')
@@ -139,10 +151,11 @@ export function baseMiddleware(
         await realDelay(startTime, delay)
         await responseFn(request, response, next)
       } catch (e) {
-        log.error(
-          `${colors.red('[response error]')} ${req.url} \n`,
-          `file: ${colors.cyan((mock as any).__filepath__)}`,
-          e,
+        logger.error(
+          `${colors.red(
+            `mock error at ${pathname}`,
+          )}\n${e}\n  at response (${colors.underline(filepath)})`,
+          logLevel,
         )
         responseStatus(response, 500)
         res.end('')
@@ -156,6 +169,7 @@ export function baseMiddleware(
 
 function fineMock(
   mockList: MockOptions,
+  logger: Logger,
   {
     pathname,
     method,
@@ -186,10 +200,12 @@ function fineMock(
         try {
           return validate({ params, ...request }, mock.validator)
         } catch (e) {
-          log.error(
-            `${colors.red('[validator error]')} ${pathname} \n`,
-            `file: ${colors.cyan((mock as any).__filepath__)}`,
-            e,
+          const file = (mock as any).__filepath__
+          logger.error(
+            `${colors.red(
+              `mock error at ${pathname}`,
+            )}\n${e}\n  at validator (${colors.underline(file)})`,
+            mock.log,
           )
           return false
         }
@@ -212,6 +228,7 @@ async function provideHeaders(
   req: MockRequest,
   res: MockResponse,
   mock: MockHttpItem,
+  logger: Logger,
 ) {
   const { headers, type = 'json' } = mock
   const filepath = (mock as any).__filepath__ as string
@@ -231,15 +248,23 @@ async function provideHeaders(
       res.setHeader(key, raw[key]!)
     })
   } catch (e) {
-    log.error(`${colors.red('[headers error]')} ${req.url} \n`, e)
+    logger.error(
+      `${colors.red(
+        `mock error at ${req.url!.split('?')[0]}`,
+      )}\n${e}\n  at headers (${colors.underline(filepath)})`,
+      mock.log,
+    )
   }
 }
 
 async function provideCookies(
   req: MockRequest,
   res: MockResponse,
-  { cookies }: MockHttpItem,
+  mock: MockHttpItem,
+  logger: Logger,
 ) {
+  const { cookies } = mock
+  const filepath = (mock as any).__filepath__ as string
   if (!cookies) return
   try {
     const raw = isFunction(cookies) ? await cookies(req) : cookies
@@ -253,7 +278,12 @@ async function provideCookies(
       }
     })
   } catch (e) {
-    log.error(`${colors.red('[cookies error]')} ${req.url} \n`, e)
+    logger.error(
+      `${colors.red(
+        `mock error at ${req.url!.split('?')[0]}`,
+      )}\n${e}\n  at cookies (${colors.underline(filepath)})`,
+      mock.log,
+    )
   }
 }
 
@@ -287,4 +317,21 @@ async function realDelay(startTime: number, delay?: MockHttpItem['delay']) {
 
 function getHTTPStatusText(status: number): string {
   return HTTP_STATUS[status] || 'Unknown'
+}
+
+function requestLog(request: MockRequest, filepath: string): string {
+  const { url, method, query, params, body } = request
+  let { pathname } = new URL(url!, 'http://example.com')
+  pathname = colors.green(decodeURIComponent(pathname))
+  const format = (prefix: string, data: any) => {
+    return !data || isEmptyObject(data)
+      ? ''
+      : `  ${colors.gray(`${prefix}:`)}${JSON.stringify(data)}`
+  }
+  const ms = colors.magenta(colors.bold(method))
+  const qs = format('query', query)
+  const ps = format('params', params)
+  const bs = format('body', body)
+  const file = `  ${colors.dim(colors.underline(`(${filepath})`))}`
+  return `${ms} ${pathname}${qs}${ps}${bs}${file}`
 }

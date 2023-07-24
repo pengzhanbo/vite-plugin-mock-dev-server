@@ -5,7 +5,6 @@ import type { Readable, Stream } from 'node:stream'
 import { URL, fileURLToPath } from 'node:url'
 import Debug from 'debug'
 import { match } from 'path-to-regexp'
-import colors from 'picocolors'
 import type { ResolvedConfig } from 'vite'
 
 export const isStream = (stream: unknown): stream is Stream =>
@@ -23,17 +22,7 @@ export function getDirname(importMetaUrl: string): string {
   return path.dirname(fileURLToPath(importMetaUrl))
 }
 
-export const debug = Debug('vite:plugin-mock-dev-server')
-
-export const log = {
-  info(...args: any) {
-    // eslint-disable-next-line no-console
-    console.info(colors.cyan('mock-dev-server: '), ...args)
-  },
-  error(...args: any[]) {
-    console.error('\n', colors.cyan('mock-dev-server: '), ...args, '\n')
-  },
-}
+export const debug = Debug('vite:mock-dev-server')
 
 interface LookupFileOptions {
   pathOnly?: boolean

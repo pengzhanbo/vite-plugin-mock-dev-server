@@ -1,10 +1,11 @@
 import type * as http from 'node:http'
-import { toArray } from '@pengzhanbo/utils'
+import { isBoolean, toArray } from '@pengzhanbo/utils'
 import cors, { type CorsOptions } from 'cors'
 import { pathToRegexp } from 'path-to-regexp'
 import type { Connect, ResolvedConfig, WebSocketServer } from 'vite'
 import { baseMiddleware } from './baseMiddleware'
 import { viteDefine } from './define'
+import { createLogger } from './logger'
 import { MockLoader } from './MockLoader'
 import type { MockServerPluginOptions } from './types'
 import { doesProxyContextMatchUrl, ensureProxies, urlParse } from './utils'
@@ -16,6 +17,10 @@ export function mockServerMiddleware(
   httpServer: http.Server | null,
   ws?: WebSocketServer,
 ): Connect.NextHandleFunction[] {
+  const logger = createLogger(
+    'vite:mock',
+    isBoolean(options.log) ? (options.log ? 'info' : 'error') : options.log,
+  )
   /**
    * 加载 mock 文件, 包括监听 mock 文件的依赖文件变化，
    * 并注入 vite  `define` / `alias`
@@ -64,12 +69,13 @@ export function mockServerMiddleware(
    * 所以插件选择了通过插件的配置项 `wsPrefix` 来做 判断的首要条件。
    * 当前插件默认会将已配置在 wsPrefix 的值，从 config.server.proxy 的删除，避免发生冲突问题。
    */
-  mockWebSocket(
+  mockWebSocket({
     loader,
     httpServer,
-    toArray(options.wsPrefix),
-    options.cookiesOptions,
-  )
+    proxies: toArray(options.wsPrefix),
+    cookiesOptions: options.cookiesOptions,
+    logger,
+  })
 
   const middlewares: (Connect.NextHandleFunction | undefined)[] = []
 
@@ -90,6 +96,7 @@ export function mockServerMiddleware(
       formidableOptions: options.formidableOptions,
       proxies,
       cookiesOptions: options.cookiesOptions,
+      logger,
     }),
   )
   return middlewares.filter(Boolean) as Connect.NextHandleFunction[]

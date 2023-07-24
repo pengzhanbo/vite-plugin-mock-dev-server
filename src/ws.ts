@@ -16,6 +16,7 @@ import { pathToRegexp } from 'path-to-regexp'
 import colors from 'picocolors'
 import type { WebSocket } from 'ws'
 import { WebSocketServer } from 'ws'
+import type { Logger } from './logger'
 import type { MockLoader } from './MockLoader'
 import type {
   MockRequest,
@@ -23,13 +24,7 @@ import type {
   MockWebsocketItem,
   WebSocketSetupContext,
 } from './types'
-import {
-  debug,
-  doesProxyContextMatchUrl,
-  log,
-  parseParams,
-  urlParse,
-} from './utils'
+import { debug, doesProxyContextMatchUrl, parseParams, urlParse } from './utils'
 
 type PoolMap = Map<string, WSSMap>
 type WSSMap = Map<string, WebSocketServer>
@@ -46,12 +41,21 @@ interface WSSContext {
   connectionList: Connection[]
 }
 
-export function mockWebSocket(
-  loader: MockLoader,
-  httpServer: http.Server | null,
-  proxies: string[],
-  cookiesOptions: MockServerPluginOptions['cookiesOptions'],
-) {
+export interface MockSocketOptions {
+  loader: MockLoader
+  httpServer: http.Server | null
+  proxies: string[]
+  cookiesOptions: MockServerPluginOptions['cookiesOptions']
+  logger: Logger
+}
+
+export function mockWebSocket({
+  loader,
+  httpServer,
+  proxies,
+  cookiesOptions,
+  logger,
+}: MockSocketOptions) {
   // 热更新文件映射
   const hmrMap = new Map<string, Set<string>>()
   // 连接池
@@ -88,8 +92,21 @@ export function mockWebSocket(
     try {
       mock.setup?.(wss, context)
       wss.on('close', () => wssMap.delete(pathname))
+      wss.on('error', (e) => {
+        logger.error(
+          `${colors.red(
+            `WebSocket mock error at ${wss.path}`,
+          )}\n${e}\n  at setup (${filepath})`,
+          mock.log,
+        )
+      })
     } catch (e) {
-      log.error(`${colors.red('[websocket server error]')} ${filepath}\n`, e)
+      logger.error(
+        `${colors.red(
+          `WebSocket mock error at ${wss.path}`,
+        )}\n${e}\n  at setup (${filepath})`,
+        mock.log,
+      )
     }
   }
 
@@ -193,6 +210,12 @@ export function mockWebSocket(
 
     wss.handleUpgrade(request, socket, head, (ws) => {
       debug(`websocket-mock: ${req.url} connected`)
+      logger.info(
+        `${colors.magenta(colors.bold('WS'))} ${colors.green(
+          req.url,
+        )} connected ${colors.dim(`(${filepath})`)}`,
+        mock.log,
+      )
       wssContext.connectionList.push({ req: request, ws })
 
       emitConnection(wss, ws, request, wssContext.connectionList)

@@ -9,11 +9,12 @@
 
 import colors from 'picocolors'
 import type { ResolvedConfig } from 'vite'
-import { log } from './utils'
+import { createLogger } from './logger'
 
 const metaEnvRe = /import\.meta\.env\.(.+)/
 
 export function viteDefine(config: ResolvedConfig) {
+  const logger = createLogger('vite:mock-dev-server', 'warn')
   const processNodeEnv: Record<string, string> = {}
 
   const nodeEnv = process.env.NODE_ENV || config.mode
@@ -49,8 +50,8 @@ export function viteDefine(config: ResolvedConfig) {
   }
 
   if (defineErrorKeys.length) {
-    log.error(
-      `${colors.yellow('[warn]')} The following keys: ${colors.yellow(
+    logger.warn(
+      `The following keys: ${colors.yellow(
         colors.underline(defineErrorKeys.join(', ')),
       )} declared in 'define' cannot be parsed as regular code snippets.`,
     )

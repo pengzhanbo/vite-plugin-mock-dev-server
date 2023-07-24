@@ -10,6 +10,7 @@ export function mockDevServerPlugin({
   include = ['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}'],
   exclude = ['**/node_modules/**', '**/.vscode/**', '**/.git/**'],
   reload = false,
+  log = 'info',
   cors = true,
   formidableOptions = {},
   build = false,
@@ -23,6 +24,7 @@ export function mockDevServerPlugin({
     reload,
     cors,
     cookiesOptions,
+    log,
     formidableOptions: {
       multiples: true,
       ...formidableOptions,

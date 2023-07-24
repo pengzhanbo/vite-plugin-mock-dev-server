@@ -4,7 +4,7 @@ import type { Readable } from 'node:stream'
 import type Cookies from 'cookies'
 import type { CorsOptions } from 'cors'
 import type formidable from 'formidable'
-import type { Connect } from 'vite'
+import type { Connect, LogLevel } from 'vite'
 import type { WebSocketServer } from 'ws'
 
 /**
@@ -53,6 +53,14 @@ export interface MockServerPluginOptions {
    * @see [picomatch](https://github.com/micromatch/picomatch#globbing-features)
    */
   exclude?: string | string[]
+
+  /**
+   * Enable log and configure log level
+   *
+   * 开启日志，或配置 日志级别
+   * @default 'info'
+   */
+  log?: true | LogLevel
 
   /**
    * When the mock resource is hot updated, only the data content is updated,
@@ -238,6 +246,14 @@ interface MockBaseItem {
    * @default true
    */
   enabled?: boolean
+
+  /**
+   * Enable log and configure log level
+   *
+   * 开启日志，或配置 日志级别
+   * @default 'info'
+   */
+  log?: boolean | LogLevel
 }
 
 export interface MockHttpItem extends MockBaseItem {
