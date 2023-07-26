@@ -13,6 +13,7 @@ export default defineConfig({
       wsPrefix: [],
       include: '',
       exclude: '',
+      log: 'info',
       reload: false,
       formidableOptions: {},
       cookiesOptions: {}
@@ -59,6 +60,12 @@ interface MockServerPluginOptions {
    * @default false
    */
   reload?: boolean
+
+  /**
+   * 开启日志，或配置 日志级别
+   * @default 'info'
+   */
+  log?: boolean | 'info' | 'warn' | 'error' | 'silent'
 
   /**
    * formidable options
@@ -132,6 +139,12 @@ mock资源热更新时，仅更新了数据内容，但是默认不重新刷新�
 当你希望每次修改mock文件都刷新页面时，可以打开此选项。
 
 默认值： `false`
+
+## log
+
+开启接口日志打印，或 配置日志级别。
+
+默认值： `info`
 
 ## formidableOptions
 
