@@ -60,7 +60,7 @@ export interface MockServerPluginOptions {
    * 开启日志，或配置 日志级别
    * @default 'info'
    */
-  log?: true | LogLevel
+  log?: boolean | LogLevel
 
   /**
    * When the mock resource is hot updated, only the data content is updated,

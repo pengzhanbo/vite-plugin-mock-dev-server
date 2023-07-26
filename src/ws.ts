@@ -24,7 +24,7 @@ import type {
   MockWebsocketItem,
   WebSocketSetupContext,
 } from './types'
-import { debug, doesProxyContextMatchUrl, parseParams, urlParse } from './utils'
+import { doesProxyContextMatchUrl, parseParams, urlParse } from './utils'
 
 type PoolMap = Map<string, WSSMap>
 type WSSMap = Map<string, WebSocketServer>
@@ -209,9 +209,8 @@ export function mockWebSocket({
     request.getCookie = cookies.get.bind(cookies)
 
     wss.handleUpgrade(request, socket, head, (ws) => {
-      debug(`websocket-mock: ${req.url} connected`)
       logger.info(
-        `${colors.magenta(colors.bold('WS'))} ${colors.green(
+        `${colors.magenta(colors.bold('WebSocket'))} ${colors.green(
           req.url,
         )} connected ${colors.dim(`(${filepath})`)}`,
         mock.log,

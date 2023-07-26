@@ -28,7 +28,6 @@ import type {
   ResponseBody,
 } from './types'
 import {
-  debug,
   doesProxyContextMatchUrl,
   isReadableStream,
   parseParams,
@@ -95,7 +94,6 @@ export function baseMiddleware(
     })
 
     if (!mock) return next()
-    debug('middleware: ', method, req.url)
 
     const request = req as MockRequest
     const response = res as MockResponse
