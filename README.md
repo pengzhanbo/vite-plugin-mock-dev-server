@@ -142,7 +142,7 @@ export default defineConfig({
 
 - `options.wsPrefix`
   
-  **类型:** `string | string[]`
+  **Type:** `string | string[]`
 
   Configure the matching rules for the WebSocket service. Any request path starting with the value of `wsPrefix` and using the `ws/wss` protocol will be proxied to the corresponding target.
 
@@ -187,7 +187,7 @@ export default defineConfig({
 
 - `options.log`
   
-  **Type:** `true | 'info' | 'warn' | 'error' | 'silent'`
+  **Type:** `boolean | 'info' | 'warn' | 'error' | 'silent'`
 
   Enable log and configure log level.
 

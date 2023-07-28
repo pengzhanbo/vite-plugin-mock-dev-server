@@ -183,7 +183,7 @@ export default defineConfig({
 
 - `options.log`
   
-  **Type:** `true | 'info' | 'warn' | 'error' | 'silent'`
+  **Type:** `boolean | 'info' | 'warn' | 'error' | 'silent'`
 
   启动日志，以及配置日志打印级别
 

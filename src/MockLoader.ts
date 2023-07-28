@@ -97,10 +97,10 @@ export class MockLoader extends EventEmitter {
   private watchMockEntry() {
     const { include } = this.options
     const [firstGlob, ...otherGlob] = include
-    const watcher = chokidar.watch(firstGlob, {
+    const watcher = (this.mockWatcher = chokidar.watch(firstGlob, {
       ignoreInitial: true,
       cwd: this.cwd,
-    })
+    }))
     otherGlob.length > 0 && otherGlob.forEach((glob) => watcher.add(glob))
 
     watcher.on('add', async (filepath: string) => {
@@ -118,7 +118,6 @@ export class MockLoader extends EventEmitter {
       this.emit('mock:unlink', filepath)
       debug('watcher:unlink', filepath)
     })
-    this.mockWatcher = watcher
   }
 
   /**
