@@ -815,7 +815,7 @@ You can access related `mock` interfaces through `localhost:8080/`.
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://pengzhanbo.cn"><img src="https://avatars.githubusercontent.com/u/16745751?v=4?s=100" width="100px;" alt="pengzhanbo"/><br /><sub><b>pengzhanbo</b></sub></a><br /><a href="https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commits?author=pengzhanbo" title="Documentation">📖</a> <a href="#ideas-pengzhanbo" title="Ideas, Planning, & Feedback">🤔</a> <a href="#example-pengzhanbo" title="Examples">💡</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jiadesen"><img src="https://avatars.githubusercontent.com/u/22772994?v=4?s=100" width="100px;" alt="jiadesen"/><br /><sub><b>jiadesen</b></sub></a><br /><a href="#ideas-jiadesen" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jiadesen"><img src="https://avatars.githubusercontent.com/u/22772994?v=4?s=100" width="100px;" alt="jiadesen"/><br /><sub><b>jiadesen</b></sub></a><br /><a href="#ideas-jiadesen" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues?q=author%3Ajiadesen" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/yogibaba"><img src="https://avatars.githubusercontent.com/u/152670?v=4?s=100" width="100px;" alt="yogibaba"/><br /><sub><b>yogibaba</b></sub></a><br /><a href="https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commits?author=yogibaba" title="Code">💻</a></td>
     </tr>
   </tbody>
