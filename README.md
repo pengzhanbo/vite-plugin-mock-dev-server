@@ -814,7 +814,7 @@ You can access related `mock` interfaces through `localhost:8080/`.
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://pengzhanbo.cn"><img src="https://avatars.githubusercontent.com/u/16745751?v=4?s=100" width="100px;" alt="pengzhanbo"/><br /><sub><b>pengzhanbo</b></sub></a><br /><a href="https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commits?author=pengzhanbo" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://pengzhanbo.cn"><img src="https://avatars.githubusercontent.com/u/16745751?v=4?s=100" width="100px;" alt="pengzhanbo"/><br /><sub><b>pengzhanbo</b></sub></a><br /><a href="https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commits?author=pengzhanbo" title="Documentation">📖</a> <a href="#ideas-pengzhanbo" title="Ideas, Planning, & Feedback">🤔</a></td>
     </tr>
   </tbody>
 </table>
