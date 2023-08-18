@@ -803,6 +803,17 @@ You can access related `mock` interfaces through `localhost:8080/`.
 
 [awesome-vite](https://github.com/vitejs/awesome-vite#helpers)
 
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
 ## LICENSE
 
 [MIT](/LICENSE)
