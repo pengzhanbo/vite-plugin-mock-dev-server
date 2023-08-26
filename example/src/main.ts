@@ -64,6 +64,8 @@ async function mockjs() {
 
 async function otherMock() {
   await post('/api/post/list', { page: 1 })
+  await post('/api/post/delete/1')
+  await post('/api/post/list', { page: 1 })
   await get('/api/user/list')
   await get('/api/user/mark2022')
 }

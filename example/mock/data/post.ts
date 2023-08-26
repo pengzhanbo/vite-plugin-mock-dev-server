@@ -1,4 +1,6 @@
-export default [
+import { defineMockData } from 'vite-plugin-mock-dev-server'
+
+export default defineMockData('posts', [
   { title: '1' },
   { title: '2' },
   { title: '3' },
@@ -8,5 +10,6 @@ export default [
   { title: '7' },
   { title: '8' },
   { title: '9' },
+  { title: '10' },
   { title: '310' },
-]
+])
