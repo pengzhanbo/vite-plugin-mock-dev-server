@@ -86,8 +86,8 @@ export default defineMock({
   body: (params) => {
     const id = params.id
     const [, setPosts] = posts
-    
-    setPost((posts) => posts.filter((post) => post.id !== id))
+
+    setPosts((posts) => posts.filter((post) => post.id !== id))
 
     return { success: true }
   }
