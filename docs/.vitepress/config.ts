@@ -57,6 +57,7 @@ export default defineConfig({
             { text: 'mockDevServerPlugin', link: '/guide/mock-plugin' },
             { text: 'defineMock', link: '/guide/define-mock' },
             { text: 'createDefineMock', link: '/guide/create-define-mock' },
+            { text: 'defineMockData', link: '/guide/define-mock-data' },
           ],
         },
         {
