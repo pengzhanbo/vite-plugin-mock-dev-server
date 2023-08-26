@@ -8,7 +8,8 @@ export type {
   MockServerPluginOptions,
   MockRequest,
 } from './types'
-export * from './defineConfig'
+export * from './defineMock'
+export * from './defineMockData'
 export * from './baseMiddleware'
 export * from './ws'
 export * from './transform'
