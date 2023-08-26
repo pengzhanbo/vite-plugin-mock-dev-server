@@ -469,6 +469,55 @@ type Response = http.ServerResponse<http.IncomingMessage> & {
 > the 'response' method is not supported, 
 > as is the function form that uses other fields.
 
+## Share Mock Data
+
+Due to each `mock` file being compiled as a separate entry point, the local files they depend on are also compiled within. Additionally, each mock file has an independent scope. This means that even if multiple mock files collectively depend on a `data.ts` file, they cannot share data. If one mock file modifies the data in `data.ts`, other mock files will not receive the updated data.
+
+To address this, the plugin offers a `defineMockData` function, which allows using `data.ts` as a shared data source within mock files.
+
+```ts
+type defineMockData<T> = (
+  key: string, // key
+  initialData: T, // initial data
+) => [getter, setter] & { value: T }
+```
+
+#### Exp:
+`data.ts`
+```ts
+import { defineMockData } from 'vite-plugin-mock-dev-server'
+
+export default defineMockData('posts', [
+  { id: '1', title: 'title1', content: 'content1' },
+  { id: '2', title: 'title2', content: 'content2' },
+])
+```
+`*.mock.ts`
+```ts
+import { defineMock } from 'vite-plugin-mock-dev-server'
+import posts from './data'
+
+export default defineMock([
+  {
+    url: '/api/posts',
+    body: () => posts.value
+  },
+  {
+    url: '/api/posts/delete/:id',
+    body: (params) => {
+      const id = params.id
+      posts.value = posts.value.filter((post) => post.id !== id)
+      return { success: true }
+    }
+  }
+])
+```
+
+> **Tips：**
+> 
+> The `defineMockData` function relies solely on the shared data support provided by `memory`. 
+> If persistent mock data is required, it is recommended to use a `nosql` database like `lowdb` or `level`.
+
 ## Example
 
 `mock/**/*.mock.{ts,js,mjs,cjs,json,json5}`

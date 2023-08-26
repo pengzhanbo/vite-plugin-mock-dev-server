@@ -457,6 +457,57 @@ type Response = http.ServerResponse<http.IncomingMessage> & {
 > 
 > 如果使用 json/json5 编写 mock文件，则不支持使用 `response` 方法，以及不支持使用其他字段的函数形式。
 
+## 共享 Mock 数据
+
+由于每个mock文件都是作为独立的入口进行编译，其依赖的本地文件也编译在内，
+且每个mock文件拥有独立的作用域，这使得即使多个 mock文件共同依赖某一个`data.ts`文件，也无法共享数据。
+某个 `mock` 文件对 `data.ts` 中的数据进行修改，其它`mock`文件不会获取到修改后的数据。
+
+为此，插件提供了一个 `defineMockData` 函数，用于在 `mock` 文件中使用 `data.ts` 作为共享数据源。
+
+```ts
+type defineMockData<T> = (
+  key: string, // 数据唯一标识符
+  initialData: T, // 初始化数据
+) => [getter, setter] & { value: T }
+```
+
+#### 用法:
+`data.ts`
+```ts
+import { defineMockData } from 'vite-plugin-mock-dev-server'
+
+export default defineMockData('posts', [
+  { id: '1', title: 'title1', content: 'content1' },
+  { id: '2', title: 'title2', content: 'content2' },
+])
+```
+`*.mock.ts`
+```ts
+import { defineMock } from 'vite-plugin-mock-dev-server'
+import posts from './data'
+
+export default defineMock([
+  {
+    url: '/api/posts',
+    body: () => posts.value
+  },
+  {
+    url: '/api/posts/delete/:id',
+    body: (params) => {
+      const id = params.id
+      posts.value = posts.value.filter((post) => post.id !== id)
+      return { success: true }
+    }
+  }
+])
+```
+
+> **注意：**
+> 
+> `defineMockData` 仅是基于 `memory` 提供的共享数据支持，
+> 如果需要做 mock 数据持久化，建议使用 `nosql`， 如 `lowdb` 或 `level` 等。
+
 ## Example
 
 `mock/**/*.mock.{ts,js,mjs,cjs,json,json5}`
