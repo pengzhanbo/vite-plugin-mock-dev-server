@@ -37,7 +37,7 @@ export default defineMockData('posts', [
 ])
 ```
 
-`*.mock.ts`
+`*.mock.ts`  (`.value`)
 ::: code-group
 ```ts [post-list.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
@@ -57,6 +57,38 @@ export default defineMock({
   body: (params) => {
     const id = params.id
     posts.value = posts.value.filter((post) => post.id !== id)
+    return { success: true }
+  }
+})
+```
+:::
+
+`*.mock.ts`  (`[getter, setter]`)
+::: code-group
+```ts [post-list.mock.ts]
+import { defineMock } from 'vite-plugin-mock-dev-server'
+import posts from './data'
+
+export default defineMock({
+  url: '/api/post/list',
+  body: () => {
+    const [getPost] = posts
+    return getPost()
+  }
+})
+```
+```ts [post-delete.mock.ts]
+import { defineMock } from 'vite-plugin-mock-dev-server'
+import posts from './data'
+
+export default defineMock({
+  url: '/api/post/delete/:id',
+  body: (params) => {
+    const id = params.id
+    const [, setPosts] = posts
+    
+    setPost((posts) => posts.filter((post) => post.id !== id))
+
     return { success: true }
   }
 })
