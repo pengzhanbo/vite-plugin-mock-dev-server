@@ -56,11 +56,11 @@
     "cookies": "^0.8.0",
     "cors": "^2.8.5",
     "debug": "^4.3.4",
-    "esbuild": "^0.18.15",
+    "esbuild": "^0.19.2",
     "fast-glob": "^3.3.1",
     "formidable": "2.1.1",
     "http-status": "^1.6.2",
-    "is-core-module": "^2.12.1",
+    "is-core-module": "^2.13.0",
     "json5": "^2.2.3",
     "mime-types": "^2.1.35",
     "path-to-regexp": "^6.2.1",
@@ -68,8 +68,8 @@
     "ws": "^8.13.0"
   },
   "devDependencies": {
-    "@pengzhanbo/eslint-config": "^0.4.0",
-    "@pengzhanbo/prettier-config": "^0.4.0",
+    "@pengzhanbo/eslint-config": "^0.4.2",
+    "@pengzhanbo/prettier-config": "^0.4.2",
     "@types/co-body": "^6.1.0",
     "@types/cookies": "^0.7.7",
     "@types/cors": "^2.8.13",
@@ -79,15 +79,15 @@
     "@types/mime-types": "^2.1.1",
     "@types/node": "^20.4.3",
     "@types/ws": "^8.5.5",
-    "bumpp": "^9.1.1",
+    "bumpp": "^9.2.0",
     "conventional-changelog-cli": "^3.0.0",
-    "eslint": "^8.45.0",
+    "eslint": "^8.48.0",
     "mockjs": "^1.1.0",
-    "prettier": "^3.0.0",
-    "tsup": "^7.1.0",
-    "typescript": "^5.1.6",
-    "vite": "^4.4.6",
-    "vitepress": "1.0.0-beta.6"
+    "prettier": "^3.0.2",
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.9",
+    "vitepress": "^1.0.0-rc.4"
   },
   "peerDependencies": {
     "vite": ">=3.0.0"
