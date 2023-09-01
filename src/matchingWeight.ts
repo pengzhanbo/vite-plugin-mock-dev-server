@@ -41,12 +41,13 @@ function getTokens(rule: string) {
 function sortFn(rule: string) {
   const tokens = getTokens(rule)
   let w = 0
-  tokens.forEach((token, i) => {
-    if (typeof token === 'string') {
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i]
+    if (!isString(token)) {
       w += 10 ** (i + 1)
     }
     w += 10 ** (i + 1)
-  })
+  }
   return w
 }
 
