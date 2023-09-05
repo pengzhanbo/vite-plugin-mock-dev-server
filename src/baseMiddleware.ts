@@ -40,6 +40,7 @@ export interface BaseMiddlewareOptions {
   cookiesOptions: MockServerPluginOptions['cookiesOptions']
   proxies: string[]
   logger: Logger
+  priority: MockServerPluginOptions['priority']
 }
 
 export function baseMiddleware(
@@ -49,6 +50,7 @@ export function baseMiddleware(
     proxies,
     cookiesOptions,
     logger,
+    priority = {},
   }: BaseMiddlewareOptions,
 ): Connect.NextHandleFunction {
   return async function (req, res, next) {
@@ -64,7 +66,7 @@ export function baseMiddleware(
     }
 
     const mockData = mockLoader.mockData
-    const mockUrls = matchingWeight(Object.keys(mockData), pathname)
+    const mockUrls = matchingWeight(Object.keys(mockData), pathname, priority)
 
     if (mockUrls.length === 0) return next()
 

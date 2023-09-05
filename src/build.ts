@@ -63,6 +63,7 @@ export async function generateMockServer(
         httpProxies,
         wsProxies,
         options.cookiesOptions,
+        options.priority,
         (options.build as ServerBuildOption).serverPort,
       ),
     },
@@ -133,6 +134,7 @@ function generatorServerEntryCode(
   httpProxies: string[],
   wsProxies: string[],
   cookiesOptions: MockServerPluginOptions['cookiesOptions'] = {},
+  priority: MockServerPluginOptions['priority'] = {},
   port = 8080,
 ) {
   // 生成的 entry code 有一个 潜在的问题：
@@ -154,6 +156,7 @@ const server = createServer(app);
 const httpProxies = ${JSON.stringify(httpProxies)};
 const wsProxies = ${JSON.stringify(wsProxies)};
 const cookiesOptions = ${JSON.stringify(cookiesOptions)};
+const priority = ${JSON.stringify(priority)};
 
 mockWebSocket({ mockData }, server, wsProxies, cookiesOptions);
 
@@ -161,6 +164,7 @@ app.use(corsMiddleware());
 app.use(baseMiddleware({ mockData }, {
   formidableOptions: { multiples: true },
   proxies: httpProxies,
+  priority,
   cookiesOptions,
 }));
 

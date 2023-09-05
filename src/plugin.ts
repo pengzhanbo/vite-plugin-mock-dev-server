@@ -15,6 +15,7 @@ export function mockDevServerPlugin({
   formidableOptions = {},
   build = false,
   cookiesOptions = {},
+  priority = {},
 }: MockServerPluginOptions = {}): Plugin[] {
   const pluginOptions: Required<MockServerPluginOptions> = {
     prefix,
@@ -29,6 +30,7 @@ export function mockDevServerPlugin({
       multiples: true,
       ...formidableOptions,
     },
+    priority,
     build: build
       ? Object.assign(
           {

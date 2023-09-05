@@ -11,9 +11,16 @@
  * 5. 同位置修饰符， * 比 + 的优先级低
  * 6. 对于 (.*) 的参数规则，无论其出现在任何位置，都拥有该位置的最低优先级，(.*)? 比 (.*) 优先级更低
  */
-import { isString, sortBy } from '@pengzhanbo/utils'
+import {
+  isArray,
+  isEmptyObject,
+  isString,
+  sortBy,
+  uniq,
+} from '@pengzhanbo/utils'
 import type { Token } from 'path-to-regexp'
 import { parse, pathToRegexp } from 'path-to-regexp'
+import type { MockMatchPriority } from './types'
 
 const tokensCache: Record<string, Token[]> = {}
 
@@ -38,6 +45,12 @@ function getTokens(rule: string) {
   return tokens
 }
 
+function getHighest(rules: string[]) {
+  let weights = rules.map((rule) => getTokens(rule).length)
+  weights = weights.length === 0 ? [1] : weights
+  return Math.max(...weights) + 2
+}
+
 function sortFn(rule: string) {
   const tokens = getTokens(rule)
   let w = 0
@@ -51,16 +64,11 @@ function sortFn(rule: string) {
   return w
 }
 
-export function matchingWeight(rules: string[], url: string): string[] {
-  const matchRules = rules.filter((rule) => pathToRegexp(rule).test(url))
-  let weights = matchRules.map((rule) => getTokens(rule).length)
-  weights = weights.length === 0 ? [1] : weights
-  const highest = Math.max(...weights) + 2
-
+function preSort(rules: string[]) {
   let matched: string[] = []
   const preMatch: string[][] = []
 
-  for (const rule of matchRules) {
+  for (const rule of rules) {
     const tokens = getTokens(rule)
 
     const len = tokens.filter((token) => typeof token !== 'string').length
@@ -71,8 +79,13 @@ export function matchingWeight(rules: string[], url: string): string[] {
   for (const match of preMatch.filter((v) => v && v.length > 0)) {
     matched = [...matched, ...sortBy(match, sortFn)]
   }
+  return matched
+}
 
-  matched = sortBy(matched, (rule) => {
+function defaultPriority(rules: string[]) {
+  const highest = getHighest(rules)
+
+  return sortBy(rules, (rule) => {
     const tokens = getTokens(rule)
     const dym = tokens.filter((token) => typeof token !== 'string')
     if (dym.length === 0) return 0
@@ -123,5 +136,63 @@ export function matchingWeight(rules: string[], url: string): string[] {
     }
     return weight
   })
+}
+
+export function matchingWeight(
+  rules: string[],
+  url: string,
+  priority: MockMatchPriority,
+): string[] {
+  // 基于默认规则下进行优先级排序
+  let matched = defaultPriority(
+    preSort(rules.filter((rule) => pathToRegexp(rule).test(url))),
+  )
+
+  const { global = [], special = {} } = priority
+
+  // 未配置自定义的排序规则，直接返回匹配结果
+  if ((global.length === 0 && isEmptyObject(special)) || matched.length === 0)
+    return matched
+
+  const [statics, dynamics] = twoPartMatch(matched)
+  const globalMatch = global.filter((rule) => dynamics.includes(rule))
+
+  if (globalMatch.length > 0) {
+    matched = uniq([...statics, ...globalMatch, ...dynamics])
+  }
+  if (isEmptyObject(special)) return matched
+
+  const specialRule = Object.keys(special).filter((rule) =>
+    matched.includes(rule),
+  )[0]
+
+  if (!specialRule) return matched
+
+  const options = special[specialRule]
+  const { rules: lowerRules, when } = isArray(options)
+    ? { rules: options, when: [] }
+    : options
+
+  if (lowerRules.includes(matched[0])) {
+    if (
+      when.length === 0 ||
+      when.some((path) => pathToRegexp(path).test(url))
+    ) {
+      matched = uniq([specialRule, ...matched])
+    }
+  }
+
   return matched
+}
+
+function twoPartMatch(rules: string[]) {
+  const statics: string[] = []
+  const dynamics: string[] = []
+  for (const rule of rules) {
+    const tokens = getTokens(rule)
+    const dym = tokens.filter((token) => typeof token !== 'string')
+    if (dym.length > 0) dynamics.push(rule)
+    else statics.push(rule)
+  }
+  return [statics, dynamics]
 }
