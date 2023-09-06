@@ -4,7 +4,7 @@ import type { Readable } from 'node:stream'
 import type Cookies from 'cookies'
 import type { CorsOptions } from 'cors'
 import type formidable from 'formidable'
-import type { Connect, LogLevel } from 'vite'
+import type { Connect } from 'vite'
 import type { WebSocketServer } from 'ws'
 
 /**
@@ -538,3 +538,7 @@ export interface WebSocketSetupContext {
 export type MockOptions = (MockHttpItem | MockWebsocketItem)[]
 
 export type FormidableFile = formidable.File | formidable.File[]
+
+export type LogType = 'info' | 'warn' | 'error' | 'debug'
+
+export type LogLevel = LogType | 'silent'
