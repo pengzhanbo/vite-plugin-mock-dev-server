@@ -77,6 +77,7 @@ export function baseMiddleware(
 
     const method = req.method!.toUpperCase()
     let mock: MockHttpItem | undefined
+    let _mockUrl: string | undefined
     for (const mockUrl of mockUrls) {
       mock = fineMock(mockData[mockUrl], logger, {
         pathname,
@@ -89,10 +90,26 @@ export function baseMiddleware(
           getCookie,
         },
       })
-      if (mock) break
+      if (mock) {
+        _mockUrl = mockUrl
+        break
+      }
     }
 
-    if (!mock) return next()
+    if (!mock) {
+      const matched = mockUrls
+        .map((m) =>
+          m === _mockUrl ? colors.underline(colors.bold(m)) : colors.dim(m),
+        )
+        .join(', ')
+      logger.warn(
+        `${colors.green(
+          pathname,
+        )} matches  ${matched} , but mock data is not found.`,
+      )
+
+      return next()
+    }
 
     const request = req as MockRequest
     const response = res as MockResponse
@@ -124,6 +141,15 @@ export function baseMiddleware(
     await provideCookies(request, response, mock, logger)
 
     logger.info(requestLog(request, filepath), logLevel)
+    logger.debug(
+      `${colors.magenta('DEBUG')} ${colors.underline(
+        pathname,
+      )}  matches: [ ${mockUrls
+        .map((m) =>
+          m === _mockUrl ? colors.underline(colors.bold(m)) : colors.dim(m),
+        )
+        .join(', ')} ]\n`,
+    )
 
     if (body) {
       try {
