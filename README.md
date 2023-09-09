@@ -235,6 +235,12 @@ export default defineConfig({
   }
   ```
 
+- `options.priority`
+  
+  Custom path matching rule priority。[read more](#Custom-Path-Matching-Priority)
+
+  **Default：** `undefined`
+
 ### defineMock(config)
 
 Mock Type Helper
@@ -517,6 +523,54 @@ export default defineMock([
 > 
 > The `defineMockData` function relies solely on the shared data support provided by `memory`. 
 > If persistent mock data is required, it is recommended to use a `nosql` database like `lowdb` or `level`.
+
+## Custom-Path-Matching-Priority
+
+> Custom rules only affect links with dynamic parameters, such as: `/api/user/:id`
+
+The priority of the path matching rules built into the plugin can already meet most needs, but if you need more flexible customization of the matching rule priority, you can use the `priority` parameter.
+
+Exp：
+```ts
+import { defineConfig } from 'vite'
+import mockPlugin from 'vite-plugin-mock-dev-server'
+
+export default defineConfig({
+  plugins: [
+    mockPlugin({
+      priority: {
+        // The priority of matching rules is global.
+        // The rules declared in this option will take priority over the default rules.
+        // The higher the position of the rule in the array, the higher the priority.
+        global: ['/api/:a/b/c', '/api/a/:b/c', '/api/a/b/:c'],
+        // For some special cases where the priority of certain rules needs to be adjusted,
+        // this option can be used. For example, when a request matches both Rule A and Rule B,
+        // and Rule A has a higher priority than Rule B, but it is desired for Rule B to take effect.
+        special: {
+          // When both A and B or C match, and B or C is at the top of the sort order,
+          // insert A into the top position.
+          // The `when` option is used to further constrain the priority adjustment to
+          // be effective only for certain requests.
+          '/api/:a/:b/c': {
+            rules: ['/api/a/:b/:c', '/api/a/b/:c'],
+            when: ['/api/a/b/c']
+           },
+           // If no `when` is specified, it means that all requests matching the rules need to have their priorities adjusted. It can be abbreviated as `[key]: [...rules]`
+           '/api/:a/b': ['/api/a/:b'],
+       }
+      }
+    })
+  ]
+})
+```
+
+> **Tip:**
+>
+> `priority` although it can adjust the priority,
+> most of the time you do not need to do so. For some special requests,
+> you can use static rules instead of `priority`,
+> as static rules always have the highest priority.
+
 
 ## Example
 
