@@ -10,7 +10,10 @@ export default defineConfig({
   cleanUrls: true,
   head: [['meta', { name: 'theme-color', content: '#FF9900' }]],
   markdown: {
-    theme: 'material-theme-palenight',
+    theme: {
+      light: 'github-light',
+      dark: 'github-dark',
+    },
     headers: {
       level: [0, 0],
     },
@@ -71,8 +74,8 @@ export default defineConfig({
           text: '实践建议',
           items: [
             { text: '目录文件管理', link: '/guide/file-management' },
-            { text: '不建议的文件管理', link: '/guide/no-recommend' },
             { text: '共享内容', link: '/guide/shared' },
+            { text: '共享可变数据', link: '/guide/shared-data' },
             { text: '文件上传', link: '/guide/upload' },
             { text: '团队协作', link: '/guide/teamwork' },
             { text: 'mock服务部署', link: '/guide/mock-service' },

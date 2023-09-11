@@ -230,6 +230,12 @@ export default defineConfig({
   }
   ```
 
+  - `options.priority`
+  
+  自定义 路径匹配规则优先级。[查看更多](#自定义匹配优先级)
+
+  **默认值：** `undefined`
+
 ### defineMock(config)
 
 mock 配置帮助函数，提供类型检查帮助
@@ -507,6 +513,50 @@ export default defineMock([
 > 
 > `defineMockData` 仅是基于 `memory` 提供的共享数据支持，
 > 如果需要做 mock 数据持久化，建议使用 `nosql`， 如 `lowdb` 或 `level` 等。
+
+
+## 自定义匹配优先级
+
+> 自定义规则仅影响包含动态参数的链接，如： `/api/user/:id`
+
+插件内置的路径匹配规则优先级，已经能够满足大部分需求，但如果你需要更加灵活的自定义匹配规则优先级，
+可以使用 `priority` 参数。
+
+示例：
+```ts
+import { defineConfig } from 'vite'
+import mockPlugin from 'vite-plugin-mock-dev-server'
+
+export default defineConfig({
+  plugins: [
+    mockPlugin({
+      priority: {
+        // 匹配规则优先级, 全局生效。声明在该选项中的规则将优先于默认规则生效。
+        // 规则在数组越靠前的位置，优先级越高。
+        global: ['/api/:a/b/c', '/api/a/:b/c', '/api/a/b/:c'],
+        // 对于一些特殊情况，需要调整部分规则的优先级，可以使用此选项。
+        // 比如一个请求同时命中了规则 A 和 B，且 A 比 B 优先级高， 但期望规则 B 生效时。
+        special: {
+          // 当请求同时命中 [key] 和 rules 中的任意一个时，优先匹配 [key] 。
+          // when 用于进一步约束具体是哪些请求需要调整优先级。
+          '/api/:a/:b/c': {
+            rules: ['/api/a/:b/:c', '/api/a/b/:c'],
+            when: ['/api/a/b/c']
+           },
+           // 如果不需要 when, 则表示命中规则的请求都需要调整优先级。
+           // 可以简写为 [key]: [...rules]
+           '/api/:a/b': ['/api/a/:b'],
+       }
+      }
+    })
+  ]
+})
+```
+
+> **注意:**
+>
+>  `priority` 虽然可以调整优先级，但大多数时候，你都没有必要这么做。
+> 对于一些特殊情况的请求，可以使用 静态规则来替代 `priority`，静态规则总是拥有最高优先级。
 
 ## Example
 

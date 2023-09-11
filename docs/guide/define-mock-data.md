@@ -31,17 +31,26 @@ type MockData<T> = [
 ```ts
 import { defineMockData } from 'vite-plugin-mock-dev-server'
 
-export default defineMockData('posts', [
+export const posts = defineMockData('posts', [
   { id: '1', title: 'title1', content: 'content1' },
   { id: '2', title: 'title2', content: 'content2' },
 ])
 ```
 
+通过 `defineMockData` 封装的数据，插件提供了两种不同风格的方式来支持对数据的读写。
+满足不同开发者的使用习惯。
+
+
+- `posts.value`: 使用 `Object.defineProperty` 方式定义数据的读写。  
+- `[getter, setter] = posts` 解构为一个 包含 `setter/getter` 方法的 元组。
+
+
+
 `*.mock.ts`  (`.value`)
 ::: code-group
 ```ts [post-list.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
-import posts from './data'
+import { posts } from './data'
 
 export default defineMock({
   url: '/api/post/list',
@@ -50,7 +59,7 @@ export default defineMock({
 ```
 ```ts [post-delete.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
-import posts from './data'
+import { posts } from './data'
 
 export default defineMock({
   url: '/api/post/delete/:id',
@@ -67,7 +76,7 @@ export default defineMock({
 ::: code-group
 ```ts [post-list.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
-import posts from './data'
+import { posts } from './data'
 
 export default defineMock({
   url: '/api/post/list',
@@ -79,7 +88,7 @@ export default defineMock({
 ```
 ```ts [post-delete.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
-import posts from './data'
+import { posts } from './data'
 
 export default defineMock({
   url: '/api/post/delete/:id',

@@ -8,6 +8,7 @@ export default defineConfig(({ mode }) => ({
       prefix: '^/api-dev/',
       wsPrefix: ['/socket.io'],
       include: 'example/mock/**/*.mock.{ts,js,cjs,mjs,json,json5}',
+      log: 'debug',
       formidableOptions: {
         // 配置上传资源存放目录
         uploadDir: path.join(process.cwd(), 'example/uploads'),

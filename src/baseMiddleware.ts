@@ -5,7 +5,6 @@ import {
   isFunction,
   random,
   sleep,
-  sortBy,
   timestamp,
 } from '@pengzhanbo/utils'
 import Cookies from 'cookies'
@@ -15,6 +14,7 @@ import { pathToRegexp } from 'path-to-regexp'
 import colors from 'picocolors'
 import type { Connect } from 'vite'
 import type { Logger } from './logger'
+import { matchingWeight } from './matchingWeight'
 import type { MockLoader } from './MockLoader'
 import { parseReqBody } from './parseReqBody'
 import type {
@@ -40,9 +40,8 @@ export interface BaseMiddlewareOptions {
   cookiesOptions: MockServerPluginOptions['cookiesOptions']
   proxies: string[]
   logger: Logger
+  priority: MockServerPluginOptions['priority']
 }
-
-const RE_DYNAMIC_URL = /:/g
 
 export function baseMiddleware(
   mockLoader: MockLoader,
@@ -51,6 +50,7 @@ export function baseMiddleware(
     proxies,
     cookiesOptions,
     logger,
+    priority = {},
   }: BaseMiddlewareOptions,
 ): Connect.NextHandleFunction {
   return async function (req, res, next) {
@@ -66,14 +66,9 @@ export function baseMiddleware(
     }
 
     const mockData = mockLoader.mockData
+    const mockUrls = matchingWeight(Object.keys(mockData), pathname, priority)
 
-    // 非动态匹配优先前置匹配，动态匹配以参数个数少的优先匹配
-    const mockUrl = sortBy(
-      Object.keys(mockData),
-      (url) => url.match(RE_DYNAMIC_URL)?.length || 0,
-    ).find((key) => pathToRegexp(key).test(pathname))
-
-    if (!mockUrl) return next()
+    if (mockUrls.length === 0) return next()
 
     const { query: refererQuery } = urlParse(req.headers.referer || '')
     const reqBody = await parseReqBody(req, formidableOptions)
@@ -81,19 +76,40 @@ export function baseMiddleware(
     const getCookie = cookies.get.bind(cookies)
 
     const method = req.method!.toUpperCase()
-    const mock = fineMock(mockData[mockUrl], logger, {
-      pathname,
-      method,
-      request: {
-        query,
-        refererQuery,
-        body: reqBody,
-        headers: req.headers,
-        getCookie,
-      },
-    })
+    let mock: MockHttpItem | undefined
+    let _mockUrl: string | undefined
+    for (const mockUrl of mockUrls) {
+      mock = fineMock(mockData[mockUrl], logger, {
+        pathname,
+        method,
+        request: {
+          query,
+          refererQuery,
+          body: reqBody,
+          headers: req.headers,
+          getCookie,
+        },
+      })
+      if (mock) {
+        _mockUrl = mockUrl
+        break
+      }
+    }
 
-    if (!mock) return next()
+    if (!mock) {
+      const matched = mockUrls
+        .map((m) =>
+          m === _mockUrl ? colors.underline(colors.bold(m)) : colors.dim(m),
+        )
+        .join(', ')
+      logger.warn(
+        `${colors.green(
+          pathname,
+        )} matches  ${matched} , but mock data is not found.`,
+      )
+
+      return next()
+    }
 
     const request = req as MockRequest
     const response = res as MockResponse
@@ -125,6 +141,15 @@ export function baseMiddleware(
     await provideCookies(request, response, mock, logger)
 
     logger.info(requestLog(request, filepath), logLevel)
+    logger.debug(
+      `${colors.magenta('DEBUG')} ${colors.underline(
+        pathname,
+      )}  matches: [ ${mockUrls
+        .map((m) =>
+          m === _mockUrl ? colors.underline(colors.bold(m)) : colors.dim(m),
+        )
+        .join(', ')} ]\n`,
+    )
 
     if (body) {
       try {
