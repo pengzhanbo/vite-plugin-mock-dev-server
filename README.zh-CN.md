@@ -215,12 +215,6 @@ export default defineConfig({
 
   **默认值：**`false`
 
-- `options.priority`
-  
-  自定义 路径匹配规则优先级。[查看更多](#自定义匹配优先级)
-
-  **默认值：** `undefined`
-
   ```ts
   interface ServerBuildOptions {
     /**
@@ -235,6 +229,12 @@ export default defineConfig({
     dist?: string
   }
   ```
+
+  - `options.priority`
+  
+  自定义 路径匹配规则优先级。[查看更多](#自定义匹配优先级)
+
+  **默认值：** `undefined`
 
 ### defineMock(config)
 

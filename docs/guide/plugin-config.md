@@ -153,6 +153,14 @@ mock资源热更新时，仅更新了数据内容，但是默认不重新刷新�
 
 文件上传资源默认临时存放于 `os.tmpdir()` 目录。
 
+## cors
+
+开启 CORS 或 配置 CORS 选项。
+
+默认值： `true`
+
+通常你不需要配置它，默认从 vite `server.cors` 继承配置。
+
 ## cookiesOptions
   
 配置 `cookies`
@@ -180,5 +188,46 @@ export interface ServerBuildOption {
    * @default 'mockServer'
    */
   dist?: string
+}
+```
+
+  - `options.priority`
+  
+  自定义 路径匹配规则优先级。
+
+  **默认值：** `undefined`
+
+```ts
+interface MockMatchPriority {
+  /**
+   * 匹配规则优先级, 全局生效。
+   * 声明在该选项中的规则将优先于默认规则生效。
+   * 规则在数组越靠前的位置，优先级越高。
+   *
+   * 不要在此选项中声明通用性的规则，比如 `/api/(.*)`，这将导致后续的规则无法生效。
+   * 除非你明确知道规则的优先级，否则大多数情况下都不需要配置该选项。
+   * @default []
+   */
+  global?: string[]
+  /**
+   * 对于一些特殊情况，需要调整部分规则的优先级，可以使用此选项。
+   * 比如一个请求同时命中了规则 A 和 B，且 A 比 B 优先级高， 但期望规则 B 生效时。
+   */
+  special?: MockMatchSpecialPriority
+}
+
+interface MockMatchSpecialPriority {
+  /**
+   * 当 A 与 B或 C 同时满足匹配，且 B或 C在排序首位时，将A插入到首位。
+   * when 选项用于进一步约束该优先级调整仅针对哪些请求有效。
+   * @example
+   * ```ts
+   * {
+   *   A: ['B', 'C'],
+   *   A: { rules: ['B', 'C'], when: ['/api/a/b/c'] }
+   * }
+   * ```
+   */
+  [key: string]: string[] | { rules: string[]; when: string[] }
 }
 ```
