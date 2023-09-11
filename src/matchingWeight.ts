@@ -77,7 +77,7 @@ function preSort(rules: string[]) {
   }
   // 归类相同参数数量，并根据参数位置进行排序
   for (const match of preMatch.filter((v) => v && v.length > 0)) {
-    matched = [...matched, ...sortBy(match, sortFn)]
+    matched = [...matched, ...sortBy(match, sortFn).reverse()]
   }
   return matched
 }
@@ -109,7 +109,7 @@ function defaultPriority(rules: string[]) {
 
       // 如果规则末尾是通配，则优先级最低
       if (i === tokens.length - 1 && isGlob) {
-        weight += 5 * 10 ** highest
+        weight += 5 * 10 ** (tokens.length === 1 ? highest + 1 : highest)
       } else {
         // 非末尾的通配，优先级次低
         if (isGlob) {
