@@ -59,21 +59,24 @@ export function transformMockData(
   // 还需要观察，看看是否有必要处理。
   // 如果有插件使用者在实际使用中反馈了该问题，再做处理。
   Object.keys(mocks).forEach((key) => {
-    mocks[key] = sortBy(mocks[key], (item) => {
-      if (item.ws === true) return 0
-      const { validator } = item
-      // fix: #28
-      if (!validator || isEmptyObject(validator)) return 2
-      if (isFunction(validator)) return 0
-      const count = Object.keys(validator).reduce(
-        (prev, key) =>
-          prev + keysCount(validator[key as keyof typeof validator]),
-        0,
-      )
-      return 1 / count
-    })
+    mocks[key] = sortByValidator(mocks[key])
   })
   return mocks
+}
+
+export function sortByValidator(mocks: MockOptions) {
+  return sortBy(mocks, (item) => {
+    if (item.ws === true) return 0
+    const { validator } = item
+    // fix: #28
+    if (!validator || isEmptyObject(validator)) return 2
+    if (isFunction(validator)) return 0
+    const count = Object.keys(validator).reduce(
+      (prev, key) => prev + keysCount(validator[key as keyof typeof validator]),
+      0,
+    )
+    return 1 / count
+  })
 }
 
 function keysCount(obj?: object): number {
