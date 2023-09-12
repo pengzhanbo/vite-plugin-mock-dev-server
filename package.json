@@ -44,6 +44,7 @@
     "docs:dev": "vitepress dev docs",
     "docs:preview": "vitepress preview docs",
     "lint": "eslint .",
+    "test": "vitest",
     "prepublishOnly": "pnpm run build",
     "release:changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "release": "bumpp package.json --execute=\"pnpm release:changelog\" --commit --all --push --tag && pnpm publish --access public"
@@ -87,7 +88,8 @@
     "tsup": "^7.2.0",
     "typescript": "^5.2.2",
     "vite": "^4.4.9",
-    "vitepress": "^1.0.0-rc.4"
+    "vitepress": "^1.0.0-rc.4",
+    "vitest": "^0.34.4"
   },
   "peerDependencies": {
     "vite": ">=3.0.0"
