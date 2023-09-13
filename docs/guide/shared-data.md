@@ -24,14 +24,14 @@ const posts = [
 
 ::: code-group
 ```ts [*.mock.ts]
-import { defineConfig } from 'vite-plugin-mock-dev-server'
+import { defineMock } from 'vite-plugin-mock-dev-server'
 
 const posts = [
   { id: 1, title: 'post1', content: '', author: 'Mark' },
   { id: 2, title: 'post2', content: '', author: 'John' },
 ]
 
-export default defineConfig([
+export default defineMock([
   {
     url: '/api/post/list',
     body: () => posts
@@ -59,19 +59,19 @@ export default defineConfig([
 而如果对于复杂场景，我们可能需要拆解为不同的文件来进行管理时：
 ::: code-group
 ```ts [posts/list.mock.ts]
-import { defineConfig } from 'vite-plugin-mock-dev-server'
+import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
 
-export default defineConfig({
+export default defineMock({
     url: '/api/post/list',
     body: () => posts
   })
 ```
 ```ts [posts/update.mock.ts]
-import { defineConfig } from 'vite-plugin-mock-dev-server'
+import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
 
-export default defineConfig({
+export default defineMock({
     url: '/api/post/update/:id',
     body: ({ params, body }) => {
       const index = posts.find((post) => post.id === parseInt(params.id))
@@ -81,10 +81,10 @@ export default defineConfig({
   })
 ```
 ```ts [posts/delete.mock.ts]
-import { defineConfig } from 'vite-plugin-mock-dev-server'
+import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
 
-export default defineConfig({
+export default defineMock({
     url: '/api/post/delete/:id',
     body: ({ params }) => {
       const index = posts.find((post) => post.id === parseInt(params.id))
@@ -122,19 +122,19 @@ export const posts = defineMockData('posts', [
 ])
 ```
 ```ts [posts/list.mock.ts] {6}
-import { defineConfig } from 'vite-plugin-mock-dev-server'
+import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
 
-export default defineConfig({
+export default defineMock({
     url: '/api/post/list',
     body: () => posts.value
   })
 ```
 ```ts [posts/update.mock.ts] {7,8}
-import { defineConfig } from 'vite-plugin-mock-dev-server'
+import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
 
-export default defineConfig({
+export default defineMock({
     url: '/api/post/update/:id',
     body: ({ params, body }) => {
       const index = posts.value.find((post) => post.id === parseInt(params.id))
@@ -144,10 +144,10 @@ export default defineConfig({
   })
 ```
 ```ts [posts/delete.mock.ts] {7,8}
-import { defineConfig } from 'vite-plugin-mock-dev-server'
+import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
 
-export default defineConfig({
+export default defineMock({
     url: '/api/post/delete/:id',
     body: ({ params }) => {
       const index = posts.value.find((post) => post.id === parseInt(params.id))
@@ -163,5 +163,3 @@ export default defineConfig({
 ::: info 说明
 `defineMockData` 仅是基于 `memory` 提供的共享数据支持，如果需要做 mock 数据持久化，建议使用 `nosql`， 如 `lowdb` 或 `level` 等。
 :::
-
-### 使用 `nosql`
