@@ -43,6 +43,8 @@ export const recoverRequest = (config: UserConfig) => {
       ...rest,
       configure(proxy, options) {
         proxy.on('proxyReq', (proxyReq, req) => {
+          configure?.(proxy, options)
+
           const buffer = cache.get(req)
           if (buffer) {
             cache.delete(req)
@@ -58,7 +60,6 @@ export const recoverRequest = (config: UserConfig) => {
             }
           }
         })
-        configure?.(proxy, options)
       },
     }
   })
