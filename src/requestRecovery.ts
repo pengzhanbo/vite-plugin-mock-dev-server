@@ -43,6 +43,7 @@ export const recoverRequest = (config: UserConfig) => {
         proxy.on('proxyReq', (proxyReq, req) => {
           const buffer = cache.get(req)
           if (buffer) {
+            cache.delete(req)
             proxyReq.setHeader('Content-Length', buffer.byteLength)
             proxyReq.write(buffer)
           }
