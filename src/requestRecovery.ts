@@ -17,7 +17,9 @@ export const collectRequest = (req: Connect.IncomingMessage) => {
     chunks.push(Buffer.from(chunk))
   })
   req.addListener('end', () => {
-    cache.set(req, Buffer.concat(chunks))
+    if (chunks.length) {
+      cache.set(req, Buffer.concat(chunks))
+    }
   })
 }
 
@@ -44,8 +46,16 @@ export const recoverRequest = (config: UserConfig) => {
           const buffer = cache.get(req)
           if (buffer) {
             cache.delete(req)
-            proxyReq.setHeader('Content-Length', buffer.byteLength)
-            proxyReq.write(buffer)
+            /**
+             * 使用 http-proxy 的 agent 配置会提前写入代理请求流
+             * https://github.com/http-party/node-http-proxy/issues/1287
+             */
+            if (!proxyReq.headersSent) {
+              proxyReq.setHeader('Content-Length', buffer.byteLength)
+            }
+            if (!proxyReq.writableEnded) {
+              proxyReq.write(buffer)
+            }
           }
         })
         configure?.(proxy, options)
