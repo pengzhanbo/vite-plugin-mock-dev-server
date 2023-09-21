@@ -17,6 +17,7 @@ import type { Logger } from './logger'
 import { matchingWeight } from './matchingWeight'
 import type { MockLoader } from './MockLoader'
 import { parseReqBody } from './parseReqBody'
+import { collectRequest } from './requestRecovery'
 import type {
   ExtraRequest,
   Method,
@@ -69,6 +70,10 @@ export function baseMiddleware(
     const mockUrls = matchingWeight(Object.keys(mockData), pathname, priority)
 
     if (mockUrls.length === 0) return next()
+
+    // #52 由于请求流被消费，vite http-proxy 无法获取已消费的请求，导致请求流无法继续
+    // 记录请求流中被消费的数据，形成备份，当当前请求无法继续时，可以从备份中恢复请求流
+    collectRequest(req)
 
     const { query: refererQuery } = urlParse(req.headers.referer || '')
     const reqBody = await parseReqBody(req, formidableOptions)

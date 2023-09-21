@@ -16,7 +16,7 @@ export default defineMock([
     },
   },
   {
-    url: '/api-custom-response-skip',
+    url: '/api/custom-response-skip',
     response(req, res, next) {
       if (req.query.skip === '1') {
         next()

@@ -2,6 +2,7 @@ import { toArray } from '@pengzhanbo/utils'
 import type { Plugin, ResolvedConfig } from 'vite'
 import { generateMockServer } from './build'
 import { mockServerMiddleware } from './mockMiddleware'
+import { recoverRequest } from './requestRecovery'
 import type { MockServerPluginOptions } from './types'
 
 export function mockDevServerPlugin({
@@ -93,10 +94,14 @@ export function serverPlugin(
       const proxy: ResolvedConfig['server']['proxy'] = {}
       Object.keys(config.server.proxy).forEach((key) => {
         if (!wsPrefix.includes(key)) {
-          proxy[key] = config.server!.proxy![key]
+          proxy[key] = config.server!.proxy![key]!
         }
       })
       config.server.proxy = proxy
+
+      // #52 由于请求流被消费，vite http-proxy 无法获取已消费的请求，导致请求流无法继续
+      // 通过 http-proxy 的 proxyReq 事件，重新写入请求流
+      recoverRequest(config)
     },
 
     configResolved(config) {
