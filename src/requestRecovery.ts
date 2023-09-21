@@ -12,12 +12,12 @@ const cache = new WeakMap<Connect.IncomingMessage, Buffer>()
 
 // 备份请求数据
 export const collectRequest = (req: Connect.IncomingMessage) => {
-  let chunks = ''
+  const chunks: Buffer[] = []
   req.addListener('data', (chunk) => {
-    chunks += chunk
+    chunks.push(Buffer.from(chunk))
   })
   req.addListener('end', () => {
-    cache.set(req, Buffer.from(chunks))
+    cache.set(req, Buffer.concat(chunks))
   })
 }
 
@@ -43,6 +43,7 @@ export const recoverRequest = (config: UserConfig) => {
         proxy.on('proxyReq', (proxyReq, req) => {
           const buffer = cache.get(req)
           if (buffer) {
+            proxyReq.setHeader('Content-Length', buffer.byteLength)
             proxyReq.write(buffer)
           }
         })
