@@ -84,13 +84,7 @@ export function serverPlugin(
       // 但在实际的 mock 中没有对该规则进行配置，从而导致默认的 websocket 代理失效。
       // 这时候就需要用户自行在 wsPrefix 中注释掉对应的规则。
       const wsPrefix = toArray(pluginOptions.wsPrefix)
-      if (
-        !(
-          wsPrefix.length === 0 ||
-          !config.server?.proxy ||
-          Object.keys(config.server.proxy).length === 0
-        )
-      ) {
+      if (wsPrefix.length && config.server?.proxy) {
         const proxy: ResolvedConfig['server']['proxy'] = {}
         Object.keys(config.server.proxy).forEach((key) => {
           if (!wsPrefix.includes(key)) {
