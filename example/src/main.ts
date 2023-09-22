@@ -44,8 +44,8 @@ async function customHeader() {
 
 async function customResponse() {
   await get('/api/custom-response?a=1&b=2')
-  await get('/api-custom-response-skip?skip=1')
-  await get('/api-custom-response-skip')
+  await post('/api/custom-response-skip?skip=1', { skip: 1, aa: 222 })
+  await get('/api/custom-response-skip')
 }
 
 async function dynamicMatchUrl() {

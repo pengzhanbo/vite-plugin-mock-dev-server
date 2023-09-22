@@ -2,6 +2,7 @@ import { toArray } from '@pengzhanbo/utils'
 import type { Plugin, ResolvedConfig } from 'vite'
 import { generateMockServer } from './build'
 import { mockServerMiddleware } from './mockMiddleware'
+import { recoverRequest } from './requestRecovery'
 import type { MockServerPluginOptions } from './types'
 
 export function mockDevServerPlugin({
@@ -83,20 +84,18 @@ export function serverPlugin(
       // 但在实际的 mock 中没有对该规则进行配置，从而导致默认的 websocket 代理失效。
       // 这时候就需要用户自行在 wsPrefix 中注释掉对应的规则。
       const wsPrefix = toArray(pluginOptions.wsPrefix)
-      if (
-        wsPrefix.length === 0 ||
-        !config.server?.proxy ||
-        Object.keys(config.server.proxy).length === 0
-      )
-        return
-
-      const proxy: ResolvedConfig['server']['proxy'] = {}
-      Object.keys(config.server.proxy).forEach((key) => {
-        if (!wsPrefix.includes(key)) {
-          proxy[key] = config.server!.proxy![key]
-        }
-      })
-      config.server.proxy = proxy
+      if (wsPrefix.length && config.server?.proxy) {
+        const proxy: ResolvedConfig['server']['proxy'] = {}
+        Object.keys(config.server.proxy).forEach((key) => {
+          if (!wsPrefix.includes(key)) {
+            proxy[key] = config.server!.proxy![key]!
+          }
+        })
+        config.server.proxy = proxy
+      }
+      // #52 由于请求流被消费，vite http-proxy 无法获取已消费的请求，导致请求流无法继续
+      // 通过 http-proxy 的 proxyReq 事件，重新写入请求流
+      recoverRequest(config)
     },
 
     configResolved(config) {
