@@ -158,10 +158,12 @@ export function matchingWeight(
   const globalMatch = global.filter((rule) => dynamics.includes(rule))
 
   if (globalMatch.length > 0) {
+    // 静态规则优先级最高，用户配置的规则插入到静态规则后，保证静态规则优先
     matched = uniq([...statics, ...globalMatch, ...dynamics])
   }
   if (isEmptyObject(special)) return matched
 
+  // 检查当前匹配规则中是否包含特殊规则，有则需要调整匹配顺序
   const specialRule = Object.keys(special).filter((rule) =>
     matched.includes(rule),
   )[0]
@@ -178,6 +180,7 @@ export function matchingWeight(
       when.length === 0 ||
       when.some((path) => pathToRegexp(path).test(url))
     ) {
+      // 特殊规则插入到最前，保证特殊规则优先
       matched = uniq([specialRule, ...matched])
     }
   }

@@ -58,6 +58,7 @@ export function baseMiddleware(
     const startTime = timestamp()
     const { query, pathname } = urlParse(req.url!)
 
+    // 预先过滤不符合路径前缀的请求
     if (
       !pathname ||
       proxies.length === 0 ||
@@ -67,6 +68,7 @@ export function baseMiddleware(
     }
 
     const mockData = mockLoader.mockData
+    // 对满足匹配规则的配置进行优先级排序
     const mockUrls = matchingWeight(Object.keys(mockData), pathname, priority)
 
     if (mockUrls.length === 0) return next()
@@ -83,6 +85,7 @@ export function baseMiddleware(
     const method = req.method!.toUpperCase()
     let mock: MockHttpItem | undefined
     let _mockUrl: string | undefined
+    // 查找匹配的mock，仅找出首个匹配的配置项后立即结束
     for (const mockUrl of mockUrls) {
       mock = fineMock(mockData[mockUrl], logger, {
         pathname,
@@ -119,7 +122,7 @@ export function baseMiddleware(
     const request = req as MockRequest
     const response = res as MockResponse
 
-    // provide request
+    // provide request 往请求实例中注入额外的请求信息
     request.body = reqBody
     request.query = query
     request.refererQuery = refererQuery
