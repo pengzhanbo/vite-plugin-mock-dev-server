@@ -42,9 +42,9 @@ export const recoverRequest = (config: UserConfig) => {
     proxies[key] = {
       ...rest,
       configure(proxy, options) {
-        proxy.on('proxyReq', (proxyReq, req) => {
-          configure?.(proxy, options)
+        configure?.(proxy, options)
 
+        proxy.on('proxyReq', (proxyReq, req) => {
           const buffer = cache.get(req)
           if (buffer) {
             cache.delete(req)
