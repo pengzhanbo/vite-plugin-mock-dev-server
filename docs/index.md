@@ -29,7 +29,7 @@ features:
     details: 自动导入mock文件，并监听文件及其依赖，实现热更新。
   - title: 路径规则匹配
     icon: 🦾
-    details: 使用 `path-to-regexp` 匹配请求路径，并支持参数匹配。
+    details: 使用 <b>path-to-regexp</b> 匹配请求路径，并支持参数匹配。
   - title: 开启/关闭任意mock配置
     icon: ⚙️
     details: 支持对任意一个或多个mock配置进行单独的开启/关闭，无需重启服务。

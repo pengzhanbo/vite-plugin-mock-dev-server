@@ -8,16 +8,13 @@ export default defineConfig({
     'Mock-dev-server is injected into the Vite development environment to simulate API request and response data.',
   lastUpdated: true,
   cleanUrls: true,
-  head: [['meta', { name: 'theme-color', content: '#FF9900' }]],
   markdown: {
-    theme: {
-      light: 'github-light',
-      dark: 'github-dark',
-    },
-    headers: {
-      level: [0, 0],
-    },
+    theme: { light: 'github-light', dark: 'github-dark' },
+    headers: { level: [2, 3] },
     lineNumbers: true,
+  },
+  sitemap: {
+    hostname: 'https://vite-plugin-mock-dev-server.netlify.app',
   },
   themeConfig: {
     editLink: {
@@ -41,7 +38,7 @@ export default defineConfig({
     },
     nav: [
       { text: '使用指南', link: '/guide/introduce', activeMatch: '/guide/' },
-      { text: '使用示例', link: '/examples/basic', activeMatch: '/example/' },
+      { text: '使用示例', link: '/examples/basic', activeMatch: '/examples/' },
       { text: `version ${version}`, link: '/', activeMatch: '!' },
     ],
     sidebar: {
