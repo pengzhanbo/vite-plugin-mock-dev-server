@@ -11,93 +11,50 @@ export default defineConfig({
     mockDevServerPlugin({
       prefix: [],
       wsPrefix: [],
-      include: '',
+      include: ['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}'],
       exclude: '',
       log: 'info',
       reload: false,
-      formidableOptions: {},
-      cookiesOptions: {}
+      cors: true,
+      formidableOptions: undefined,
+      cookiesOptions: undefined,
+      priority: undefined
     }),
   ]
 })
 ```
 
+**Type**
 ``` ts
 interface MockServerPluginOptions {
-  /**
-   * 为 mock 服务配置 路径匹配规则，任何请求路径以 prefix 开头的都将被拦截代理。
-   * 如果 prefix 以 `^` 开头，将被识别为 `RegExp`。
-   *
-   * @default []
-   */
   prefix?: string | string[]
-  /**
-   * 为 websocket mock 服务配置 路径匹配规则， 
-   * 任何请求路径以 wsPrefix 开头的 ws/wss请求，都将被代理拦截。
-   * 如果 wsPrefix 以 `^` 开头，将被识别为 `RegExp`。
-   * @default []
-   * @example ['/socket.io']
-   */
   wsPrefix?: string | string[]
-
-  /**
-   * glob 字符串匹配 mock 包含的文件
-   * @see https://github.com/micromatch/picomatch#globbing-features
-   * @default []
-   */
   include?: string | string[]
-
-  /**
-   * glob 字符串匹配 mock 过滤的文件
-   * @see https://github.com/micromatch/picomatch#globbing-features
-   */
   exclude?: string | string[]
-
-  /**
-   * mock资源热更新时，仅更新了数据内容，但是默认不重新刷新页面。
-   * 当你希望每次修改mock文件都刷新页面时，可以打开此选项。
-   *
-   * @default false
-   */
   reload?: boolean
-
-  /**
-   * 开启日志，或配置 日志级别
-   * @default 'info'
-   */
-  log?: boolean | 'info' | 'warn' | 'error' | 'silent'
-
-  /**
-   * formidable options
-   * @see https://github.com/node-formidable/formidable#options
-   */
+  log?: boolean | 'debug' | 'info' | 'warn' | 'error' | 'silent'
+  cors?: boolean | CorsOptions
   formidableOptions?: formidable.Options
-
-  /**
-   * cookies options
-   * @see https://github.com/pillarjs/cookies#new-cookiesrequest-response--options
-   */
   cookiesOptions?: Cookies.Option
-
-  /**
-   * 当需要构建一个小型mock服务时，可配置此项
-   *
-   * @default false
-   */
   build?: boolean | ServerBuildOption
+  priority?: MockMatchPriority
 }
 ```
 
 ## prefix
 
+**类型**： `string | string[]`
+
+**默认值**： `[]`
+
 为 mock 服务配置 路径匹配规则，任何请求路径以 prefix 开头的都将被拦截代理。
 如果 prefix 以 `^` 开头，将被识别为 `RegExp`。
 
-默认值： `[]`
-
-## options.wsPrefix
+## wsPrefix
   
-**类型:** `string | string[]`
+**类型**： `string | string[]`
+
+**默认值**： `[]`
 
 配置 webSocket 服务 匹配规则。任何请求路径以 `wsPrefix` 值开头的 `ws/wss` 协议请求，将被代理到对应的目标。
 如果`wsPrefix`值以 `^` 开头,将被识别为 RegExp。
@@ -108,61 +65,69 @@ interface MockServerPluginOptions {
 
 ## include
 
+**类型**： `string | string[]`
+
+**默认值**：
+`['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']`  相对于根目录
+
 配置读取 mock文件，可以是一个 目录，glob，或者一个数组
 
-默认值：
-```ts
-['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}'] // 相对于根目录
-```
 
 ## exclude
 
+**类型**： `string | string[]`
+
+**默认值**：
+`['**/node_modules/**','**/test/**','**/cypress/**','src/**','**/.vscode/**','**/.git/**','**/dist/**']`
+
 配置读取 mock文件时，需要排除的文件， 可以是一个 目录、glob、或者一个数组
 
-默认值：
-```ts
-[
-  '**/node_modules/**',
-  '**/test/**',
-  '**/cypress/**',
-  'src/**',
-  '**/.vscode/**',
-  '**/.git/**',
-  '**/dist/**'
-]
-```
-
 ## reload
+
+**类型**： `boolean`
+
+**默认值**： `false`
 
 mock资源热更新时，仅更新了数据内容，但是默认不重新刷新页面。
 
 当你希望每次修改mock文件都刷新页面时，可以打开此选项。
 
-默认值： `false`
-
 ## log
+
+**类型**： `boolean | 'debug' | 'info' | 'warn' | 'error' | 'silent'`
+
+**默认值**： `info`
 
 开启接口日志打印，或 配置日志级别。
 
-默认值： `info`
-
 ## formidableOptions
 
+**类型**： `formidable.Options`
+
+**默认值**： `undefined`
+
 配置 `formidable`。 用于处理对 `content-type` 为 `multipart` 的类型。
+
 详细配置查看 [formidable](https://github.com/node-formidable/formidable#options)
 
 文件上传资源默认临时存放于 `os.tmpdir()` 目录。
 
 ## cors
 
+**类型**： `boolean | CorsOptions`
+
+**默认值**： `true`
+
 开启 CORS 或 配置 CORS 选项。
 
-默认值： `true`
-
-通常你不需要配置它，默认从 vite `server.cors` 继承配置。
+通常你不需要配置它，默认从 vite [`server.cors`](https://cn.vitejs.dev/config/server-options.html#server-cors) 继承配置。
 
 ## cookiesOptions
-  
+
+**类型**： `Cookies.Option`
+
+**默认值**： `undefined`
+
 配置 `cookies`
 
 详细配置信息查看 [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options)
@@ -170,32 +135,38 @@ mock资源热更新时，仅更新了数据内容，但是默认不重新刷新�
 
 ## build
 
+**类型**： `boolean | ServerBuildOption`
+
+**默认值**： `false`
+
 当需要构建一个可独立部署的mock server 时，可启用此配置。
 
-默认为 `false`，当设置为 `true` 是，默认配置为 `{ serverPort: 8080, dist: 'mockServer' }`。
+当设置为 `true` 是，默认配置为 `{ serverPort: 8080, dist: 'mockServer' }`。
 
 ```ts
 export interface ServerBuildOption {
   /**
    * 服务启动端口
-   *
    * @default 8080
    */
   serverPort?: number
   /**
    * 服务应用输出目录
-   *
    * @default 'mockServer'
    */
   dist?: string
 }
 ```
 
-  - `options.priority`
-  
-  自定义 路径匹配规则优先级。
+## priority
 
-  **默认值：** `undefined`
+**类型**： `MockMatchPriority`
+
+**默认值：** `undefined`
+
+自定义 路径匹配规则优先级。
+
+
 
 ```ts
 interface MockMatchPriority {

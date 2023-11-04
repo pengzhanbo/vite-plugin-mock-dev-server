@@ -11,10 +11,28 @@ export default defineMock({
 })
 ```
 
+**类型定义**
+```ts
+// 请求接口包含的信息
+interface RequestOptions {
+  query: Record<string, string> // query string parse
+  params: Record<string, string> // params parse
+  headers: Record<string, string> // request headers
+  body: any // request body
+  getCookie: (name: string, option?: Cookies.GetOption) => string | void
+}
+```
+
+**注意**
+
+::: warning
+如果使用 json/json5 编写 mock文件，则不支持使用 response 方法，以及不支持使用其他字段的函数形式。
+:::
+
 ## url
 
-- Type: `string`
-- 必填
+- **Type**: `string`
+- **必填**
 
 请求地址。
 
@@ -33,9 +51,9 @@ export default defineMock([
 
 ## method
 
-- Type: `Method | Method[]`
-- 选填
-- 默认值： `['POST', 'GET']`
+- **Type**: `Method | Method[]`
+- **选填**
+- **默认值**： `['POST', 'GET']`
 
 接口支持的请求方法。
 
@@ -49,9 +67,9 @@ type Method =
 
 ## enabled
 
-- Type: `boolean`
-- 选填
-- 默认值： `true`
+- **Type**: `boolean`
+- **选填**
+- **默认值**： `true`
 
 是否开启当前 mock config。
 
@@ -64,26 +82,26 @@ export default defineMock({
 
 ## status
 
-- Type: `number`
-- 选填
-- 默认值： `200`
+- **Type**: `number`
+- **选填**
+- **默认值**： `200`
 
 响应状态码。
 
 ## statusText
 
-- Type: `string`
-- 选填
-- 默认值： `'OK'`
+- **Type**: `string`
+- **选填**
+- **默认值**： `'OK'`
 
 响应状态文本。
 
 ## delay
 
-- Type: `number | [number, number]`
-- 选填
-- 单位： `ms`
-- 默认值： `0`，表示不延迟
+- **Type**: `number | [number, number]`
+- **选填**
+- **单位**： `ms`
+- **默认值**： `0`，表示不延迟
 
 接口延迟响应。
 
@@ -91,9 +109,9 @@ export default defineMock({
 
 ## type
 
-- Type: `'text' | 'json' | 'buffer' | string`
-- 选填
-- 默认值： `'json'`
+- **Type**: `'text' | 'json' | 'buffer' | string`
+- **选填**
+- **默认值**： `'json'`
 
 设置 `content-type` 类型，如果是响应一个文件类型，可以将 文件名 作为值传给 `type`。
 
@@ -101,36 +119,25 @@ export default defineMock({
 
 ## headers
 
-- Type: `Record<string, string> | (request: RequestOptions) => Record<string, string>`
-- 选填
-- 默认值：
+- **Type**: `Record<string, string> | (request: RequestOptions) => Record<string, string>`
+- **选填**
+- **默认值**：
   
   默认值根据 [type](#type) 的值确定：
-  | type | 默认值 |
-  | -- | -- |
-  | `text` | `{ 'Content-Type': 'text/plain' }` |
-  | `json` | `{ 'Content-Type': 'application/json' }` |
-  | `buffer` | `{'Content-Type': 'application/octet-stream'  }` |
-  | 其他值 | 根据传入值由  `mime-types` 判断获取 |
+  | type     | 默认值                                            |
+  | -------- | ------------------------------------------------- |
+  | `text`   | `{ 'Content-Type': 'text/plain' }`                |
+  | `json`   | `{ 'Content-Type': 'application/json' }`          |
+  | `buffer` | `{ 'Content-Type': 'application/octet-stream'  }` |
+  | 其他值   | 根据传入值由  `mime-types` 判断获取               |
 
 配置请求响应头
 
-```ts
-// 请求接口包含的信息
-interface RequestOptions {
-  query: Record<string, string> // query string parse
-  params: Record<string, string> // params parse
-  headers: Record<string, string> // request headers
-  body: any // request body
-  getCookie: (name: string, option?: Cookies.GetOption) => string | void
-}
-```
-
 ## cookies
 
-- Type: `ResponseCookies | ResponseCookiesFn`
-- 选填
-- 默认值: `undefined`
+- **Type**: `ResponseCookies | ResponseCookiesFn`
+- **选填**
+- **默认值**: `undefined`
 
 设置响应体 cookies
 
@@ -144,9 +151,9 @@ type ResponseCookiesFn = (
 
 ## body
 
-- Type: `ResponseBody | ((request: RequestOptions) => ResponseBody | Promise<ResponseBody>)`
-- 选填
-- 默认值： `{}`
+- **Type**: `ResponseBody | ((request: RequestOptions) => ResponseBody | Promise<ResponseBody>)`
+- **选填**
+- **默认值**： `{}`
 
 响应体数据。
 
@@ -160,9 +167,9 @@ type ResponseBody = string | number | array | object | Buffer | ReadableStream
 
 ## response
 
-- Type: `(req, res, next) => void | Promise<void>`
-- 选填
-- 默认值： `null`
+- **Type**: `(req, res, next) => void | Promise<void>`
+- **选填**
+- **默认值**： `null`
 
 如果通过 body 配置不能解决mock需求，那么可以通过 配置 response，暴露http server 的接口，实现完全可控的自定义配置。
 在 `req` 参数中，已内置了 `query、body、params、refererQuery` 的解析，以及 `getCookie` 方法，
@@ -172,7 +179,7 @@ type ResponseBody = string | number | array | object | Buffer | ReadableStream
 
 ## validator
 
-- Type: `Validator` | `ValidatorFn`
+- **Type**: `Validator` | `ValidatorFn`
   ```ts
   interface Validator {
     header?: object
@@ -185,8 +192,8 @@ type ResponseBody = string | number | array | object | Buffer | ReadableStream
     (request: RequestOptions): boolean
   }
   ```
-- 选填
-- 默认值： `null`
+- **选填**
+- **默认值**： `null`
 
 请求验证器，通过验证器则返回 mock数据，否则不使用当前mock。
 
@@ -222,20 +229,22 @@ export default defineMock([
 
 ## ws
 
-- 选填
-- 类型 `Boolean`
-- 默认值： `false`
+- **Type** `Boolean`
+- **选填**
+- **默认值**： `false`
 
 如果需要配置 模拟 `Websocket` ，必须显式的指定 `ws` 的值为 `true`
 
 ## setup
 
-- 选填， 如果 `ws`值为`true`， 则该选项必填
-- 类型：`(wss: WebSocketServer) => Destroy | void`
+- **Type**：`(wss: WebSocketServer) => Destroy | void`
   ```ts
   type Destroy = () => void
   ```
+- **选填**， 如果 `ws`值为`true`， 则该选项必填
+  
 该选项仅用于 模拟 `Websocket`。
+
 
 ```ts
 export default {
@@ -260,9 +269,3 @@ export default {
   }
 }
 ```
-
-## 注意
-
-::: warning
-如果使用 json/json5 编写 mock文件，则不支持使用 response 方法，以及不支持使用其他字段的函数形式。
-:::
