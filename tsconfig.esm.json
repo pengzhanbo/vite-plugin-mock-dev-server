@@ -1,22 +1,22 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
-    "target": "ESNext",
     "composite": true,
-    "lib": ["DOM", "ESNext"],
-    "strict": true,
-    "esModuleInterop": true,
+    "target": "ESNext",
     "jsx": "preserve",
-    "skipLibCheck": true,
+    "lib": ["DOM", "ESNext"],
+    "module": "ESNext",
     "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "noUnusedLocals": true,
-    "strictNullChecks": true,
-    "allowJs": true,
-    "forceConsistentCasingInFileNames": true,
     "paths": {
       "vite-plugin-mock-dev-server": ["./src/index.ts"]
-    }
+    },
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
   },
   "include": ["./package.json", "./example", "./src"],
   "exclude": ["./example/**/*.mjs", "./example/**/*.cjs", "./example/**/*.js"]

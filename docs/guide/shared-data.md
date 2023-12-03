@@ -39,7 +39,7 @@ export default defineMock([
   {
     url: '/api/post/delete/:id',
     body: ({ params }) => {
-      const index = posts.find((post) => post.id === parseInt(params.id))
+      const index = posts.find(post => post.id === Number.parseInt(params.id))
       index !== -1 && posts.splice(index, 1)
       return { message: 'success' }
     }
@@ -47,7 +47,7 @@ export default defineMock([
   {
     url: '/api/post/update/:id',
     body: ({ params, body }) => {
-      const index = posts.find((post) => post.id === parseInt(params.id))
+      const index = posts.find(post => post.id === Number.parseInt(params.id))
       index !== -1 && (posts[index] = { ...posts[index], ...body })
       return { message: 'success' }
     }
@@ -63,35 +63,35 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
 
 export default defineMock({
-    url: '/api/post/list',
-    body: () => posts
-  })
+  url: '/api/post/list',
+  body: () => posts
+})
 ```
 ```ts [posts/update.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
 
 export default defineMock({
-    url: '/api/post/update/:id',
-    body: ({ params, body }) => {
-      const index = posts.findIndex((post) => post.id === parseInt(params.id))
-      index !== -1 && (posts[index] = { ...posts[index], ...body })
-      return { message: 'success' }
-    }
-  })
+  url: '/api/post/update/:id',
+  body: ({ params, body }) => {
+    const index = posts.findIndex(post => post.id === Number.parseInt(params.id))
+    index !== -1 && (posts[index] = { ...posts[index], ...body })
+    return { message: 'success' }
+  }
+})
 ```
 ```ts [posts/delete.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
 
 export default defineMock({
-    url: '/api/post/delete/:id',
-    body: ({ params }) => {
-      const index = posts.findIndex((post) => post.id === parseInt(params.id))
-      index !== -1 && posts.splice(index, 1)
-      return { message: 'success' }
-    }
-  })
+  url: '/api/post/delete/:id',
+  body: ({ params }) => {
+    const index = posts.findIndex(post => post.id === Number.parseInt(params.id))
+    index !== -1 && posts.splice(index, 1)
+    return { message: 'success' }
+  }
+})
 ```
 ```ts [shared/data.ts]
 export const posts = [
@@ -126,35 +126,35 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
 
 export default defineMock({
-    url: '/api/post/list',
-    body: () => posts.value
-  })
+  url: '/api/post/list',
+  body: () => posts.value
+})
 ```
 ```ts [posts/update.mock.ts] {7,8}
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
 
 export default defineMock({
-    url: '/api/post/update/:id',
-    body: ({ params, body }) => {
-      const index = posts.value.findIndex((post) => post.id === parseInt(params.id))
-      index !== -1 && (posts.value[index] = { ...posts.value[index], ...body })
-      return { message: 'success' }
-    }
-  })
+  url: '/api/post/update/:id',
+  body: ({ params, body }) => {
+    const index = posts.value.findIndex(post => post.id === Number.parseInt(params.id))
+    index !== -1 && (posts.value[index] = { ...posts.value[index], ...body })
+    return { message: 'success' }
+  }
+})
 ```
 ```ts [posts/delete.mock.ts] {7,8}
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
 
 export default defineMock({
-    url: '/api/post/delete/:id',
-    body: ({ params }) => {
-      const index = posts.value.findIndex((post) => post.id === parseInt(params.id))
-      index !== -1 && posts.value.splice(index, 1)
-      return { message: 'success' }
-    }
-  })
+  url: '/api/post/delete/:id',
+  body: ({ params }) => {
+    const index = posts.value.findIndex(post => post.id === Number.parseInt(params.id))
+    index !== -1 && posts.value.splice(index, 1)
+    return { message: 'success' }
+  }
+})
 ```
 :::
 

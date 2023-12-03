@@ -11,15 +11,14 @@ import type { Connect, UserConfig } from 'vite'
 const cache = new WeakMap<Connect.IncomingMessage, Buffer>()
 
 // 备份请求数据
-export const collectRequest = (req: Connect.IncomingMessage) => {
+export function collectRequest(req: Connect.IncomingMessage) {
   const chunks: Buffer[] = []
   req.addListener('data', (chunk) => {
     chunks.push(Buffer.from(chunk))
   })
   req.addListener('end', () => {
-    if (chunks.length) {
+    if (chunks.length)
       cache.set(req, Buffer.concat(chunks))
-    }
   })
 }
 
@@ -27,15 +26,17 @@ export const collectRequest = (req: Connect.IncomingMessage) => {
  * vite 在 proxy 配置中，允许通过 configure 访问 http-proxy 实例，
  * 通过 http-proxy 的 proxyReq 事件，重新写入请求流
  */
-export const recoverRequest = (config: UserConfig) => {
-  if (!config.server) return
+export function recoverRequest(config: UserConfig) {
+  if (!config.server)
+    return
 
   const proxies = config.server.proxy || {}
 
   Object.keys(proxies).forEach((key) => {
     const target = proxies[key]
     const options = typeof target === 'string' ? { target } : target
-    if (options.ws) return
+    if (options.ws)
+      return
 
     const { configure, ...rest } = options
 
@@ -52,12 +53,11 @@ export const recoverRequest = (config: UserConfig) => {
              * 使用 http-proxy 的 agent 配置会提前写入代理请求流
              * https://github.com/http-party/node-http-proxy/issues/1287
              */
-            if (!proxyReq.headersSent) {
+            if (!proxyReq.headersSent)
               proxyReq.setHeader('Content-Length', buffer.byteLength)
-            }
-            if (!proxyReq.writableEnded) {
+
+            if (!proxyReq.writableEnded)
               proxyReq.write(buffer)
-            }
           }
         })
       },

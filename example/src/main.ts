@@ -124,9 +124,8 @@ function webSocketMock() {
     { once: true },
   )
   setTimeout(() => {
-    if (ws.readyState === ws.OPEN) {
+    if (ws.readyState === ws.OPEN)
       ws.send(JSON.stringify({ type: 'message', payload: { a: 1 } }))
-    }
   }, 3000)
 }
 

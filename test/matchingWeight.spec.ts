@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { matchingWeight } from '../src/matchingWeight'
 
 /**
@@ -106,8 +106,8 @@ describe('matching weight', () => {
     ],
   }
 
-  test.each(
-    Object.keys(expects).map((url) => ({
+  it.each(
+    Object.keys(expects).map(url => ({
       rules,
       url,
       expected: expects[url],

@@ -1,9 +1,9 @@
 name: Test
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
@@ -14,14 +14,14 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
-      
+
       - name: Set Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
-      
+
       - name: Install
         run: pnpm i
-      
+
       - name: Test
         run: pnpm vitest run

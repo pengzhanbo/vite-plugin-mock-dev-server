@@ -25,19 +25,21 @@ import type { MockMatchPriority } from './types'
 const tokensCache: Record<string, Token[]> = {}
 
 function getTokens(rule: string) {
-  if (tokensCache[rule]) return tokensCache[rule]
+  if (tokensCache[rule])
+    return tokensCache[rule]
 
   const tks = parse(rule)
   const tokens: Token[] = []
   for (const tk of tks) {
     if (!isString(tk)) {
       tokens.push(tk)
-    } else {
+    }
+    else {
       const hasPrefix = tk[0] === '/'
       const subTks = hasPrefix ? tk.slice(1).split('/') : tk.split('/')
       tokens.push(
         `${hasPrefix ? '/' : ''}${subTks[0]}`,
-        ...subTks.slice(1).map((t) => `/${t}`),
+        ...subTks.slice(1).map(t => `/${t}`),
       )
     }
   }
@@ -46,7 +48,7 @@ function getTokens(rule: string) {
 }
 
 function getHighest(rules: string[]) {
-  let weights = rules.map((rule) => getTokens(rule).length)
+  let weights = rules.map(rule => getTokens(rule).length)
   weights = weights.length === 0 ? [1] : weights
   return Math.max(...weights) + 2
 }
@@ -56,9 +58,9 @@ function sortFn(rule: string) {
   let w = 0
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i]
-    if (!isString(token)) {
+    if (!isString(token))
       w += 10 ** (i + 1)
-    }
+
     w += 10 ** (i + 1)
   }
   return w
@@ -71,14 +73,15 @@ function preSort(rules: string[]) {
   for (const rule of rules) {
     const tokens = getTokens(rule)
 
-    const len = tokens.filter((token) => typeof token !== 'string').length
-    if (!preMatch[len]) preMatch[len] = []
+    const len = tokens.filter(token => typeof token !== 'string').length
+    if (!preMatch[len])
+      preMatch[len] = []
     preMatch[len].push(rule)
   }
   // 归类相同参数数量，并根据参数位置进行排序
-  for (const match of preMatch.filter((v) => v && v.length > 0)) {
+  for (const match of preMatch.filter(v => v && v.length > 0))
     matched = [...matched, ...sortBy(match, sortFn).reverse()]
-  }
+
   return matched
 }
 
@@ -87,8 +90,9 @@ function defaultPriority(rules: string[]) {
 
   return sortBy(rules, (rule) => {
     const tokens = getTokens(rule)
-    const dym = tokens.filter((token) => typeof token !== 'string')
-    if (dym.length === 0) return 0
+    const dym = tokens.filter(token => typeof token !== 'string')
+    if (dym.length === 0)
+      return 0
 
     let weight = dym.length
     let exp = 0
@@ -110,29 +114,31 @@ function defaultPriority(rules: string[]) {
       // 如果规则末尾是通配，则优先级最低
       if (i === tokens.length - 1 && isGlob) {
         weight += 5 * 10 ** (tokens.length === 1 ? highest + 1 : highest)
-      } else {
+      }
+      else {
         // 非末尾的通配，优先级次低
         if (isGlob) {
           weight += 3 * 10 ** (highest - 1)
-        } else if (pattern) {
+        }
+        else if (pattern) {
           if (isSlash) {
             // 具名参数优先级高于非命名参数
             weight += (isNamed ? 2 : 1) * 10 ** (exp + 1)
-          } else {
+          }
+          else {
             // :foo{-:bar}{-:baz}? 优先级高于 :foo
             weight -= 1 * 10 ** exp
           }
         }
       }
-      if (modifier === '+') {
+      if (modifier === '+')
         weight += 1 * 10 ** (highest - 1)
-      }
-      if (modifier === '*') {
+
+      if (modifier === '*')
         weight += 1 * 10 ** (highest - 1) + 1
-      }
-      if (modifier === '?') {
+
+      if (modifier === '?')
         weight += 1 * 10 ** (exp + (isSlash ? 1 : 0))
-      }
     }
     return weight
   })
@@ -145,7 +151,7 @@ export function matchingWeight(
 ): string[] {
   // 基于默认规则下进行优先级排序
   let matched = defaultPriority(
-    preSort(rules.filter((rule) => pathToRegexp(rule).test(url))),
+    preSort(rules.filter(rule => pathToRegexp(rule).test(url))),
   )
 
   const { global = [], special = {} } = priority
@@ -155,20 +161,22 @@ export function matchingWeight(
     return matched
 
   const [statics, dynamics] = twoPartMatch(matched)
-  const globalMatch = global.filter((rule) => dynamics.includes(rule))
+  const globalMatch = global.filter(rule => dynamics.includes(rule))
 
   if (globalMatch.length > 0) {
     // 静态规则优先级最高，用户配置的规则插入到静态规则后，保证静态规则优先
     matched = uniq([...statics, ...globalMatch, ...dynamics])
   }
-  if (isEmptyObject(special)) return matched
+  if (isEmptyObject(special))
+    return matched
 
   // 检查当前匹配规则中是否包含特殊规则，有则需要调整匹配顺序
-  const specialRule = Object.keys(special).filter((rule) =>
+  const specialRule = Object.keys(special).filter(rule =>
     matched.includes(rule),
   )[0]
 
-  if (!specialRule) return matched
+  if (!specialRule)
+    return matched
 
   const options = special[specialRule]
   const { rules: lowerRules, when } = isArray(options)
@@ -177,8 +185,8 @@ export function matchingWeight(
 
   if (lowerRules.includes(matched[0])) {
     if (
-      when.length === 0 ||
-      when.some((path) => pathToRegexp(path).test(url))
+      when.length === 0
+      || when.some(path => pathToRegexp(path).test(url))
     ) {
       // 特殊规则插入到最前，保证特殊规则优先
       matched = uniq([specialRule, ...matched])
@@ -193,8 +201,9 @@ function twoPartMatch(rules: string[]) {
   const dynamics: string[] = []
   for (const rule of rules) {
     const tokens = getTokens(rule)
-    const dym = tokens.filter((token) => typeof token !== 'string')
-    if (dym.length > 0) dynamics.push(rule)
+    const dym = tokens.filter(token => typeof token !== 'string')
+    if (dym.length > 0)
+      dynamics.push(rule)
     else statics.push(rule)
   }
   return [statics, dynamics]

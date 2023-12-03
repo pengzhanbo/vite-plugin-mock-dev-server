@@ -41,7 +41,7 @@ Matching paths through the `path-to-regexp` library, supporting static URL match
 export default defineMock([
   {
     url: '/api/post/list',
-  }, 
+  },
   {
     url: '/api/post/:postId',
   }
@@ -59,8 +59,8 @@ Supported request methods.
 Only the matching request methods will return `mock data`, otherwise they will be ignored. Multiple request methods can be configured using an array.
 
 ```ts
-type Method = 
-  | 'GET' | 'POST' | 'PUT' | 'DELETE' 
+type Method =
+  | 'GET' | 'POST' | 'PUT' | 'DELETE'
   | 'PATCH' | 'HEAD' | 'TRACE' | 'OPTIONS'
 ```
 
@@ -211,7 +211,7 @@ export default defineMock([
     url: 'api/list',
     validator: { query: { p: 1 } },
     body: {
-      result: [ { title: 'p1' } ],
+      result: [{ title: 'p1' }],
       page: 1,
     }
   },
@@ -219,7 +219,7 @@ export default defineMock([
     url: 'api/list',
     validator: { query: { p: 2 } },
     body: {
-      result: [ { title: 'p2' } ],
+      result: [{ title: 'p2' }],
       page: 2,
     }
   }
@@ -245,7 +245,7 @@ This option is only used for simulating `Websocket`.
 export default {
   ws: true,
   setup(wss, { onCleanup }) {
-    // `wss` is an instance of `WebSocketServer` on the server side, 
+    // `wss` is an instance of `WebSocketServer` on the server side,
     // where each request address corresponds to a `wss`.
     // However, multiple clients are allowed to simultaneously request
     // this address to establish a WebSocket connection.

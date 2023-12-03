@@ -34,18 +34,18 @@ export function mockDevServerPlugin({
     priority,
     build: build
       ? Object.assign(
-          {
-            serverPort: 8080,
-            dist: 'mockServer',
-          },
-          typeof build === 'object' ? build : {},
-        )
+        {
+          serverPort: 8080,
+          dist: 'mockServer',
+        },
+        typeof build === 'object' ? build : {},
+      )
       : false,
   }
   const plugins: Plugin[] = [serverPlugin(pluginOptions)]
-  if (pluginOptions.build) {
+  if (pluginOptions.build)
     plugins.push(buildPlugin(pluginOptions))
-  }
+
   return plugins
 }
 
@@ -62,8 +62,10 @@ export function buildPlugin(
       config.logger.warn('')
     },
     async buildEnd(error) {
-      if (error) return
-      if (viteConfig.command !== 'build') return
+      if (error)
+        return
+      if (viteConfig.command !== 'build')
+        return
       await generateMockServer(this, viteConfig, pluginOptions)
     },
   }
@@ -87,9 +89,8 @@ export function serverPlugin(
       if (wsPrefix.length && config.server?.proxy) {
         const proxy: ResolvedConfig['server']['proxy'] = {}
         Object.keys(config.server.proxy).forEach((key) => {
-          if (!wsPrefix.includes(key)) {
+          if (!wsPrefix.includes(key))
             proxy[key] = config.server!.proxy![key]!
-          }
         })
         config.server.proxy = proxy
       }
@@ -113,7 +114,7 @@ export function serverPlugin(
         httpServer,
         ws,
       )
-      middlewareList.forEach((middleware) => middlewares.use(middleware))
+      middlewareList.forEach(middleware => middlewares.use(middleware))
     },
 
     configurePreviewServer({ middlewares, httpServer }) {
@@ -126,7 +127,7 @@ export function serverPlugin(
         pluginOptions,
         httpServer,
       )
-      middlewareList.forEach((middleware) => middlewares.use(middleware))
+      middlewareList.forEach(middleware => middlewares.use(middleware))
     },
   }
 }

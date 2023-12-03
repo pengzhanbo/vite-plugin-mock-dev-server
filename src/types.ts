@@ -135,12 +135,12 @@ export interface MockMatchPriority {
    * The priority of matching rules is global.
    * The rules declared in this option will take priority over the default rules.
    * The higher the position of the rule in the array, the higher the priority.
-   * 
-   * Do not declare general rules in this option, such as /api/(.*), 
-   * as it will prevent subsequent rules from taking effect. 
-   * Unless you are clear about the priority of the rules, 
+   *
+   * Do not declare general rules in this option, such as /api/(.*),
+   * as it will prevent subsequent rules from taking effect.
+   * Unless you are clear about the priority of the rules,
    * most of the time you do not need to configure this option.
-
+   *
    * 匹配规则优先级, 全局生效。
    * 声明在该选项中的规则将优先于默认规则生效。
    * 规则在数组越靠前的位置，优先级越高。
@@ -178,7 +178,7 @@ export interface MockMatchSpecialPriority {
    * }
    * ```
    */
-  [key: string]: string[] | { rules: string[]; when: string[] }
+  [key: string]: string[] | { rules: string[], when: string[] }
 }
 
 export interface ServerBuildOption {

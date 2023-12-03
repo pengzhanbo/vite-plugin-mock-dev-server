@@ -28,14 +28,14 @@ export function createLogger(
     const thresh = logLevels[level]
     if (thresh >= logLevels[type]) {
       const method = type === 'info' || type === 'debug' ? 'log' : type
-      const tag =
-        type === 'debug'
+      const tag
+        = type === 'debug'
           ? colors.magenta(colors.bold(prefix))
           : type === 'info'
-          ? colors.cyan(colors.bold(prefix))
-          : type === 'warn'
-          ? colors.yellow(colors.bold(prefix))
-          : colors.red(colors.bold(prefix))
+            ? colors.cyan(colors.bold(prefix))
+            : type === 'warn'
+              ? colors.yellow(colors.bold(prefix))
+              : colors.red(colors.bold(prefix))
       const format = `${colors.dim(
         new Date().toLocaleTimeString(),
       )} ${tag} ${msg}`

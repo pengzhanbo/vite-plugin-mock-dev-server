@@ -39,9 +39,8 @@ export function mockServerMiddleware(
    * 当发生变更时，通知当前页面进行重新加载
    */
   loader.on('mock:update-end', () => {
-    if (options.reload) {
+    if (options.reload)
       ws?.send({ type: 'full-reload' })
-    }
   })
 
   httpServer?.on('close', () => loader.close())
@@ -133,25 +132,25 @@ function corsMiddleware(
   return !enabled
     ? undefined
     : function (req, res, next) {
-        const { pathname } = urlParse(req.url!)
-        if (
-          !pathname ||
-          proxies.length === 0 ||
-          !proxies.some((context) =>
-            doesProxyContextMatchUrl(context, req.url!),
-          )
-        ) {
-          return next()
-        }
-
-        const mockData = mockLoader.mockData
-
-        const mockUrl = Object.keys(mockData).find((key) =>
-          pathToRegexp(key).test(pathname),
+      const { pathname } = urlParse(req.url!)
+      if (
+        !pathname
+        || proxies.length === 0
+        || !proxies.some(context =>
+          doesProxyContextMatchUrl(context, req.url!),
         )
+      )
+        return next()
 
-        if (!mockUrl) return next()
+      const mockData = mockLoader.mockData
 
-        cors(corsOptions)(req, res, next)
-      }
+      const mockUrl = Object.keys(mockData).find(key =>
+        pathToRegexp(key).test(pathname),
+      )
+
+      if (!mockUrl)
+        return next()
+
+      cors(corsOptions)(req, res, next)
+    }
 }

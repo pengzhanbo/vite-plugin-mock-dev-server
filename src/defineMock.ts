@@ -61,11 +61,12 @@ export function createDefineMock(
   ) => MockHttpItem | MockWebsocketItem | void,
 ): typeof defineMock {
   const define = (config: MockOptions | MockHttpItem | MockWebsocketItem) => {
-    if (isArray(config)) {
-      config = config.map((item) => transformer(item) || item)
-    } else {
+    if (isArray(config))
+      config = config.map(item => transformer(item) || item)
+
+    else
       config = transformer(config) || config
-    }
+
     return config
   }
   return define as typeof defineMock
