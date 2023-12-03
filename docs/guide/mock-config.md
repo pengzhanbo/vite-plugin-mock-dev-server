@@ -237,10 +237,7 @@ export default defineMock([
 
 ## setup
 
-- **Type**：`(wss: WebSocketServer) => Destroy | void`
-  ```ts
-  type Destroy = () => void
-  ```
+- **Type**：`(wss: WebSocketServer) => void`
 - **选填**， 如果 `ws`值为`true`， 则该选项必填
   
 该选项仅用于 模拟 `Websocket`。
