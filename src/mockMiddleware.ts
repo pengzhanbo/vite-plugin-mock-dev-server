@@ -1,4 +1,5 @@
-import type * as http from 'node:http'
+import type { Server } from 'node:http'
+import type { Http2SecureServer } from 'node:http2'
 import { isBoolean, toArray } from '@pengzhanbo/utils'
 import cors, { type CorsOptions } from 'cors'
 import { pathToRegexp } from 'path-to-regexp'
@@ -14,7 +15,7 @@ import { mockWebSocket } from './ws'
 export function mockServerMiddleware(
   config: ResolvedConfig,
   options: Required<MockServerPluginOptions>,
-  httpServer: http.Server | null,
+  httpServer: Server | Http2SecureServer | null,
   ws?: WebSocketServer,
 ): Connect.NextHandleFunction[] {
   const logger = createLogger(

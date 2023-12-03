@@ -10,7 +10,8 @@
  * 于 `server.proxy` 中，避免 vite 内的 http-proxy ws 与 插件的 ws 的冲突。
  */
 
-import type http from 'node:http'
+import type { Server } from 'node:http'
+import type { Http2SecureServer } from 'node:http2'
 import Cookies from 'cookies'
 import { pathToRegexp } from 'path-to-regexp'
 import colors from 'picocolors'
@@ -43,7 +44,7 @@ interface WSSContext {
 
 export interface MockSocketOptions {
   loader: MockLoader
-  httpServer: http.Server | null
+  httpServer: Server | Http2SecureServer | null
   proxies: string[]
   cookiesOptions: MockServerPluginOptions['cookiesOptions']
   logger: Logger
