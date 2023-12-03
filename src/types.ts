@@ -157,6 +157,23 @@ export interface MockMatchPriority {
    *
    * 对于一些特殊情况，需要调整部分规则的优先级，可以使用此选项。
    * 比如一个请求同时命中了规则 A 和 B，且 A 比 B 优先级高， 但期望规则 B 生效时。
+   *
+   * @example
+   * ```ts
+   * {
+   *   special: {
+   *     // /api/a/:b/c 优先级将提升到 /api/a/b/:c 前面
+   *     // The /api/a/:b/c priority is promoted to /api/a/b/:c
+   *     '/api/a/:b/c': ['/api/a/b/:c'],
+   *     // 仅在请求满足 /api/a/b/c 时生效
+   *     // Only when the request satisfies /api/a/b/c
+   *     '/api/:a/b/c': {
+   *        rules: ['/api/a/:b/c'],
+   *        when: ['/api/a/b/c']
+   *      }
+   *   }
+   * }
+   * ```
    */
   special?: MockMatchSpecialPriority
 }
@@ -167,7 +184,7 @@ export interface MockMatchSpecialPriority {
    * insert A into the top position.The `when` option is used to further constrain
    * the priority adjustment to be effective only for certain requests.
    *
-   * 当 A 与 B或 C 同时满足匹配，且 B或 C在排序首位时，将A插入到首位。
+   * 当 A 与 B或 C 同时满足匹配，`B` 或 `C` 在排序首位时，将A插入到首位。
    * when 选项用于进一步约束该优先级调整仅针对哪些请求有效。
    *
    * @example
@@ -301,6 +318,7 @@ interface MockBaseItem {
    * /api/login
    * /api/post/:id
    * /api/post/:id
+   * /api/anything/(.*)
    * ```
    */
   url: string

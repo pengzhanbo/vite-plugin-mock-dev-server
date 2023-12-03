@@ -5,7 +5,10 @@ import type { MockHttpItem, MockOptions, MockWebsocketItem } from './types'
  * mock config Type helper
  *
  * mock配置 类型帮助函数
- * @param config
+ * @param config see config docs:
+ * {@link https://vite-plugin-mock-dev-server.netlify.app/en/guide/mock-config en-US DOC} |
+ * {@link https://vite-plugin-mock-dev-server.netlify.app/guide/mock-config zh-CN DOC}
+ *
  * @example
  * Mock Http Request
  * ```ts
@@ -13,6 +16,13 @@ import type { MockHttpItem, MockOptions, MockWebsocketItem } from './types'
  *   url: '/api/example',
  *   method: ['GET', 'POST'],
  *   body: { a: 1 },
+ * })
+ * ```
+ * ```ts
+ * export default defineMock({
+ *   url: '/api/example',
+ *   method: 'GET',
+ *   body: ({ query }) => ({ a: 1, b: query.b }),
  * })
  * ```
  * @example
