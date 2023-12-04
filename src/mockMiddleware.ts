@@ -15,6 +15,8 @@ import { mockWebSocket } from './ws'
 export function mockServerMiddleware(
   config: ResolvedConfig,
   options: Required<MockServerPluginOptions>,
+  // vite@5 httpServer 类型发生变更
+  // https://github.com/vitejs/vite/pull/14834
   httpServer: Server | Http2SecureServer | null,
   ws?: WebSocketServer,
 ): Connect.NextHandleFunction[] {
