@@ -57,7 +57,7 @@
     "vite": ">=3.0.0"
   },
   "dependencies": {
-    "@pengzhanbo/utils": "^1.1.0",
+    "@pengzhanbo/utils": "^1.1.1",
     "chokidar": "^3.5.3",
     "co-body": "^6.1.0",
     "cookies": "^0.8.0",
