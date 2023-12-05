@@ -31,14 +31,13 @@
     },
     "./package.json": "./package.json"
   },
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "engines": {
-    "node": "^14.18.0 || >=16"
+    "node": "^16 || ^18 || >= 20"
   },
   "scripts": {
     "build": "tsup",
