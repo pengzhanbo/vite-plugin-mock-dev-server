@@ -1,3 +1,12 @@
+# [1.4.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.3.4...v1.4.0) (2023-12-5)
+
+
+### Features
+
+* support `vite5` ([5028c7c](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/5028c7c04ccd30a3021b75be83fe9112abfe9ea6))
+
+
+
 ## [1.3.4](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.3.4-beta.1...v1.3.4) (2023-09-22)
 
 
