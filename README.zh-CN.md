@@ -282,7 +282,7 @@ export default defineMock({
    * 接口支持的请求方法
    * @type string | string[]
    * @default ['POST','GET']
-   * 
+   *
    */
   method: ['GET', 'POST'],
   /**
@@ -345,10 +345,10 @@ export default defineMock({
    * 定义返回的响应体数据内容。
    * 在这里，你可以直接返回JavaScript支持的数据类型如 `string/number/array/object` 等
    * 同时，你也可以使用如 `mockjs` 等库来生成数据内容
-   * 
+   *
    * @type string | number | array | object
    *  直接返回定义的数据
-   * 
+   *
    * @type (request: { headers, query, body, params }) => any | Promise<any>
    * 如果传入一个函数，那么可以更加灵活的定义返回响应体数据
    */
@@ -370,11 +370,11 @@ export default defineMock({
    * 请求验证器，通过验证器则返回 mock数据，否则不使用当前mock。
    * 这对于一些场景中，某个接口需要通过不同的入参来返回不同的数据，验证器可以很好的解决这一类问题，
    * 将同个 url 分为多个 mock配置，根据 验证器来判断哪个mock配置生效。
-   * 
+   *
    * @type { headers, body, query, params, refererQuery }
    * 如果 validator 传入的是一个对象，那么验证方式是 深度比较 请求的接口
    * 中 headers/body/query/params/refererQuery 是否包含 validator 的 key-value。
-   * 
+   *
    * @type (request) => boolean
    * 如果 validator 传入的是一个函数，那么会将 请求的接口相关数据作为入参，
    * 提供给使用者进行自定义校验，并返回一个 boolean
@@ -414,7 +414,7 @@ export default defineMock({
    * 那么需要在 `onCleanup()` 传入一个回调，用于清除这些任务，
    * 这是由于插件在热更新时，需要重新执行 setup，需要清除之前的任务，否则可能会导致重复任务产生冲突。
    * `onCleanup()`可以在 setup 内部多次调用
-   * @type `(wss: WebSocketServer, context: SetupContext) =>  void` 
+   * @type `(wss: WebSocketServer, context: SetupContext) =>  void`
    */
   setup(wss, { onCleanup }) {
     wss.on('connection', (ws, request) => {
@@ -502,7 +502,7 @@ export default defineMock([
     url: '/api/posts/delete/:id',
     body: (params) => {
       const id = params.id
-      posts.value = posts.value.filter((post) => post.id !== id)
+      posts.value = posts.value.filter(post => post.id !== id)
       return { success: true }
     }
   }
@@ -542,11 +542,11 @@ export default defineConfig({
           '/api/:a/:b/c': {
             rules: ['/api/a/:b/:c', '/api/a/b/:c'],
             when: ['/api/a/b/c']
-           },
-           // 如果不需要 when, 则表示命中规则的请求都需要调整优先级。
-           // 可以简写为 [key]: [...rules]
-           '/api/:a/b': ['/api/a/:b'],
-       }
+          },
+          // 如果不需要 when, 则表示命中规则的请求都需要调整优先级。
+          // 可以简写为 [key]: [...rules]
+          '/api/:a/b': ['/api/a/:b'],
+        }
       }
     })
   ]
@@ -694,7 +694,7 @@ export default defineMock({
 export default defineMock({
   url: 'api/buffer',
   type: 'buffer',
-  // 内部使用 Buffer.from(body) 进行转换 
+  // 内部使用 Buffer.from(body) 进行转换
   body: { a: 1 }
 })
 ```
@@ -768,18 +768,18 @@ export default defineMock({
 通过 [`formidable`](https://www.npmjs.com/package/formidable#readme) 支持。
 ``` html
 <form action="/api/upload" method="post" enctype="multipart/form-data">
-    <p>
-      <span>file: </span>
-      <input type="file" name="files" multiple />
-    </p>
-    <p>
-      <span>name:</span>
-      <input type="text" name="name" value="mark">
-    </p>
-    <p>
-      <input type="submit" value="submit">
-    </p>
-  </form>
+  <p>
+    <span>file: </span>
+    <input type="file" name="files" multiple>
+  </p>
+  <p>
+    <span>name:</span>
+    <input type="text" name="name" value="mark">
+  </p>
+  <p>
+    <input type="submit" value="submit">
+  </p>
+</form>
 ```
 
 fields `files` 映射为 `formidable.File` 类型。
@@ -822,7 +822,7 @@ export default defineMock({
 ```ts
 fetch('/api/graphql', {
   method: 'POST',
-  body: JSON.stringify({ source: '{ hello }' }) 
+  body: JSON.stringify({ source: '{ hello }' })
 })
 ```
 
@@ -839,7 +839,8 @@ export default defineMock({
       wsMap.set(token, ws)
       ws.on('message', (raw) => {
         const data = JSON.parse(String(raw))
-        if (data.type === 'ping') return
+        if (data.type === 'ping')
+          return
         // Broadcast
         for (const [_token, _ws] of wsMap.entires()) {
           if (_token !== token)

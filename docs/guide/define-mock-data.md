@@ -65,7 +65,7 @@ export default defineMock({
   url: '/api/post/delete/:id',
   body: (params) => {
     const id = params.id
-    posts.value = posts.value.filter((post) => post.id !== id)
+    posts.value = posts.value.filter(post => post.id !== id)
     return { success: true }
   }
 })
@@ -96,7 +96,7 @@ export default defineMock({
     const id = params.id
     const [, setPosts] = posts
 
-    setPosts((posts) => posts.filter((post) => post.id !== id))
+    setPosts(posts => posts.filter(post => post.id !== id))
 
     return { success: true }
   }

@@ -25,7 +25,7 @@
 
 ::: code-group
 ``` ts [shared/utils/dataWrap.ts]
-export const successWrap = (data) => {
+export function successWrap(data) {
   return {
     code: 0,
     message: 'success',

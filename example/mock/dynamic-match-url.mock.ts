@@ -15,7 +15,8 @@ export default defineMock({
         message: 'success',
         result: authorMap[id],
       }
-    } else {
+    }
+    else {
       return {
         code: 400,
         message: 'author not found',

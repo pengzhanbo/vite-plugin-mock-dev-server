@@ -7,22 +7,23 @@ export async function parseReqBody(
   options: formidable.Options,
 ): Promise<any> {
   const method = req.method!.toUpperCase()
-  if (['GET', 'DELETE', 'HEAD'].includes(method)) return undefined
+  if (['GET', 'DELETE', 'HEAD'].includes(method))
+    return undefined
   const type = req.headers['content-type']?.toLocaleLowerCase() || ''
   try {
-    if (type.startsWith('application/json')) {
+    if (type.startsWith('application/json'))
       return await bodyParser.json(req)
-    }
-    if (type.startsWith('application/x-www-form-urlencoded')) {
+
+    if (type.startsWith('application/x-www-form-urlencoded'))
       return await bodyParser.form(req)
-    }
-    if (type.startsWith('text/plain')) {
+
+    if (type.startsWith('text/plain'))
       return await bodyParser.text(req)
-    }
-    if (type.startsWith('multipart/form-data')) {
+
+    if (type.startsWith('multipart/form-data'))
       return await parseMultipart(req, options)
-    }
-  } catch (e) {
+  }
+  catch (e) {
     console.error(e)
   }
   return undefined

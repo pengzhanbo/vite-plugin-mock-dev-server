@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest'
+import { expect, it } from 'vitest'
 import { sortByValidator } from '../src/transform'
 import type { MockHttpItem } from '../src/types'
 
@@ -15,8 +15,8 @@ const mockList: MockHttpItem[] = [
 /**
  * 验证 validator 优先级
  */
-test('sort by validator', () => {
-  expect(sortByValidator(mockList).map((m) => m.url)).toEqual([
+it('sort by validator', () => {
+  expect(sortByValidator(mockList).map(m => m.url)).toEqual([
     '1',
     '5',
     '4',

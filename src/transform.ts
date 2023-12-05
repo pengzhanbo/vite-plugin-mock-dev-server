@@ -16,12 +16,14 @@ export function transformMockData(
 ) {
   const list: MockOptions = []
   for (const [, handle] of mockList.entries()) {
-    if (handle) isArray(handle) ? list.push(...handle) : list.push(handle)
+    if (handle)
+      isArray(handle) ? list.push(...handle) : list.push(handle)
   }
+
   const mocks: Record<string, MockOptions> = {}
 
   list
-    .filter((mock) => isObject(mock) && mock.enabled !== false && mock.url)
+    .filter(mock => isObject(mock) && mock.enabled !== false && mock.url)
     .forEach((mock) => {
       const { pathname, query } = urlParse(mock.url)
       const list = (mocks[pathname!] ??= [])
@@ -34,12 +36,14 @@ export function transformMockData(
             current.validator = function (request) {
               return isObjectSubset(request.query, query) && validator(request)
             }
-          } else if (validator) {
+          }
+          else if (validator) {
             current.validator = { ...validator }
             current.validator.query = current.validator.query
               ? { ...query, ...current.validator.query }
               : query
-          } else {
+          }
+          else {
             current.validator = { query }
           }
         }
@@ -66,11 +70,14 @@ export function transformMockData(
 
 export function sortByValidator(mocks: MockOptions) {
   return sortBy(mocks, (item) => {
-    if (item.ws === true) return 0
+    if (item.ws === true)
+      return 0
     const { validator } = item
     // fix: #28
-    if (!validator || isEmptyObject(validator)) return 2
-    if (isFunction(validator)) return 0
+    if (!validator || isEmptyObject(validator))
+      return 2
+    if (isFunction(validator))
+      return 0
     const count = Object.keys(validator).reduce(
       (prev, key) => prev + keysCount(validator[key as keyof typeof validator]),
       0,
@@ -80,6 +87,7 @@ export function sortByValidator(mocks: MockOptions) {
 }
 
 function keysCount(obj?: object): number {
-  if (!obj) return 0
+  if (!obj)
+    return 0
   return Object.keys(obj).length
 }

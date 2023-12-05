@@ -199,6 +199,6 @@ interface MockMatchSpecialPriority {
    * }
    * ```
    */
-  [key: string]: string[] | { rules: string[]; when: string[] }
+  [key: string]: string[] | { rules: string[], when: string[] }
 }
 ```

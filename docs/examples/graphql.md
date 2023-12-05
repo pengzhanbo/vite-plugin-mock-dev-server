@@ -29,7 +29,7 @@ export default defineMock({
 ```ts [api.ts]
 const response = await fetch('/api/graphql', {
   method: 'POST',
-  body: JSON.stringify({ source: '{ hello }' }) 
+  body: JSON.stringify({ source: '{ hello }' })
 })
 if (response.ok) {
   const data = await response.json()

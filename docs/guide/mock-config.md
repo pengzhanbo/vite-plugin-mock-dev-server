@@ -42,7 +42,7 @@ interface RequestOptions {
 export default defineMock([
   {
     url: '/api/post/list',
-  }, 
+  },
   {
     url: '/api/post/:postId',
   }
@@ -60,8 +60,8 @@ export default defineMock([
 仅符合的请求方法返回 `mock data`，否则忽略。可通过数组配置接口支持多种请求方法。
 
 ```ts
-type Method = 
-  | 'GET' | 'POST' | 'PUT' | 'DELETE' 
+type Method =
+  | 'GET' | 'POST' | 'PUT' | 'DELETE'
   | 'PATCH' | 'HEAD' | 'TRACE' | 'OPTIONS'
 ```
 
@@ -212,7 +212,7 @@ export default defineMock([
     url: 'api/list',
     validator: { query: { p: 1 } },
     body: {
-      result: [ { title: 'p1' } ],
+      result: [{ title: 'p1' }],
       page: 1,
     }
   },
@@ -220,7 +220,7 @@ export default defineMock([
     url: 'api/list',
     validator: { query: { p: 2 } },
     body: {
-      result: [ { title: 'p2' } ],
+      result: [{ title: 'p2' }],
       page: 2,
     }
   }
@@ -237,10 +237,7 @@ export default defineMock([
 
 ## setup
 
-- **Type**：`(wss: WebSocketServer) => Destroy | void`
-  ```ts
-  type Destroy = () => void
-  ```
+- **Type**：`(wss: WebSocketServer) => void`
 - **选填**， 如果 `ws`值为`true`， 则该选项必填
   
 该选项仅用于 模拟 `Websocket`。

@@ -8,9 +8,9 @@
 
 ```html
 <form action="/api/upload" method="post" enctype="multipart/form-data">
-  <input type="file" name="files" multiple />
+  <input type="file" name="files" multiple>
   <input type="submit" value="submit">
-  </form>
+</form>
 ```
 
 ```ts
@@ -101,5 +101,4 @@ export default defineMock({
     }
   },
 })
-
 ```

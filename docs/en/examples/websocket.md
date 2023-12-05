@@ -52,7 +52,8 @@ export default defineMock({
         userList.push(user)
         // Broadcast the updated member to all participants in the chat room
         userList.forEach(({ id }) => userWsMap[id].send(JSON.stringify({
-          type: 'userList', data: { userList }
+          type: 'userList',
+          data: { userList }
         })))
       }
       ws.on('message', (raw) => {
@@ -74,7 +75,8 @@ export default defineMock({
         userWsMap[user.id] = null
         // Broadcast the updated member to all participants in the chat room
         userList.forEach(({ id }) => userWsMap[id].send(JSON.stringify({
-          type: 'userList', data: { userList }
+          type: 'userList',
+          data: { userList }
         })))
       })
     })
@@ -101,15 +103,14 @@ ws.addEventListener('open', () => {
 }, { once: true })
 ws.addEventListener('message', (raw) => {
   const { type, data } = JSON.parse(String(raw))
-  if (type === 'userList') {
+  if (type === 'userList')
     store.userList = data.userList || []
-  }
-  if (type === 'chat') {
+
+  if (type === 'chat')
     store.chatList.push(data)
-  }
 })
 
-const sendMessage = (message: string) => {
+function sendMessage(message: string) {
   if (store.connected) {
     ws.send(JSON.stringify({
       type: 'chat',
@@ -117,8 +118,9 @@ const sendMessage = (message: string) => {
     }))
   }
 }
-const closeChat = () => {
-  if (store.connected) ws.close()
+function closeChat() {
+  if (store.connected)
+    ws.close()
 }
 ```
 :::

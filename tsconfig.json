@@ -1,23 +1,23 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "moduleResolution": "node",
-    "strict": true,
-    "declaration": true,
-    "noUnusedLocals": true,
-    "esModuleInterop": true,
-    "module": "ESNext",
     "lib": ["ESNext"],
-    "sourceMap": false,
+    "baseUrl": ".",
+    "module": "ESNext",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
-    "noEmitOnError": true
+    "strict": true,
+    "noUnusedLocals": true,
+    "declaration": true,
+    "noEmitOnError": true,
+    "sourceMap": false,
+    "esModuleInterop": true
   },
+  "references": [{ "path": "./tsconfig.esm.json" }],
   "include": ["./src", "./example", "./docs/.vitepress"],
   "exclude": [
     "dist",
     "node_modules",
     "./docs/.vitepress/cache",
     "./docs/.vitepress/dist"
-  ],
-  "references": [{ "path": "./tsconfig.esm.json" }]
+  ]
 }

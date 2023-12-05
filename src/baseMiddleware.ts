@@ -60,18 +60,18 @@ export function baseMiddleware(
 
     // 预先过滤不符合路径前缀的请求
     if (
-      !pathname ||
-      proxies.length === 0 ||
-      !proxies.some((context) => doesProxyContextMatchUrl(context, req.url!))
-    ) {
+      !pathname
+      || proxies.length === 0
+      || !proxies.some(context => doesProxyContextMatchUrl(context, req.url!))
+    )
       return next()
-    }
 
     const mockData = mockLoader.mockData
     // 对满足匹配规则的配置进行优先级排序
     const mockUrls = matchingWeight(Object.keys(mockData), pathname, priority)
 
-    if (mockUrls.length === 0) return next()
+    if (mockUrls.length === 0)
+      return next()
 
     // #52 由于请求流被消费，vite http-proxy 无法获取已消费的请求，导致请求流无法继续
     // 记录请求流中被消费的数据，形成备份，当当前请求无法继续时，可以从备份中恢复请求流
@@ -106,7 +106,7 @@ export function baseMiddleware(
 
     if (!mock) {
       const matched = mockUrls
-        .map((m) =>
+        .map(m =>
           m === _mockUrl ? colors.underline(colors.bold(m)) : colors.dim(m),
         )
         .join(', ')
@@ -153,7 +153,7 @@ export function baseMiddleware(
       `${colors.magenta('DEBUG')} ${colors.underline(
         pathname,
       )}  matches: [ ${mockUrls
-        .map((m) =>
+        .map(m =>
           m === _mockUrl ? colors.underline(colors.bold(m)) : colors.dim(m),
         )
         .join(', ')} ]\n`,
@@ -164,7 +164,8 @@ export function baseMiddleware(
         const content = isFunction(body) ? await body(request) : body
         await realDelay(startTime, delay)
         sendData(response, content, type)
-      } catch (e) {
+      }
+      catch (e) {
         logger.error(
           `${colors.red(
             `mock error at ${pathname}`,
@@ -181,7 +182,8 @@ export function baseMiddleware(
       try {
         await realDelay(startTime, delay)
         await responseFn(request, response, next)
-      } catch (e) {
+      }
+      catch (e) {
         logger.error(
           `${colors.red(
             `mock error at ${pathname}`,
@@ -212,14 +214,16 @@ function fineMock(
   },
 ): MockHttpItem | undefined {
   return mockList.find((mock) => {
-    if (!pathname || !mock || !mock.url || mock.ws === true) return false
+    if (!pathname || !mock || !mock.url || mock.ws === true)
+      return false
     const methods: Method[] = mock.method
       ? isArray(mock.method)
         ? mock.method
         : [mock.method]
       : ['GET', 'POST']
     // 判断发起的请求方法是否符合当前 mock 允许的方法
-    if (!methods.includes(method as Method)) return false
+    if (!methods.includes(method as Method))
+      return false
 
     const hasMock = pathToRegexp(mock.url).test(pathname)
 
@@ -227,10 +231,12 @@ function fineMock(
       const params = parseParams(mock.url, pathname)
       if (isFunction(mock.validator)) {
         return mock.validator({ params, ...request })
-      } else {
+      }
+      else {
         try {
           return validate({ params, ...request }, mock.validator)
-        } catch (e) {
+        }
+        catch (e) {
           const file = (mock as any).__filepath__
           logger.error(
             `${colors.red(
@@ -263,22 +269,24 @@ async function provideHeaders(
 ) {
   const { headers, type = 'json' } = mock
   const filepath = (mock as any).__filepath__ as string
-  const contentType =
-    mime.contentType(type) || mime.contentType(mime.lookup(type) || '')
+  const contentType
+    = mime.contentType(type) || mime.contentType(mime.lookup(type) || '')
   contentType && res.setHeader('Content-Type', contentType)
 
   res.setHeader('Cache-Control', 'no-cache,max-age=0')
   res.setHeader('X-Mock-Power-By', 'vite-plugin-mock-dev-server')
   res.setHeader('X-File-Path', filepath)
 
-  if (!headers) return
+  if (!headers)
+    return
 
   try {
     const raw = isFunction(headers) ? await headers(req) : headers
     Object.keys(raw).forEach((key) => {
       res.setHeader(key, raw[key]!)
     })
-  } catch (e) {
+  }
+  catch (e) {
     logger.error(
       `${colors.red(
         `mock error at ${req.url!.split('?')[0]}`,
@@ -296,7 +304,8 @@ async function provideCookies(
 ) {
   const { cookies } = mock
   const filepath = (mock as any).__filepath__ as string
-  if (!cookies) return
+  if (!cookies)
+    return
   try {
     const raw = isFunction(cookies) ? await cookies(req) : cookies
     Object.keys(raw).forEach((key) => {
@@ -304,11 +313,13 @@ async function provideCookies(
       if (isArray(cookie)) {
         const [value, options] = cookie
         res.setCookie(key, value, options)
-      } else {
+      }
+      else {
         res.setCookie(key, cookie)
       }
     })
-  } catch (e) {
+  }
+  catch (e) {
     logger.error(
       `${colors.red(
         `mock error at ${req.url!.split('?')[0]}`,
@@ -321,9 +332,11 @@ async function provideCookies(
 function sendData(res: MockResponse, raw: ResponseBody, type: string) {
   if (isReadableStream(raw)) {
     raw.pipe(res)
-  } else if (Buffer.isBuffer(raw)) {
+  }
+  else if (Buffer.isBuffer(raw)) {
     res.end(type === 'text' || type === 'json' ? raw.toString('utf-8') : raw)
-  } else {
+  }
+  else {
     const content = typeof raw === 'string' ? raw : JSON.stringify(raw)
     res.end(type === 'buffer' ? Buffer.from(content) : content)
   }
@@ -331,19 +344,21 @@ function sendData(res: MockResponse, raw: ResponseBody, type: string) {
 
 async function realDelay(startTime: number, delay?: MockHttpItem['delay']) {
   if (
-    !delay ||
-    (typeof delay === 'number' && delay <= 0) ||
-    (isArray(delay) && delay.length !== 2)
+    !delay
+    || (typeof delay === 'number' && delay <= 0)
+    || (isArray(delay) && delay.length !== 2)
   )
     return
   let realDelay = 0
   if (isArray(delay)) {
     const [min, max] = delay
     realDelay = random(min, max)
-  } else {
+  }
+  else {
     realDelay = delay - (timestamp() - startTime)
   }
-  if (realDelay > 0) await sleep(realDelay)
+  if (realDelay > 0)
+    await sleep(realDelay)
 }
 
 function getHTTPStatusText(status: number): string {

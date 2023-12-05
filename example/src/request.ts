@@ -26,7 +26,8 @@ async function renderResponse(url: string, method: string, response: Response) {
     let result = {}
     try {
       result = await response.json()
-    } catch {}
+    }
+    catch {}
     const str = JSON.stringify(result, null, 2)
     content += `<div><p><b>Response Body: </b></p><pre><code>${str}</code></pre></div>`
   }

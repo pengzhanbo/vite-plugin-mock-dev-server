@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
+import process from 'node:process'
 import { toArray } from '@pengzhanbo/utils'
 import type { Metafile } from 'esbuild'
 import fg from 'fast-glob'
@@ -36,10 +37,10 @@ export async function generateMockServer(
   let pkg = {}
   try {
     const pkgStr = lookupFile(config.root, ['package.json'])
-    if (pkgStr) {
+    if (pkgStr)
       pkg = JSON.parse(pkgStr)
-    }
-  } catch {}
+  }
+  catch {}
 
   const outputDir = (options.build as ServerBuildOption).dist!
 
@@ -77,10 +78,10 @@ export async function generateMockServer(
     if (path.isAbsolute(outputDir)) {
       await fsp.rm(outputDir, { recursive: true })
       fs.mkdirSync(outputDir, { recursive: true })
-      for (const { filename, source } of outputList) {
+      for (const { filename, source } of outputList)
         await fsp.writeFile(filename, source, 'utf-8')
-      }
-    } else {
+    }
+    else {
       for (const { filename, source } of outputList) {
         ctx.emitFile({
           type: 'asset',
@@ -89,7 +90,8 @@ export async function generateMockServer(
         })
       }
     }
-  } catch {}
+  }
+  catch {}
 }
 
 function getMockDependencies(deps: Metafile['inputs']): string[] {
@@ -97,12 +99,11 @@ function getMockDependencies(deps: Metafile['inputs']): string[] {
   const excludeDeps = [name, 'connect', 'cors']
   Object.keys(deps).forEach((mPath) => {
     const imports = deps[mPath].imports
-      .filter((_) => _.external && !_.path.startsWith('<define:'))
-      .map((_) => _.path)
+      .filter(_ => _.external && !_.path.startsWith('<define:'))
+      .map(_ => _.path)
     imports.forEach((dep) => {
-      if (!excludeDeps.includes(dep) && !isCore(dep)) {
+      if (!excludeDeps.includes(dep) && !isCore(dep))
         list.add(dep)
-      }
     })
   })
   return Array.from(list)

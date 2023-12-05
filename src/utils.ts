@@ -7,16 +7,18 @@ import Debug from 'debug'
 import { match } from 'path-to-regexp'
 import type { ResolvedConfig } from 'vite'
 
-export const isStream = (stream: unknown): stream is Stream =>
-  stream !== null &&
-  typeof stream === 'object' &&
-  typeof (stream as any).pipe === 'function'
+export function isStream(stream: unknown): stream is Stream {
+  return stream !== null
+    && typeof stream === 'object'
+    && typeof (stream as any).pipe === 'function'
+}
 
-export const isReadableStream = (stream: unknown): stream is Readable =>
-  isStream(stream) &&
-  (stream as any).readable !== false &&
-  typeof (stream as any)._read === 'function' &&
-  typeof (stream as any)._readableState === 'object'
+export function isReadableStream(stream: unknown): stream is Readable {
+  return isStream(stream)
+    && (stream as any).readable !== false
+    && typeof (stream as any)._read === 'function'
+    && typeof (stream as any)._readableState === 'object'
+}
 
 export function getDirname(importMetaUrl: string): string {
   return path.dirname(fileURLToPath(importMetaUrl))
@@ -41,37 +43,32 @@ export function lookupFile(
       const result = options?.pathOnly
         ? fullPath
         : fs.readFileSync(fullPath, 'utf-8')
-      if (!options?.predicate || options.predicate(result)) {
+      if (!options?.predicate || options.predicate(result))
         return result
-      }
     }
   }
   const parentDir = path.dirname(dir)
   if (
-    parentDir !== dir &&
-    (!options?.rootDir || parentDir.startsWith(options?.rootDir))
-  ) {
+    parentDir !== dir
+    && (!options?.rootDir || parentDir.startsWith(options?.rootDir))
+  )
     return lookupFile(parentDir, formats, options)
-  }
 }
 
-export const ensureProxies = (
-  serverProxy: ResolvedConfig['server']['proxy'] = {},
-) => {
+export function ensureProxies(serverProxy: ResolvedConfig['server']['proxy'] = {}) {
   const httpProxies: string[] = []
   const wsProxies: string[] = []
   Object.keys(serverProxy).forEach((key) => {
     const value = serverProxy[key]
     if (
-      typeof value === 'string' ||
-      (!value.ws &&
-        !value.target?.toString().startsWith('ws:') &&
-        !value.target?.toString().startsWith('wss:'))
-    ) {
+      typeof value === 'string'
+        || (!value.ws
+        && !value.target?.toString().startsWith('ws:')
+        && !value.target?.toString().startsWith('wss:'))
+    )
       httpProxies.push(key)
-    } else {
+    else
       wsProxies.push(key)
-    }
   })
   return { httpProxies, wsProxies }
 }
@@ -81,8 +78,8 @@ export function doesProxyContextMatchUrl(
   url: string,
 ): boolean {
   return (
-    (context[0] === '^' && new RegExp(context).test(url)) ||
-    url.startsWith(context)
+    (context[0] === '^' && new RegExp(context).test(url))
+    || url.startsWith(context)
   )
 }
 

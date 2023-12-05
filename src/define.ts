@@ -7,6 +7,7 @@
 // 在本插件中，简化了处理过程，仅提供 支持在 mock 文件中使用 `define` 和 `env`，并删除了不必要的边界处理。
 // 而存在的问题则是，插件并没有对`.env` 文件进行监听，即 `env` 发生变化，不会触发插件的热更新。
 
+import process from 'node:process'
 import colors from 'picocolors'
 import type { ResolvedConfig } from 'vite'
 import { createLogger } from './logger'
@@ -35,18 +36,19 @@ export function viteDefine(config: ResolvedConfig) {
       try {
         JSON.parse(val)
         userDefine[key] = val
-      } catch {
+      }
+      catch {
         defineErrorKeys.push(key)
       }
-    } else {
+    }
+    else {
       userDefine[key] = JSON.stringify(val)
     }
 
     // make sure `import.meta.env` object has user define properties
     const match = key.match(metaEnvRe)
-    if (match && userDefine[key]) {
+    if (match && userDefine[key])
       userDefineEnv[match[1]] = `__vite__define__${userDefine[key]}`
-    }
   }
 
   if (defineErrorKeys.length) {
@@ -62,9 +64,9 @@ export function viteDefine(config: ResolvedConfig) {
 
   // set here to allow override with config.define
   importMetaKeys['import.meta.hot'] = 'undefined'
-  for (const key in config.env) {
+  for (const key in config.env)
     importMetaKeys[`import.meta.env.${key}`] = JSON.stringify(config.env[key])
-  }
+
   Object.assign(importMetaFallbackKeys, {
     'import.meta.env': JSON.stringify({
       ...config.env,

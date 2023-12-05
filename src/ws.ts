@@ -10,7 +10,8 @@
  * 于 `server.proxy` 中，避免 vite 内的 http-proxy ws 与 插件的 ws 的冲突。
  */
 
-import type http from 'node:http'
+import type { Server } from 'node:http'
+import type { Http2SecureServer } from 'node:http2'
 import Cookies from 'cookies'
 import { pathToRegexp } from 'path-to-regexp'
 import colors from 'picocolors'
@@ -43,7 +44,7 @@ interface WSSContext {
 
 export interface MockSocketOptions {
   loader: MockLoader
-  httpServer: http.Server | null
+  httpServer: Server | Http2SecureServer | null
   proxies: string[]
   cookiesOptions: MockServerPluginOptions['cookiesOptions']
   logger: Logger
@@ -70,8 +71,8 @@ export function mockWebSocket({
 
   const getWss = (wssMap: WSSMap, pathname: string): WebSocketServer => {
     let wss = wssMap.get(pathname)
-    !wss &&
-      wssMap.set(pathname, (wss = new WebSocketServer({ noServer: true })))
+    !wss
+    && wssMap.set(pathname, (wss = new WebSocketServer({ noServer: true })))
     return wss
   }
 
@@ -100,7 +101,8 @@ export function mockWebSocket({
           mock.log,
         )
       })
-    } catch (e) {
+    }
+    catch (e) {
       logger.error(
         `${colors.red(
           `WebSocket mock error at ${wss.path}`,
@@ -118,8 +120,9 @@ export function mockWebSocket({
   ) => {
     wss.emit('connection', ws, req)
     ws.on('close', () => {
-      const i = connectionList.findIndex((item) => item.ws === ws)
-      if (i !== -1) connectionList.splice(i, 1)
+      const i = connectionList.findIndex(item => item.ws === ws)
+      if (i !== -1)
+        connectionList.splice(i, 1)
     })
   }
 
@@ -146,39 +149,43 @@ export function mockWebSocket({
   // 检测 ws 相关的 mock 文件更新
   // 如果 当前的 ws 配置已 建立 wss 连接，则重启该 wss 连接
   loader.on?.('mock:update-end', (filepath: string) => {
-    if (!hmrMap.has(filepath)) return
+    if (!hmrMap.has(filepath))
+      return
     const mockUrlList = hmrMap.get(filepath)
-    if (!mockUrlList) return
+    if (!mockUrlList)
+      return
     for (const mockUrl of mockUrlList.values()) {
       for (const mock of loader.mockData[mockUrl]) {
-        if (!mock.ws || (mock as any).__filepath__ !== filepath) return
+        if (!mock.ws || (mock as any).__filepath__ !== filepath)
+          return
         const wssMap = getWssMap(mockUrl)
-        for (const [pathname, wss] of wssMap.entries()) {
+        for (const [pathname, wss] of wssMap.entries())
           restartWss(wssMap, wss, mock, pathname, filepath)
-        }
       }
     }
   })
   httpServer?.on('upgrade', (req, socket, head) => {
     const { pathname, query } = urlParse(req.url!)
     if (
-      !pathname ||
-      proxies.length === 0 ||
-      !proxies.some((context) => doesProxyContextMatchUrl(context, req.url!))
-    ) {
+      !pathname
+      || proxies.length === 0
+      || !proxies.some(context => doesProxyContextMatchUrl(context, req.url!))
+    )
       return
-    }
+
     const mockData = loader.mockData
     const mockUrl = Object.keys(mockData).find((key) => {
       return pathToRegexp(key).test(pathname)
     })
-    if (!mockUrl) return
+    if (!mockUrl)
+      return
 
     const mock = mockData[mockUrl].find((mock) => {
       return mock.url && mock.ws && pathToRegexp(mock.url).test(pathname)
     }) as MockWebsocketItem
 
-    if (!mock) return
+    if (!mock)
+      return
 
     const filepath = (mock as any).__filepath__
 
@@ -191,7 +198,7 @@ export function mockWebSocket({
     if (!wssContext) {
       const cleanupList: (() => void)[] = []
       const context: WebSocketSetupContext = {
-        onCleanup: (cleanup) => cleanupList.push(cleanup),
+        onCleanup: cleanup => cleanupList.push(cleanup),
       }
       wssContext = { cleanupList, context, connectionList: [] }
       wssContextMap.set(wss, wssContext)
@@ -238,7 +245,6 @@ export function mockWebSocket({
 function cleanupRunner(cleanupList: WSSContext['cleanupList']) {
   let cleanup: (() => void) | undefined
   // eslint-disable-next-line no-cond-assign
-  while ((cleanup = cleanupList.shift())) {
+  while ((cleanup = cleanupList.shift()))
     cleanup?.()
-  }
 }

@@ -287,16 +287,16 @@ export default defineMock({
    * Supported request methods of the interface.
    * @type string | string[]
    * @default ['POST','GET']
-   * 
+   *
    */
   method: ['GET', 'POST'],
   /**
-   * In practical scenarios, 
-   * we usually only need certain mock interfaces to take effect, 
-   * rather than enabling all mock interfaces. 
-   * For interfaces that do not currently require mocking, 
+   * In practical scenarios,
+   * we usually only need certain mock interfaces to take effect,
+   * rather than enabling all mock interfaces.
+   * For interfaces that do not currently require mocking,
    * they can be set to false.
-   * 
+   *
    * @default true
    */
   enabled: true,
@@ -350,7 +350,7 @@ export default defineMock({
 
   /**
    * Response Body
-   * Support `string/number/array/object/buffer/ReadableStream` 
+   * Support `string/number/array/object/buffer/ReadableStream`
    * You can also use libraries such as' mockjs' to generate data content
    * @type string | number | array | object | ReadableStream | buffer
    * @type (request: { headers, query, body, params, refererQuery, getCookie }) => any | Promise<any>
@@ -358,33 +358,33 @@ export default defineMock({
   body: '',
 
   /**
-   * If the mock requirement cannot be solved through `body` configuration, 
-   * then it can be achieved by configuring response and exposing the interface of http server 
-   * to realize fully controllable custom configuration in req parameters. 
-   * The parsing of query, body and params has been built-in, so you can use them directly. 
+   * If the mock requirement cannot be solved through `body` configuration,
+   * then it can be achieved by configuring response and exposing the interface of http server
+   * to realize fully controllable custom configuration in req parameters.
+   * The parsing of query, body and params has been built-in, so you can use them directly.
    * Don't forget to return response data through `res.end()` or skip mock by calling `next()`.
    */
   response(req, res, next) {
     res.end()
   },
   /**
-   * Request validator, return mock data if validated, otherwise do not use current mock. 
-   * This is useful in scenarios where an interface needs to return different data based 
-   * on different input parameters. 
-   * Validators can solve this type of problem well by dividing the same URL into multiple 
+   * Request validator, return mock data if validated, otherwise do not use current mock.
+   * This is useful in scenarios where an interface needs to return different data based
+   * on different input parameters.
+   * Validators can solve this type of problem well by dividing the same URL into multiple
    * mock configurations and determining which one is effective based on the validator.
-   * 
+   *
    * @type { headers, body, query, params, refererQuery }
-   * If the validator passed in is an object, 
-   * then the validation method is to deeply compare whether 
-   * `headers/body/query/params/refererQuery` of the requested interface contain 
+   * If the validator passed in is an object,
+   * then the validation method is to deeply compare whether
+   * `headers/body/query/params/refererQuery` of the requested interface contain
    * the `key-value` of the validator.
-   * 
+   *
    * @type (request) => boolean
-   * If the validator passed in is a function, 
-   * then the data related to the requested interface will be provided as input parameters 
+   * If the validator passed in is a function,
+   * then the data related to the requested interface will be provided as input parameters
    * for users to perform custom validation and return a boolean.
-   * 
+   *
    */
   validator: {
     headers: {},
@@ -392,8 +392,8 @@ export default defineMock({
     query: {},
     params: {},
     /**
-     * refererQuery validates the query parameters in the URL of the request source page, 
-     * which allows for direct modification of parameters in the browser address bar 
+     * refererQuery validates the query parameters in the URL of the request source page,
+     * which allows for direct modification of parameters in the browser address bar
      * to obtain different simulated data.
      */
     refererQuery: {}
@@ -422,7 +422,7 @@ export default defineMock({
    * `onCleanup()` to clear these tasks.
    * This is because when the plugin is hot updated,
    * it needs to re-execute setup and clear previous tasks; otherwise,
-   * duplicate tasks may cause conflicts. 
+   * duplicate tasks may cause conflicts.
    * `onCleanup()` can be called multiple times within setup.
    * @type `(wss: WebSocketServer, context: SetupContext) => void`
    */
@@ -512,7 +512,7 @@ export default defineMock([
     url: '/api/posts/delete/:id',
     body: (params) => {
       const id = params.id
-      posts.value = posts.value.filter((post) => post.id !== id)
+      posts.value = posts.value.filter(post => post.id !== id)
       return { success: true }
     }
   }
@@ -554,10 +554,10 @@ export default defineConfig({
           '/api/:a/:b/c': {
             rules: ['/api/a/:b/:c', '/api/a/b/:c'],
             when: ['/api/a/b/c']
-           },
-           // If no `when` is specified, it means that all requests matching the rules need to have their priorities adjusted. It can be abbreviated as `[key]: [...rules]`
-           '/api/:a/b': ['/api/a/:b'],
-       }
+          },
+          // If no `when` is specified, it means that all requests matching the rules need to have their priorities adjusted. It can be abbreviated as `[key]: [...rules]`
+          '/api/:a/b': ['/api/a/:b'],
+        }
       }
     })
   ]
@@ -782,18 +782,18 @@ export default defineMock({
 use [`formidable`](https://www.npmjs.com/package/formidable#readme) to support.
 ``` html
 <form action="/api/upload" method="post" enctype="multipart/form-data">
-    <p>
-      <span>file: </span>
-      <input type="file" name="files" multiple />
-    </p>
-    <p>
-      <span>name:</span>
-      <input type="text" name="name" value="mark">
-    </p>
-    <p>
-      <input type="submit" value="submit">
-    </p>
-  </form>
+  <p>
+    <span>file: </span>
+    <input type="file" name="files" multiple>
+  </p>
+  <p>
+    <span>name:</span>
+    <input type="text" name="name" value="mark">
+  </p>
+  <p>
+    <input type="submit" value="submit">
+  </p>
+</form>
 ```
 
 fields `files` mapping to `formidable.File` 
@@ -836,7 +836,7 @@ export default defineMock({
 ``` ts
 fetch('/api/graphql', {
   method: 'POST',
-  body: JSON.stringify({ source: '{ hello }' }) 
+  body: JSON.stringify({ source: '{ hello }' })
 })
 ```
 
@@ -853,7 +853,8 @@ export default defineMock({
       wsMap.set(token, ws)
       ws.on('message', (raw) => {
         const data = JSON.parse(String(raw))
-        if (data.type === 'ping') return
+        if (data.type === 'ping')
+          return
         // Broadcast
         for (const [_token, _ws] of wsMap.entires()) {
           if (_token !== token)

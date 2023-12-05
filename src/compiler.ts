@@ -14,9 +14,8 @@ const externalizeDeps: Plugin = {
   name: 'externalize-deps',
   setup(build) {
     build.onResolve({ filter: /.*/ }, ({ path: id }) => {
-      if (id[0] !== '.' && !path.isAbsolute(id)) {
+      if (id[0] !== '.' && !path.isAbsolute(id))
         return { external: true }
-      }
     })
   },
 }
@@ -47,16 +46,16 @@ const jsonLoader: Plugin = {
   },
 }
 
-const aliasPlugin = (alias: ResolvedConfig['resolve']['alias']): Plugin => {
+function aliasPlugin(alias: ResolvedConfig['resolve']['alias']): Plugin {
   return {
     name: 'alias-plugin',
     setup(build) {
       build.onResolve({ filter: /.*/ }, async ({ path: id }) => {
         // First match is supposed to be the correct one
         const matchedEntry = alias.find(({ find }) => matches(find, id))
-        if (!matchedEntry) {
+        if (!matchedEntry)
           return null
-        }
+
         // 插件内部 对 alias 的支持并不完善，还缺少对 `customResolver` 的支持
         // 但是在 esbuild 的插件实现中，暂时不能很好的实现对 `customResolver` 的参数兼容
         // 这里作为 待优化的 问题
@@ -78,15 +77,15 @@ const aliasPlugin = (alias: ResolvedConfig['resolve']['alias']): Plugin => {
 }
 
 function matches(pattern: string | RegExp, importee: string) {
-  if (pattern instanceof RegExp) {
+  if (pattern instanceof RegExp)
     return pattern.test(importee)
-  }
-  if (importee.length < pattern.length) {
+
+  if (importee.length < pattern.length)
     return false
-  }
-  if (importee === pattern) {
+
+  if (importee === pattern)
     return true
-  }
+
   return importee.startsWith(`${pattern}/`)
 }
 
@@ -123,7 +122,8 @@ export async function transformWithEsbuild(
       code: result.outputFiles[0].text,
       deps: result.metafile?.inputs || {},
     }
-  } catch (e) {
+  }
+  catch (e) {
     console.error(e)
   }
   return { code: '', deps: {} }
@@ -149,12 +149,15 @@ export async function loadFromCode<T = any>(
     await fsp.writeFile(fileNameTmp, code, 'utf8')
     try {
       return await import(fileUrl)
-    } finally {
+    }
+    finally {
       try {
         fs.unlinkSync(fileNameTmp)
-      } catch {}
+      }
+      catch {}
     }
-  } else {
+  }
+  else {
     filepath = path.resolve(cwd, filepath)
     const extension = path.extname(filepath)
     const realFileName = fs.realpathSync(filepath)
@@ -163,7 +166,8 @@ export async function loadFromCode<T = any>(
     _require.extensions[loaderExt] = (module: NodeModule, filename: string) => {
       if (filename === realFileName) {
         ;(module as any)._compile(code, filename)
-      } else {
+      }
+      else {
         defaultLoader(module, filename)
       }
     }
