@@ -10,5 +10,6 @@
     "picomatch",
     "proxied",
     "referer"
-  ]
+  ],
+  "typescript.tsdk": "node_modules/typescript/lib"
 }
