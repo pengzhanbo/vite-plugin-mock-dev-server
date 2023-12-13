@@ -1,3 +1,17 @@
+## [1.4.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.4.0...v1.4.1) (2023-12-13)
+
+
+### Bug Fixes
+
+* mockServer build error ([#63](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/63)) ([58b8aae](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/58b8aae6d736628140b2bb2c24ebe496c4905af6))
+
+
+### Features
+
+* deprecate `cjs` ([25deb2e](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/25deb2ea36aac38d74c81aa1faa3caa996ae3201))
+
+
+
 # [1.4.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.3.4...v1.4.0) (2023-12-5)
 
 
