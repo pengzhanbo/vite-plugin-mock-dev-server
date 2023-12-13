@@ -52,7 +52,7 @@ function aliasPlugin(alias: ResolvedConfig['resolve']['alias']): Plugin {
     setup(build) {
       build.onResolve({ filter: /.*/ }, async ({ path: id }) => {
         // First match is supposed to be the correct one
-        const matchedEntry = alias.find(({ find }) => matches(find, id))
+        const matchedEntry = alias.find(({ find }) => aliasMatches(find, id))
         if (!matchedEntry)
           return null
 
@@ -76,7 +76,7 @@ function aliasPlugin(alias: ResolvedConfig['resolve']['alias']): Plugin {
   }
 }
 
-function matches(pattern: string | RegExp, importee: string) {
+export function aliasMatches(pattern: string | RegExp, importee: string) {
   if (pattern instanceof RegExp)
     return pattern.test(importee)
 

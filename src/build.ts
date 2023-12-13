@@ -9,7 +9,7 @@ import isCore from 'is-core-module'
 import type { Plugin, ResolvedConfig } from 'vite'
 import { createFilter, normalizePath } from 'vite'
 import { name, version } from '../package.json'
-import { transformWithEsbuild } from './compiler'
+import { aliasMatches, transformWithEsbuild } from './compiler'
 import { viteDefine } from './define'
 import type { MockServerPluginOptions, ServerBuildOption } from './types'
 import { ensureProxies, lookupFile } from './utils'
@@ -51,7 +51,7 @@ export async function generateMockServer(
     define,
     alias: config.resolve.alias,
   })
-  const mockDeps = getMockDependencies(deps)
+  const mockDeps = getMockDependencies(deps, config.resolve.alias)
   await fsp.unlink(mockEntry)
   const outputList = [
     {
@@ -94,12 +94,13 @@ export async function generateMockServer(
   catch {}
 }
 
-function getMockDependencies(deps: Metafile['inputs']): string[] {
+function getMockDependencies(deps: Metafile['inputs'], alias: ResolvedConfig['resolve']['alias']): string[] {
   const list = new Set<string>()
   const excludeDeps = [name, 'connect', 'cors']
+  const isAlias = (p: string) => alias.find(({ find }) => aliasMatches(find, p))
   Object.keys(deps).forEach((mPath) => {
     const imports = deps[mPath].imports
-      .filter(_ => _.external && !_.path.startsWith('<define:'))
+      .filter(_ => _.external && !_.path.startsWith('<define:') && !isAlias(_.path))
       .map(_ => _.path)
     imports.forEach((dep) => {
       if (!excludeDeps.includes(dep) && !isCore(dep))
@@ -149,17 +150,24 @@ function generatorServerEntryCode(
   return `import { createServer } from 'node:http';
 import connect from 'connect';
 import corsMiddleware from 'cors';
-import { baseMiddleware, mockWebSocket } from 'vite-plugin-mock-dev-server';
+import { baseMiddleware, mockWebSocket, createLogger } from 'vite-plugin-mock-dev-server';
 import mockData from './mock-data.js';
 
 const app = connect();
 const server = createServer(app);
+const logger = createLogger('mock-server', 'error');
 const httpProxies = ${JSON.stringify(httpProxies)};
 const wsProxies = ${JSON.stringify(wsProxies)};
 const cookiesOptions = ${JSON.stringify(cookiesOptions)};
 const priority = ${JSON.stringify(priority)};
 
-mockWebSocket({ mockData }, server, wsProxies, cookiesOptions);
+mockWebSocket({ 
+  loader: { mockData },
+  httpServer: server,
+  proxies: wsProxies,
+  cookiesOptions,
+  logger,
+});
 
 app.use(corsMiddleware());
 app.use(baseMiddleware({ mockData }, {
@@ -167,6 +175,7 @@ app.use(baseMiddleware({ mockData }, {
   proxies: httpProxies,
   priority,
   cookiesOptions,
+  logger,
 }));
 
 server.listen(${port});
@@ -205,7 +214,7 @@ const mockList = exporters.map((raw) => {
   } else {
     mockConfig = []
     Object.keys(raw || {}).forEach((key) => {
-      isArray(raw[key])
+      Array.isArray(raw[key])
         ? mockConfig.push(...raw[key])
         : mockConfig.push(raw[key])
     })
