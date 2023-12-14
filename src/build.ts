@@ -8,6 +8,7 @@ import fg from 'fast-glob'
 import isCore from 'is-core-module'
 import type { Plugin, ResolvedConfig } from 'vite'
 import { createFilter } from '@rollup/pluginutils'
+import c from 'picocolors'
 import { name, version } from '../package.json'
 import { aliasMatches, transformWithEsbuild } from './compiler'
 import { viteDefine } from './define'
@@ -73,15 +74,21 @@ export async function generateMockServer(
       source: generatePackageJson(pkg, mockDeps),
     },
   ]
-
   try {
     if (path.isAbsolute(outputDir)) {
-      for (const { filename } of outputList)
-        await fsp.rm(filename)
-
-      fs.mkdirSync(outputDir, { recursive: true })
-      for (const { filename, source } of outputList)
+      for (const { filename } of outputList) {
+        if (fs.existsSync(filename))
+          await fsp.rm(filename)
+      }
+      config.logger.info(`${c.green('✓')} generate mock server in ${c.cyan(outputDir)}`)
+      for (const { filename, source } of outputList) {
+        fs.mkdirSync(path.dirname(filename), { recursive: true })
         await fsp.writeFile(filename, source, 'utf-8')
+        const sourceSize = (source.length / 1024).toFixed(2)
+        const name = path.relative(outputDir, filename)
+        const space = name.length < 30 ? ' '.repeat(30 - name.length) : ''
+        config.logger.info(`  ${c.green(name)}${space}${c.bold(c.dim(`${sourceSize} kB`))}`)
+      }
     }
     else {
       for (const { filename, source } of outputList) {
@@ -93,7 +100,9 @@ export async function generateMockServer(
       }
     }
   }
-  catch {}
+  catch (e) {
+    console.error(e)
+  }
 }
 
 function getMockDependencies(deps: Metafile['inputs'], alias: ResolvedConfig['resolve']['alias']): string[] {
@@ -153,7 +162,7 @@ function generatorServerEntryCode(
   return `import { createServer } from 'node:http';
 import connect from 'connect';
 import corsMiddleware from 'cors';
-import { baseMiddleware, mockWebSocket, createLogger } from 'vite-plugin-mock-dev-server';
+import { baseMiddleware, createLogger, mockWebSocket } from 'vite-plugin-mock-dev-server';
 import mockData from './mock-data.js';
 
 const app = connect();
