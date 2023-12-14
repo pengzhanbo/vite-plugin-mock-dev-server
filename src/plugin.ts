@@ -37,6 +37,7 @@ export function mockDevServerPlugin({
         {
           serverPort: 8080,
           dist: 'mockServer',
+          log: 'error',
         },
         typeof build === 'object' ? build : {},
       )

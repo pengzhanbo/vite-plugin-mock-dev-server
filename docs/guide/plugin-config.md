@@ -155,6 +155,12 @@ export interface ServerBuildOption {
    * @default 'mockServer'
    */
   dist?: string
+
+  /**
+   * 服务应用日志级别
+   * @default 'error'
+   */
+  log?: LogLevel
 }
 ```
 
