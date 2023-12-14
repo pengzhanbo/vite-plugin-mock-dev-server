@@ -232,6 +232,11 @@ export default defineConfig({
      * @default 'mockServer'
      */
     dist?: string
+    /**
+     * log level
+     * @default 'error'
+     */
+    log?: LogLevel
   }
   ```
 

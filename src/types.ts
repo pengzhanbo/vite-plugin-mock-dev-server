@@ -214,6 +214,12 @@ export interface ServerBuildOption {
    */
   dist?: string
 
+  /**
+   * Service application log level
+   *
+   * 服务应用日志级别
+   * @default 'error'
+   */
   log?: LogLevel
 }
 

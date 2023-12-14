@@ -227,6 +227,12 @@ export default defineConfig({
      * @default 'mockServer'
      */
     dist?: string
+
+    /**
+     * 日志级别
+     * @default 'error'
+     */
+    log?: LogLevel
   }
   ```
 
