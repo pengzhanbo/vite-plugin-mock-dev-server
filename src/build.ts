@@ -7,12 +7,12 @@ import type { Metafile } from 'esbuild'
 import fg from 'fast-glob'
 import isCore from 'is-core-module'
 import type { Plugin, ResolvedConfig } from 'vite'
-import { createFilter, normalizePath } from 'vite'
+import { createFilter } from '@rollup/pluginutils'
 import { name, version } from '../package.json'
 import { aliasMatches, transformWithEsbuild } from './compiler'
 import { viteDefine } from './define'
 import type { MockServerPluginOptions, ServerBuildOption } from './types'
-import { ensureProxies, lookupFile } from './utils'
+import { ensureProxies, lookupFile, normalizePath } from './utils'
 
 type PluginContext<T = Plugin['buildEnd']> = T extends (
   this: infer R,
@@ -65,7 +65,7 @@ export async function generateMockServer(
         wsProxies,
         options.cookiesOptions,
         options.priority,
-        (options.build as ServerBuildOption).serverPort,
+        options.build as ServerBuildOption,
       ),
     },
     {
@@ -76,7 +76,9 @@ export async function generateMockServer(
 
   try {
     if (path.isAbsolute(outputDir)) {
-      await fsp.rm(outputDir, { recursive: true })
+      for (const { filename } of outputList)
+        await fsp.rm(filename)
+
       fs.mkdirSync(outputDir, { recursive: true })
       for (const { filename, source } of outputList)
         await fsp.writeFile(filename, source, 'utf-8')
@@ -137,8 +139,9 @@ function generatorServerEntryCode(
   wsProxies: string[],
   cookiesOptions: MockServerPluginOptions['cookiesOptions'] = {},
   priority: MockServerPluginOptions['priority'] = {},
-  port = 8080,
+  build: ServerBuildOption,
 ) {
+  const { serverPort, log } = build
   // 生成的 entry code 有一个 潜在的问题：
   // formidableOptions 配置在 `vite.config.ts` 中，`formidableOptions` 配置项
   // 支持 function，并不能被 `JSON.stringify` 转换，故会导致生成的
@@ -155,7 +158,7 @@ import mockData from './mock-data.js';
 
 const app = connect();
 const server = createServer(app);
-const logger = createLogger('mock-server', 'error');
+const logger = createLogger('mock-server', '${log}');
 const httpProxies = ${JSON.stringify(httpProxies)};
 const wsProxies = ${JSON.stringify(wsProxies)};
 const cookiesOptions = ${JSON.stringify(cookiesOptions)};
@@ -178,9 +181,9 @@ app.use(baseMiddleware({ mockData }, {
   logger,
 }));
 
-server.listen(${port});
+server.listen(${serverPort});
 
-console.log('listen: http://localhost:${port}');
+console.log('listen: http://localhost:${serverPort}');
 `
 }
 

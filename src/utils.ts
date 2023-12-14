@@ -3,6 +3,7 @@ import path from 'node:path'
 import { parse as queryParse } from 'node:querystring'
 import type { Readable, Stream } from 'node:stream'
 import { URL, fileURLToPath } from 'node:url'
+import os from 'node:os'
 import Debug from 'debug'
 import { match } from 'path-to-regexp'
 import type { ResolvedConfig } from 'vite'
@@ -99,4 +100,14 @@ export function urlParse(input: string) {
   const pathname = decodeURIComponent(url.pathname)
   const query = queryParse(url.search.replace(/^\?/, ''))
   return { pathname, query }
+}
+
+const windowsSlashRE = /\\/g
+const isWindows = os.platform() === 'win32'
+
+export function slash(p: string): string {
+  return p.replace(windowsSlashRE, '/')
+}
+export function normalizePath(id: string): string {
+  return path.posix.normalize(isWindows ? slash(id) : id)
 }

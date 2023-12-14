@@ -5,11 +5,11 @@ import chokidar from 'chokidar'
 import type { Metafile } from 'esbuild'
 import fastGlob from 'fast-glob'
 import type { ResolvedConfig } from 'vite'
-import { createFilter, normalizePath } from 'vite'
+import { createFilter } from '@rollup/pluginutils'
 import { loadFromCode, transformWithEsbuild } from './compiler'
 import { transformMockData } from './transform'
 import type { MockHttpItem, MockOptions, MockWebsocketItem } from './types'
-import { debug, lookupFile } from './utils'
+import { debug, lookupFile, normalizePath } from './utils'
 
 export interface MockLoaderOptions {
   cwd?: string

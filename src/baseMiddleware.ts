@@ -275,7 +275,7 @@ async function provideHeaders(
 
   res.setHeader('Cache-Control', 'no-cache,max-age=0')
   res.setHeader('X-Mock-Power-By', 'vite-plugin-mock-dev-server')
-  res.setHeader('X-File-Path', filepath)
+  filepath && res.setHeader('X-File-Path', filepath)
 
   if (!headers)
     return
