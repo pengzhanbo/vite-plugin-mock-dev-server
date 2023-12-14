@@ -9,11 +9,13 @@ import isCore from 'is-core-module'
 import type { Plugin, ResolvedConfig } from 'vite'
 import { createFilter } from '@rollup/pluginutils'
 import c from 'picocolors'
-import { name, version } from '../package.json'
 import { aliasMatches, transformWithEsbuild } from './compiler'
 import { viteDefine } from './define'
 import type { MockServerPluginOptions, ServerBuildOption } from './types'
 import { ensureProxies, lookupFile, normalizePath } from './utils'
+
+declare const __PACKAGE_NAME__: string
+declare const __PACKAGE_VERSION__: string
 
 type PluginContext<T = Plugin['buildEnd']> = T extends (
   this: infer R,
@@ -107,7 +109,7 @@ export async function generateMockServer(
 
 function getMockDependencies(deps: Metafile['inputs'], alias: ResolvedConfig['resolve']['alias']): string[] {
   const list = new Set<string>()
-  const excludeDeps = [name, 'connect', 'cors']
+  const excludeDeps = [__PACKAGE_NAME__, 'connect', 'cors']
   const isAlias = (p: string) => alias.find(({ find }) => aliasMatches(find, p))
   Object.keys(deps).forEach((mPath) => {
     const imports = deps[mPath].imports
@@ -132,7 +134,7 @@ function generatePackageJson(pkg: any, mockDeps: string[]) {
     },
     dependencies: {
       'connect': '^3.7.0',
-      'vite-plugin-mock-dev-server': `^${version}`,
+      'vite-plugin-mock-dev-server': `^${__PACKAGE_VERSION__}`,
       'cors': '^2.8.5',
     } as Record<string, string>,
     pnpm: { peerDependencyRules: { ignoreMissing: ['vite'] } },
