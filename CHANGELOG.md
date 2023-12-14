@@ -1,3 +1,17 @@
+## [1.4.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.4.1...v1.4.2) (2023-12-14)
+
+
+### Bug Fixes
+
+* remove optional deps and change to build-in ([#65](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/65)) ([c02e387](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/c02e387b3f8e45ec78ba12675b76dcd0f07c4f45))
+
+
+### Features
+
+* add mockServer logLevel options ([#65](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/65)) ([eb95494](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/eb95494b9ba414bfe486b7469ae0d705af01c9c3))
+
+
+
 ## [1.4.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.4.0...v1.4.1) (2023-12-13)
 
 
