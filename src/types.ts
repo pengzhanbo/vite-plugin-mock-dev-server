@@ -213,6 +213,8 @@ export interface ServerBuildOption {
    * @default 'dist/mockServer'
    */
   dist?: string
+
+  log?: LogLevel
 }
 
 export type Method =
