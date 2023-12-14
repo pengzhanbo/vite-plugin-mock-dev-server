@@ -1,3 +1,17 @@
+## [1.4.3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.4.2...v1.4.3) (2023-12-14)
+
+
+### Bug Fixes
+
+* file recursively generated in the absolute path fails ([#65](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/65)) ([cac1411](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/cac1411849a44f2dcb2d946262e3db0aef78a5f0))
+
+
+### Performance Improvements
+
+* replace package info ([bb38bbf](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/bb38bbfc4b8cf4762c57b48823372cd35c1b46ee))
+
+
+
 ## [1.4.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.4.1...v1.4.2) (2023-12-14)
 
 
