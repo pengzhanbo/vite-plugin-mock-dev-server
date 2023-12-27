@@ -1,9 +1,10 @@
 import type { Server } from 'node:http'
 import type { Http2SecureServer } from 'node:http2'
-import { isBoolean, toArray } from '@pengzhanbo/utils'
+import { isBoolean, toArray, uniq } from '@pengzhanbo/utils'
 import cors, { type CorsOptions } from 'cors'
 import { pathToRegexp } from 'path-to-regexp'
 import type { Connect, ResolvedConfig, WebSocketServer } from 'vite'
+import c from 'picocolors'
 import { baseMiddleware } from './baseMiddleware'
 import { viteDefine } from './define'
 import { createLogger } from './logger'
@@ -60,7 +61,11 @@ export function mockServerMiddleware(
    * 但在大多数场景下，共用 `server.proxy` 已足够
    */
   const prefix = toArray(options.prefix)
-  const proxies = [...prefix, ...httpProxies]
+  const proxies = uniq([...prefix, ...httpProxies])
+
+  // #68
+  if (!proxies.length)
+    logger.warn(`No proxy was configured, mock server will not work. See ${c.cyan('https://vite-plugin-mock-dev-server.netlify.app/guide/usage')}`)
 
   /**
    * 虽然 config.server.proxy 中有关于 ws 的代理配置，
