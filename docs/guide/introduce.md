@@ -1,4 +1,3 @@
-
 # 介绍
 
 `vite-plugin-mock-dev-server` 专注于在 `Vite` 开发环境下 提供 Mock 服务。
@@ -10,7 +9,6 @@
 插件支持响应多种数据类型包括 `text/json/Buffer/ReadStream`等，还支持设置 headers、cookies。
 
 插件还支持模拟 `WebSocket`，可以轻松的实现在本地开发环境调试 `WebSocket` 服务。
-
 
 ## 特性
 

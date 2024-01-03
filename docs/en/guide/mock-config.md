@@ -121,7 +121,7 @@ The actual `content-type` is determined internally by the plugin using `mime-typ
 - **Type**: `Record<string, string> | (request: RequestOptions) => Record<string, string>`
 - **Optional**
 - **Default**：
-  
+
   The default value is determined based on the value of [type](#type):
   | Type     | Default                                                  |
   | -------- | -------------------------------------------------------- |
@@ -131,7 +131,6 @@ The actual `content-type` is determined internally by the plugin using `mime-typ
   | other    | Determined based on the input value using `mime-types`   |
 
 Response headers
-
 
 ## cookies
 

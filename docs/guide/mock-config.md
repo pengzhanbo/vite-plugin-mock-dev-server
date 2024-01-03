@@ -122,7 +122,7 @@ export default defineMock({
 - **Type**: `Record<string, string> | (request: RequestOptions) => Record<string, string>`
 - **选填**
 - **默认值**：
-  
+
   默认值根据 [type](#type) 的值确定：
   | type     | 默认值                                            |
   | -------- | ------------------------------------------------- |
@@ -239,9 +239,8 @@ export default defineMock([
 
 - **Type**：`(wss: WebSocketServer) => void`
 - **选填**， 如果 `ws`值为`true`， 则该选项必填
-  
-该选项仅用于 模拟 `Websocket`。
 
+该选项仅用于 模拟 `Websocket`。
 
 ```ts
 export default {

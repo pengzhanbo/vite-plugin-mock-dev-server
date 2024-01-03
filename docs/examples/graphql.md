@@ -1,6 +1,6 @@
 # Graphql
 
-需要安装 `graphql`。 
+需要安装 `graphql`。
 
 ::: code-group
 ```ts [graphql.mock.ts]

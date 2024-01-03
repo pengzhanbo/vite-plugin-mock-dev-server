@@ -6,7 +6,7 @@
 <form action="/api/upload" method="post" enctype="multipart/form-data">
   <p>
     <span>file: </span>
-    <input type="file" name="files" multiple>
+    <input type="file" name="files" multiple="multiple">
   </p>
   <p>
     <span>name:</span>

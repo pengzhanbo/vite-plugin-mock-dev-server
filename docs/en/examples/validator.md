@@ -2,7 +2,6 @@
 
 Sometimes, for the same URL, we need to return different content based on different request parameters, but we don't want to handle it internally in the `body` function form. In this case, you can use the `validator` configuration to return different response content based on different request parameters.
 
-
 ## Validate if GET request query matches
 
 The link parameters only need to contain this parameter, no need for exact match.

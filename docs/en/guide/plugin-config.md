@@ -52,7 +52,7 @@ Configure the path matching rules for the mock service, where any request path s
 If `prefix` starts with `^`, it will be recognized as a `RegExp`.
 
 ## wsPrefix
-  
+
 **Type**： `string | string[]`
 
 **Default**： `[]`
@@ -72,7 +72,6 @@ This conflict is not a problem with Vite or the plugin itself; it is a reasonabl
 `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']`  relative to root
 
 Configure the reading of mock files, which can be a directory, a glob pattern, or an array.
-
 
 ## exclude
 
@@ -133,7 +132,6 @@ Configure `cookies`
 
 For detailed configuration, refer to [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options).
 
-
 ## build
 
 **Type**： `boolean | ServerBuildOption`
@@ -172,8 +170,6 @@ export interface ServerBuildOption {
 **Default：** `undefined`
 
 Customize the priority of path matching rules.
-
-
 
 ```ts
 interface MockMatchPriority {
