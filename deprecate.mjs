@@ -2,7 +2,7 @@ import path from 'node:path'
 import fs from 'node:fs'
 import process from 'node:process'
 
-const deprecatedContent = `The CJS build of Vite's Node API is deprecated. See https://vitejs.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.`
+const deprecatedContent = `The CJS build of vite-plugin-mock-dev-server's Node API is deprecated. See https://vitejs.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.`
 
 async function rewriteCjsDts() {
   const filepath = path.join(process.cwd(), 'dist', 'index.d.cts')
