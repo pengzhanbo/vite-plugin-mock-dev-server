@@ -110,7 +110,7 @@ export async function transformWithEsbuild(
       entryPoints: [entryPoint],
       outfile: 'out.js',
       write: false,
-      target: ['node14.18', 'node16'],
+      target: ['node16'],
       platform: 'node',
       bundle: true,
       metafile: true,
