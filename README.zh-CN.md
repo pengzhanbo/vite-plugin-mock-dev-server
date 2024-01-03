@@ -47,7 +47,6 @@
 - ⚜️ 支持模拟 `WebSocket`
 - 🗂 支持构建可独立部署的小型mock服务
 
-
 ## 文档
 
 查看 [Documentation](https://vite-plugin-mock-dev-server.netlify.app/) 了解更多。
@@ -61,7 +60,7 @@
 ```sh
 # npm
 npm i -D vite-plugin-mock-dev-server
-# yarn 
+# yarn
 yarn add vite-plugin-mock-dev-server
 # pnpm
 pnpm add -D vite-plugin-mock-dev-server
@@ -92,7 +91,7 @@ export default defineConfig({
 插件也会读取 `define` 配置， 支持在 mock 文件中直接使用。
 
 > 因为一般场景下，我们只需要对有代理的url进行mock，这样才能通过 vite 提供的 http 服务进行 代理和 mock，
-> 但你也可以使用 `options.prefix`配置 mock 
+> 但你也可以使用 `options.prefix`配置 mock
 
 ### 编写mock文件
 
@@ -114,7 +113,6 @@ export default defineMock({
 
 vite plugin
 
-
 `vite.config.ts`
 ```ts
 import { defineConfig } from 'vite'
@@ -132,7 +130,7 @@ export default defineConfig({
 - `options.prefix`
 
   **类型:** `string | string[]`
-  
+
   为mock服务器配置自定义匹配规则。任何请求路径以 `prefix` 值开头的请求将被代理到对应的目标。如果 `prefix` 值以 `^` 开头，将被识别为 RegExp。
 
   > 一般情况下, `server.proxy` 已经足够满足需求，添加此项是为了与某些场景兼容。
@@ -140,19 +138,19 @@ export default defineConfig({
   **默认值:** `[]`
 
 - `options.wsPrefix`
-  
+
   **类型:** `string | string[]`
 
   配置 webSocket 服务 匹配规则。任何请求路径以 `wsPrefix` 值开头的 `ws/wss` 协议请求，将被代理到对应的目标。
   如果`wsPrefix`值以 `^` 开头,将被识别为 RegExp。
 
   > 与 http mock 默认使用 `viteConfig.server.proxy` 不同的是，`websocket mock` 不会使用 `viteConfig.server.proxy` 中的 ws 相关的配置，且配置在 `wsPrefix` 中的规则，不能同时配置在 `viteConfig.server.proxy`中，因为会导致在 vite 在启动服务时产生冲突，因为不能对同一个请求实现多个的 `WebSocketServer`实例。
-  > 该冲突既不是 `vite` 的问题，也不是插件的问题，这属于合理的错误类型。在进行 `WebSocket Mock`和 `WebSocket Proxy` 切换时，请注意配置不要出现重复导致冲突。 
+  > 该冲突既不是 `vite` 的问题，也不是插件的问题，这属于合理的错误类型。在进行 `WebSocket Mock`和 `WebSocket Proxy` 切换时，请注意配置不要出现重复导致冲突。
 
-- `option.include` 
+- `option.include`
 
   **类型：** `string | string[]`
-  
+
   配置读取 mock文件，可以是一个 目录，glob，或者一个数组
 
   **默认值：** `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']` (相对于根目录)
@@ -160,7 +158,7 @@ export default defineConfig({
 - `options.exclude`
 
   **类型：** `string | string[]`
-  
+
   配置读取 mock文件时，需要排除的文件， 可以是一个 目录、glob、或者一个数组
 
   **默认值：** `['**/node_modules/**', '**/.vscode/**', '**/.git/**']`
@@ -174,7 +172,7 @@ export default defineConfig({
   **Default:** `false`
 
 - `options.cors`
-  
+
   **Type:** `boolean | CorsOptions`
 
   默认启用.
@@ -182,13 +180,13 @@ export default defineConfig({
   配置 `cors`, 查看 [cors](https://github.com/expressjs/cors#configuration-options)
 
 - `options.log`
-  
+
   **Type:** `boolean | 'info' | 'warn' | 'error' | 'silent'`
 
   启动日志，以及配置日志打印级别
 
 - `options.formidableOptions`
-  
+
   配置 `formidable`，查看 [formidable options](https://github.com/node-formidable/formidable#options)
 
   **默认值:** `{}`
@@ -202,16 +200,16 @@ export default defineConfig({
   })
   ```
 - `options.cookiesOptions`
-  
+
   配置 `cookies`, 查看 [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options)
 
   **默认值:** `{}`
 
 - `options.build`
-  
+
   需要构建可独立部署的小型mock服务时配置。
 
-  **类型：** `boolean | ServerBuildOptions` 
+  **类型：** `boolean | ServerBuildOptions`
 
   **默认值：**`false`
 
@@ -237,7 +235,7 @@ export default defineConfig({
   ```
 
   - `options.priority`
-  
+
   自定义 路径匹配规则优先级。[查看更多](#自定义匹配优先级)
 
   **默认值：** `undefined`
@@ -464,9 +462,8 @@ type Response = http.ServerResponse<http.IncomingMessage> & {
 }
 ```
 
-
 > **注意：**
-> 
+>
 > 如果使用 json/json5 编写 mock文件，则不支持使用 `response` 方法，以及不支持使用其他字段的函数形式。
 
 ## 共享 Mock 数据
@@ -516,10 +513,9 @@ export default defineMock([
 ```
 
 > **注意：**
-> 
+>
 > `defineMockData` 仅是基于 `memory` 提供的共享数据支持，
 > 如果需要做 mock 数据持久化，建议使用 `nosql`， 如 `lowdb` 或 `level` 等。
-
 
 ## 自定义匹配优先级
 
@@ -599,7 +595,6 @@ export default defineMock({
 })
 ```
 
-
 **exp:**  在返回的响应头中，添加自定义 header 和 cookie
 ```ts
 export default defineMock({
@@ -652,7 +647,6 @@ export default defineMock([
   }
 ])
 ```
-
 
 **exp:**  延迟接口响应：
 ```ts
@@ -737,7 +731,6 @@ export default defineMock({
 ```
 请先安装 `mockjs`
 
-
 **exp:** 使用 `response` 自定义响应
 ```ts
 export default defineMock({
@@ -757,7 +750,6 @@ export default defineMock({
 })
 ```
 
-
 **exp:** 使用 json / json5
 ```json
 {
@@ -768,7 +760,6 @@ export default defineMock({
 }
 ```
 
-
 **exp:** multipart, 文件上传.
 
 通过 [`formidable`](https://www.npmjs.com/package/formidable#readme) 支持。
@@ -776,7 +767,7 @@ export default defineMock({
 <form action="/api/upload" method="post" enctype="multipart/form-data">
   <p>
     <span>file: </span>
-    <input type="file" name="files" multiple>
+    <input type="file" name="files" multiple="multiple">
   </p>
   <p>
     <span>name:</span>

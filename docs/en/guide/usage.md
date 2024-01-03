@@ -1,6 +1,6 @@
 # Usage
 
-This section will guide you through the process of using this plugin in your project. 
+This section will guide you through the process of using this plugin in your project.
 
 If you haven't installed this plugin in your project yet, please refer to [Install](/en/guide/install).
 

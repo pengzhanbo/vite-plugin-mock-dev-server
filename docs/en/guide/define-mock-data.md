@@ -4,7 +4,7 @@ Define shareable mock data.
 
 ## Description
 
-Due to the plugin compiling `*.mock.*` files as separate entry points, the dependency relationships of the compiled mock files are inconsistent. 
+Due to the plugin compiling `*.mock.*` files as separate entry points, the dependency relationships of the compiled mock files are inconsistent.
 
 Each mock file has its own scope, which means that even if multiple `*.mock.*` files import the same `data.ts` file, they have completely separate copies of the `data` object. As a result, operations on `data` cannot be shared between different `*.mock.*` files.
 
@@ -38,11 +38,8 @@ export const posts = defineMockData('posts', [
 ```
 The data encapsulated by `defineMockData` provides two different styles of data reading and writing support through the plugin, satisfying the usage habits of different developers.
 
-
 - `posts.value`: Use `Object.defineProperty` to define read and write data.
 - `[getter, setter] = posts`:  Deconstruct to a tuple containing `setter/getter` methods.
-
-
 
 `*.mock.ts`  (`.value`)
 ::: code-group

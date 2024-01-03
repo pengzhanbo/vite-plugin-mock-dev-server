@@ -15,7 +15,7 @@ It is recommended to create a `/mock/shared` directory in the `/mock` directory 
 ```sh
 ./mock
 └── shared
-    ├── database 
+    ├── database
     └── utils
 ```
 

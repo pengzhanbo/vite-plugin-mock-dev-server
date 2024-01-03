@@ -12,7 +12,6 @@ export default defineMock({
 })
 ```
 
-
 ## 状态码：204
 
 ```ts

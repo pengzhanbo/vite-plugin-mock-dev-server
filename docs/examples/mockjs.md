@@ -9,7 +9,6 @@ pnpm add -D mockjs
 ```
 :::
 
-
 ```ts
 import Mock from 'mockjs'
 import { defineMock } from 'vite-plugin-mock-dev-server'

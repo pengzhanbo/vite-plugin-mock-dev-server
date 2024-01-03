@@ -3,7 +3,6 @@
 ## Basic Usage
 <<< @/../example/mock/ws.mock.ts
 
-
 ## Simulated Real-time Push
 
 ::: code-group

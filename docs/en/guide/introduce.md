@@ -1,16 +1,14 @@
-
 # Introduce
 
-`vite-plugin-mock-dev-server` is a plugin dedicated to providing mock services in the development environment of `Vite`. 
+`vite-plugin-mock-dev-server` is a plugin dedicated to providing mock services in the development environment of `Vite`.
 
 It uses the built-in `http` and `http-proxy` services of Vite to intercept the proxy paths configured by `server.proxy` in a second level. When the rules are hit, it returns the mock data configured.
 
 You can use any third-party module in the mock configuration file with `node`. This means that you can use libraries like `mockjs` / `faker-js` to help generate mock data.
 
-The plugin supports responding with multiple data types including `text` / `json` / `Buffer` / `ReadStream`, and also supports setting headers and cookies. 
+The plugin supports responding with multiple data types including `text` / `json` / `Buffer` / `ReadStream`, and also supports setting headers and cookies.
 
 The plugin also supports simulating `WebSocket`, making it easy to debug `WebSocket` services in local development environment.
-
 
 ## Features
 

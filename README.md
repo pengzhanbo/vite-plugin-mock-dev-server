@@ -8,21 +8,20 @@
 
 <br>
 <p align="center">
-<a href="https://www.npmjs.com/package/vite-plugin-mock-dev-server"><img alt="npm" src="https://img.shields.io/npm/v/vite-plugin-mock-dev-server?style=flat-square"></a>
-<img alt="node-current" src="https://img.shields.io/node/v/vite-plugin-mock-dev-server?style=flat-square">
-<img alt="npm peer dependency version" src="https://img.shields.io/npm/dependency-version/vite-plugin-mock-dev-server/peer/vite?style=flat-square">
-<img alt="npm" src="https://img.shields.io/npm/dt/vite-plugin-mock-dev-server?style=flat-square">
-<br>
-<img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/pengzhanbo/vite-plugin-mock-dev-server/lint.yml?style=flat-square">
-<a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fpengzhanbo%2Fvite-plugin-mock-dev-server?ref=badge_shield"><img alt="fossa status" src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpengzhanbo%2Fvite-plugin-mock-dev-server.svg?type=shield"></a>
+  <a href="https://www.npmjs.com/package/vite-plugin-mock-dev-server"><img alt="npm" src="https://img.shields.io/npm/v/vite-plugin-mock-dev-server?style=flat-square"></a>
+  <img alt="node-current" src="https://img.shields.io/node/v/vite-plugin-mock-dev-server?style=flat-square">
+  <img alt="npm peer dependency version" src="https://img.shields.io/npm/dependency-version/vite-plugin-mock-dev-server/peer/vite?style=flat-square">
+  <img alt="npm" src="https://img.shields.io/npm/dt/vite-plugin-mock-dev-server?style=flat-square">
+  <br>
+  <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/pengzhanbo/vite-plugin-mock-dev-server/lint.yml?style=flat-square">
+  <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fpengzhanbo%2Fvite-plugin-mock-dev-server?ref=badge_shield"><img alt="fossa status" src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpengzhanbo%2Fvite-plugin-mock-dev-server.svg?type=shield"></a>
 </p>
 <br>
 <p align="center">
-<span>English</span> | <a href="/README.zh-CN.md">简体中文</a>
+  <span>English</span> | <a href="/README.zh-CN.md">简体中文</a>
 </p>
 <br>
 <br>
-
 
 ## Feature
 
@@ -46,7 +45,6 @@
 - ⚜️ Support `WebSocket Mock`
 - 🗂 Support building small independent deployable mock services.
 
-
 ## Documentation
 
 See the [documentation](https://vite-plugin-mock-dev-server.netlify.app/en/) to learn more.
@@ -60,7 +58,7 @@ See the [documentation](https://vite-plugin-mock-dev-server.netlify.app/en/) to 
 ``` sh
 # npm
 npm i -D vite-plugin-mock-dev-server
-# yarn 
+# yarn
 yarn add vite-plugin-mock-dev-server
 # pnpm
 pnpm add -D vite-plugin-mock-dev-server
@@ -114,7 +112,6 @@ export default defineMock({
 
 Vite plugin
 
-
 `vite.config.ts`
 ``` ts
 import { defineConfig } from 'vite'
@@ -127,13 +124,12 @@ export default defineConfig({
 })
 ```
 
-
 #### options
 
 - `options.prefix`
 
   **Type:** `string | string[]`
-  
+
   Configure custom matching rules for the mock server. Any request path starting with the value of `prefix` will be proxied to the corresponding target. If the `prefix` value starts with ^, it will be recognized as a RegExp.
 
   > In general, `server.proxy` is sufficient to meet the needs. Adding this item is for compatibility with certain scenarios.
@@ -141,7 +137,7 @@ export default defineConfig({
   **Default:** `[]`
 
 - `options.wsPrefix`
-  
+
   **Type:** `string | string[]`
 
   Configure the matching rules for the WebSocket service. Any request path starting with the value of `wsPrefix` and using the `ws/wss` protocol will be proxied to the corresponding target.
@@ -151,11 +147,10 @@ export default defineConfig({
   > Different from using `viteConfig.server.proxy` by default for http mock, `websocket mock` does not use the ws-related configuration in `viteConfig.server.proxy`. Also, rules configured in `wsPrefix` cannot be configured simultaneously in `viteConfig.server.proxy`, as it will cause conflicts when starting the vite server because multiple instances of WebSocketServer cannot be implemented for the same request.
   > This conflict is neither a problem with Vite nor with the plugin; it belongs to a reasonable error type. When switching between WebSocket Mock and WebSocket Proxy, please pay attention to avoid duplicate configurations that may cause conflicts.
 
-
-- `option.include` 
+- `option.include`
 
   **Type:** `string | string[]`
-  
+
   Configure to read mock files, which can be a directory, glob, or an array.
 
   **Default：** `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']` (Relative to the root directory.)
@@ -163,36 +158,35 @@ export default defineConfig({
 - `options.exclude`
 
   **Type:** `string | string[]`
-  
+
   When reading mock files for configuration, the files that need to be excluded can be a directory, glob, or array.
 
   **Default：** `['**/node_modules/**','**/.vscode/**','**/.git/**']`
 
 - `options.reload`
-  
+
   **Type:** `boolean`
 
   When the mock resource is hot updated, only the data content is updated, but the page is not refreshed by default. If you want to refresh the page every time you modify the mock file, you can open this option.
 
 - `options.cors`
-  
+
   **Type:** `boolean | CorsOptions`
 
   Enable by default.
 
   Configure to `cors`, see [cors](https://github.com/expressjs/cors#configuration-options)
 
-
   **Default:** `true`
 
 - `options.log`
-  
+
   **Type:** `boolean | 'info' | 'warn' | 'error' | 'silent'`
 
   Enable log and configure log level.
 
 - `options.formidableOptions`
-  
+
   Configure to `formidable`, see [formidable options](https://github.com/node-formidable/formidable#options)
 
   **Default:** `{}`
@@ -207,7 +201,7 @@ export default defineConfig({
   ```
 
 - `options.cookiesOptions`
-  
+
   Configure to `cookies`, see [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options)
 
   **Default:** `{}`
@@ -216,7 +210,7 @@ export default defineConfig({
 
   The configuration needed to build a small, independently deployable mock service.
 
-  **Type：** `boolean | ServerBuildOptions` 
+  **Type：** `boolean | ServerBuildOptions`
 
   **Default：** `false`
 
@@ -241,7 +235,7 @@ export default defineConfig({
   ```
 
 - `options.priority`
-  
+
   Custom path matching rule priority。[read more](#Custom-Path-Matching-Priority)
 
   **Default：** `undefined`
@@ -473,11 +467,10 @@ type Response = http.ServerResponse<http.IncomingMessage> & {
 }
 ```
 
-
 > **Tips：**
-> 
-> If you write mock files using json/json5, 
-> the 'response' method is not supported, 
+>
+> If you write mock files using json/json5,
+> the 'response' method is not supported,
 > as is the function form that uses other fields.
 
 ## Share Mock Data
@@ -525,8 +518,8 @@ export default defineMock([
 ```
 
 > **Tips：**
-> 
-> The `defineMockData` function relies solely on the shared data support provided by `memory`. 
+>
+> The `defineMockData` function relies solely on the shared data support provided by `memory`.
 > If persistent mock data is required, it is recommended to use a `nosql` database like `lowdb` or `level`.
 
 ## Custom-Path-Matching-Priority
@@ -576,7 +569,6 @@ export default defineConfig({
 > you can use static rules instead of `priority`,
 > as static rules always have the highest priority.
 
-
 ## Example
 
 `mock/**/*.mock.{ts,js,mjs,cjs,json,json5}`
@@ -597,7 +589,6 @@ export default defineMock({
   body: { a: 1 },
 })
 ```
-
 
 **exp:** Only Support `GET` Method
 ``` ts
@@ -626,7 +617,6 @@ export default defineMock({
   }
 })
 ```
-
 
 **exp:** Define multiple mock requests for the same URL and match valid rules with validators
 ``` ts
@@ -662,7 +652,6 @@ export default defineMock([
 ])
 ```
 
-
 **exp:** Response Delay
 ``` ts
 export default defineMock({
@@ -670,7 +659,6 @@ export default defineMock({
   delay: 6000, // delay 6 seconds
 })
 ```
-
 
 **exp:** The interface request failed
 ``` ts
@@ -680,7 +668,6 @@ export default defineMock({
   statusText: 'Bad Gateway'
 })
 ```
-
 
 **exp:** Dynamic route matching
 ``` ts
@@ -749,7 +736,6 @@ export default defineMock({
 ```
 You need install `mockjs`
 
-
 **exp:** Use `response` to customize the response
 ``` ts
 export default defineMock({
@@ -769,7 +755,6 @@ export default defineMock({
 })
 ```
 
-
 **exp:** Use json / json5
 ``` json
 {
@@ -780,8 +765,6 @@ export default defineMock({
 }
 ```
 
-
-
 **exp:** multipart, upload files.
 
 use [`formidable`](https://www.npmjs.com/package/formidable#readme) to support.
@@ -789,7 +772,7 @@ use [`formidable`](https://www.npmjs.com/package/formidable#readme) to support.
 <form action="/api/upload" method="post" enctype="multipart/form-data">
   <p>
     <span>file: </span>
-    <input type="file" name="files" multiple>
+    <input type="file" name="files" multiple="multiple">
   </p>
   <p>
     <span>name:</span>
@@ -801,7 +784,7 @@ use [`formidable`](https://www.npmjs.com/package/formidable#readme) to support.
 </form>
 ```
 
-fields `files` mapping to `formidable.File` 
+fields `files` mapping to `formidable.File`
 ``` ts
 export default defineMock({
   url: '/api/upload',
@@ -947,6 +930,5 @@ You can access related `mock` interfaces through `localhost:8080/`.
 ## LICENSE
 
 [MIT](/LICENSE)
-
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpengzhanbo%2Fvite-plugin-mock-dev-server.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpengzhanbo%2Fvite-plugin-mock-dev-server?ref=badge_large)

@@ -40,11 +40,8 @@ export const posts = defineMockData('posts', [
 通过 `defineMockData` 封装的数据，插件提供了两种不同风格的方式来支持对数据的读写。
 满足不同开发者的使用习惯。
 
-
-- `posts.value`: 使用 `Object.defineProperty` 方式定义数据的读写。  
+- `posts.value`: 使用 `Object.defineProperty` 方式定义数据的读写。
 - `[getter, setter] = posts` 解构为一个 包含 `setter/getter` 方法的 元组。
-
-
 
 `*.mock.ts`  (`.value`)
 ::: code-group

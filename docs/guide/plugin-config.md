@@ -51,7 +51,7 @@ interface MockServerPluginOptions {
 如果 prefix 以 `^` 开头，将被识别为 `RegExp`。
 
 ## wsPrefix
-  
+
 **类型**： `string | string[]`
 
 **默认值**： `[]`
@@ -61,7 +61,7 @@ interface MockServerPluginOptions {
 
 与 http mock 默认使用 `viteConfig.server.proxy` 不同的是，`websocket mock` 不会使用 `viteConfig.server.proxy` 中的 ws 相关的配置，且配置在 `wsPrefix` 中的规则，不能同时配置在 `viteConfig.server.proxy`中，因为会导致在 vite 在启动服务时产生冲突，因为不能对同一个请求实现多个的 `WebSocketServer`实例。
 
-该冲突既不是 `vite` 的问题，也不是插件的问题，这属于合理的错误类型。在进行 `WebSocket Mock`和 `WebSocket Proxy` 切换时，请注意配置不要出现重复导致冲突。 
+该冲突既不是 `vite` 的问题，也不是插件的问题，这属于合理的错误类型。在进行 `WebSocket Mock`和 `WebSocket Proxy` 切换时，请注意配置不要出现重复导致冲突。
 
 ## include
 
@@ -71,7 +71,6 @@ interface MockServerPluginOptions {
 `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']`  相对于根目录
 
 配置读取 mock文件，可以是一个 目录，glob，或者一个数组
-
 
 ## exclude
 
@@ -132,7 +131,6 @@ mock资源热更新时，仅更新了数据内容，但是默认不重新刷新�
 
 详细配置信息查看 [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options)
 
-
 ## build
 
 **类型**： `boolean | ServerBuildOption`
@@ -171,8 +169,6 @@ export interface ServerBuildOption {
 **默认值：** `undefined`
 
 自定义 路径匹配规则优先级。
-
-
 
 ```ts
 interface MockMatchPriority {
