@@ -1,3 +1,18 @@
+## [1.4.5](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.4.3...v1.4.5) (2024-1-9)
+
+
+### Features
+
+* add logs when no proxy configured [#68](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/68) ([2986210](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/2986210d3e7adf29e1418c90bc42798c3773035d))
+
+
+### Performance Improvements
+
+* esbuild target `node>=16` ([b3f5ae9](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/b3f5ae9c4c25c909c05a4bd393df3c5ce48043b5))
+* update `cjs` deprecate info ([b98c133](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/b98c133141aa099cace0a23125bbf8b11170a4c6))
+
+
+
 ## [1.4.3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.4.2...v1.4.3) (2023-12-14)
 
 
