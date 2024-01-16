@@ -92,7 +92,7 @@ const store = {
   connected: false,
   currentUserId: '112233'
 }
-const ws = new WebSocket('wx://localhost:5173/socket/chat')
+const ws = new WebSocket('ws://localhost:5173/socket/chat')
 ws.addEventListener('open', () => {
   store.connected = true
   // heartbeat
