@@ -63,9 +63,9 @@ export function ensureProxies(serverProxy: ResolvedConfig['server']['proxy'] = {
     const value = serverProxy[key]
     if (
       typeof value === 'string'
-        || (!value.ws
-        && !value.target?.toString().startsWith('ws:')
-        && !value.target?.toString().startsWith('wss:'))
+      || (!value.ws
+      && !value.target?.toString().startsWith('ws:')
+      && !value.target?.toString().startsWith('wss:'))
     )
       httpProxies.push(key)
     else
