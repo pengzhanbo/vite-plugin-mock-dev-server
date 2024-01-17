@@ -1,3 +1,18 @@
+## [1.4.6](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.4.5...v1.4.6) (2024-1-17)
+
+
+### Bug Fixes
+
+*  esbuild `define` deep stringify fail ([#71](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/71)) ([d0f51bc](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/d0f51bcaa26924c572bc7f30664ba3b8d9d898ad))
+
+
+### Performance Improvements
+
+* constant variable provide check ([2af011c](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/2af011ca26a64a7a4e2647cddf9bcaa1675168fc))
+* optimize no proxy configured, add `wsPrefix` check ([f1acafd](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/f1acafdb6478020ebab9ffa322a1f9a20f7798e0))
+
+
+
 ## [1.4.5](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.4.3...v1.4.5) (2024-1-9)
 
 
