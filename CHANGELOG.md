@@ -1,3 +1,12 @@
+## [1.4.7](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.4.6...v1.4.7) (2024-1-17)
+
+
+### Bug Fixes
+
+* Optimize no proxy configured, add wsPrefix check ([ec57504](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/ec5750438a1c7304ca3be6ef6cef2e3ca39ba5ea))
+
+
+
 ## [1.4.6](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.4.5...v1.4.6) (2024-1-17)
 
 
