@@ -1,21 +1,21 @@
-// fork for https://github.com/vitejs/vite/blob/main/packages/vite/src/node/plugins/define.ts
-//
-// 在 vite 内部，除了处理 用户配置的 `define`， 在处理环境变量 `env` 时，在不同的 mode 下使用了不同的内置插件，
-// - 在 production mode 下， `define` 和 `env` 均在 define-plugin 中进行处理；
-// - 在 development mode 下， `define` 由 define-plugin 处理，而 `env` 由 importAnalysis-plugin 处理;
-//
-// 在本插件中，简化了处理过程，仅提供 支持在 mock 文件中使用 `define` 和 `env`，并删除了不必要的边界处理。
-// 而存在的问题则是，插件并没有对`.env` 文件进行监听，即 `env` 发生变化，不会触发插件的热更新。
+/**
+ * fork for https://github.com/vitejs/vite/blob/main/packages/vite/src/node/plugins/define.ts
+ *
+ * 在 vite 内部，除了处理 用户配置的 `define`， 在处理环境变量 `env` 时，在不同的 mode 下使用了不同的内置插件，
+ * - 在 production mode 下， `define` 和 `env` 均在 define-plugin 中进行处理；
+ * - 在 development mode 下， `define` 由 define-plugin 处理，而 `env` 由 importAnalysis-plugin 处理;
+ *
+ * 在本插件中，简化了处理过程，仅提供 支持在 mock 文件中使用 `define` 和 `env`，并删除了不必要的边界处理。
+ * 在 vite5 中，对 define 做了优化， 因此插件在 1.4.6 版本中进行了同步更新。
+ *
+ * 值得注意的是，如果 define 中存在 无法被 JSON.parse 解析的值，则会被直接忽略。
+ * 所以类似 其它插件 注入的一些 代码片段 的字符串值，在 mock 文件中都不能使用。
+ */
 
 import process from 'node:process'
-import colors from 'picocolors'
 import type { ResolvedConfig } from 'vite'
-import { createLogger } from './logger'
-
-const metaEnvRe = /import\.meta\.env\.(.+)/
 
 export function viteDefine(config: ResolvedConfig) {
-  const logger = createLogger('vite:mock-dev-server', 'warn')
   const processNodeEnv: Record<string, string> = {}
 
   const nodeEnv = process.env.NODE_ENV || config.mode
@@ -23,64 +23,88 @@ export function viteDefine(config: ResolvedConfig) {
     'process.env.NODE_ENV': JSON.stringify(nodeEnv),
     'global.process.env.NODE_ENV': JSON.stringify(nodeEnv),
     'globalThis.process.env.NODE_ENV': JSON.stringify(nodeEnv),
-    '__vite_process_env_NODE_ENV': JSON.stringify(nodeEnv),
   })
 
   const userDefine: Record<string, string> = {}
   const userDefineEnv: Record<string, string> = {}
-  const defineErrorKeys = []
   for (const key in config.define) {
     // fix: #31 https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/31
+    // fix: #71 https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/71
     const val = config.define[key]
+    const isMetaEnv = key.startsWith('import.meta.env.')
     if (typeof val === 'string') {
-      try {
-        JSON.parse(val)
+      if (canJsonParse(val)) {
         userDefine[key] = val
-      }
-      catch {
-        defineErrorKeys.push(key)
+        isMetaEnv && (userDefineEnv[key.slice(16)] = val)
       }
     }
     else {
-      userDefine[key] = JSON.stringify(val)
+      userDefine[key] = handleDefineValue(val)
+      isMetaEnv && (userDefineEnv[key.slice(16)] = val)
     }
-
-    // make sure `import.meta.env` object has user define properties
-    const match = key.match(metaEnvRe)
-    if (match && userDefine[key])
-      userDefineEnv[match[1]] = `__vite__define__${userDefine[key]}`
   }
 
-  if (defineErrorKeys.length) {
-    logger.warn(
-      `The following keys: ${colors.yellow(
-        colors.underline(defineErrorKeys.join(', ')),
-      )} declared in 'define' cannot be parsed as regular code snippets.`,
-    )
-  }
-
+  // during dev, import.meta properties are handled by importAnalysis plugin.
   const importMetaKeys: Record<string, string> = {}
+  const importMetaEnvKeys: Record<string, string> = {}
   const importMetaFallbackKeys: Record<string, string> = {}
+  importMetaKeys['import.meta.hot'] = `undefined`
+  for (const key in config.env) {
+    const val = JSON.stringify(config.env[key])
+    importMetaKeys[`import.meta.env.${key}`] = val
+    importMetaEnvKeys[key] = val
+  }
+  importMetaFallbackKeys['import.meta.env'] = `undefined`
 
-  // set here to allow override with config.define
-  importMetaKeys['import.meta.hot'] = 'undefined'
-  for (const key in config.env)
-    importMetaKeys[`import.meta.env.${key}`] = JSON.stringify(config.env[key])
-
-  Object.assign(importMetaFallbackKeys, {
-    'import.meta.env': JSON.stringify({
-      ...config.env,
-      ...userDefineEnv,
-    }).replace(
-      /"__vite__define__(.+?)"([,}])/g,
-      (_, val, suffix) => `${val.replace(/(^\\")|(\\"$)/g, '"')}${suffix}`,
-    ),
-  })
-
-  return {
+  const define = {
+    ...processNodeEnv,
     ...importMetaKeys,
     ...userDefine,
     ...importMetaFallbackKeys,
-    ...processNodeEnv,
+  }
+
+  // fix: #71 https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/71
+  if ('import.meta.env' in define) {
+    define['import.meta.env'] = serializeDefine({
+      ...importMetaEnvKeys,
+      ...userDefineEnv,
+    })
+  }
+  return define
+}
+
+/**
+ * Like `JSON.stringify` but keeps raw string values as a literal
+ * in the generated code. For example: `"window"` would refer to
+ * the global `window` object directly.
+ */
+export function serializeDefine(define: Record<string, any>): string {
+  let res = `{`
+  const keys = Object.keys(define)
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i]
+    const val = define[key]
+    res += `${JSON.stringify(key)}: ${handleDefineValue(val)}`
+    if (i !== keys.length - 1)
+      res += `, `
+  }
+  return `${res}}`
+}
+
+function handleDefineValue(value: any): string {
+  if (typeof value === 'undefined')
+    return 'undefined'
+  if (typeof value === 'string')
+    return value
+  return JSON.stringify(value)
+}
+
+function canJsonParse(value: any): boolean {
+  try {
+    JSON.parse(value)
+    return true
+  }
+  catch {
+    return false
   }
 }
