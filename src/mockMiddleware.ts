@@ -64,7 +64,7 @@ export function mockServerMiddleware(
   const proxies = uniq([...prefix, ...httpProxies])
 
   // fix: #68
-  if (!proxies.length || !toArray(options.wsPrefix).length)
+  if (!proxies.length && !toArray(options.wsPrefix).length)
     logger.warn(`No proxy was configured, mock server will not work. See ${c.cyan('https://vite-plugin-mock-dev-server.netlify.app/guide/usage')}`)
 
   /**
