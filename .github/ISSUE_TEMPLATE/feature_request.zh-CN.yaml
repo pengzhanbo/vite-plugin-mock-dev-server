@@ -1,0 +1,32 @@
+name: 🚀 新特性提案
+description: 建议添加一个新功能到插件
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢您对这个项目的兴趣，并花时间填写这个专题报告!
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: 新特性说明
+      description: 清晰、简明地描述问题。请尽可能详细说明原因和用例。如果您打算就此问题提交PR，请在描述中告诉我们。谢谢!
+      placeholder: 作为一个使用vite-plugin-mock-dev-server的开发者，我想要 [目标/愿望] 这样 [收益]。
+    validations:
+      required: true
+  - type: textarea
+    id: suggested-solution
+    attributes:
+      label: 解决方案建议
+      description: 在模块[xy]中，我们可以提供以下实现……
+    validations:
+      required: true
+  - type: textarea
+    id: alternative
+    attributes:
+      label: 可替代方案
+      description: 对您考虑过的任何替代解决方案或特性进行清晰、简明的描述。
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 任何其他上下文
+      description: 关于此功能请求的任何其他上下文或截图。
