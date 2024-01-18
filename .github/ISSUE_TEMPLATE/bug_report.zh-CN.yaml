@@ -1,25 +1,25 @@
 name: 🐞 Bug report
-description: Report an issue, English Template.
+description: Report an issue, 中文模板.
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to fill out this bug report!
+        感谢您花时间填写这个bug报告!
   - type: textarea
     id: bug-description
     attributes:
-      label: Describe the bug
-      description: A clear and concise description of what the bug is. If you intend to submit a PR for this issue, tell us in the description. Thanks!
-      placeholder: I am doing ... What I expect is ... What actually happening is ...
+      label: Bug 描述
+      description: 关于bug是什么的清晰而简洁的描述。如果您打算就此问题提交PR，请在描述中告诉我。谢谢!
+      placeholder: 我正在做…… 我所期望的是…… 实际发生的是……
     validations:
       required: true
   - type: textarea
     id: system-info
     attributes:
-      label: Environment
+      label: 系统环境
       render: markdown
       description: |
-        examples:
+        示例:
         - **OS**: Ubuntu 20.04
         - **Node**: 18.16.0
         - **packageManager**: pnpm@8.14.0
@@ -36,4 +36,4 @@ body:
     attributes:
       label: Logs
       description: |
-        Please try not to insert an image but copy paste the log text.
+        请尽量不要插入图像，而是复制粘贴日志文本。
