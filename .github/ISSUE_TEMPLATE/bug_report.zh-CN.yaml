@@ -1,5 +1,5 @@
-name: 🐞 Bug report
-description: Report an issue, 中文模板.
+name: 🐞 Bug 报告
+description: 报告一个问题, 中文模板.
 body:
   - type: markdown
     attributes:
