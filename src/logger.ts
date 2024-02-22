@@ -3,10 +3,10 @@ import colors from 'picocolors'
 import type { LogLevel, LogType } from './types'
 
 export interface Logger {
-  debug(msg: string, level?: boolean | LogLevel): void
-  info(msg: string, level?: boolean | LogLevel): void
-  warn(msg: string, level?: boolean | LogLevel): void
-  error(msg: string, level?: boolean | LogLevel): void
+  debug: (msg: string, level?: boolean | LogLevel) => void
+  info: (msg: string, level?: boolean | LogLevel) => void
+  warn: (msg: string, level?: boolean | LogLevel) => void
+  error: (msg: string, level?: boolean | LogLevel) => void
 }
 
 export const logLevels: Record<LogLevel, number> = {

@@ -80,9 +80,9 @@ interface File {
    *
    * @link https://github.com/node-formidable/formidable#filetojson
    */
-  toJSON(): FileJSON
+  toJSON: () => FileJSON
 
-  toString(): string
+  toString: () => string
 }
 ```
 :::

@@ -23,6 +23,9 @@ export default defineConfig({
         link: 'https://github.com/pengzhanbo/vite-plugin-mock-dev-server',
       },
     ],
+    search: {
+      provider: 'local',
+    },
   },
   locales: {
     root: {
