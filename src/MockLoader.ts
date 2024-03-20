@@ -182,6 +182,7 @@ export class MockLoader extends EventEmitter {
   private async loadMock(filepath?: string): Promise<void> {
     if (!filepath)
       return
+
     let isESM = false
     if (/\.m[jt]s$/.test(filepath))
       isESM = true
@@ -193,11 +194,10 @@ export class MockLoader extends EventEmitter {
       isESM = this.moduleType === 'esm'
 
     const { define, alias } = this.options
-    const { code, deps } = await transformWithEsbuild(filepath, {
-      isESM,
-      define,
-      alias,
-    })
+    const { code, deps } = await transformWithEsbuild(
+      filepath,
+      { isESM, define, alias },
+    )
 
     try {
       const raw

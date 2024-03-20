@@ -362,7 +362,7 @@ async function realDelay(startTime: number, delay?: MockHttpItem['delay']) {
 }
 
 function getHTTPStatusText(status: number): string {
-  return HTTP_STATUS[status] || 'Unknown'
+  return HTTP_STATUS[status as keyof typeof HTTP_STATUS] as string || 'Unknown'
 }
 
 function requestLog(request: MockRequest, filepath: string): string {
