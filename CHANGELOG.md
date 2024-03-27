@@ -1,3 +1,18 @@
+# [1.5.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.4.7...v1.5.0) (2024-3-27)
+
+
+### Features
+
+* Add `bodyParserOptions` option for configuring `co-body` (close [#76](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/76)) ([23b4dff](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/23b4dffd0506d0b3a509bf8fec8ab59b91e1c599))
+
+
+### Performance Improvements
+
+* prettier code ([c26fa08](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/c26fa080220b672077c8ee36603dbe665a83dc40))
+* update non-major deps to latest ([6fdab75](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/6fdab75cd536fb6fe550d43b26cd5fde3c71ee0d))
+
+
+
 ## [1.4.7](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.4.6...v1.4.7) (2024-1-17)
 
 
