@@ -9,6 +9,7 @@ If you haven't installed this plugin in your project yet, please refer to [Insta
 In your project's `vite.config.{ts,js}` file, import and configure the plugin:
 
 ::: code-group
+
 ``` ts [typescript]
 import { defineConfig } from 'vite'
 
@@ -20,6 +21,7 @@ export default defineConfig({
   ],
 })
 ```
+
 ``` js [javascript]
 const mockDevServerPlugin = require('vite-plugin-mock-dev-server') // [!code ++]
 /**
@@ -31,6 +33,7 @@ module.exports = {
   ],
 }
 ```
+
 :::
 
 ## Step2: Configure `server.proxy`
@@ -40,6 +43,7 @@ The plugin directly reads the request path prefix configured in `server.proxy` a
 In general scenarios, when configuring the `server.proxy` proxy forwarding configuration in the development environment, it directly forwards to the development environment address of the backend service. When the backend service has not completed the interface development but has provided the interface documentation, we only need to mock this part of the interface to enable parallel development of the frontend interface integration process. Therefore, this plugin directly reads the `server.proxy` configuration to reduce the complexity of plugin configuration.
 
 ::: code-group
+
 ``` ts [typescript]
 import { defineConfig } from 'vite'
 import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
@@ -55,6 +59,7 @@ export default defineConfig({
   }, // [!code ++]
 })
 ```
+
 ``` js [javascript]
 const mockDevServerPlugin = require('vite-plugin-mock-dev-server')
 
@@ -72,6 +77,7 @@ module.exports = {
   }, // [!code ++]
 }
 ```
+
 :::
 
 ## Step3: Add `/mock` directory
@@ -117,6 +123,7 @@ Add `*.mock.ts` files:
 The plugin provides the `defineMock()` function to help write mock configurations.
 
 ::: code-group
+
 ```ts [api.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
@@ -125,6 +132,7 @@ export default defineMock({
   body: {}
 })
 ```
+
 :::
 
 ## Step5: Start Vite Development Server

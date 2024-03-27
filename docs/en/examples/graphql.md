@@ -3,6 +3,7 @@
 You need to install `graphql`.
 
 ::: code-group
+
 ```ts [graphql.mock.ts]
 import { buildSchema, graphql } from 'graphql'
 
@@ -23,9 +24,11 @@ export default defineMock({
   },
 })
 ```
+
 :::
 
 ::: code-group
+
 ```ts [api.ts]
 const response = await fetch('/api/graphql', {
   method: 'POST',
@@ -35,4 +38,5 @@ if (response.ok) {
   const data = await response.json()
 }
 ```
+
 :::

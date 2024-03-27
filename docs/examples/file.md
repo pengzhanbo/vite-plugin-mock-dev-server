@@ -19,6 +19,7 @@
 ```
 
 ::: code-group
+
 ```ts [upload.mock.ts]
 export default defineMock({
   url: '/api/upload',
@@ -32,11 +33,13 @@ export default defineMock({
   },
 })
 ```
+
 :::
 
 ## 文件下载
 
 模拟文件下载，传入文件读取流
+
 ```ts
 import { createReadStream } from 'node:fs'
 

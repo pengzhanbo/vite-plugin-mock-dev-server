@@ -45,6 +45,7 @@ export const posts = defineMockData('posts', [
 
 `*.mock.ts`  (`.value`)
 ::: code-group
+
 ```ts [post-list.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from './data'
@@ -54,6 +55,7 @@ export default defineMock({
   body: () => posts.value
 })
 ```
+
 ```ts [post-delete.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from './data'
@@ -67,10 +69,12 @@ export default defineMock({
   }
 })
 ```
+
 :::
 
 `*.mock.ts`  (`[getter, setter]`)
 ::: code-group
+
 ```ts [post-list.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from './data'
@@ -83,6 +87,7 @@ export default defineMock({
   }
 })
 ```
+
 ```ts [post-delete.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from './data'
@@ -99,4 +104,5 @@ export default defineMock({
   }
 })
 ```
+
 :::

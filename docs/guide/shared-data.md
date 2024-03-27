@@ -8,12 +8,14 @@
 对于一些复杂场景，期望 接口 B 返回被 接口 A 修改过的数据，比如:
 
 模拟 对 文章列表和文章的修改:
+
 ```ts
 const posts = [
   { id: 1, title: 'post1', content: '', author: 'Mark' },
   { id: 2, title: 'post2', content: '', author: 'John' },
 ]
 ```
+
 - `/api/post/delete/:id` 将会删除文章，
 - `/api/post/update/:id` 用于修改文章，
 - `/api/post/list` 获取所有文章列表
@@ -23,6 +25,7 @@ const posts = [
 如果对数据的操作比较简单，我们可以将 数据、模拟请求配置都放在 同一个 `*.mock.ts` 中编写:
 
 ::: code-group
+
 ```ts [*.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
@@ -54,10 +57,12 @@ export default defineMock([
   }
 ])
 ```
+
 :::
 
 而如果对于复杂场景，我们可能需要拆解为不同的文件来进行管理时：
 ::: code-group
+
 ```ts [posts/list.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
@@ -67,6 +72,7 @@ export default defineMock({
   body: () => posts
 })
 ```
+
 ```ts [posts/update.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
@@ -80,6 +86,7 @@ export default defineMock({
   }
 })
 ```
+
 ```ts [posts/delete.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
@@ -93,12 +100,14 @@ export default defineMock({
   }
 })
 ```
+
 ```ts [shared/data.ts]
 export const posts = [
   { id: 1, title: 'post1', content: '', author: 'Mark' },
   { id: 2, title: 'post2', content: '', author: 'John' },
 ]
 ```
+
 :::
 
 这时候，接口将不会按预期返回被修改的数据，这是由于每个 `*.mock.ts` 都是独立引入 `data.ts`进行单独编译的。
@@ -113,6 +122,7 @@ export const posts = [
 只需要将 `data.ts` 中的数据包装在 `defineMockData` 中即可。
 
 ::: code-group
+
 ```ts [shared/data.ts] {1,3}
 import { defineMockData } from 'vite-plugin-mock-dev-server'
 
@@ -121,6 +131,7 @@ export const posts = defineMockData('posts', [
   { id: 2, title: 'post2', content: '', author: 'John' },
 ])
 ```
+
 ```ts [posts/list.mock.ts] {6}
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
@@ -130,6 +141,7 @@ export default defineMock({
   body: () => posts.value
 })
 ```
+
 ```ts [posts/update.mock.ts] {7,8}
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
@@ -143,6 +155,7 @@ export default defineMock({
   }
 })
 ```
+
 ```ts [posts/delete.mock.ts] {7,8}
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
@@ -156,6 +169,7 @@ export default defineMock({
   }
 })
 ```
+
 :::
 
 `defineMockData` 将数据隔离到单独的共享作用域中，并通过 `key` 保证数据的唯一性。

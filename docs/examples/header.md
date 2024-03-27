@@ -5,6 +5,7 @@
 示例，模拟添加 JWT， Authorization Header
 
 ## 对象类型
+
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 

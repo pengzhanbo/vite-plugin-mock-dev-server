@@ -44,6 +44,7 @@ export default defineMock({
   }
 })
 ```
+
 The `/api/demo` interface will only respond to requests that have the `?a=1` query parameter in the referring source address, such as `http://example.com/?a=1`.
 
 Therefore, we can split the mock files based on `refererQuery` and refine the file management according to the team's specified collaboration guidelines.

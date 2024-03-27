@@ -4,9 +4,11 @@
 
 ::: tip
 你需要自行安装 `mockjs` 库
+
 ```sh
 pnpm add -D mockjs
 ```
+
 :::
 
 ```ts

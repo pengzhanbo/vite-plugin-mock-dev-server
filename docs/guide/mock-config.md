@@ -11,7 +11,8 @@ export default defineMock({
 })
 ```
 
-**类型定义**
+**类型定义:**
+
 ```ts
 // 请求接口包含的信息
 interface RequestOptions {
@@ -23,7 +24,7 @@ interface RequestOptions {
 }
 ```
 
-**注意**
+**注意:**
 
 ::: warning
 如果使用 json/json5 编写 mock文件，则不支持使用 response 方法，以及不支持使用其他字段的函数形式。
@@ -180,6 +181,7 @@ type ResponseBody = string | number | array | object | Buffer | ReadableStream
 ## validator
 
 - **Type**: `Validator` | `ValidatorFn`
+
   ```ts
   interface Validator {
     header?: object
@@ -192,6 +194,7 @@ type ResponseBody = string | number | array | object | Buffer | ReadableStream
     (request: RequestOptions): boolean
   }
   ```
+
 - **选填**
 - **默认值**： `null`
 

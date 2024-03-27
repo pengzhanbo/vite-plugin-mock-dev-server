@@ -8,6 +8,7 @@ Microservices architecture is the mainstream architecture used by backend servic
 In this scenario, in order to have a clear mapping relationship with the backend microservices architecture, we should also use a directory structure in the `mock` directory to manage and organize the mocks.
 
 For example, in an e-commerce project, the backend provides:
+
 - **Goods service**: Provides interfaces such as product list and product details.
 - **Search service**: Provides interfaces such as keyword search and filtering.
 - **Order service**: Provides interfaces such as order list and order details.

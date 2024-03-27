@@ -24,6 +24,7 @@
 比如，提供一个 返回数据的包装函数，和一个 用户数据文件
 
 ::: code-group
+
 ``` ts [shared/utils/dataWrap.ts]
 export function successWrap(data) {
   return {
@@ -33,6 +34,7 @@ export function successWrap(data) {
   }
 }
 ```
+
 ```ts [shared/database/user.ts]
 export const userMap = {
   Mark: {
@@ -45,6 +47,7 @@ export const userMap = {
   }
 }
 ```
+
 ```ts [user/info.mock.ts]
 import { userMap } from '../shared/database/user'
 import { successWrap } from '../shared/utils/dataWrap'
@@ -58,4 +61,5 @@ export default defineMock({
   }
 })
 ```
+
 :::

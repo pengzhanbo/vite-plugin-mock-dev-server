@@ -12,6 +12,7 @@ const posts = [
   { id: 2, title: 'post2', content: '', author: 'John' },
 ]
 ```
+
 - `/api/post/delete/:id` Delete a post
 - `/api/post/update/:id` Update a post
 - `/api/post/list` Get a list of all posts
@@ -21,6 +22,7 @@ I expect that after calling the delete and update post APIs, the get all posts A
 If the data operations are relatively simple, we can write the data and mock request configuration in the same `*.mock.ts` file.
 
 ::: code-group
+
 ```ts [*.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
@@ -52,11 +54,13 @@ export default defineMock([
   }
 ])
 ```
+
 :::
 
 And if we need to manage complex scenarios, we may need to break it down into different files:
 
 ::: code-group
+
 ```ts [posts/list.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
@@ -66,6 +70,7 @@ export default defineMock({
   body: () => posts
 })
 ```
+
 ```ts [posts/update.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
@@ -79,6 +84,7 @@ export default defineMock({
   }
 })
 ```
+
 ```ts [posts/delete.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
@@ -92,12 +98,14 @@ export default defineMock({
   }
 })
 ```
+
 ```ts [shared/data.ts]
 export const posts = [
   { id: 1, title: 'post1', content: '', author: 'Mark' },
   { id: 2, title: 'post2', content: '', author: 'John' },
 ]
 ```
+
 :::
 
 At this point, the interface will not return the modified data as expected. This is because each `*.mock.ts` file is independently importing `data.ts` for separate compilation.
@@ -112,6 +120,7 @@ To address this, the plugin provides a `defineMockData(key, initialData)` functi
 You just need to wrap the data in `data.ts` with `defineMockData`.
 
 ::: code-group
+
 ```ts [shared/data.ts] {1,3}
 import { defineMockData } from 'vite-plugin-mock-dev-server'
 
@@ -120,6 +129,7 @@ export const posts = defineMockData('posts', [
   { id: 2, title: 'post2', content: '', author: 'John' },
 ])
 ```
+
 ```ts [posts/list.mock.ts] {6}
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
@@ -129,6 +139,7 @@ export default defineMock({
   body: () => posts.value
 })
 ```
+
 ```ts [posts/update.mock.ts] {7,8}
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
@@ -142,6 +153,7 @@ export default defineMock({
   }
 })
 ```
+
 ```ts [posts/delete.mock.ts] {7,8}
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from '../shared/data'
@@ -155,6 +167,7 @@ export default defineMock({
   }
 })
 ```
+
 :::
 
 `defineMockData` isolates the data into a separate shared scope and ensures the uniqueness of the data through a `key`.

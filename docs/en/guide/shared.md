@@ -22,6 +22,7 @@ It is recommended to create a `/mock/shared` directory in the `/mock` directory 
 For example, provide a wrapper function that returns data and a user data file.
 
 ::: code-group
+
 ``` ts [shared/utils/dataWrap.ts]
 export function successWrap(data) {
   return {
@@ -31,6 +32,7 @@ export function successWrap(data) {
   }
 }
 ```
+
 ```ts [shared/database/user.ts]
 export const userMap = {
   Mark: {
@@ -43,6 +45,7 @@ export const userMap = {
   }
 }
 ```
+
 ```ts [user/info.mock.ts]
 import { userMap } from '../shared/database/user'
 import { successWrap } from '../shared/utils/dataWrap'
@@ -56,4 +59,5 @@ export default defineMock({
   }
 })
 ```
+
 :::

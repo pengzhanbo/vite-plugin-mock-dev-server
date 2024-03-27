@@ -4,9 +4,11 @@ Generate mock data using the `faker-js` library.
 
 ::: tip
 You need to manually install the `faker-js` library
+
 ```sh
 pnpm add -D @faker-js/faker
 ```
+
 :::
 
 ```ts

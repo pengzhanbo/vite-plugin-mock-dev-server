@@ -18,6 +18,7 @@ Write mock files using ESModule
 :::
 
 ::: code-group
+
 ``` js [api.mock.mjs]
 /**
  * @type {import('vite-plugin-mock-dev-server').MockOptions}
@@ -33,6 +34,7 @@ export default [
   }
 ]
 ```
+
 ```ts [api.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
@@ -47,6 +49,7 @@ export default defineMock([
   }
 ])
 ```
+
 :::
 
 ## JSON

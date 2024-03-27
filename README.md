@@ -7,6 +7,7 @@
 </p>
 
 <br>
+
 <p align="center">
   <a href="https://www.npmjs.com/package/vite-plugin-mock-dev-server"><img alt="npm" src="https://img.shields.io/npm/v/vite-plugin-mock-dev-server?style=flat-square"></a>
   <img alt="node-current" src="https://img.shields.io/node/v/vite-plugin-mock-dev-server?style=flat-square">
@@ -67,6 +68,7 @@ pnpm add -D vite-plugin-mock-dev-server
 ### Configuration
 
 `vite.config.ts`
+
 ``` ts
 import { defineConfig } from 'vite'
 import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
@@ -84,6 +86,7 @@ export default defineConfig({
   }
 })
 ```
+
 The plugin will read the configuration of `server.proxy` or `options.prefix`, and enable mock matching for matched URLs.
 
 The plugin will also read the `define` configuration, which supports direct use in mock files.
@@ -97,6 +100,7 @@ The plugin will also read the `define` configuration, which supports direct use 
 By default, write mock data in the `mock` directory of your project's root directory:
 
 `mock/**/*.mock.ts` :
+
 ``` ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
@@ -113,6 +117,7 @@ export default defineMock({
 Vite plugin
 
 `vite.config.ts`
+
 ``` ts
 import { defineConfig } from 'vite'
 import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
@@ -192,6 +197,7 @@ export default defineConfig({
   **Default:** `{}`
 
   example: Configure to file upload dir
+
   ``` ts
   MockDevServerPlugin({
     formidableOptions: {
@@ -203,6 +209,12 @@ export default defineConfig({
 - `options.cookiesOptions`
 
   Configure to `cookies`, see [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options)
+
+  **Default:** `{}`
+
+- `options.bodyParserOptions`
+
+  Configure to `co-body`, see [co-body](https://github.com/cojs/co-body#options)
 
   **Default:** `{}`
 
@@ -236,7 +248,7 @@ export default defineConfig({
 
 - `options.priority`
 
-  Custom path matching rule priority。[read more](#Custom-Path-Matching-Priority)
+  Custom path matching rule priority。[read more](#custom-path-matching-priority)
 
   **Default：** `undefined`
 
@@ -399,6 +411,7 @@ export default defineMock({
   },
 })
 ```
+
 ``` ts
 // Configure the WebSocket mock
 export default defineMock({
@@ -486,8 +499,10 @@ type defineMockData<T> = (
 ) => [getter, setter] & { value: T }
 ```
 
-#### Exp:
+### Exp
+
 `data.ts`
+
 ```ts
 import { defineMockData } from 'vite-plugin-mock-dev-server'
 
@@ -496,7 +511,9 @@ export default defineMockData('posts', [
   { id: '2', title: 'title2', content: 'content2' },
 ])
 ```
+
 `*.mock.ts`
+
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import posts from './data'
@@ -529,6 +546,7 @@ export default defineMock([
 The priority of the path matching rules built into the plugin can already meet most needs, but if you need more flexible customization of the matching rule priority, you can use the `priority` parameter.
 
 Exp：
+
 ```ts
 import { defineConfig } from 'vite'
 import mockPlugin from 'vite-plugin-mock-dev-server'
@@ -576,6 +594,7 @@ export default defineConfig({
 See more examples： [example](/example/)
 
 **exp:** Match `/api/test`, And returns a response body content with empty data
+
 ``` ts
 export default defineMock({
   url: '/api/test',
@@ -583,6 +602,7 @@ export default defineMock({
 ```
 
 **exp:** Match `/api/test` , And returns a static content data
+
 ``` ts
 export default defineMock({
   url: '/api/test',
@@ -591,6 +611,7 @@ export default defineMock({
 ```
 
 **exp:** Only Support `GET` Method
+
 ``` ts
 export default defineMock({
   url: '/api/test',
@@ -599,6 +620,7 @@ export default defineMock({
 ```
 
 **exp:** In the response header, add a custom header and cookie
+
 ``` ts
 export default defineMock({
   url: '/api/test',
@@ -606,6 +628,7 @@ export default defineMock({
   cookies: { 'my-cookie': '123456789' },
 })
 ```
+
 ``` ts
 export default defineMock({
   url: '/api/test',
@@ -619,6 +642,7 @@ export default defineMock({
 ```
 
 **exp:** Define multiple mock requests for the same URL and match valid rules with validators
+
 ``` ts
 export default defineMock([
   // Match /api/test?a=1
@@ -653,6 +677,7 @@ export default defineMock([
 ```
 
 **exp:** Response Delay
+
 ``` ts
 export default defineMock({
   url: '/api/test',
@@ -661,6 +686,7 @@ export default defineMock({
 ```
 
 **exp:** The interface request failed
+
 ``` ts
 export default defineMock({
   url: '/api/test',
@@ -670,6 +696,7 @@ export default defineMock({
 ```
 
 **exp:** Dynamic route matching
+
 ``` ts
 export default defineMock({
   url: '/api/user/:userId',
@@ -682,6 +709,7 @@ export default defineMock({
 The `userId` in the route will be resolved into the `request.params` object.
 
 **exp**:** Use the buffer to respond data
+
 ```ts
 import { Buffer } from 'node:buffer'
 
@@ -693,6 +721,7 @@ export default defineMock({
   body: Buffer.from(JSON.stringify({ a: 1 }))
 })
 ```
+
 ``` ts
 // When the type is buffer, the content-type is application/octet-stream.
 // The data passed in through body will be converted to a buffer.
@@ -707,6 +736,7 @@ export default defineMock({
 **exp:** Response file type
 
 Simulate file download, and pass in the file reading stream.
+
 ``` ts
 import { createReadStream } from 'node:fs'
 
@@ -717,11 +747,13 @@ export default defineMock({
   body: () => createReadStream('./my-app.dmg')
 })
 ```
+
 ```html
 <a href="/api/download" download="my-app.dmg">Download File</a>
 ```
 
 **exp:** Use `mockjs`:
+
 ``` ts
 import Mock from 'mockjs'
 
@@ -734,9 +766,11 @@ export default defineMock({
   })
 })
 ```
+
 You need install `mockjs`
 
 **exp:** Use `response` to customize the response
+
 ``` ts
 export default defineMock({
   url: '/api/test',
@@ -756,6 +790,7 @@ export default defineMock({
 ```
 
 **exp:** Use json / json5
+
 ``` json
 {
   "url": "/api/test",
@@ -768,6 +803,7 @@ export default defineMock({
 **exp:** multipart, upload files.
 
 use [`formidable`](https://www.npmjs.com/package/formidable#readme) to support.
+
 ``` html
 <form action="/api/upload" method="post" enctype="multipart/form-data">
   <p>
@@ -785,6 +821,7 @@ use [`formidable`](https://www.npmjs.com/package/formidable#readme) to support.
 ```
 
 fields `files` mapping to `formidable.File`
+
 ``` ts
 export default defineMock({
   url: '/api/upload',
@@ -800,6 +837,7 @@ export default defineMock({
 ```
 
 **exp:** Graphql
+
 ``` ts
 import { buildSchema, graphql } from 'graphql'
 
@@ -829,6 +867,7 @@ fetch('/api/graphql', {
 ```
 
 **exp:** WebSocket Mock
+
 ``` ts
 // ws.mock.ts
 export default defineMock({
@@ -857,6 +896,7 @@ export default defineMock({
   }
 })
 ```
+
 ``` ts
 // app.ts
 const ws = new WebSocket('ws://localhost:5173/socket.io')
@@ -878,6 +918,7 @@ In some scenarios, it may be necessary to use the data provided by mock services
 To meet such scenarios, on one hand, the plugin provides support under `vite preview`, and on the other hand, it also builds a small independent mock service application that can be deployed to relevant environments during `vite build`. This can then be forwarded through other HTTP servers like Nginx to actual ports for mock support.
 
 The default output is built into the directory `dist/mockServer`, generating files as follows:
+
 ``` sh
 ./mockServer
 ├── index.js
@@ -898,7 +939,7 @@ You can access related `mock` interfaces through `localhost:8080/`.
 ## Contributors
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->

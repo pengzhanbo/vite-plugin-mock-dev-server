@@ -19,6 +19,7 @@ Form Upload File
 ```
 
 ::: code-group
+
 ```ts [upload.mock.ts]
 export default defineMock({
   url: '/api/upload',
@@ -32,6 +33,7 @@ export default defineMock({
   },
 })
 ```
+
 :::
 
 ## File Download

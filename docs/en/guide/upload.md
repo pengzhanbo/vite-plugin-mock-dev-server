@@ -31,6 +31,7 @@ In the data fields of form submissions, such as the form field `files`, it is pa
 If the `multiple` attribute is declared, the corresponding field is parsed as an array of `formidable.File`.
 
 ::: code-group
+
 ```ts [formidable.File]
 interface File {
   /**
@@ -85,6 +86,7 @@ interface File {
   toString: () => string
 }
 ```
+
 :::
 
 In the mock configuration file, you can directly access the relevant information using `req.body.*`:

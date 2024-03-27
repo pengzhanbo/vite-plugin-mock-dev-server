@@ -69,6 +69,7 @@ pnpm add -D vite-plugin-mock-dev-server
 ### 配置
 
 `vite.config.ts`
+
 ```ts
 import { defineConfig } from 'vite'
 import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
@@ -86,6 +87,7 @@ export default defineConfig({
   }
 })
 ```
+
 插件会读取 `server.proxy` 或 `options.prefix` 的配置，对匹配的 url 启用mock 匹配。
 
 插件也会读取 `define` 配置， 支持在 mock 文件中直接使用。
@@ -98,6 +100,7 @@ export default defineConfig({
 默认配置，在你的项目根目录的 `mock` 目录中编写mock数据：
 
 `mock/**/*.mock.ts` :
+
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
@@ -114,6 +117,7 @@ export default defineMock({
 vite plugin
 
 `vite.config.ts`
+
 ```ts
 import { defineConfig } from 'vite'
 import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
@@ -192,6 +196,7 @@ export default defineConfig({
   **默认值:** `{}`
 
   示例: 配置文件上传的存放目录
+
   ```ts
   MockDevServerPlugin({
     formidableOptions: {
@@ -199,11 +204,16 @@ export default defineConfig({
     }
   })
   ```
+
 - `options.cookiesOptions`
 
   配置 `cookies`, 查看 [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options)
 
   **默认值:** `{}`
+
+- `options.bodyParserOptions`
+
+  配置 `co-body`, 查看 [co-body](https://github.com/cojs/co-body#options)
 
 - `options.build`
 
@@ -397,6 +407,7 @@ export default defineMock({
   },
 })
 ```
+
 ```ts
 // 配置 WebSocket mock
 export default defineMock({
@@ -481,8 +492,10 @@ type defineMockData<T> = (
 ) => [getter, setter] & { value: T }
 ```
 
-#### 用法:
+### 用法
+
 `data.ts`
+
 ```ts
 import { defineMockData } from 'vite-plugin-mock-dev-server'
 
@@ -491,7 +504,9 @@ export default defineMockData('posts', [
   { id: '2', title: 'title2', content: 'content2' },
 ])
 ```
+
 `*.mock.ts`
+
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import posts from './data'
@@ -525,6 +540,7 @@ export default defineMock([
 可以使用 `priority` 参数。
 
 示例：
+
 ```ts
 import { defineConfig } from 'vite'
 import mockPlugin from 'vite-plugin-mock-dev-server'
@@ -557,7 +573,7 @@ export default defineConfig({
 
 > **注意:**
 >
->  `priority` 虽然可以调整优先级，但大多数时候，你都没有必要这么做。
+> `priority` 虽然可以调整优先级，但大多数时候，你都没有必要这么做。
 > 对于一些特殊情况的请求，可以使用 静态规则来替代 `priority`，静态规则总是拥有最高优先级。
 
 ## Example
@@ -567,6 +583,7 @@ export default defineConfig({
 查看更多示例： [example](/example/)
 
 **exp:** 命中 `/api/test` 请求，并返回一个 数据为空的响应体内容
+
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -574,12 +591,14 @@ export default defineMock({
 ```
 
 **exp:** 命中 `/api/test` 请求，并返回一个固定内容数据
+
 ```ts
 export default defineMock({
   url: '/api/test',
   body: { a: 1 },
 })
 ```
+
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -588,6 +607,7 @@ export default defineMock({
 ```
 
 **exp:** 限定只允许 `GET` 请求
+
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -596,6 +616,7 @@ export default defineMock({
 ```
 
 **exp:**  在返回的响应头中，添加自定义 header 和 cookie
+
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -603,6 +624,7 @@ export default defineMock({
   cookies: { 'my-cookie': '123456789' },
 })
 ```
+
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -616,6 +638,7 @@ export default defineMock({
 ```
 
 **exp:**  定义多个相同url请求mock，并使用验证器匹配生效规则
+
 ```ts
 export default defineMock([
   // 命中 /api/test?a=1
@@ -649,6 +672,7 @@ export default defineMock([
 ```
 
 **exp:**  延迟接口响应：
+
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -657,6 +681,7 @@ export default defineMock({
 ```
 
 **exp:**  使接口请求失败
+
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -666,6 +691,7 @@ export default defineMock({
 ```
 
 **exp:** 动态路由匹配
+
 ```ts
 export default defineMock({
   url: '/api/user/:userId',
@@ -678,6 +704,7 @@ export default defineMock({
 路由中的 `userId`将会解析到 `request.params` 对象中.
 
 **exp:** 使用 buffer 响应数据
+
 ```ts
 import { Buffer } from 'node:buffer'
 
@@ -688,6 +715,7 @@ export default defineMock({
   body: Buffer.from(JSON.stringify({ a: 1 }))
 })
 ```
+
 ```ts
 // 当 type 为 buffer 时，content-type 为 application/octet-stream，
 // body 传入的数据会被转为 buffer
@@ -702,6 +730,7 @@ export default defineMock({
 **exp:** 响应文件类型
 
 模拟文件下载，传入文件读取流
+
 ```ts
 import { createReadStream } from 'node:fs'
 
@@ -712,11 +741,13 @@ export default defineMock({
   body: () => createReadStream('./my-app.dmg')
 })
 ```
+
 ```html
 <a href="/api/download" download="my-app.dmg">下载文件</a>
 ```
 
 **exp:** 使用 `mockjs` 生成响应数据:
+
 ```ts
 import Mock from 'mockjs'
 
@@ -729,9 +760,11 @@ export default defineMock({
   })
 })
 ```
+
 请先安装 `mockjs`
 
 **exp:** 使用 `response` 自定义响应
+
 ```ts
 export default defineMock({
   url: '/api/test',
@@ -751,6 +784,7 @@ export default defineMock({
 ```
 
 **exp:** 使用 json / json5
+
 ```json
 {
   "url": "/api/test",
@@ -763,6 +797,7 @@ export default defineMock({
 **exp:** multipart, 文件上传.
 
 通过 [`formidable`](https://www.npmjs.com/package/formidable#readme) 支持。
+
 ``` html
 <form action="/api/upload" method="post" enctype="multipart/form-data">
   <p>
@@ -780,6 +815,7 @@ export default defineMock({
 ```
 
 fields `files` 映射为 `formidable.File` 类型。
+
 ``` ts
 export default defineMock({
   url: '/api/upload',
@@ -795,6 +831,7 @@ export default defineMock({
 ```
 
 **exp:** Graphql
+
 ```ts
 import { buildSchema, graphql } from 'graphql'
 
@@ -824,6 +861,7 @@ fetch('/api/graphql', {
 ```
 
 **exp:** WebSocket Mock
+
 ```ts
 // ws.mock.ts
 export default defineMock({
@@ -852,6 +890,7 @@ export default defineMock({
   }
 })
 ```
+
 ```ts
 // app.ts
 const ws = new WebSocket('ws://localhost:5173/socket.io')
@@ -873,6 +912,7 @@ ws.addEventListener('message', (raw) => {
 为了能够满足这类场景，插件一方面提供了 `vite preview` 下的支持，同时还提供了在 `vite build` 时，也构建一个可独立部署的 小型mock服务应用，可以将这个应用部署到相关的环境，后通过其他http服务器如nginx做代理转发到实际端口实现mock支持。
 
 构建默认输出到 `dist/mockServer` 目录中，并生成如下文件：
+
 ```sh
 ./mockServer
 ├── index.js

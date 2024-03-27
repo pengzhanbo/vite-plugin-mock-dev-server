@@ -14,6 +14,7 @@ export default defineMock({
 ```
 
 传入数组：
+
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 

@@ -45,6 +45,7 @@
 插件支持判断 验证器配置的 body 是否 属于 请求体 body 的 子集。
 
 ::: code-group
+
 ``` ts [api.mock.ts]
 export default defineMock({
   url: '/mock/validator-body',
@@ -57,6 +58,7 @@ export default defineMock({
   body: ''
 })
 ```
+
 ``` ts [fetch.ts]
 await fetch('/mock/validator-body', {
   method: 'POST',
@@ -67,6 +69,7 @@ await fetch('/mock/validator-body', {
   })
 })
 ```
+
 :::
 
 ::: info

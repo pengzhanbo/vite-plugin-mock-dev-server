@@ -7,6 +7,7 @@
 在你的项目的 `vite.config.{ts,js}`文件中，引入并配置插件:
 
 ::: code-group
+
 ``` ts [typescript]
 import { defineConfig } from 'vite'
 
@@ -18,6 +19,7 @@ export default defineConfig({
   ],
 })
 ```
+
 ``` js [javascript]
 const mockDevServerPlugin = require('vite-plugin-mock-dev-server') // [!code ++]
 /**
@@ -29,6 +31,7 @@ module.exports = {
   ],
 }
 ```
+
 :::
 
 ## Step2: 配置 `server.proxy`
@@ -40,6 +43,7 @@ module.exports = {
 因此，本插件直接读取 `server.proxy` 配置，从而减少插件需要配置的参数复杂度。
 
 ::: code-group
+
 ``` ts [typescript]
 import { defineConfig } from 'vite'
 import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
@@ -55,6 +59,7 @@ export default defineConfig({
   }, // [!code ++]
 })
 ```
+
 ``` js [javascript]
 const mockDevServerPlugin = require('vite-plugin-mock-dev-server')
 
@@ -72,6 +77,7 @@ module.exports = {
   }, // [!code ++]
 }
 ```
+
 :::
 
 ## Step3: 添加 `/mock` 目录
@@ -102,6 +108,7 @@ module.exports = {
   "cjs": [".cjs", ".cts"]
 }
 ```
+
 **`.js/.ts` 文件根据 `package.json` 的  `type` 字段值判断， 默认为 `cjs`。**
 
 新增 `*.mock.ts` 文件：
@@ -116,6 +123,7 @@ module.exports = {
 
 插件提供了 [`defineMock()`](/guide/define-mock) 函数帮助编写 mock 配置。
 ::: code-group
+
 ```ts [api.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
@@ -124,6 +132,7 @@ export default defineMock({
   body: {}
 })
 ```
+
 :::
 
 ## Step5: 启动 Vite 开发服务

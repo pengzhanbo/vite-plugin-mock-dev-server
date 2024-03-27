@@ -26,9 +26,10 @@
 
 那么，选择使用发起 mock api 的来源页地址来区分，是一种很好的方式，因为这种方式可以使我们直接在 浏览器地址栏中，直接修改地址即可区分返回不同的参数！
 
-而发起 mock api 的来源页地址，也将会附带在 `mock request ` 的 `referer` 字段上，所以插件内可以通过解析 `referer` 来实现 一个新的 `validator` 。
+而发起 mock api 的来源页地址，也将会附带在 `mock request` 的 `referer` 字段上，所以插件内可以通过解析 `referer` 来实现 一个新的 `validator` 。
 
 如以下配置：
+
 ``` ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
@@ -44,6 +45,7 @@ export default defineMock({
   }
 })
 ```
+
 `/api/demo` 接口只会响应来自带了 `?a=1` 的请求来源地址，如 `http://example.com/?a=1`。
 
 所以可以基于 `refererQuery`，进行 mock file 的拆分，根据 团队指定的协作规范，细化文件管理。

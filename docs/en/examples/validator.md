@@ -44,6 +44,7 @@ For the request body, which may have a relatively complex data structure, deep v
 The plugin supports checking if the body configured in the validator is a subset of the request body.
 
 ::: code-group
+
 ``` ts [api.mock.ts]
 export default defineMock({
   url: '/mock/validator-body',
@@ -56,6 +57,7 @@ export default defineMock({
   body: ''
 })
 ```
+
 ``` ts [fetch.ts]
 await fetch('/mock/validator-body', {
   method: 'POST',
@@ -66,6 +68,7 @@ await fetch('/mock/validator-body', {
   })
 })
 ```
+
 :::
 
 ::: info

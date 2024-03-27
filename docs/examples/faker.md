@@ -4,9 +4,11 @@
 
 ::: tip
 你需要自行安装 `faker-js` 库
+
 ```sh
 pnpm add -D @faker-js/faker
 ```
+
 :::
 
 ```ts

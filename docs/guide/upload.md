@@ -33,6 +33,7 @@ fetch('/api/upload', {
 如果 声明了 `multiple` 属性，则对应字段解析为  `formidable.File[]` 的数组。
 
 ::: code-group
+
 ```ts [formidable.File]
 interface File {
   /**
@@ -87,9 +88,11 @@ interface File {
   toString: () => string
 }
 ```
+
 :::
 
 在mock 配置文件中, 可直接通过 `req.body.*` 获取相关的信息：
+
 ```ts
 export default defineMock({
   url: '/api/upload',

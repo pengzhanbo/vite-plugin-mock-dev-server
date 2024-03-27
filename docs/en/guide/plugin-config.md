@@ -18,13 +18,15 @@ export default defineConfig({
       cors: true,
       formidableOptions: undefined,
       cookiesOptions: undefined,
+      bodyParserOptions: undefined,
       priority: undefined
     }),
   ]
 })
 ```
 
-**Type**
+**Type:**
+
 ``` ts
 interface MockServerPluginOptions {
   prefix?: string | string[]
@@ -131,6 +133,16 @@ Usually, you don't need to configure it, as it inherits the configuration from V
 Configure `cookies`
 
 For detailed configuration, refer to [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options).
+
+## bodyParserOptions
+
+**Type**： `coBody.Options & { formLimit?: string | number, jsonLimit?: string | number, textLimit?: string | number }`
+
+**Default**： `undefined`
+
+Configure `co-body`
+
+For detailed configuration, refer to [co-body](https://github.com/cojs/co-body#options).
 
 ## build
 

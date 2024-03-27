@@ -36,6 +36,7 @@ export const posts = defineMockData('posts', [
   { id: '2', title: 'title2', content: 'content2' },
 ])
 ```
+
 The data encapsulated by `defineMockData` provides two different styles of data reading and writing support through the plugin, satisfying the usage habits of different developers.
 
 - `posts.value`: Use `Object.defineProperty` to define read and write data.
@@ -43,6 +44,7 @@ The data encapsulated by `defineMockData` provides two different styles of data 
 
 `*.mock.ts`  (`.value`)
 ::: code-group
+
 ```ts [post-list.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from './data'
@@ -52,6 +54,7 @@ export default defineMock({
   body: () => posts.value
 })
 ```
+
 ```ts [post-delete.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from './data'
@@ -65,10 +68,12 @@ export default defineMock({
   }
 })
 ```
+
 :::
 
 `*.mock.ts`  (`[getter, setter]`)
 ::: code-group
+
 ```ts [post-list.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from './data'
@@ -81,6 +86,7 @@ export default defineMock({
   }
 })
 ```
+
 ```ts [post-delete.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from './data'
@@ -97,4 +103,5 @@ export default defineMock({
   }
 })
 ```
+
 :::

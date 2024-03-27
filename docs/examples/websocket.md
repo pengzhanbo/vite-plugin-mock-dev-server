@@ -1,11 +1,13 @@
 # WebSocket
 
 ## 基础示例
+
 <<< @/../example/mock/ws.mock.ts
 
 ## 模拟实时推送
 
 ::: code-group
+
 ```ts [ws-real-time-push.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
@@ -27,11 +29,13 @@ export default defineMock({
   }
 })
 ```
+
 :::
 
 ## 模拟聊天室
 
 ::: code-group
+
 ```ts [ws-chat.mock.ts]
 import type { MockRequest } from 'vite-plugin-mock-dev-server'
 import { defineMock } from 'vite-plugin-mock-dev-server'
@@ -82,9 +86,11 @@ export default defineMock({
   }
 })
 ```
+
 :::
 
 ::: code-group
+
 ```ts [app.ts]
 const store = {
   userList: [],
@@ -122,4 +128,5 @@ function closeChat() {
     ws.close()
 }
 ```
+
 :::

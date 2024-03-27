@@ -11,5 +11,8 @@
     "proxied",
     "referer"
   ],
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "markdownlint.config": {
+    "no-inline-html": false
+  }
 }

@@ -5,6 +5,7 @@
 为了能够满足这类场景，插件一方面提供了 `vite preview` 下的支持，同时还提供了在 `vite build` 时，也构建一个可独立部署的 小型mock服务应用，可以将这个应用部署到相关的环境，后通过其他http服务器如nginx做代理转发到实际端口实现mock支持。
 
 构建默认输出到 `dist/mockServer` 目录中，并生成如下文件：
+
 ```sh
 ./mockServer
 ├── index.js

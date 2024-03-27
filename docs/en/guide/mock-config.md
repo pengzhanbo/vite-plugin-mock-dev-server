@@ -11,7 +11,8 @@ export default defineMock({
 })
 ```
 
-**Type Definition**
+**Type Definition:**
+
 ```ts
 interface RequestOptions {
   query: Record<string, string> // query string parse
@@ -22,7 +23,7 @@ interface RequestOptions {
 }
 ```
 
-**Description**
+**Description:**
 
 ::: warning
 If using json/json5 to write mock files, the `response` method is not supported, nor is the use of other field functions.
@@ -179,6 +180,7 @@ Don't forget to use `res.end()` to return the response body data, or use `next()
 ## validator
 
 - **Type**: `Validator` | `ValidatorFn`
+
   ```ts
   interface Validator {
     header?: object
@@ -191,6 +193,7 @@ Don't forget to use `res.end()` to return the response body data, or use `next()
     (request: RequestOptions): boolean
   }
   ```
+
 - **Optional**
 - **Default**： `null`
 

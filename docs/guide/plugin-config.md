@@ -18,13 +18,15 @@ export default defineConfig({
       cors: true,
       formidableOptions: undefined,
       cookiesOptions: undefined,
+      bodyParserOptions: undefined,
       priority: undefined
     }),
   ]
 })
 ```
 
-**Type**
+**Type:**
+
 ``` ts
 interface MockServerPluginOptions {
   prefix?: string | string[]
@@ -36,6 +38,11 @@ interface MockServerPluginOptions {
   cors?: boolean | CorsOptions
   formidableOptions?: formidable.Options
   cookiesOptions?: Cookies.Option
+  bodyParserOptions?: coBody.Options & {
+    formLimit?: string | number
+    jsonLimit?: string | number
+    textLimit?: string | number
+  }
   build?: boolean | ServerBuildOption
   priority?: MockMatchPriority
 }
@@ -130,6 +137,16 @@ mock资源热更新时，仅更新了数据内容，但是默认不重新刷新�
 配置 `cookies`
 
 详细配置信息查看 [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options)
+
+## bodyParserOptions
+
+**类型**： `coBody.Options & { formLimit?: string | number, jsonLimit?: string | number, textLimit?: string | number }`
+
+**默认值**： `undefined`
+
+配置 `co-body`
+
+详细配置信息查看 [co-body](https://github.com/cojs/co-body#options)
 
 ## build
 

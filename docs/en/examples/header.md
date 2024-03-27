@@ -3,6 +3,7 @@
 Example, simulate adding JWT, Authorization Header
 
 ## Object Type
+
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
