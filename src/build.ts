@@ -70,6 +70,7 @@ export async function generateMockServer(
         httpProxies,
         wsProxies,
         options.cookiesOptions,
+        options.bodyParserOptions,
         options.priority,
         options.build as ServerBuildOption,
       ),
@@ -152,6 +153,7 @@ function generatorServerEntryCode(
   httpProxies: string[],
   wsProxies: string[],
   cookiesOptions: MockServerPluginOptions['cookiesOptions'] = {},
+  bodyParserOptions: MockServerPluginOptions['bodyParserOptions'] = {},
   priority: MockServerPluginOptions['priority'] = {},
   build: ServerBuildOption,
 ) {
@@ -176,6 +178,7 @@ const logger = createLogger('mock-server', '${log}');
 const httpProxies = ${JSON.stringify(httpProxies)};
 const wsProxies = ${JSON.stringify(wsProxies)};
 const cookiesOptions = ${JSON.stringify(cookiesOptions)};
+const bodyParserOptions = ${JSON.stringify(bodyParserOptions)};
 const priority = ${JSON.stringify(priority)};
 
 mockWebSocket({ 
@@ -192,6 +195,7 @@ app.use(baseMiddleware({ mockData }, {
   proxies: httpProxies,
   priority,
   cookiesOptions,
+  bodyParserOptions,
   logger,
 }));
 

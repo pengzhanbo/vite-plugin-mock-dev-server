@@ -39,6 +39,7 @@ import { validate } from './validator'
 export interface BaseMiddlewareOptions {
   formidableOptions: MockServerPluginOptions['formidableOptions']
   cookiesOptions: MockServerPluginOptions['cookiesOptions']
+  bodyParserOptions: MockServerPluginOptions['bodyParserOptions']
   proxies: string[]
   logger: Logger
   priority: MockServerPluginOptions['priority']
@@ -48,6 +49,7 @@ export function baseMiddleware(
   mockLoader: MockLoader,
   {
     formidableOptions = {},
+    bodyParserOptions = {},
     proxies,
     cookiesOptions,
     logger,
@@ -78,7 +80,7 @@ export function baseMiddleware(
     collectRequest(req)
 
     const { query: refererQuery } = urlParse(req.headers.referer || '')
-    const reqBody = await parseReqBody(req, formidableOptions)
+    const reqBody = await parseReqBody(req, formidableOptions, bodyParserOptions)
     const cookies = new Cookies(req, res, cookiesOptions)
     const getCookie = cookies.get.bind(cookies)
 

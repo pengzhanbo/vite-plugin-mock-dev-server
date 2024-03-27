@@ -103,6 +103,7 @@ export function mockServerMiddleware(
       formidableOptions: options.formidableOptions,
       proxies,
       cookiesOptions: options.cookiesOptions,
+      bodyParserOptions: options.bodyParserOptions,
       priority: options.priority,
       logger,
     }),

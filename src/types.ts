@@ -6,6 +6,7 @@ import type { CorsOptions } from 'cors'
 import type formidable from 'formidable'
 import type { Connect } from 'vite'
 import type { WebSocketServer } from 'ws'
+import type { Options as COBodyOptions } from 'co-body'
 
 /**
  * Configure plugin
@@ -94,6 +95,15 @@ export interface MockServerPluginOptions {
    * @see [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options)
    */
   cookiesOptions?: Cookies.Option
+
+  /**
+   * Configure to `co-body`
+   *
+   * 配置 `co-body`
+   *
+   * @see [co-body](https://github.com/cojs/co-body#options)
+   */
+  bodyParserOptions?: BodyParserOptions
 
   /**
    * When you need to build a small mock service, you can configure this option.
@@ -196,6 +206,12 @@ export interface MockMatchSpecialPriority {
    * ```
    */
   [key: string]: string[] | { rules: string[], when: string[] }
+}
+
+export type BodyParserOptions = COBodyOptions & {
+  jsonLimit?: string | number
+  formLimit?: string | number
+  textLimit?: string | number
 }
 
 export interface ServerBuildOption {
