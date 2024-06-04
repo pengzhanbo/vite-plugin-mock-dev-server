@@ -52,8 +52,9 @@ export function lookupFile(
   if (
     parentDir !== dir
     && (!options?.rootDir || parentDir.startsWith(options?.rootDir))
-  )
+  ) {
     return lookupFile(parentDir, formats, options)
+  }
 }
 
 export function ensureProxies(serverProxy: ResolvedConfig['server']['proxy'] = {}) {
@@ -66,10 +67,12 @@ export function ensureProxies(serverProxy: ResolvedConfig['server']['proxy'] = {
       || (!value.ws
       && !value.target?.toString().startsWith('ws:')
       && !value.target?.toString().startsWith('wss:'))
-    )
+    ) {
       httpProxies.push(key)
-    else
+    }
+    else {
       wsProxies.push(key)
+    }
   })
   return { httpProxies, wsProxies }
 }

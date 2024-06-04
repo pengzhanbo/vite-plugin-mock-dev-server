@@ -170,8 +170,9 @@ export function mockWebSocket({
       !pathname
       || proxies.length === 0
       || !proxies.some(context => doesProxyContextMatchUrl(context, req.url!))
-    )
+    ) {
       return
+    }
 
     const mockData = loader.mockData
     const mockUrl = Object.keys(mockData).find((key) => {

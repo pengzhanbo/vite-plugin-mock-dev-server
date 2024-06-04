@@ -65,15 +65,17 @@ export function baseMiddleware(
       !pathname
       || proxies.length === 0
       || !proxies.some(context => doesProxyContextMatchUrl(context, req.url!))
-    )
+    ) {
       return next()
+    }
 
     const mockData = mockLoader.mockData
     // 对满足匹配规则的配置进行优先级排序
     const mockUrls = matchingWeight(Object.keys(mockData), pathname, priority)
 
-    if (mockUrls.length === 0)
+    if (mockUrls.length === 0) {
       return next()
+    }
 
     // #52 由于请求流被消费，vite http-proxy 无法获取已消费的请求，导致请求流无法继续
     // 记录请求流中被消费的数据，形成备份，当当前请求无法继续时，可以从备份中恢复请求流
@@ -349,8 +351,9 @@ async function realDelay(startTime: number, delay?: MockHttpItem['delay']) {
     !delay
     || (typeof delay === 'number' && delay <= 0)
     || (isArray(delay) && delay.length !== 2)
-  )
+  ) {
     return
+  }
   let realDelay = 0
   if (isArray(delay)) {
     const [min, max] = delay

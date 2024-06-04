@@ -148,8 +148,9 @@ function corsMiddleware(
         || !proxies.some(context =>
           doesProxyContextMatchUrl(context, req.url!),
         )
-      )
+      ) {
         return next()
+      }
 
       const mockData = mockLoader.mockData
 
