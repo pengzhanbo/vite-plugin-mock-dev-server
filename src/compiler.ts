@@ -139,9 +139,7 @@ export async function loadFromCode<T = any>(
   code: string,
   isESM: boolean,
   cwd: string,
-): Promise<{
-  [key: string]: T
-}> {
+): Promise<{ [key: string]: T }> {
   if (isESM) {
     const fileBase = `${filepath}.timestamp-${Date.now()}`
     const fileNameTmp = `${fileBase}.mjs`
