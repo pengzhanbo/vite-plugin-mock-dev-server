@@ -51,7 +51,7 @@ importers:
         specifier: ^2.1.35
         version: 2.1.35
       path-to-regexp:
-        specifier: ^6.2.2
+        specifier: 6.2.2
         version: 6.2.2
       picocolors:
         specifier: ^1.0.1
