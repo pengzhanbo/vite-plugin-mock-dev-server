@@ -34,6 +34,7 @@ export function mockServerMiddleware(
     exclude: toArray(options.exclude),
     define: viteDefine(config),
     alias: config.resolve.alias,
+    cwd: config.root,
   })
 
   loader.load()
