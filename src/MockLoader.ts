@@ -42,7 +42,7 @@ export class MockLoader extends EventEmitter {
       this.moduleType
         = !!pkg && JSON.parse(pkg).type === 'module' ? 'esm' : 'cjs'
     }
-    catch (e) {}
+    catch {}
   }
 
   get mockData() {
@@ -82,7 +82,9 @@ export class MockLoader extends EventEmitter {
       if (!includeFilter(filepath))
         return
       await this.loadMock(filepath)
-      timer && clearImmediate(timer)
+      if (timer)
+        clearImmediate(timer)
+
       timer = setImmediate(() => {
         this.updateMockList()
         this.emit('mock:update-end', filepath)
@@ -105,7 +107,9 @@ export class MockLoader extends EventEmitter {
       ignoreInitial: true,
       cwd: this.cwd,
     }))
-    otherGlob.length > 0 && otherGlob.forEach(glob => watcher.add(glob))
+
+    if (otherGlob.length > 0)
+      otherGlob.forEach(glob => watcher.add(glob))
 
     watcher.on('add', async (filepath: string) => {
       filepath = normalizePath(filepath)
@@ -137,8 +141,7 @@ export class MockLoader extends EventEmitter {
     this.depsWatcher.on('change', (filepath) => {
       filepath = normalizePath(filepath)
       const mockFiles = this.moduleDeps.get(filepath)
-      mockFiles
-      && mockFiles.forEach((file) => {
+      mockFiles?.forEach((file) => {
         this.emit('mock:update', file)
       })
     })
@@ -152,7 +155,9 @@ export class MockLoader extends EventEmitter {
         deps.push(dep)
 
       const exactDeps = deps.filter(dep => !oldDeps.includes(dep))
-      exactDeps.length > 0 && this.depsWatcher.add(exactDeps)
+
+      if (exactDeps.length > 0)
+        this.depsWatcher.add(exactDeps)
     })
   }
 
