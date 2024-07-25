@@ -66,12 +66,20 @@ Unlike the default behavior of using `viteConfig.server.proxy` for HTTP mocks, W
 
 This conflict is not a problem with Vite or the plugin itself; it is a reasonable type of error. When switching between WebSocket Mock and WebSocket Proxy, please ensure that the configuration does not contain duplicates that could cause conflicts.
 
+## cwd
+
+**Type**： `string`
+
+**Default**： `process.cwd()`
+
+Configure the matching context for `include` and `exclude`.
+
 ## include
 
 **Type**： `string | string[]`
 
 **Default**：
-`['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']`  relative to root
+`['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']`  relative to [`cwd`](#cwd)
 
 Configure the reading of mock files, which can be a directory, a glob pattern, or an array.
 
@@ -80,7 +88,7 @@ Configure the reading of mock files, which can be a directory, a glob pattern, o
 **Type**： `string | string[]`
 
 **Default**：
-`['**/node_modules/**','**/test/**','**/cypress/**','src/**','**/.vscode/**','**/.git/**','**/dist/**']`
+`['**/node_modules/**','**/test/**','**/cypress/**','src/**','**/.vscode/**','**/.git/**','**/dist/**']` relative to [`cwd`](#cwd)
 
 Specifies the files to be excluded when reading mock files. It can be a directory, glob pattern, or an array.
 

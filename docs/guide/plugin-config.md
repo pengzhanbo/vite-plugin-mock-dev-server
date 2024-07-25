@@ -70,12 +70,20 @@ interface MockServerPluginOptions {
 
 该冲突既不是 `vite` 的问题，也不是插件的问题，这属于合理的错误类型。在进行 `WebSocket Mock`和 `WebSocket Proxy` 切换时，请注意配置不要出现重复导致冲突。
 
+## cwd
+
+**类型**： `string`
+
+**默认值**： `process.cwd()`
+
+配置 `include` 和 `exclude` 的匹配上下文
+
 ## include
 
 **类型**： `string | string[]`
 
 **默认值**：
-`['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']`  相对于根目录
+`['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']`  相对于 [`cwd`](#cwd)
 
 配置读取 mock文件，可以是一个 目录，glob，或者一个数组
 
@@ -84,7 +92,7 @@ interface MockServerPluginOptions {
 **类型**： `string | string[]`
 
 **默认值**：
-`['**/node_modules/**','**/test/**','**/cypress/**','src/**','**/.vscode/**','**/.git/**','**/dist/**']`
+`['**/node_modules/**','**/test/**','**/cypress/**','src/**','**/.vscode/**','**/.git/**','**/dist/**']` 相对于 [`cwd`](#cwd)
 
 配置读取 mock文件时，需要排除的文件， 可以是一个 目录、glob、或者一个数组
 

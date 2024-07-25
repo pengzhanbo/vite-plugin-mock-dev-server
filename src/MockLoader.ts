@@ -201,12 +201,12 @@ export class MockLoader extends EventEmitter {
 
     try {
       const raw
-        = (await loadFromCode<MockHttpItem | MockWebsocketItem | MockOptions>(
+        = (await loadFromCode<MockHttpItem | MockWebsocketItem | MockOptions>({
           filepath,
           code,
           isESM,
-          this.cwd,
-        )) || {}
+          cwd: this.cwd,
+        })) || {}
       let mockConfig: MockHttpItem | MockWebsocketItem | MockOptions
 
       if (hasOwn(raw, 'default')) {

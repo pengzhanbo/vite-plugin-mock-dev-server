@@ -30,6 +30,7 @@ export function mockServerMiddleware(
    * 并注入 vite  `define` / `alias`
    */
   const loader = new MockLoader({
+    cwd: options.cwd,
     include: toArray(options.include),
     exclude: toArray(options.exclude),
     define: viteDefine(config),
