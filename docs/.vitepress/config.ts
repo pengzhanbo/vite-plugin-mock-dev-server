@@ -11,7 +11,6 @@ export default defineConfig({
   markdown: {
     theme: { light: 'github-light', dark: 'github-dark' },
     headers: { level: [2, 3] },
-    lineNumbers: true,
   },
   sitemap: {
     hostname: 'https://vite-plugin-mock-dev-server.netlify.app',
