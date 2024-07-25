@@ -39,6 +39,16 @@ export interface MockServerPluginOptions {
    * @example ['/socket.io']
    */
   wsPrefix?: string | string[]
+
+  /**
+   * Configure the matching context for `include` and `exclude`.
+   *
+   * 配置 `include` 和 `exclude` 的匹配上下文
+   *
+   * @default process.cwd()
+   */
+  cwd?: string
+
   /**
    * glob string matching mock includes files
    *

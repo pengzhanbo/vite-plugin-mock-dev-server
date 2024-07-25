@@ -1,3 +1,4 @@
+import process from 'node:process'
 import { toArray } from '@pengzhanbo/utils'
 import type { Plugin, ResolvedConfig } from 'vite'
 import { generateMockServer } from './build'
@@ -8,6 +9,7 @@ import type { MockServerPluginOptions } from './types'
 export function mockDevServerPlugin({
   prefix = [],
   wsPrefix = [],
+  cwd = process.cwd(),
   include = ['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}'],
   exclude = ['**/node_modules/**', '**/.vscode/**', '**/.git/**'],
   reload = false,
@@ -22,6 +24,7 @@ export function mockDevServerPlugin({
   const pluginOptions: Required<MockServerPluginOptions> = {
     prefix,
     wsPrefix,
+    cwd,
     include,
     exclude,
     reload,

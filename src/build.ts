@@ -35,6 +35,7 @@ export async function generateMockServer(
   const include = toArray(options.include)
   const exclude = toArray(options.exclude)
   const define = viteDefine(config)
+  const cwd = options.cwd || process.cwd()
 
   const { httpProxies } = ensureProxies(config.server.proxy || {})
   httpProxies.push(...toArray(options.prefix))
@@ -50,8 +51,8 @@ export async function generateMockServer(
 
   const outputDir = (options.build as ServerBuildOption).dist!
 
-  const content = await generateMockEntryCode(process.cwd(), include, exclude)
-  const mockEntry = path.join(config.root, `mock-data-${Date.now()}.js`)
+  const content = await generateMockEntryCode(cwd, include, exclude)
+  const mockEntry = path.join(cwd, `mock-data-${Date.now()}.js`)
   await fsp.writeFile(mockEntry, content, 'utf-8')
   const { code, deps } = await transformWithEsbuild(mockEntry, {
     define,
