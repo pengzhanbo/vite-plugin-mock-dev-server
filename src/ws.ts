@@ -65,20 +65,24 @@ export function mockWebSocket({
 
   const getWssMap = (mockUrl: string): WSSMap => {
     let wssMap = poolMap.get(mockUrl)
-    !wssMap && poolMap.set(mockUrl, (wssMap = new Map()))
+    if (!wssMap)
+      poolMap.set(mockUrl, (wssMap = new Map()))
+
     return wssMap
   }
 
   const getWss = (wssMap: WSSMap, pathname: string): WebSocketServer => {
     let wss = wssMap.get(pathname)
-    !wss
-    && wssMap.set(pathname, (wss = new WebSocketServer({ noServer: true })))
+    if (!wss)
+      wssMap.set(pathname, (wss = new WebSocketServer({ noServer: true })))
+
     return wss
   }
 
   const addHmr = (filepath: string, mockUrl: string) => {
     let urlList = hmrMap.get(filepath)
-    !urlList && hmrMap.set(filepath, (urlList = new Set()))
+    if (!urlList)
+      hmrMap.set(filepath, (urlList = new Set()))
     urlList.add(mockUrl)
   }
 

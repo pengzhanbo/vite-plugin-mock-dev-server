@@ -275,11 +275,15 @@ async function provideHeaders(
   const filepath = (mock as any).__filepath__ as string
   const contentType
     = mime.contentType(type) || mime.contentType(mime.lookup(type) || '')
-  contentType && res.setHeader('Content-Type', contentType)
+
+  if (contentType)
+    res.setHeader('Content-Type', contentType)
 
   res.setHeader('Cache-Control', 'no-cache,max-age=0')
   res.setHeader('X-Mock-Power-By', 'vite-plugin-mock-dev-server')
-  filepath && res.setHeader('X-File-Path', filepath)
+
+  if (filepath)
+    res.setHeader('X-File-Path', filepath)
 
   if (!headers)
     return

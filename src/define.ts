@@ -35,12 +35,14 @@ export function viteDefine(config: ResolvedConfig) {
     if (typeof val === 'string') {
       if (canJsonParse(val)) {
         userDefine[key] = val
-        isMetaEnv && (userDefineEnv[key.slice(16)] = val)
+        if (isMetaEnv)
+          userDefineEnv[key.slice(16)] = val
       }
     }
     else {
       userDefine[key] = handleDefineValue(val)
-      isMetaEnv && (userDefineEnv[key.slice(16)] = val)
+      if (isMetaEnv)
+        userDefineEnv[key.slice(16)] = val
     }
   }
 

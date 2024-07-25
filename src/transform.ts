@@ -1,9 +1,9 @@
 import {
-  isArray,
   isEmptyObject,
   isFunction,
   isObject,
   sortBy,
+  toArray,
 } from '@pengzhanbo/utils'
 import type { MockHttpItem, MockOptions, MockWebsocketItem } from './types'
 import { urlParse } from './utils'
@@ -17,7 +17,7 @@ export function transformMockData(
   const list: MockOptions = []
   for (const [, handle] of mockList.entries()) {
     if (handle)
-      isArray(handle) ? list.push(...handle) : list.push(handle)
+      list.push(...toArray(handle))
   }
 
   const mocks: Record<string, MockOptions> = {}
