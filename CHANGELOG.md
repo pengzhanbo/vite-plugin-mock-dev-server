@@ -1,3 +1,17 @@
+# [1.6.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.5.1...v1.6.0) (2024-07-25)
+
+
+### Features
+
+* add plugin options `cwd` ([#83](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/83)) ([43cf97b](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/43cf97bd3e452ebd0ac3d5a126f1d935edc36863))
+
+
+### Performance Improvements
+
+* update deps to latest ([#85](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/85)) ([e2db223](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/e2db223db3d22d77cffc8515f2a3125d713ed0cd))
+
+
+
 ## [1.5.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.5.0...v1.5.1) (2024-06-30)
 
 
