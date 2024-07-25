@@ -151,6 +151,14 @@ export default defineConfig({
   > 与 http mock 默认使用 `viteConfig.server.proxy` 不同的是，`websocket mock` 不会使用 `viteConfig.server.proxy` 中的 ws 相关的配置，且配置在 `wsPrefix` 中的规则，不能同时配置在 `viteConfig.server.proxy`中，因为会导致在 vite 在启动服务时产生冲突，因为不能对同一个请求实现多个的 `WebSocketServer`实例。
   > 该冲突既不是 `vite` 的问题，也不是插件的问题，这属于合理的错误类型。在进行 `WebSocket Mock`和 `WebSocket Proxy` 切换时，请注意配置不要出现重复导致冲突。
 
+- `option.cwd`
+
+  **类型：** `string`
+
+  配置 `include` 和 `exclude` 的匹配上下文
+
+  **默认值：** `process.cwd()`
+
 - `option.include`
 
   **类型：** `string | string[]`
