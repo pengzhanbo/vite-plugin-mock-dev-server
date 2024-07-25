@@ -47,6 +47,15 @@
         "code",
         "bug"
       ]
+    },
+    {
+      "login": "chuyuandu",
+      "name": "chuyuan du",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6959138?v=4",
+      "profile": "https://github.com/chuyuandu",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
