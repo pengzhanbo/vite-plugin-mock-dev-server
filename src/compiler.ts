@@ -2,6 +2,7 @@ import fs, { promises as fsp } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
+import process from 'node:process'
 import type { Metafile, Plugin } from 'esbuild'
 import { build } from 'esbuild'
 import JSON5 from 'json5'
@@ -93,6 +94,7 @@ export interface TransformWithEsbuildOptions {
   isESM?: boolean
   define: Record<string, string>
   alias: ResolvedConfig['resolve']['alias']
+  cwd?: string
 }
 
 export type TransformWithEsbuildResult = Promise<{
@@ -104,7 +106,7 @@ export async function transformWithEsbuild(
   entryPoint: string,
   options: TransformWithEsbuildOptions,
 ): TransformWithEsbuildResult {
-  const { isESM = true, define, alias } = options
+  const { isESM = true, define, alias, cwd = process.cwd() } = options
   try {
     const result = await build({
       entryPoints: [entryPoint],
@@ -117,6 +119,7 @@ export async function transformWithEsbuild(
       format: isESM ? 'esm' : 'cjs',
       define,
       plugins: [aliasPlugin(alias), externalizeDeps, jsonLoader, json5Loader],
+      absWorkingDir: cwd,
     })
     return {
       code: result.outputFiles[0].text,
@@ -147,6 +150,7 @@ export async function loadFromCode<T = any>({
   isESM,
   cwd,
 }: LoadFromCodeOptions): Promise<{ [key: string]: T }> {
+  filepath = path.resolve(cwd, filepath)
   if (isESM) {
     const fileBase = `${filepath}.timestamp-${Date.now()}`
     const fileNameTmp = `${fileBase}.mjs`
@@ -163,7 +167,6 @@ export async function loadFromCode<T = any>({
     }
   }
   else {
-    filepath = path.resolve(cwd, filepath)
     const extension = path.extname(filepath)
     const realFileName = fs.realpathSync(filepath)
     const loaderExt = extension in _require.extensions ? extension : '.js'
