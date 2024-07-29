@@ -201,7 +201,7 @@ export class MockLoader extends EventEmitter {
     const { define, alias } = this.options
     const { code, deps } = await transformWithEsbuild(
       filepath,
-      { isESM, define, alias },
+      { isESM, define, alias, cwd: this.cwd },
     )
 
     try {
