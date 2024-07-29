@@ -1,3 +1,12 @@
+## [1.6.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.6.0...v1.6.1) (2024-07-29)
+
+
+### Bug Fixes
+
+* no such file or directory with cwd option ([#88](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/88)) ([d22004b](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/d22004b35fa16cf8967febc032fa9e7ae91612f3))
+
+
+
 # [1.6.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.5.1...v1.6.0) (2024-07-25)
 
 
