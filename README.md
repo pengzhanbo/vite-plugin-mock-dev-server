@@ -24,14 +24,14 @@
 <br>
 <br>
 
-## Feature
+## Features
 
 - ⚡️ Lightweight, Flexible, Fast.
 - 🧲 Not injection-based, non-intrusive to client code.
 - 💡 ESModule/commonjs.
 - 🦾 Typescript.
 - 🔥 HMR
-- 🏷 Support `json` / `json5`.
+- 🏷 Support `.[cm]?js` / `.ts` / `.json` / `.json5`.
 - 📦 Auto import mock file.
 - 🎨 Support any lib, like `mockjs`, or do not use it.
 - 📥 Path rule matching, request parameter matching.
@@ -48,13 +48,11 @@
 
 ## Documentation
 
-See the [documentation](https://vite-plugin-mock-dev-server.netlify.app/en/) to learn more.
+See the [documentation](https://vite-plugin-mock-dev-server.netlify.app/en/) for more details.
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/9ccda610-2c6a-4cd0-aeaa-a8932f2b477c/deploy-status)](https://app.netlify.com/sites/vite-plugin-mock-dev-server/deploys)
 
-## Usage
-
-### Install
+## Install
 
 ``` sh
 # npm
@@ -65,7 +63,7 @@ yarn add vite-plugin-mock-dev-server
 pnpm add -D vite-plugin-mock-dev-server
 ```
 
-### Configuration
+## Usage
 
 `vite.config.ts`
 
@@ -75,11 +73,12 @@ import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
 
 export default defineConfig({
   plugins: [
-    mockDevServerPlugin(),
+    mockDevServerPlugin(/* plugin options */),
   ],
   // The fields defined here can also be used in mock.
   define: {},
   server: {
+    // plugin will read `server.proxy`
     proxy: {
       '^/api': { target: 'http://example.com' }
     }
@@ -91,11 +90,7 @@ The plugin will read the configuration of `server.proxy` or `options.prefix`, an
 
 The plugin will also read the `define` configuration, which supports direct use in mock files.
 
-> Because in general scenarios, we only need to mock URLs with proxies so that we can use the proxy and mock services provided by Vite's HTTP service.
->
-> However, you can also configure mocks using `options.prefix`.
-
-### Edit Mock File
+## Edit Mock File
 
 By default, write mock data in the `mock` directory of your project's root directory:
 
@@ -112,9 +107,9 @@ export default defineMock({
 
 ## Methods
 
-### mockDevServerPlugin(options)
+### mockDevServerPlugin(pluginOptions)
 
-Vite plugin
+vite plugin
 
 `vite.config.ts`
 
@@ -124,145 +119,14 @@ import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
 
 export default defineConfig({
   plugins: [
-    mockDevServerPlugin(),
+    mockDevServerPlugin({ /* plugin options */ }),
   ]
 })
 ```
 
-#### options
+### defineMock(mockOptions)
 
-- `options.prefix`
-
-  **Type:** `string | string[]`
-
-  Configure custom matching rules for the mock server. Any request path starting with the value of `prefix` will be proxied to the corresponding target. If the `prefix` value starts with ^, it will be recognized as a RegExp.
-
-  > In general, `server.proxy` is sufficient to meet the needs. Adding this item is for compatibility with certain scenarios.
-
-  **Default:** `[]`
-
-- `options.wsPrefix`
-
-  **Type:** `string | string[]`
-
-  Configure the matching rules for the WebSocket service. Any request path starting with the value of `wsPrefix` and using the `ws/wss` protocol will be proxied to the corresponding target.
-
-  If the value of `wsPrefix` starts with `^`, it will be recognized as a RegExp.
-
-  > Different from using `viteConfig.server.proxy` by default for http mock, `websocket mock` does not use the ws-related configuration in `viteConfig.server.proxy`. Also, rules configured in `wsPrefix` cannot be configured simultaneously in `viteConfig.server.proxy`, as it will cause conflicts when starting the vite server because multiple instances of WebSocketServer cannot be implemented for the same request.
-  > This conflict is neither a problem with Vite nor with the plugin; it belongs to a reasonable error type. When switching between WebSocket Mock and WebSocket Proxy, please pay attention to avoid duplicate configurations that may cause conflicts.
-
-- `option.cwd`
-
-  **Type:** `string`
-
-  Configure the matching context for `include` and `exclude`.
-
-  **Default：** `process.cwd()`
-
-- `option.include`
-
-  **Type:** `string | string[]`
-
-  Configure to read mock files, which can be a directory, glob, or an array.
-
-  **Default：** `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']` (Relative to the root directory.)
-
-- `options.exclude`
-
-  **Type:** `string | string[]`
-
-  When reading mock files for configuration, the files that need to be excluded can be a directory, glob, or array.
-
-  **Default：** `['**/node_modules/**','**/.vscode/**','**/.git/**']`
-
-- `options.reload`
-
-  **Type:** `boolean`
-
-  When the mock resource is hot updated, only the data content is updated, but the page is not refreshed by default. If you want to refresh the page every time you modify the mock file, you can open this option.
-
-- `options.cors`
-
-  **Type:** `boolean | CorsOptions`
-
-  Enable by default.
-
-  Configure to `cors`, see [cors](https://github.com/expressjs/cors#configuration-options)
-
-  **Default:** `true`
-
-- `options.log`
-
-  **Type:** `boolean | 'info' | 'warn' | 'error' | 'silent'`
-
-  Enable log and configure log level.
-
-- `options.formidableOptions`
-
-  Configure to `formidable`, see [formidable options](https://github.com/node-formidable/formidable#options)
-
-  **Default:** `{}`
-
-  example: Configure to file upload dir
-
-  ``` ts
-  MockDevServerPlugin({
-    formidableOptions: {
-      uploadDir: path.join(process.cwd(), 'uploads'),
-    }
-  })
-  ```
-
-- `options.cookiesOptions`
-
-  Configure to `cookies`, see [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options)
-
-  **Default:** `{}`
-
-- `options.bodyParserOptions`
-
-  Configure to `co-body`, see [co-body](https://github.com/cojs/co-body#options)
-
-  **Default:** `{}`
-
-- `options.build`
-
-  The configuration needed to build a small, independently deployable mock service.
-
-  **Type：** `boolean | ServerBuildOptions`
-
-  **Default：** `false`
-
-  ``` ts
-  interface ServerBuildOptions {
-    /**
-     * server port
-     * @default 8080
-     */
-    serverPort?: number
-    /**
-     * build output dir
-     * @default 'mockServer'
-     */
-    dist?: string
-    /**
-     * log level
-     * @default 'error'
-     */
-    log?: LogLevel
-  }
-  ```
-
-- `options.priority`
-
-  Custom path matching rule priority。[read more](#custom-path-matching-priority)
-
-  **Default：** `undefined`
-
-### defineMock(config)
-
-Mock Type Helper
+Mock Options Type Helper
 
 ``` ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
@@ -291,181 +155,365 @@ export default defineApiMock({
 })
 ```
 
-## Mock Configuration
+## Plugin Options
 
-``` ts
-// Configure the http mock
-export default defineMock({
-  /**
-   * Request address, supports the `/api/user/:id` format.
-   * The plugin matches the path through `path-to-regexp`.
-   * @see https://github.com/pillarjs/path-to-regexp
-   */
-  url: '/api/test',
-  /**
-   * Supported request methods of the interface.
-   * @type string | string[]
-   * @default ['POST','GET']
-   *
-   */
-  method: ['GET', 'POST'],
-  /**
-   * In practical scenarios,
-   * we usually only need certain mock interfaces to take effect,
-   * rather than enabling all mock interfaces.
-   * For interfaces that do not currently require mocking,
-   * they can be set to false.
-   *
-   * @default true
-   */
-  enabled: true,
-  /**
-   * Set interface response delay, if an array is passed in,
-   * it represents the range of delay time.
-   * unit: ms.
-   * @default 0
-   */
-  delay: 1000,
-  /**
-   * response status
-   * @default 200
-   */
-  status: 200,
-  /**
-   * response status text
-   */
-  statusText: 'OK',
-  /**
-   * response headers
-   * @type Record<string, any>
-   * @type (({ query, body, params, headers }) => Record<string, any>)
-   */
-  headers: {
-    'Content-Type': 'application/json'
-  },
+### prefix
 
-  /**
-   * response cookies
-   * @type Record<string, string | [value: string, option: CookieOption]>
-   * @see https://github.com/pillarjs/cookies#cookiessetname--values--options
-   */
-  cookies: {
-    'your-cookie': 'your cookie value',
-    'cookie&option': ['cookie value', { path: '/', httpOnly: true }]
-  },
-  /**
-   * Response body data type, optional values include `text, json, buffer`.
-   * And also support types included in `mime-db`.
-   * When the response body returns a file and you are not sure which type to use,
-   * you can pass the file name as the value. The plugin will internally search for matching
-   * `content-type` based on the file name suffix.
-   * However, if it is a TypeScript file such as `a.ts`, it may not be correctly matched
-   * as a JavaScript script. You need to modify `a.ts` to `a.js` as the value passed
-   * in order to recognize it correctly.
-   * @see https://github.com/jshttp/mime-db
-   * @default 'json'
-   */
-  type: 'json',
+- **Type:** `string | string[]`
+- **Default:** `[]`
+- **Details:**
 
-  /**
-   * Response Body
-   * Support `string/number/array/object/buffer/ReadableStream`
-   * You can also use libraries such as' mockjs' to generate data content
-   * @type string | number | array | object | ReadableStream | buffer
-   * @type (request: { headers, query, body, params, refererQuery, getCookie }) => any | Promise<any>
-   */
-  body: '',
+  Configure custom matching rules for the mock server. Any request path starting with the value of `prefix` will be proxied to the corresponding target. If the `prefix` value starts with ^, it will be recognized as a RegExp.
 
-  /**
-   * If the mock requirement cannot be solved through `body` configuration,
-   * then it can be achieved by configuring response and exposing the interface of http server
-   * to realize fully controllable custom configuration in req parameters.
-   * The parsing of query, body and params has been built-in, so you can use them directly.
-   * Don't forget to return response data through `res.end()` or skip mock by calling `next()`.
-   */
-  response(req, res, next) {
-    res.end()
-  },
-  /**
-   * Request validator, return mock data if validated, otherwise do not use current mock.
-   * This is useful in scenarios where an interface needs to return different data based
-   * on different input parameters.
-   * Validators can solve this type of problem well by dividing the same URL into multiple
-   * mock configurations and determining which one is effective based on the validator.
-   *
-   * @type { headers, body, query, params, refererQuery }
-   * If the validator passed in is an object,
-   * then the validation method is to deeply compare whether
-   * `headers/body/query/params/refererQuery` of the requested interface contain
-   * the `key-value` of the validator.
-   *
-   * @type (request) => boolean
-   * If the validator passed in is a function,
-   * then the data related to the requested interface will be provided as input parameters
-   * for users to perform custom validation and return a boolean.
-   *
-   */
-  validator: {
-    headers: {},
-    body: {},
-    query: {},
-    params: {},
+  > In general, `server.proxy` is sufficient to meet the needs. Adding this item is for compatibility with certain scenarios.
+
+### wsPrefix
+
+- **Type:** `string | string[]`
+- **Default:** `[]`
+- **Details:**
+
+  Configure the matching rules for the WebSocket service. Any request path starting with the value of `wsPrefix` and using the `ws/wss` protocol will be proxied to the corresponding target.
+
+  If the value of `wsPrefix` starts with `^`, it will be recognized as a RegExp.
+
+  > Different from using `viteConfig.server.proxy` by default for http mock, `websocket mock` does not use the ws-related configuration in `viteConfig.server.proxy`. Also, rules configured in `wsPrefix` cannot be configured simultaneously in `viteConfig.server.proxy`, as it will cause conflicts when starting the vite server because multiple instances of WebSocketServer cannot be implemented for the same request.
+  > This conflict is neither a problem with Vite nor with the plugin; it belongs to a reasonable error type. When switching between WebSocket Mock and WebSocket Proxy, please pay attention to avoid duplicate configurations that may cause conflicts.
+
+### cwd
+
+- **Type:** `string`
+- **Default:** `process.cwd()`
+- **Details:**
+
+  Configure the matching context for `include` and `exclude`.
+
+### include
+
+- **Type:** `string | string[]`
+- **Default：** `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']` (Relative to the root directory)
+- **Details:**
+
+  Configure to read mock files, which can be a directory, glob, or an array.
+
+### exclude
+
+- **Type:** `string | string[]`
+- **Default：** `['**/node_modules/**','**/.vscode/**','**/.git/**']`
+- **Details:**
+
+  When reading mock files for configuration, the files that need to be excluded can be a directory, glob, or array.
+
+### reload
+
+- **Type:** `boolean`
+- **Default:** `false`
+- **Details:**
+
+  When the mock resource is hot updated, only the data content is updated, but the page is not refreshed by default. If you want to refresh the page every time you modify the mock file, you can open this option.
+
+### cors
+
+- **Type:** `boolean | CorsOptions`
+- **Default:** `true`
+- **Details:**
+
+  Enable by default.
+
+  Configure to `cors`, see [cors](https://github.com/expressjs/cors#configuration-options)
+
+### log
+
+- **Type:** `boolean | 'info' | 'warn' | 'error' | 'silent' | 'debug'`
+- **Default:** `info`
+- **Details:**
+
+  Enable log and configure log level.
+
+### formidableOptions
+
+- **Type:** `formidable.Options`
+- **Details:**
+
+  Configure to `formidable`, see [formidable options](https://github.com/node-formidable/formidable#options)
+
+  example: Configure to file upload dir
+
+  ``` ts
+  MockDevServerPlugin({
+    formidableOptions: {
+      uploadDir: path.join(process.cwd(), 'uploads'),
+    }
+  })
+  ```
+
+### cookiesOptions
+
+- **Type:** `CookiesOptions`
+- **Details:**
+
+  Configure to `cookies`, see [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options)
+
+### bodyParserOptions
+
+- **Type:** `BodyParserOptions`
+- **Details:**
+
+  Configure to `co-body`, see [co-body](https://github.com/cojs/co-body#options)
+
+### build
+
+- **Type:** `boolean | ServerBuildOptions`
+- **Default:** `false`
+- **Details:**
+
+  The configuration needed to build a small, independently deployable mock service.
+
+  ``` ts
+  interface ServerBuildOptions {
     /**
-     * refererQuery validates the query parameters in the URL of the request source page,
-     * which allows for direct modification of parameters in the browser address bar
-     * to obtain different simulated data.
+     * server port
+     * @default 8080
      */
-    refererQuery: {}
-  },
+    serverPort?: number
+    /**
+     * build output dir
+     * @default 'mockServer'
+     */
+    dist?: string
+    /**
+     * log level
+     * @default 'error'
+     */
+    log?: LogLevel
+  }
+  ```
+
+### priority
+
+- **Type:** `MockMatchPriority`
+- **Details:**
+
+  Custom path matching rule priority。[read more](#custom-path-matching-priority)
+
+## Mock Options
+
+**http mock**
+
+```ts
+import { defineMock } from 'vite-plugin-mock-dev-server'
+export default defineMock({
+  url: '/api/test',
+  body: { message: 'hello world' }
 })
 ```
 
-``` ts
-// Configure the WebSocket mock
+**websocket mock**
+
+```ts
+import { defineMock } from 'vite-plugin-mock-dev-server'
 export default defineMock({
-  /**
-   * Request address, supports the `/api/user/:id` format.
-   * The plugin matches the path through `path-to-regexp`.
-   * @see https://github.com/pillarjs/path-to-regexp
-   */
-  url: '/api/test',
-  /**
-   * Value must be explicitly specified as `true`.
-   * The plugin needs to make a judgment based on this field.
-   */
+  url: '/socket.io',
   ws: true,
-  /**
-   * Configure the WebSocketServer
-   * @see https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocketserver
-   * If there are some additional automatically executed tasks or loop
-   * tasks in the setup function,a callback needs to be passed in
-   * `onCleanup()` to clear these tasks.
-   * This is because when the plugin is hot updated,
-   * it needs to re-execute setup and clear previous tasks; otherwise,
-   * duplicate tasks may cause conflicts.
-   * `onCleanup()` can be called multiple times within setup.
-   * @type `(wss: WebSocketServer, context: SetupContext) => void`
-   */
-  setup(wss, { onCleanup }) {
-    wss.on('connection', (ws, request) => {
-      ws.on('message', (rawData) => {})
-      const timer = setInterval(() => ws.send('data'), 1000)
-      onCleanup(() => clearInterval(timer))
+  setup(wss) {
+    wss.on('connection', (ws, req) => {
+      console.log('connected')
     })
   }
 })
 ```
 
-### Request/Response Enhance
+### options.url
+
+- **Type:** `string`
+- **Details:**
+
+  The interface address that needs to be mocked, supported by [path-to-regexp](https://github.com/pillarjs/path-to-regexp) for path matching.
+
+### options.enabled
+
+- **Type:** `boolean`
+- **Default:** `true`
+- **Details:**
+
+  Whether to enable mock for this interface. In most scenarios, we only need to mock some interfaces instead of all requests that have been configured with mock.
+  Therefore, it is important to be able to configure whether to enable it or not.
+
+### options.method
+
+- **Type:** `Method | Method[]`
+
+  ```ts
+  type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS' | 'HEAD' | 'PATCH'
+  ```
+
+- **Default:** `['GET', 'POST']`
+- **Details:**
+
+  The interface allows request methods
+
+### options.type
+
+- **Type:** `'text' | 'json' | 'buffer' | string`
+- **Details:**
+
+  Response body data type. And also support types included in [mime-db](https://github.com/jshttp/mime-db).
+
+  When the response body returns a file and you are not sure which type to use,
+  you can pass the file name as the value. The plugin will internally search for matching
+  `content-type` based on the file name suffix.
+
+### options.headers
+
+- **Type:** `object | (request: MockRequest) => object | Promise<object>`
+- **Default:** `{ 'Content-Type': 'application/json' }`
+- **Details:**
+
+  Configure the response body headers
+
+### options.status
+
+- **Type:** `number`
+- **Default:** `200`
+- **Details:**
+
+  Configure Response Header Status Code
+
+### options.statusText
+
+- **Type:** `string`
+- **Default:** `"OK"`
+- **Details:**
+
+  Configure response header status text
+
+### options.delay
+
+- **Type:** `number | [number, number]`
+- **Default:** `0`
+- **Details:**
+
+  Configure response delay time, If an array is passed in, it represents the range of delay time.
+
+  unit: `ms`
+
+### options.body
+
+- **Type:** `Body | (request: MockRequest) => Body | Promise<Body>`
+
+  ```ts
+  type Body = string | object | Buffer | Readable
+  ```
+
+- **Details:**
+
+  Configure response body data content.  `body` takes precedence over `response`.
+
+### options.response
+
+- **Type:** `(req: MockRequest, res: MockResponse, next: (err?: any) => void) => void | Promise<void>`
+- **Details:**
+
+  If you need to set complex response content, you can use the response method,
+  which is a middleware. Here, you can get information such as req
+  and res of the http request,
+  and then return response data through res.write() | res.end().
+  Otherwise, you need to execute next() method.
+  In `req`, you can also get parsed request information such as
+  `query`, `params`, `body` and `refererQuery`.
+
+### options.cookies
+
+- **Type:** `CookiesOptions | (request: MockRequest) => CookiesOptions | Promise<CookiesOptions>`
+
+  ```ts
+  type CookiesOptions = Record<string, CookieValue>
+
+  type CookieValue = string | [string, SetCookie]
+  ```
+
+- **Details:**
+
+  Configure response body cookies
+
+### options.validator
+
+- **Type:** `Validator | (request: MockRequest) => boolean`
+
+  ```ts
+  interface Validator {
+    /**
+     * The query string located after `?` in the request address has been parsed into JSON.
+     */
+    query: Record<string, any>
+    /**
+     * The queryString located after `?` in the referer request has been parsed as JSON.
+     */
+    refererQuery: Record<string, any>
+    /**
+     * Body data in the request
+     */
+    body: Record<string, any>
+    /**
+     * The params parameter parsed from the `/api/id/:id` in the request address.
+     */
+    params: Record<string, any>
+    /**
+     * headers data in the request
+     */
+    headers: Headers
+  }
+  ```
+
+- **Details:**
+
+  Request Validator
+
+  Sometimes, for the same API request, data needs to be returned based
+  on different request parameters.
+
+  However, if all of this is written in a single mock's body or response,
+  the content can become cumbersome and difficult to manage.
+  The function of a validator allows you to configure multiple mocks with
+  the same URL simultaneously and determine which mock should be used through validation.
+
+### options.ws
+
+- **Type:** `boolean`
+- **Default:** `false`
+- **Details:**
+
+  Enable WebSocket interface simulation
+
+### options.setup
+
+- **Type:** `(wss: WebSocketServer, ctx: WebSocketSetupContext) => void`
+- **Details:**
+
+  Configure Websocket Server
+
+```ts
+interface WebSocketSetupContext {
+  /**
+   * When defining WSS, you may perform some automatic or looping tasks.
+   * However, when hot updating, the plugin will re-execute `setup()`,
+   * which may result in duplicate registration of listening events and looping tasks
+   * such as setTimeout. You can use `onCleanup()` to clear these automatic or looping tasks.
+   */
+  onCleanup: (cleanup: () => void) => void
+}
+```
+
+## Request/Response Enhance
 
 When defining methods using `headers`, `body`, and `response`, the plugin adds new content to the `request` and `response` parameters.
 
 **In Request:**
 
-The original type of `request` is [`Connect.IncomingMessage`](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/connect/index.d.ts). The plugin adds data such as `query`, `params`, `body`, `refererQuery`, and the `getCookie(name)` method for obtaining cookie information on this basis.
+The original type of `request` is [`http.IncomingMessage`](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/connect/index.d.ts). The plugin adds data such as `query`, `params`, `body`, `refererQuery`, and the `getCookie(name)` method for obtaining cookie information on this basis.
 
 ```ts
-type Request = Connect.IncomingMessage & {
+type Request = http.IncomingMessage & {
   query: object
   params: object
   body: any
@@ -488,12 +536,6 @@ type Response = http.ServerResponse<http.IncomingMessage> & {
 }
 ```
 
-> **Tips：**
->
-> If you write mock files using json/json5,
-> the 'response' method is not supported,
-> as is the function form that uses other fields.
-
 ## Share Mock Data
 
 Due to each `mock` file being compiled as a separate entry point, the local files they depend on are also compiled within. Additionally, each mock file has an independent scope. This means that even if multiple mock files collectively depend on a `data.ts` file, they cannot share data. If one mock file modifies the data in `data.ts`, other mock files will not receive the updated data.
@@ -507,7 +549,7 @@ type defineMockData<T> = (
 ) => [getter, setter] & { value: T }
 ```
 
-### Exp
+### Expamples
 
 `data.ts`
 
@@ -595,7 +637,7 @@ export default defineConfig({
 > you can use static rules instead of `priority`,
 > as static rules always have the highest priority.
 
-## Example
+## Examples
 
 `mock/**/*.mock.{ts,js,mjs,cjs,json,json5}`
 
@@ -716,7 +758,7 @@ export default defineMock({
 
 The `userId` in the route will be resolved into the `request.params` object.
 
-**exp**:** Use the buffer to respond data
+**exp:** Use the buffer to respond data
 
 ```ts
 import { Buffer } from 'node:buffer'
@@ -940,9 +982,11 @@ The default port is `8080`.
 
 You can access related `mock` interfaces through `localhost:8080/`.
 
-## Archives
+## Links
 
-[awesome-vite](https://github.com/vitejs/awesome-vite#helpers)
+- [vite](https://vitejs.dev/)
+- [awesome-vite](https://github.com/vitejs/awesome-vite#helpers)
+- [rspack-plugin-mock](https://github.com/pengzhanbo/rspack-plugin-mock) - **Rspack** and **Rsbuild** plugin for API mock server
 
 ## Contributors
 
@@ -979,6 +1023,6 @@ You can access related `mock` interfaces through `localhost:8080/`.
 
 ## LICENSE
 
-[MIT](/LICENSE)
+The plugin is licensed under the [MIT License](./LICENSE)
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpengzhanbo%2Fvite-plugin-mock-dev-server.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpengzhanbo%2Fvite-plugin-mock-dev-server?ref=badge_large)

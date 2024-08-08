@@ -1,7 +1,8 @@
 ## Git Commit Message Convention
 
 > This is adapted from [Angular's commit convention](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular).
-#### TL;DR:
+
+### TL;DR:
 
 Messages must be matched by the following regex:
 
@@ -12,7 +13,7 @@ Messages must be matched by the following regex:
 
 #### Examples
 
-```
+```txt
 feat(dev): add 'comments' option
 fix(dev): fix dev error
 perf(build)!: remove 'foo' option
@@ -21,7 +22,8 @@ revert: feat(compiler): add 'comments' option
 
 ### Revert
 
-If the PR reverts a previous commit, it should begin with `revert: `, followed by the header of the reverted commit
+If the PR reverts a previous commit, it should begin with `revert: `,
+followed by the header of the reverted commit
 
 ### Scope
 
