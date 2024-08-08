@@ -32,7 +32,7 @@
 - 💡 ESModule/commonjs
 - 🦾 Typescript
 - 🔥 热更新
-- 🏷 支持 `json` / `json5` 编写 mock 数据
+- 🏷 支持 `.[cm]?js` / `.ts` / `.json` / `.json5` 编写 mock 数据
 - 📦 自动加载 mock 文件
 - 🎨 可选择你喜欢的任意用于生成mock数据库，如 `mockjs`，或者不使用其他库
 - 📥 路径规则匹配，请求参数匹配
@@ -53,9 +53,7 @@
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/9ccda610-2c6a-4cd0-aeaa-a8932f2b477c/deploy-status)](https://app.netlify.com/sites/vite-plugin-mock-dev-server/deploys)
 
-## 使用
-
-### 安装
+## 安装
 
 ```sh
 # npm
@@ -66,7 +64,7 @@ yarn add vite-plugin-mock-dev-server
 pnpm add -D vite-plugin-mock-dev-server
 ```
 
-### 配置
+## 使用
 
 `vite.config.ts`
 
@@ -81,6 +79,7 @@ export default defineConfig({
   // 这里定义的字段，在mock中也能使用
   define: {},
   server: {
+    // 插件将会读取 `server.proxy`
     proxy: {
       '^/api': { target: 'http://example.com' }
     }
@@ -92,10 +91,7 @@ export default defineConfig({
 
 插件也会读取 `define` 配置， 支持在 mock 文件中直接使用。
 
-> 因为一般场景下，我们只需要对有代理的url进行mock，这样才能通过 vite 提供的 http 服务进行 代理和 mock，
-> 但你也可以使用 `options.prefix`配置 mock
-
-### 编写mock文件
+## 编写mock文件
 
 默认配置，在你的项目根目录的 `mock` 目录中编写mock数据：
 
@@ -114,7 +110,7 @@ export default defineMock({
 
 ### mockDevServerPlugin(options)
 
-vite plugin
+vite 插件
 
 `vite.config.ts`
 
@@ -124,26 +120,59 @@ import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
 
 export default defineConfig({
   plugins: [
-    mockDevServerPlugin(),
+    mockDevServerPlugin({/* 插件配置 */}),
   ]
 })
 ```
 
-#### options
+### defineMock(mockOptions)
 
-- `options.prefix`
+Mock 配置类型帮助
 
-  **类型:** `string | string[]`
+``` ts
+import { defineMock } from 'vite-plugin-mock-dev-server'
+
+export default defineMock({
+  url: '/api/test',
+  body: {}
+})
+```
+
+### createDefineMock(transformer)
+
+返回一个自定义的 defineMock 函数，用于支持对 mock config 的预处理。
+
+``` ts
+import path from 'node:path'
+import { createDefineMock } from 'vite-plugin-mock-dev-server'
+
+// 预处理 mock url
+const defineAPIMock = createDefineMock((mock) => {
+  mock.url = path.join('/api', mock.url)
+})
+
+export default defineApiMock({
+  url: '/test' // 补全为 '/api/test'
+})
+```
+
+## Plugin Options
+
+### prefix
+
+- **类型：** `string | string[]`
+- **默认值：** `[]`
+- **详情：**
 
   为mock服务器配置自定义匹配规则。任何请求路径以 `prefix` 值开头的请求将被代理到对应的目标。如果 `prefix` 值以 `^` 开头，将被识别为 RegExp。
 
   > 一般情况下, `server.proxy` 已经足够满足需求，添加此项是为了与某些场景兼容。
 
-  **默认值:** `[]`
+### wsPrefix
 
-- `options.wsPrefix`
-
-  **类型:** `string | string[]`
+- **类型：** `string | string[]`
+- **默认值：** `[]`
+- **详情：**
 
   配置 webSocket 服务 匹配规则。任何请求路径以 `wsPrefix` 值开头的 `ws/wss` 协议请求，将被代理到对应的目标。
   如果`wsPrefix`值以 `^` 开头,将被识别为 RegExp。
@@ -151,59 +180,62 @@ export default defineConfig({
   > 与 http mock 默认使用 `viteConfig.server.proxy` 不同的是，`websocket mock` 不会使用 `viteConfig.server.proxy` 中的 ws 相关的配置，且配置在 `wsPrefix` 中的规则，不能同时配置在 `viteConfig.server.proxy`中，因为会导致在 vite 在启动服务时产生冲突，因为不能对同一个请求实现多个的 `WebSocketServer`实例。
   > 该冲突既不是 `vite` 的问题，也不是插件的问题，这属于合理的错误类型。在进行 `WebSocket Mock`和 `WebSocket Proxy` 切换时，请注意配置不要出现重复导致冲突。
 
-- `option.cwd`
+### cwd
 
-  **类型：** `string`
+- **类型：** `string`
+- **默认值：** `process.cwd()`
+- **详情：**
 
   配置 `include` 和 `exclude` 的匹配上下文
 
-  **默认值：** `process.cwd()`
+### include
 
-- `option.include`
-
-  **类型：** `string | string[]`
+- **类型：** `string | string[]`
+- **默认值：** `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']` (相对于根目录)
+- **详情：**
 
   配置读取 mock文件，可以是一个 目录，glob，或者一个数组
 
-  **默认值：** `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']` (相对于根目录)
+### exclude
 
-- `options.exclude`
-
-  **类型：** `string | string[]`
+- **类型：** `string | string[]`
+- **默认值：** `['**/node_modules/**', '**/.vscode/**', '**/.git/**']`
+- **详情：**
 
   配置读取 mock文件时，需要排除的文件， 可以是一个 目录、glob、或者一个数组
 
-  **默认值：** `['**/node_modules/**', '**/.vscode/**', '**/.git/**']`
+### reload
 
-- `options.reload`
-
-  **Type:** `boolean`
+- **类型：** `boolean`
+- **默认值：** `false`
+- **详情：**
 
   mock资源热更新时，仅更新了数据内容，但是默认不重新刷新页面。当你希望每次修改mock文件都刷新页面时，可以打开此选项。
 
-  **Default:** `false`
+### cors
 
-- `options.cors`
-
-  **Type:** `boolean | CorsOptions`
-
-  默认启用.
+- **类型：** `boolean | CorsOptions`
+- **默认值：** `true`
+- **详情：**
 
   配置 `cors`, 查看 [cors](https://github.com/expressjs/cors#configuration-options)
 
-- `options.log`
+### log
 
-  **Type:** `boolean | 'info' | 'warn' | 'error' | 'silent'`
+- **类型：** `boolean | 'info' | 'warn' | 'error' | 'silent' | 'debug'`
+- **默认值：** `info`
+- **详情：**
 
   启动日志，以及配置日志打印级别
 
-- `options.formidableOptions`
+### formidableOptions
+
+- **类型：** `formidable.Options`
+- **详情：**
 
   配置 `formidable`，查看 [formidable options](https://github.com/node-formidable/formidable#options)
 
-  **默认值:** `{}`
-
-  示例: 配置文件上传的存放目录
+  **示例：** 配置文件上传的存放目录
 
   ```ts
   MockDevServerPlugin({
@@ -213,23 +245,27 @@ export default defineConfig({
   })
   ```
 
-- `options.cookiesOptions`
+### cookiesOptions
+
+- **类型：** `cookies.Options`
+- **详情：**
 
   配置 `cookies`, 查看 [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options)
 
-  **默认值:** `{}`
+### bodyParserOptions
 
-- `options.bodyParserOptions`
+- **类型：** `BodyParserOptions`
+- **详情：**
 
   配置 `co-body`, 查看 [co-body](https://github.com/cojs/co-body#options)
 
-- `options.build`
+### build
+
+- **类型：** `boolean | ServerBuildOptions`
+- **默认值：**`false`
+- **详情：**
 
   需要构建可独立部署的小型mock服务时配置。
-
-  **类型：** `boolean | ServerBuildOptions`
-
-  **默认值：**`false`
 
   ```ts
   interface ServerBuildOptions {
@@ -252,201 +288,213 @@ export default defineConfig({
   }
   ```
 
-  - `options.priority`
+### priority
+
+- **类型：** `MockMatchPriority`
+- **详情：**
 
   自定义 路径匹配规则优先级。[查看更多](#自定义匹配优先级)
 
   **默认值：** `undefined`
 
-### defineMock(config)
+## Mock 配置
 
-mock 配置帮助函数，提供类型检查帮助
+**http mock**
 
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
-
 export default defineMock({
   url: '/api/test',
-  body: {}
+  body: { message: 'hello world' }
 })
 ```
 
-### createDefineMock(transformer)
-
-返回一个自定义的 defineMock 函数，用于支持对 mock config 的预处理。
+**websocket mock**
 
 ```ts
-import path from 'node:path'
-import { createDefineMock } from 'vite-plugin-mock-dev-server'
-
-// 预处理 mock url
-const defineAPIMock = createDefineMock((mock) => {
-  mock.url = path.join('/api', mock.url)
-})
-
-export default defineApiMock({
-  url: '/test' // 补全为 '/api/test'
-})
-```
-
-## Mock 配置
-
-```ts
-// 配置 http mock
+import { defineMock } from 'vite-plugin-mock-dev-server'
 export default defineMock({
-  /**
-   * 请求地址，支持 `/api/user/:id` 格式
-   * 插件通过 `path-to-regexp` 匹配路径
-   * @see https://github.com/pillarjs/path-to-regexp
-   */
-  url: '/api/test',
-  /**
-   * 接口支持的请求方法
-   * @type string | string[]
-   * @default ['POST','GET']
-   *
-   */
-  method: ['GET', 'POST'],
-  /**
-   * 是否启用当前 mock请求
-   * 在实际场景中，我们一般只需要某几个mock接口生效，
-   * 而不是所以mock接口都启用。
-   * 对当前不需要mock的接口，可设置为 false
-   * @default true
-   */
-  enabled: true,
-  /**
-   * 设置接口响应延迟，如果传入的是一个数组，则代表延迟时间的范围
-   * 单位：ms
-   * @default 0
-   */
-  delay: 1000,
-  /**
-   * 响应状态码
-   * @default 200
-   */
-  status: 200,
-  /**
-   * 响应状态文本
-   */
-  statusText: 'OK',
-  /**
-   * 响应状态 headers
-   * @type Record<string, any>
-   * @type (({ query, body, params, headers }) => Record<string, any>)
-   * 入参部分为 请求相关信息
-   */
-  headers: {
-    'Content-Type': 'application/json'
-  },
-
-  /**
-   * 响应体 cookies
-   * @type Record<string, string | [value: string, option: CookieOption]>
-   * @see https://github.com/pillarjs/cookies#cookiessetname--values--options
-   */
-  cookies: {
-    'your-cookie': 'your cookie value',
-    'cookie&option': ['cookie value', { path: '/', httpOnly: true }]
-  },
-
-  /**
-   * 响应体数据类型, 可选值包括 `text, json, buffer`，
-   * 还支持`mime-db`中的包含的类型。
-   * 当响应体返回的是一个文件，而你不确定应该使用哪个类型时，可以将文件名作为值传入，
-   * 插件内部会根据文件名后缀查找匹配的`content-type`。
-   * 但如果是 `typescript`文件如 `a.ts`，可能不会被正确匹配为 `javascript`脚本，
-   * 你需要将 `a.ts` 修改为 `a.js`作为值传入才能正确识别。
-   * @see https://github.com/jshttp/mime-db
-   * @default 'json'
-   */
-  type: 'json',
-
-  /**
-   * 响应体数据
-   * 定义返回的响应体数据内容。
-   * 在这里，你可以直接返回JavaScript支持的数据类型如 `string/number/array/object` 等
-   * 同时，你也可以使用如 `mockjs` 等库来生成数据内容
-   *
-   * @type string | number | array | object
-   *  直接返回定义的数据
-   *
-   * @type (request: { headers, query, body, params }) => any | Promise<any>
-   * 如果传入一个函数，那么可以更加灵活的定义返回响应体数据
-   */
-  body: '',
-
-  /**
-   * 如果通过 body 配置不能解决mock需求，
-   * 那么可以通过 配置 response，暴露http server 的接口，
-   * 实现完全可控的自定义配置
-   * 在 req参数中，已内置了 query、body、params 的解析，
-   * 你可以直接使用它们。
-   * 别忘了，需要通过 `res.end()` 返回响应体数据，
-   * 或者需要跳过mock，那么别忘了调用 `next()`
-   */
-  response(req, res, next) {
-    res.end()
-  },
-  /**
-   * 请求验证器，通过验证器则返回 mock数据，否则不使用当前mock。
-   * 这对于一些场景中，某个接口需要通过不同的入参来返回不同的数据，验证器可以很好的解决这一类问题，
-   * 将同个 url 分为多个 mock配置，根据 验证器来判断哪个mock配置生效。
-   *
-   * @type { headers, body, query, params, refererQuery }
-   * 如果 validator 传入的是一个对象，那么验证方式是 深度比较 请求的接口
-   * 中 headers/body/query/params/refererQuery 是否包含 validator 的 key-value。
-   *
-   * @type (request) => boolean
-   * 如果 validator 传入的是一个函数，那么会将 请求的接口相关数据作为入参，
-   * 提供给使用者进行自定义校验，并返回一个 boolean
-   *
-   */
-  validator: {
-    headers: {},
-    body: {},
-    query: {},
-    params: {},
-    /**
-     * refererQuery 验证了请求来源页面 URL 中的查询参数，
-     * 这使得可以直接在浏览器地址栏中修改参数以获取不同的模拟数据。
-     */
-    refererQuery: {}
-  },
-})
-```
-
-```ts
-// 配置 WebSocket mock
-export default defineMock({
-  /**
-   * 请求地址，支持 `/api/user/:id` 格式
-   * 插件通过 `path-to-regexp` 匹配路径
-   * @see https://github.com/pillarjs/path-to-regexp
-   */
-  url: '/api/test',
-  /**
-   * 必须显式的指定值为 `true`
-   * 插件内部需要根据此值进行判断
-   */
+  url: '/socket.io',
   ws: true,
-  /**
-   * 配置 WebSocketServer
-   * @see https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocketserver
-   * 如果在 setup 函数中有一些 额外的 自动执行任务或循环任务，
-   * 那么需要在 `onCleanup()` 传入一个回调，用于清除这些任务，
-   * 这是由于插件在热更新时，需要重新执行 setup，需要清除之前的任务，否则可能会导致重复任务产生冲突。
-   * `onCleanup()`可以在 setup 内部多次调用
-   * @type `(wss: WebSocketServer, context: SetupContext) =>  void`
-   */
-  setup(wss, { onCleanup }) {
-    wss.on('connection', (ws, request) => {
-      ws.on('message', (rawData) => {})
-      const timer = setInterval(() => ws.send('data'), 1000)
-      onCleanup(() => clearInterval(timer))
+  setup(wss) {
+    wss.on('connection', (ws, req) => {
+      console.log('connected')
     })
   }
 })
+```
+
+### options.url
+
+- **类型：** `string`
+- **详情：**
+
+  需要进行 mock 的接口地址, 由 [path-to-regexp](https://github.com/pillarjs/path-to-regexp) 提供路径匹配支持。
+
+### options.enabled
+
+- **类型：** `boolean`
+- **默认值：** `true`
+- **详情：**
+
+  是否启动对该接口的mock，在多数场景下，我们仅需要对部分接口进行 mock，
+  而不是对所有配置了mock的请求进行全量mock，所以是否能够配置是否启用很重要
+
+### options.method
+
+- **类型：** `Method | Method[]`
+
+  ```ts
+  type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS' | 'HEAD' | 'PATCH'
+  ```
+
+- **默认值：** `['GET', 'POST']`
+- **详情：**
+
+  该接口允许的 请求方法，默认同时支持 GET 和 POST
+
+### options.type
+
+- **类型：** `'text' | 'json' | 'buffer' | string`
+- **详情：**
+
+  响应体数据类型。 还支持 [mime-db](https://github.com/jshttp/mime-db) 中的包含的类型。
+
+  当响应体返回的是一个文件，而你不确定应该使用哪个类型时，可以将文件名作为值传入，
+  插件内部会根据文件名后缀查找匹配的`content-type`。
+
+### options.headers
+
+- **类型：** `object | (request: MockRequest) => object | Promise<object>`
+- **默认值：** `{ 'Content-Type': 'application/json' }`
+- **详情：**
+
+  配置响应体 headers
+
+### options.status
+
+- **类型：** `number`
+- **默认值：** `200`
+- **详情：**
+
+  配置 响应头状态码
+
+### options.statusText
+
+- **类型：** `string`
+- **默认值：** `"OK"`
+- **详情：**
+
+  配置响应头状态文本
+
+### options.delay
+
+- **类型：** `number | [number, number]`
+- **默认值：** `0`
+- **详情：**
+
+  配置响应延迟时间, 如果传入的是一个数组，则代表延迟时间的范围。
+
+  单位： `ms`
+
+### options.body
+
+- **类型：** `Body | (request: MockRequest) => Body | Promise<Body>`
+
+  ```ts
+  type Body = string | object | Buffer | Readable
+  ```
+
+- **详情：**
+
+  配置响应体数据内容 `body` 优先级高于 `response`.
+
+### options.response
+
+- **类型：** `(req: MockRequest, res: MockResponse, next: (err?: any) => void) => void | Promise<void>`
+- **详情：**
+
+  如果需要设置复杂的响应内容，可以使用 response 方法，
+  该方法是一个 middleware，你可以在这里拿到 http 请求的 req、res等信息，
+  然后通过 `res.write() | res.end()` 返回响应数据， 否则需要执行 `next()` 方法。
+  在 `req` 中，还可以拿到 `query、params、body, refererQuery` 等已解析的请求信息。
+
+### options.cookies
+
+- **类型：** `CookiesOptions | (request: MockRequest) => CookiesOptions | Promise<CookiesOptions>`
+
+  ```ts
+  type CookiesOptions = Record<string, CookieValue>
+
+  type CookieValue = string | [string, SetCookie]
+  ```
+
+- **详情：**
+
+  配置响应体 cookies
+
+### options.validator
+
+- **类型：** `Validator | (request: MockRequest) => boolean`
+
+  ```ts
+  interface Validator {
+    /**
+     * 请求地址中位于 `?` 后面的 queryString，已解析为 json
+     */
+    query: Record<string, any>
+    /**
+     * 请求 referer 中位于 `?` 后面的 queryString
+     */
+    refererQuery: Record<string, any>
+    /**
+     * 请求体中 body 数据
+     */
+    body: Record<string, any>
+    /**
+     * 请求地址中，`/api/id/:id` 解析后的 params 参数
+     */
+    params: Record<string, any>
+    /**
+     * 请求体中 headers
+     */
+    headers: Headers
+  }
+  ```
+
+- **详情：**
+
+  请求验证器
+
+  有时候，一个相同的API请求，需要根据不同的请求参数，来决定返回数据，
+  但全部都在单个 mock中的 body或者 response 中写，内容会很庞杂，不好管理，
+  验证器的功能，允许你同时配置多条相同url的mock，通过验证器来判断使哪个mock生效。
+
+### options.ws
+
+- **类型：** `boolean`
+- **默认值：** `false`
+- **详情：**
+
+  配置是否开启 WebSocket Mock
+
+### options.setup
+
+- **类型：** `(wss: WebSocketServer, ctx: WebSocketSetupContext) => void`
+- **详情：**
+
+  配置 Websocket Server
+
+```ts
+interface WebSocketSetupContext {
+  /**
+   * 当你在定义 WSS 时，可能会执行一些自动任务或循环任务，
+   * 但是当热更新时，插件内部会重新执行 setup() ，
+   * 这可能导致出现 重复注册监听事件 和 循环任务如 `setTimeout` 等。
+   * 通过 `onCleanup()` 可以来清除这些自动任务或循环任务。
+   */
+  onCleanup: (cleanup: () => void) => void
+}
 ```
 
 ### Request/Response 增强
@@ -579,18 +627,18 @@ export default defineConfig({
 })
 ```
 
-> **注意:**
+> **注意：**
 >
 > `priority` 虽然可以调整优先级，但大多数时候，你都没有必要这么做。
 > 对于一些特殊情况的请求，可以使用 静态规则来替代 `priority`，静态规则总是拥有最高优先级。
 
-## Example
+## 示例
 
 `mock/**/*.mock.{ts,js,mjs,cjs,json,json5}`
 
 查看更多示例： [example](/example/)
 
-**exp:** 命中 `/api/test` 请求，并返回一个 数据为空的响应体内容
+**示例：** 命中 `/api/test` 请求，并返回一个 数据为空的响应体内容
 
 ```ts
 export default defineMock({
@@ -598,7 +646,7 @@ export default defineMock({
 })
 ```
 
-**exp:** 命中 `/api/test` 请求，并返回一个固定内容数据
+**示例：** 命中 `/api/test` 请求，并返回一个固定内容数据
 
 ```ts
 export default defineMock({
@@ -614,7 +662,7 @@ export default defineMock({
 })
 ```
 
-**exp:** 限定只允许 `GET` 请求
+**示例：** 限定只允许 `GET` 请求
 
 ```ts
 export default defineMock({
@@ -623,7 +671,7 @@ export default defineMock({
 })
 ```
 
-**exp:**  在返回的响应头中，添加自定义 header 和 cookie
+**示例：**  在返回的响应头中，添加自定义 header 和 cookie
 
 ```ts
 export default defineMock({
@@ -645,7 +693,7 @@ export default defineMock({
 })
 ```
 
-**exp:**  定义多个相同url请求mock，并使用验证器匹配生效规则
+**示例：**  定义多个相同url请求mock，并使用验证器匹配生效规则
 
 ```ts
 export default defineMock([
@@ -679,7 +727,7 @@ export default defineMock([
 ])
 ```
 
-**exp:**  延迟接口响应：
+**示例：**  延迟接口响应：
 
 ```ts
 export default defineMock({
@@ -688,7 +736,7 @@ export default defineMock({
 })
 ```
 
-**exp:**  使接口请求失败
+**示例：**  使接口请求失败
 
 ```ts
 export default defineMock({
@@ -698,7 +746,7 @@ export default defineMock({
 })
 ```
 
-**exp:** 动态路由匹配
+**示例：** 动态路由匹配
 
 ```ts
 export default defineMock({
@@ -711,7 +759,7 @@ export default defineMock({
 
 路由中的 `userId`将会解析到 `request.params` 对象中.
 
-**exp:** 使用 buffer 响应数据
+**示例：** 使用 buffer 响应数据
 
 ```ts
 import { Buffer } from 'node:buffer'
@@ -735,7 +783,7 @@ export default defineMock({
 })
 ```
 
-**exp:** 响应文件类型
+**示例：** 响应文件类型
 
 模拟文件下载，传入文件读取流
 
@@ -754,7 +802,7 @@ export default defineMock({
 <a href="/api/download" download="my-app.dmg">下载文件</a>
 ```
 
-**exp:** 使用 `mockjs` 生成响应数据:
+**示例：** 使用 `mockjs` 生成响应数据:
 
 ```ts
 import Mock from 'mockjs'
@@ -771,7 +819,7 @@ export default defineMock({
 
 请先安装 `mockjs`
 
-**exp:** 使用 `response` 自定义响应
+**示例：** 使用 `response` 自定义响应
 
 ```ts
 export default defineMock({
@@ -791,7 +839,7 @@ export default defineMock({
 })
 ```
 
-**exp:** 使用 json / json5
+**示例：** 使用 json / json5
 
 ```json
 {
@@ -802,7 +850,7 @@ export default defineMock({
 }
 ```
 
-**exp:** multipart, 文件上传.
+**示例：** multipart, 文件上传.
 
 通过 [`formidable`](https://www.npmjs.com/package/formidable#readme) 支持。
 
@@ -838,7 +886,7 @@ export default defineMock({
 })
 ```
 
-**exp:** Graphql
+**示例：** Graphql
 
 ```ts
 import { buildSchema, graphql } from 'graphql'
@@ -868,7 +916,7 @@ fetch('/api/graphql', {
 })
 ```
 
-**exp:** WebSocket Mock
+**示例：** WebSocket Mock
 
 ```ts
 // ws.mock.ts
@@ -932,12 +980,14 @@ ws.addEventListener('message', (raw) => {
 默认端口为 `8080`。
 可通过 `localhost:8080/` 访问相关的 `mock` 接口。
 
-## Archives
+## Links
 
-[awesome-vite](https://github.com/vitejs/awesome-vite#helpers)
+- [vite](https://vitejs.dev/)
+- [awesome-vite](https://github.com/vitejs/awesome-vite#helpers)
+- [rspack-plugin-mock](https://github.com/pengzhanbo/rspack-plugin-mock) - **Rspack** 和 **Rsbuild** 的 API mock 服务插件
 
 ## LICENSE
 
-[MIT](/LICENSE)
+[MIT License](./LICENSE)
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpengzhanbo%2Fvite-plugin-mock-dev-server.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpengzhanbo%2Fvite-plugin-mock-dev-server?ref=badge_large)
