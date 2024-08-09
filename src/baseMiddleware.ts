@@ -15,7 +15,7 @@ import colors from 'picocolors'
 import type { Connect } from 'vite'
 import type { Logger } from './logger'
 import { matchingWeight } from './matchingWeight'
-import type { MockLoader } from './MockLoader'
+import type { MockCompiler } from './mockCompiler'
 import { parseReqBody } from './parseReqBody'
 import { collectRequest } from './requestRecovery'
 import type {
@@ -46,7 +46,7 @@ export interface BaseMiddlewareOptions {
 }
 
 export function baseMiddleware(
-  mockLoader: MockLoader,
+  compiler: MockCompiler,
   {
     formidableOptions = {},
     bodyParserOptions = {},
@@ -69,7 +69,7 @@ export function baseMiddleware(
       return next()
     }
 
-    const mockData = mockLoader.mockData
+    const mockData = compiler.mockData
     // 对满足匹配规则的配置进行优先级排序
     const mockUrls = matchingWeight(Object.keys(mockData), pathname, priority)
 

@@ -1,13 +1,10 @@
 import fs, { promises as fsp } from 'node:fs'
-import { createRequire } from 'node:module'
 import path from 'node:path'
-import { pathToFileURL } from 'node:url'
 import process from 'node:process'
 import type { Metafile, Plugin } from 'esbuild'
 import { build } from 'esbuild'
 import JSON5 from 'json5'
 import type { ResolvedConfig } from 'vite'
-import { getDirname } from './utils'
 
 /* ===== esbuild begin ===== */
 
@@ -133,10 +130,6 @@ export async function transformWithEsbuild(
 }
 
 /* ===== esbuild end ===== */
-
-const _dirname = getDirname(import.meta.url)
-const _require = createRequire(_dirname)
-
 interface LoadFromCodeOptions {
   filepath: string
   code: string
@@ -149,39 +142,20 @@ export async function loadFromCode<T = any>({
   code,
   isESM,
   cwd,
-}: LoadFromCodeOptions): Promise<{ [key: string]: T }> {
+}: LoadFromCodeOptions): Promise<T | { [key: string]: T }> {
   filepath = path.resolve(cwd, filepath)
-  if (isESM) {
-    const fileBase = `${filepath}.timestamp-${Date.now()}`
-    const fileNameTmp = `${fileBase}.mjs`
-    const fileUrl = `${pathToFileURL(fileBase)}.mjs`
-    await fsp.writeFile(fileNameTmp, code, 'utf8')
-    try {
-      return await import(fileUrl)
-    }
-    finally {
-      try {
-        fs.unlinkSync(fileNameTmp)
-      }
-      catch {}
-    }
+  const fileBase = `${filepath}.timestamp-${Date.now()}`
+  const ext = isESM ? '.mjs' : '.cjs'
+  const fileNameTmp = `${fileBase}${ext}`
+  await fsp.writeFile(fileNameTmp, code, 'utf8')
+  try {
+    const mod = await import(fileNameTmp)
+    return mod.default || mod
   }
-  else {
-    const extension = path.extname(filepath)
-    const realFileName = fs.realpathSync(filepath)
-    const loaderExt = extension in _require.extensions ? extension : '.js'
-    const defaultLoader = _require.extensions[loaderExt]!
-    _require.extensions[loaderExt] = (module: NodeModule, filename: string) => {
-      if (filename === realFileName) {
-        ;(module as any)._compile(code, filename)
-      }
-      else {
-        defaultLoader(module, filename)
-      }
+  finally {
+    try {
+      fs.unlinkSync(fileNameTmp)
     }
-    delete _require.cache[_require.resolve(filepath)]
-    const raw = _require(filepath)
-    _require.extensions[loaderExt] = defaultLoader
-    return raw.__esModule ? raw : { default: raw }
+    catch {}
   }
 }

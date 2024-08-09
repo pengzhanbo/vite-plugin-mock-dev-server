@@ -6,13 +6,13 @@ import { toArray } from '@pengzhanbo/utils'
 import type { Metafile } from 'esbuild'
 import fg from 'fast-glob'
 import isCore from 'is-core-module'
-import type { Plugin, ResolvedConfig } from 'vite'
+import type { Plugin } from 'vite'
 import { createFilter } from '@rollup/pluginutils'
 import c from 'picocolors'
 import { aliasMatches, transformWithEsbuild } from './compiler'
-import { viteDefine } from './define'
-import type { MockServerPluginOptions, ServerBuildOption } from './types'
-import { ensureProxies, lookupFile, normalizePath } from './utils'
+import type { ServerBuildOption } from './types'
+import { lookupFile, normalizePath } from './utils'
+import type { ResolvedMockServerPluginOptions } from './resolvePluginOptions'
 
 declare const __PACKAGE_NAME__: string
 declare const __PACKAGE_VERSION__: string
@@ -29,21 +29,15 @@ type PluginContext<T = Plugin['buildEnd']> = T extends (
 
 export async function generateMockServer(
   ctx: PluginContext,
-  config: ResolvedConfig,
-  options: Required<MockServerPluginOptions>,
+  options: ResolvedMockServerPluginOptions,
 ) {
   const include = toArray(options.include)
   const exclude = toArray(options.exclude)
-  const define = viteDefine(config)
   const cwd = options.cwd || process.cwd()
-
-  const { httpProxies } = ensureProxies(config.server.proxy || {})
-  httpProxies.push(...toArray(options.prefix))
-  const wsProxies = toArray(options.wsPrefix)
 
   let pkg = {}
   try {
-    const pkgStr = lookupFile(config.root, ['package.json'])
+    const pkgStr = lookupFile(options.context, ['package.json'])
     if (pkgStr)
       pkg = JSON.parse(pkgStr)
   }
@@ -54,12 +48,11 @@ export async function generateMockServer(
   const content = await generateMockEntryCode(cwd, include, exclude)
   const mockEntry = path.join(cwd, `mock-data-${Date.now()}.js`)
   await fsp.writeFile(mockEntry, content, 'utf-8')
-  const { code, deps } = await transformWithEsbuild(mockEntry, {
-    define,
-    alias: config.resolve.alias,
-  })
-  const mockDeps = getMockDependencies(deps, config.resolve.alias)
+
+  const { code, deps } = await transformWithEsbuild(mockEntry, options)
+  const mockDeps = getMockDependencies(deps, options.alias)
   await fsp.unlink(mockEntry)
+
   const outputList = [
     {
       filename: path.join(outputDir, 'mock-data.js'),
@@ -67,14 +60,7 @@ export async function generateMockServer(
     },
     {
       filename: path.join(outputDir, 'index.js'),
-      source: generatorServerEntryCode(
-        httpProxies,
-        wsProxies,
-        options.cookiesOptions,
-        options.bodyParserOptions,
-        options.priority,
-        options.build as ServerBuildOption,
-      ),
+      source: generatorServerEntryCode(options),
     },
     {
       filename: path.join(outputDir, 'package.json'),
@@ -87,14 +73,14 @@ export async function generateMockServer(
         if (fs.existsSync(filename))
           await fsp.rm(filename)
       }
-      config.logger.info(`${c.green('✓')} generate mock server in ${c.cyan(outputDir)}`)
+      options.logger.info(`${c.green('✓')} generate mock server in ${c.cyan(outputDir)}`)
       for (const { filename, source } of outputList) {
         fs.mkdirSync(path.dirname(filename), { recursive: true })
         await fsp.writeFile(filename, source, 'utf-8')
         const sourceSize = (source.length / 1024).toFixed(2)
         const name = path.relative(outputDir, filename)
         const space = name.length < 30 ? ' '.repeat(30 - name.length) : ''
-        config.logger.info(`  ${c.green(name)}${space}${c.bold(c.dim(`${sourceSize} kB`))}`)
+        options.logger.info(`  ${c.green(name)}${space}${c.bold(c.dim(`${sourceSize} kB`))}`)
       }
     }
     else {
@@ -112,7 +98,10 @@ export async function generateMockServer(
   }
 }
 
-function getMockDependencies(deps: Metafile['inputs'], alias: ResolvedConfig['resolve']['alias']): string[] {
+function getMockDependencies(
+  deps: Metafile['inputs'],
+  alias: ResolvedMockServerPluginOptions['alias'],
+): string[] {
   const list = new Set<string>()
   const excludeDeps = [packageName, 'connect', 'cors']
   const isAlias = (p: string) => alias.find(({ find }) => aliasMatches(find, p))
@@ -150,15 +139,15 @@ function generatePackageJson(pkg: any, mockDeps: string[]) {
   return JSON.stringify(mockPkg, null, 2)
 }
 
-function generatorServerEntryCode(
-  httpProxies: string[],
-  wsProxies: string[],
-  cookiesOptions: MockServerPluginOptions['cookiesOptions'] = {},
-  bodyParserOptions: MockServerPluginOptions['bodyParserOptions'] = {},
-  priority: MockServerPluginOptions['priority'] = {},
-  build: ServerBuildOption,
-) {
-  const { serverPort, log } = build
+function generatorServerEntryCode({
+  proxies,
+  wsProxies,
+  cookiesOptions,
+  bodyParserOptions,
+  priority,
+  build,
+}: ResolvedMockServerPluginOptions) {
+  const { serverPort, log } = build as ServerBuildOption
   // 生成的 entry code 有一个 潜在的问题：
   // formidableOptions 配置在 `vite.config.ts` 中，`formidableOptions` 配置项
   // 支持 function，并不能被 `JSON.stringify` 转换，故会导致生成的
@@ -176,24 +165,19 @@ import mockData from './mock-data.js';
 const app = connect();
 const server = createServer(app);
 const logger = createLogger('mock-server', '${log}');
-const httpProxies = ${JSON.stringify(httpProxies)};
+const proxies = ${JSON.stringify(proxies)};
 const wsProxies = ${JSON.stringify(wsProxies)};
 const cookiesOptions = ${JSON.stringify(cookiesOptions)};
 const bodyParserOptions = ${JSON.stringify(bodyParserOptions)};
 const priority = ${JSON.stringify(priority)};
+const compiler = { mockData }
 
-mockWebSocket({ 
-  loader: { mockData },
-  httpServer: server,
-  proxies: wsProxies,
-  cookiesOptions,
-  logger,
-});
+mockWebSocket(compiler, server, { wsProxies, cookiesOptions, logger });
 
 app.use(corsMiddleware());
-app.use(baseMiddleware({ mockData }, {
+app.use(baseMiddleware(compiler, {
   formidableOptions: { multiples: true },
-  proxies: httpProxies,
+  proxies,
   priority,
   cookiesOptions,
   bodyParserOptions,
@@ -219,29 +203,19 @@ async function generateMockEntryCode(
   const mockFiles = includePaths.filter(includeFilter)
 
   let importers = ''
-  let exporters = ''
+  const exporters: string[] = []
   mockFiles.forEach((filepath, index) => {
     // fix: #21
     const file = normalizePath(path.join(cwd, filepath))
     importers += `import * as m${index} from '${file}';\n`
-    exporters += `m${index}, `
+    exporters.push(`[m${index}, filepath]`)
   })
-  return `import { transformMockData } from 'vite-plugin-mock-dev-server';
+  return `import { transformMockData, transformRawData } from 'vite-plugin-mock-dev-server';
 ${importers}
-const exporters = [${exporters}];
-const mockList = exporters.map((raw) => {
-  let mockConfig
-  if (raw.default) {
-    mockConfig = raw.default
-  } else {
-    mockConfig = []
-    Object.keys(raw || {}).forEach((key) => {
-      Array.isArray(raw[key])
-        ? mockConfig.push(...raw[key])
-        : mockConfig.push(raw[key])
-    })
-  }
-  return mockConfig
+const exporters = [\n  ${exporters.join(',\n  ')}\n];
+const mockList = exporters.map(([mod, filepath]) => {
+  const raw = mod.default || mod
+  return transformRawData(raw, filepath)
 });
 export default transformMockData(mockList);`
 }

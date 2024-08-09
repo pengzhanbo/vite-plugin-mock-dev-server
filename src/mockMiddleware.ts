@@ -1,72 +1,40 @@
 import type { Server } from 'node:http'
 import type { Http2SecureServer } from 'node:http2'
-import { isBoolean, toArray, uniq } from '@pengzhanbo/utils'
-import cors, { type CorsOptions } from 'cors'
+import cors from 'cors'
 import { pathToRegexp } from 'path-to-regexp'
-import type { Connect, ResolvedConfig, WebSocketServer } from 'vite'
-import c from 'picocolors'
+import type { Connect, WebSocketServer } from 'vite'
 import { baseMiddleware } from './baseMiddleware'
-import { viteDefine } from './define'
-import { createLogger } from './logger'
-import { MockLoader } from './MockLoader'
-import type { MockServerPluginOptions } from './types'
-import { doesProxyContextMatchUrl, ensureProxies, urlParse } from './utils'
+import type { MockCompiler } from './mockCompiler'
+import { createMockCompiler } from './mockCompiler'
+import { doesProxyContextMatchUrl, urlParse } from './utils'
 import { mockWebSocket } from './ws'
+import type { ResolvedMockServerPluginOptions } from './resolvePluginOptions'
 
 export function mockServerMiddleware(
-  config: ResolvedConfig,
-  options: Required<MockServerPluginOptions>,
+  options: ResolvedMockServerPluginOptions,
   // vite@5 httpServer 类型发生变更
   // https://github.com/vitejs/vite/pull/14834
-  httpServer: Server | Http2SecureServer | null,
+  server: Server | Http2SecureServer | null,
   ws?: WebSocketServer,
 ): Connect.NextHandleFunction[] {
-  const logger = createLogger(
-    'vite:mock',
-    isBoolean(options.log) ? (options.log ? 'info' : 'error') : options.log,
-  )
   /**
    * 加载 mock 文件, 包括监听 mock 文件的依赖文件变化，
    * 并注入 vite  `define` / `alias`
    */
-  const loader = new MockLoader({
-    cwd: options.cwd,
-    include: toArray(options.include),
-    exclude: toArray(options.exclude),
-    define: viteDefine(config),
-    alias: config.resolve.alias,
-  })
+  const compiler = createMockCompiler(options)
 
-  loader.load()
+  compiler.run()
 
   /**
    * 监听 mock 文件是否发生变更，如何配置了 reload 为 true，
    * 当发生变更时，通知当前页面进行重新加载
    */
-  loader.on('mock:update-end', () => {
+  compiler.on('mock:update-end', () => {
     if (options.reload)
       ws?.send({ type: 'full-reload' })
   })
 
-  httpServer?.on('close', () => loader.close())
-
-  /**
-   * 获取 服务代理配置中，配置的 请求前缀，
-   * 作为判断接口是否需要mock的首要条件。
-   *
-   * 在一般开发场景中，我们也只需要对通过 vite server 进行代理的请求 进行 mock
-   */
-  const { httpProxies } = ensureProxies(config.server.proxy || {})
-  /**
-   * 保留直接通过 plugin option 直接配置 路径匹配规则，
-   * 但在大多数场景下，共用 `server.proxy` 已足够
-   */
-  const prefix = toArray(options.prefix)
-  const proxies = uniq([...prefix, ...httpProxies])
-
-  // fix: #68
-  if (!proxies.length && !toArray(options.wsPrefix).length)
-    logger.warn(`No proxy was configured, mock server will not work. See ${c.cyan('https://vite-plugin-mock-dev-server.netlify.app/guide/usage')}`)
+  server?.on('close', () => compiler.close())
 
   /**
    * 虽然 config.server.proxy 中有关于 ws 的代理配置，
@@ -77,13 +45,7 @@ export function mockServerMiddleware(
    * 所以插件选择了通过插件的配置项 `wsPrefix` 来做 判断的首要条件。
    * 当前插件默认会将已配置在 wsPrefix 的值，从 config.server.proxy 的删除，避免发生冲突问题。
    */
-  mockWebSocket({
-    loader,
-    httpServer,
-    proxies: toArray(options.wsPrefix),
-    cookiesOptions: options.cookiesOptions,
-    logger,
-  })
+  mockWebSocket(compiler, server, options)
 
   const middlewares: (Connect.NextHandleFunction | undefined)[] = []
 
@@ -99,61 +61,28 @@ export function mockServerMiddleware(
      * 也会使用 viteConfig.server.cors 配置，并支持 用户可以对 mock 中的 cors 中间件进行配置。
      * 而用户的配置也仅对 mock 的接口生效。
      */
-    corsMiddleware(loader, proxies, config, options),
-    baseMiddleware(loader, {
-      formidableOptions: options.formidableOptions,
-      proxies,
-      cookiesOptions: options.cookiesOptions,
-      bodyParserOptions: options.bodyParserOptions,
-      priority: options.priority,
-      logger,
-    }),
+    corsMiddleware(compiler, options),
+    baseMiddleware(compiler, options),
   )
   return middlewares.filter(Boolean) as Connect.NextHandleFunction[]
 }
 
 function corsMiddleware(
-  mockLoader: MockLoader,
-  proxies: string[],
-  config: ResolvedConfig,
-  options: Required<MockServerPluginOptions>,
+  compiler: MockCompiler,
+  { proxies, cors: corsOptions }: ResolvedMockServerPluginOptions,
 ): Connect.NextHandleFunction | undefined {
-  let corsOptions: CorsOptions = {}
-
-  // enable cors by default
-  const enabled = options.cors === false ? false : config.server.cors !== false
-
-  if (enabled && config.server.cors !== false) {
-    corsOptions = {
-      ...corsOptions,
-      ...((typeof config.server.cors === 'boolean'
-        ? {}
-        : config.server.cors) as CorsOptions),
-    }
-  }
-
-  if (enabled && options.cors !== false) {
-    corsOptions = {
-      ...corsOptions,
-      ...(typeof options.cors === 'boolean' ? {} : options.cors),
-    }
-  }
-
-  return !enabled
+  return !corsOptions
     ? undefined
     : function (req, res, next) {
       const { pathname } = urlParse(req.url!)
       if (
-        !pathname
-        || proxies.length === 0
-        || !proxies.some(context =>
-          doesProxyContextMatchUrl(context, req.url!),
-        )
+        !pathname || proxies.length === 0
+        || !proxies.some(context => doesProxyContextMatchUrl(context, req.url!))
       ) {
         return next()
       }
 
-      const mockData = mockLoader.mockData
+      const mockData = compiler.mockData
 
       const mockUrl = Object.keys(mockData).find(key =>
         pathToRegexp(key).test(pathname),
