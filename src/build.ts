@@ -208,14 +208,14 @@ async function generateMockEntryCode(
     // fix: #21
     const file = normalizePath(path.join(cwd, filepath))
     importers += `import * as m${index} from '${file}';\n`
-    exporters.push(`[m${index}, filepath]`)
+    exporters.push(`[m${index}, '${filepath}']`)
   })
   return `import { transformMockData, transformRawData } from 'vite-plugin-mock-dev-server';
 ${importers}
 const exporters = [\n  ${exporters.join(',\n  ')}\n];
 const mockList = exporters.map(([mod, filepath]) => {
-  const raw = mod.default || mod
-  return transformRawData(raw, filepath)
+  const raw = mod.default || mod;
+  return transformRawData(raw, filepath);
 });
 export default transformMockData(mockList);`
 }
