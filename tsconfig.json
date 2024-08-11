@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "target": "ESNext",
     "lib": ["ESNext"],
     "baseUrl": ".",
     "module": "ESNext",
@@ -8,12 +9,11 @@
     "strict": true,
     "noUnusedLocals": true,
     "declaration": true,
-    "noEmitOnError": true,
     "sourceMap": false,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
-  "references": [{ "path": "./tsconfig.esm.json" }],
-  "include": ["./src", "./example", "./docs/.vitepress"],
+  "include": ["./plugin", "./docs/.vitepress"],
   "exclude": [
     "dist",
     "node_modules",

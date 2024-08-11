@@ -1,14 +1,11 @@
 {
   "compilerOptions": {
-    "composite": true,
     "target": "ESNext",
     "jsx": "preserve",
     "lib": ["DOM", "ESNext"],
+    "baseUrl": ".",
     "module": "ESNext",
     "moduleResolution": "node",
-    "paths": {
-      "vite-plugin-mock-dev-server": ["./src/index.ts"]
-    },
     "resolveJsonModule": true,
     "allowJs": true,
     "strict": true,
@@ -18,6 +15,6 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["./package.json", "./example", "./src"],
-  "exclude": ["./example/**/*.mjs", "./example/**/*.cjs", "./example/**/*.js"]
+  "include": ["./src", "./mock"],
+  "exclude": ["./**/*.mjs", "./**/*.cjs", "./**/*.js"]
 }

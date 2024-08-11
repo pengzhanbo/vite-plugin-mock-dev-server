@@ -1,18 +1,17 @@
 import path from 'node:path'
 import process from 'node:process'
 import { defineConfig } from 'vite'
-import mockServer from '../src'
+import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 
 export default defineConfig(({ mode }) => ({
   plugins: [
-    mockServer({
+    mockDevServerPlugin({
       prefix: '^/api-dev/',
       wsPrefix: ['/socket.io'],
-      include: 'example/mock/**/*.mock.{ts,js,cjs,mjs,json,json5}',
       log: 'debug',
       formidableOptions: {
         // 配置上传资源存放目录
-        uploadDir: path.join(process.cwd(), 'example/uploads'),
+        uploadDir: path.join(process.cwd(), '/uploads'),
         // 可修改上传资源名称
         filename: (name, ext, part) => {
           return part.originalFilename!
