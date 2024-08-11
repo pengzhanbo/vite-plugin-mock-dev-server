@@ -1,3 +1,25 @@
+# [1.7.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.6.1...v1.7.0) (2024-08-11)
+
+
+### Features
+
+* resolve plugin options ([d22fd36](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/d22fd3667603bd97f775579a3850569c52653d3c))
+
+
+### Performance Improvements
+
+* improve `alias` resolve ([595475a](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/595475a66ae90d4694e636887b237afbc73fe0c5))
+* improve `build` output ([66e741e](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/66e741e078b1fcee62026e161a82a7c4af0af25f))
+* improve build output ([98e54a7](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/98e54a76271a5803bf111042f8c5bdf93e43dc5e))
+* improve code structure ([ac4f2f8](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/ac4f2f81effe788d484179ceddc242909e9f6e01))
+* improve code structure ([e66f70c](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/e66f70cd1b74830b6fa74d2a81b6c4e1d293df00))
+* improve mock `ws` argument ([2940719](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/2940719978b16363dc28d76af0d3e1cf9e6cd04d))
+* improve mock data transform ([a4dbfe4](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/a4dbfe44e090749ec5f843994d7332db203099f0))
+* improve plugin exports ([df0b7e0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/df0b7e0cc2bd86caa6e407a0679f32a4e97d694f))
+* migrate to workspace ([addc801](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/addc8013eaab3f3bf100eac388eb910e3842f68a))
+
+
+
 ## [1.6.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.6.0...v1.6.1) (2024-07-29)
 
 
