@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { matchingWeight } from '../src/matchingWeight'
+import { matchingWeight } from '../plugin/src/core/matchingWeight'
 
 /**
  * 验证 规则优先级排序
