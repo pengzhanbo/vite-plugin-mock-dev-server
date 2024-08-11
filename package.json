@@ -17,7 +17,7 @@
     "test": "vitest",
     "prepublishOnly": "vitest run && pnpm run build",
     "release:changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
-    "release": "bumpp package.json --execute=\"pnpm release:changelog\" --commit --all --push --tag && pnpm -r publish --access public"
+    "release": "bumpp package.json plugin/package.json --execute=\"pnpm release:changelog\" --commit --all --push --tag && pnpm -r publish --access public"
   },
   "devDependencies": {
     "@pengzhanbo/eslint-config": "^1.12.0",
