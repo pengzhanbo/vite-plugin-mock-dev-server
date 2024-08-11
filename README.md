@@ -549,7 +549,7 @@ type defineMockData<T> = (
 ) => [getter, setter] & { value: T }
 ```
 
-### Expamples
+### Examples
 
 `data.ts`
 

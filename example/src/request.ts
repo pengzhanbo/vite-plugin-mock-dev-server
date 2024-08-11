@@ -32,5 +32,5 @@ async function renderResponse(url: string, method: string, response: Response) {
     content += `<div><p><b>Response Body: </b></p><pre><code>${str}</code></pre></div>`
   }
   container.innerHTML = content
-  document.body.appendChild(container)
+  document.querySelector('.app')!.appendChild(container)
 }

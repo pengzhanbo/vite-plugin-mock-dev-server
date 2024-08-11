@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
-import { sortByValidator } from '../src/transform'
-import type { MockHttpItem } from '../src/types'
+import { sortByValidator } from '../plugin/src/core/transform'
+import type { MockHttpItem } from '../plugin/src/types'
 
 const mockList: MockHttpItem[] = [
   { url: '1', validator: () => true },

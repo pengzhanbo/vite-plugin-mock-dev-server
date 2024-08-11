@@ -1,40 +1,36 @@
 import EventEmitter from 'node:events'
 import process from 'node:process'
-import { hasOwn, isArray, promiseParallel, toArray } from '@pengzhanbo/utils'
-import chokidar from 'chokidar'
+import { promiseParallel, toArray } from '@pengzhanbo/utils'
+import chokidar, { type FSWatcher } from 'chokidar'
 import type { Metafile } from 'esbuild'
 import fastGlob from 'fast-glob'
-import type { ResolvedConfig } from 'vite'
 import { createFilter } from '@rollup/pluginutils'
+import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
 import { loadFromCode, transformWithEsbuild } from './compiler'
-import { transformMockData } from './transform'
-import type { MockHttpItem, MockOptions, MockWebsocketItem } from './types'
+import { transformMockData, transformRawData } from './transform'
 import { debug, lookupFile, normalizePath } from './utils'
+import type { ResolvedMockServerPluginOptions } from './resolvePluginOptions'
 
-export interface MockLoaderOptions {
-  cwd?: string
-  include: string[]
-  exclude: string[]
-  define: Record<string, any>
-  alias: ResolvedConfig['resolve']['alias']
+export function createMockCompiler(options: ResolvedMockServerPluginOptions) {
+  return new MockCompiler(options)
 }
 
 /**
  * mock配置加载器
  */
-export class MockLoader extends EventEmitter {
+export class MockCompiler extends EventEmitter {
   moduleCache: Map<string, MockOptions | MockHttpItem | MockWebsocketItem>
     = new Map()
 
   moduleDeps: Map<string, Set<string>> = new Map()
   cwd: string
-  mockWatcher!: chokidar.FSWatcher
-  depsWatcher!: chokidar.FSWatcher
+  mockWatcher!: FSWatcher
+  depsWatcher!: FSWatcher
   moduleType: 'cjs' | 'esm' = 'cjs'
 
   private _mockData: Record<string, MockOptions> = {}
 
-  constructor(public options: MockLoaderOptions) {
+  constructor(public options: ResolvedMockServerPluginOptions) {
     super()
     this.cwd = options.cwd || process.cwd()
     try {
@@ -49,15 +45,13 @@ export class MockLoader extends EventEmitter {
     return this._mockData
   }
 
-  load() {
+  run() {
     const { include, exclude } = this.options
     /**
      * 使用 rollup 提供的 include/exclude 规则，
      * 过滤包含文件
      */
-    const includeFilter = createFilter(include, exclude, {
-      resolve: false,
-    })
+    const includeFilter = createFilter(include, exclude, { resolve: false })
 
     fastGlob(include, { cwd: this.cwd })
       /**
@@ -102,7 +96,7 @@ export class MockLoader extends EventEmitter {
 
   private watchMockEntry() {
     const { include } = this.options
-    const [firstGlob, ...otherGlob] = include
+    const [firstGlob, ...otherGlob] = toArray(include)
     const watcher = (this.mockWatcher = chokidar.watch(firstGlob, {
       ignoreInitial: true,
       cwd: this.cwd,
@@ -150,7 +144,7 @@ export class MockLoader extends EventEmitter {
       this.moduleDeps.delete(filepath)
     })
     this.on('update:deps', () => {
-      const deps = []
+      const deps: string[] = []
       for (const [dep] of this.moduleDeps.entries())
         deps.push(dep)
 
@@ -205,32 +199,9 @@ export class MockLoader extends EventEmitter {
     )
 
     try {
-      const raw
-        = (await loadFromCode<MockHttpItem | MockWebsocketItem | MockOptions>({
-          filepath,
-          code,
-          isESM,
-          cwd: this.cwd,
-        })) || {}
-      let mockConfig: MockHttpItem | MockWebsocketItem | MockOptions
+      const raw = (await loadFromCode({ filepath, code, isESM, cwd: this.cwd })) || {}
 
-      if (hasOwn(raw, 'default')) {
-        mockConfig = raw.default
-      }
-      else {
-        mockConfig = []
-        Object.keys(raw).forEach(key =>
-          (mockConfig as MockOptions).push(...toArray(raw[key])),
-        )
-      }
-
-      if (isArray(mockConfig)) {
-        mockConfig.forEach(mock => ((mock as any).__filepath__ = filepath))
-      }
-      else {
-        ;(mockConfig as any).__filepath__ = filepath
-      }
-      this.moduleCache.set(filepath, mockConfig)
+      this.moduleCache.set(filepath, transformRawData(raw, filepath))
       this.updateModuleDeps(filepath, deps)
     }
     catch (e) {

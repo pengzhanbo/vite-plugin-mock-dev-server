@@ -1,86 +1,47 @@
-import process from 'node:process'
 import { toArray } from '@pengzhanbo/utils'
 import type { Plugin, ResolvedConfig } from 'vite'
-import { generateMockServer } from './build'
-import { mockServerMiddleware } from './mockMiddleware'
-import { recoverRequest } from './requestRecovery'
+import { generateMockServer } from './core/build'
+import { mockServerMiddleware } from './core/mockMiddleware'
+import { recoverRequest } from './core/requestRecovery'
 import type { MockServerPluginOptions } from './types'
+import type { ResolvedMockServerPluginOptions } from './core/resolvePluginOptions'
+import { resolvePluginOptions } from './core/resolvePluginOptions'
 
-export function mockDevServerPlugin({
-  prefix = [],
-  wsPrefix = [],
-  cwd = process.cwd(),
-  include = ['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}'],
-  exclude = ['**/node_modules/**', '**/.vscode/**', '**/.git/**'],
-  reload = false,
-  log = 'info',
-  cors = true,
-  formidableOptions = {},
-  build = false,
-  cookiesOptions = {},
-  bodyParserOptions = {},
-  priority = {},
-}: MockServerPluginOptions = {}): Plugin[] {
-  const pluginOptions: Required<MockServerPluginOptions> = {
-    prefix,
-    wsPrefix,
-    cwd,
-    include,
-    exclude,
-    reload,
-    cors,
-    cookiesOptions,
-    log,
-    formidableOptions: {
-      multiples: true,
-      ...formidableOptions,
-    },
-    bodyParserOptions,
-    priority,
-    build: build
-      ? Object.assign(
-        {
-          serverPort: 8080,
-          dist: 'mockServer',
-          log: 'error',
-        },
-        typeof build === 'object' ? build : {},
-      )
-      : false,
-  }
-  const plugins: Plugin[] = [serverPlugin(pluginOptions)]
-  if (pluginOptions.build)
-    plugins.push(buildPlugin(pluginOptions))
+export function mockDevServerPlugin(options: MockServerPluginOptions = {}): Plugin[] {
+  const plugins: Plugin[] = [serverPlugin(options)]
+  if (options.build)
+    plugins.push(buildPlugin(options))
 
   return plugins
 }
 
 export function buildPlugin(
-  pluginOptions: Required<MockServerPluginOptions>,
+  options: MockServerPluginOptions,
 ): Plugin {
   let viteConfig = {} as ResolvedConfig
+  let resolvedOptions!: ResolvedMockServerPluginOptions
   return {
     name: 'vite-plugin-mock-dev-server-generator',
     enforce: 'post',
     apply: 'build',
     configResolved(config) {
       viteConfig = config
+      resolvedOptions = resolvePluginOptions(options, config)
       config.logger.warn('')
     },
     async buildEnd(error) {
-      if (error)
+      if (error || viteConfig.command !== 'build')
         return
-      if (viteConfig.command !== 'build')
-        return
-      await generateMockServer(this, viteConfig, pluginOptions)
+
+      await generateMockServer(this, resolvedOptions)
     },
   }
 }
 
 export function serverPlugin(
-  pluginOptions: Required<MockServerPluginOptions>,
+  options: MockServerPluginOptions,
 ): Plugin {
-  let viteConfig = {} as ResolvedConfig
+  let resolvedOptions!: ResolvedMockServerPluginOptions
   return {
     name: 'vite-plugin-mock-dev-server',
     enforce: 'pre',
@@ -91,7 +52,7 @@ export function serverPlugin(
       // 可以避免 wss 初始化时的冲突，带来潜在的影响是，可能存在指定了 `wsPrefix`，
       // 但在实际的 mock 中没有对该规则进行配置，从而导致默认的 websocket 代理失效。
       // 这时候就需要用户自行在 wsPrefix 中注释掉对应的规则。
-      const wsPrefix = toArray(pluginOptions.wsPrefix)
+      const wsPrefix = toArray(options.wsPrefix)
       if (wsPrefix.length && config.server?.proxy) {
         const proxy: ResolvedConfig['server']['proxy'] = {}
         Object.keys(config.server.proxy).forEach((key) => {
@@ -106,20 +67,14 @@ export function serverPlugin(
     },
 
     configResolved(config) {
-      viteConfig = config
-
+      resolvedOptions = resolvePluginOptions(options, config)
       // This is a hack to prevent Vite from nuking useful logs,
       // pending https://github.com/vitejs/vite/issues/9378
       config.logger.warn('')
     },
 
-    configureServer({ middlewares, config, httpServer, ws }) {
-      const middlewareList = mockServerMiddleware(
-        config,
-        pluginOptions,
-        httpServer,
-        ws,
-      )
+    configureServer({ middlewares, httpServer, ws }) {
+      const middlewareList = mockServerMiddleware(resolvedOptions, httpServer, ws)
       middlewareList.forEach(middleware => middlewares.use(middleware))
     },
 
@@ -128,11 +83,7 @@ export function serverPlugin(
       // pending...
       // feat: use preview server parameter in preview server hook #11647
       // https://github.com/vitejs/vite/pull/11647
-      const middlewareList = mockServerMiddleware(
-        viteConfig,
-        pluginOptions,
-        httpServer,
-      )
+      const middlewareList = mockServerMiddleware(resolvedOptions, httpServer)
       middlewareList.forEach(middleware => middlewares.use(middleware))
     },
   }

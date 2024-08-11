@@ -1,5 +1,5 @@
 import { isArray } from '@pengzhanbo/utils'
-import type { MockHttpItem, MockOptions, MockWebsocketItem } from './types'
+import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
 
 /**
  * mock config Type helper

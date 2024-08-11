@@ -1,7 +1,3 @@
 [build]
 publish = "docs/.vitepress/dist"
-command = "pnpm install && pnpm docs:build"
-
-[build.environment]
-NODE_VERSION = "18" # prevent Netlify npm install
-NPM_FLAGS = "--version"
+command = "pnpm docs:build"

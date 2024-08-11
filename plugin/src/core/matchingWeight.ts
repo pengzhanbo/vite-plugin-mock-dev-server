@@ -20,7 +20,7 @@ import {
 } from '@pengzhanbo/utils'
 import type { Token } from 'path-to-regexp'
 import { parse, pathToRegexp } from 'path-to-regexp'
-import type { MockMatchPriority } from './types'
+import type { MockMatchPriority } from '../types'
 
 const tokensCache: Record<string, Token[]> = {}
 

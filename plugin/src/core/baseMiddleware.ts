@@ -13,11 +13,6 @@ import * as mime from 'mime-types'
 import { pathToRegexp } from 'path-to-regexp'
 import colors from 'picocolors'
 import type { Connect } from 'vite'
-import type { Logger } from './logger'
-import { matchingWeight } from './matchingWeight'
-import type { MockLoader } from './MockLoader'
-import { parseReqBody } from './parseReqBody'
-import { collectRequest } from './requestRecovery'
 import type {
   ExtraRequest,
   Method,
@@ -27,7 +22,12 @@ import type {
   MockResponse,
   MockServerPluginOptions,
   ResponseBody,
-} from './types'
+} from '../types'
+import type { Logger } from './logger'
+import { matchingWeight } from './matchingWeight'
+import type { MockCompiler } from './mockCompiler'
+import { parseReqBody } from './parseReqBody'
+import { collectRequest } from './requestRecovery'
 import {
   doesProxyContextMatchUrl,
   isReadableStream,
@@ -46,7 +46,7 @@ export interface BaseMiddlewareOptions {
 }
 
 export function baseMiddleware(
-  mockLoader: MockLoader,
+  compiler: MockCompiler,
   {
     formidableOptions = {},
     bodyParserOptions = {},
@@ -69,7 +69,7 @@ export function baseMiddleware(
       return next()
     }
 
-    const mockData = mockLoader.mockData
+    const mockData = compiler.mockData
     // 对满足匹配规则的配置进行优先级排序
     const mockUrls = matchingWeight(Object.keys(mockData), pathname, priority)
 

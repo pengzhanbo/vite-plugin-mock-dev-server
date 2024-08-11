@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest'
-import { isObjectSubset } from '../src/validator'
+import { isObjectSubset } from '../plugin/src/core/validator'
 
 it('validator isObjectSubset', () => {
   // 浅层比较

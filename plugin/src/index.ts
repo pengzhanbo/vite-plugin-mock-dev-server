@@ -9,13 +9,10 @@ export type {
   MockRequest,
 } from './types'
 
-export * from './defineMock'
-export * from './defineMockData'
-export * from './baseMiddleware'
-export * from './ws'
-export * from './transform'
-export * from './logger'
+export * from './helper'
+export * from './server'
 
 export { mockDevServerPlugin }
 
+/** @deprecated use named export `mockDevServerPlugin` instead */
 export default mockDevServerPlugin

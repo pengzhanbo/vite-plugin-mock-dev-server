@@ -1,6 +1,6 @@
 import { isBoolean } from '@pengzhanbo/utils'
 import colors from 'picocolors'
-import type { LogLevel, LogType } from './types'
+import type { LogLevel, LogType } from '../types'
 
 export interface Logger {
   debug: (msg: string, level?: boolean | LogLevel) => void

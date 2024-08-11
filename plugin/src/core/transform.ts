@@ -1,13 +1,42 @@
 import {
+  isArray,
   isEmptyObject,
   isFunction,
   isObject,
   sortBy,
   toArray,
 } from '@pengzhanbo/utils'
-import type { MockHttpItem, MockOptions, MockWebsocketItem } from './types'
+import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
 import { urlParse } from './utils'
 import { isObjectSubset } from './validator'
+
+type MockRawData = MockOptions | MockHttpItem | MockWebsocketItem | Record<string, MockOptions | MockHttpItem | MockWebsocketItem>
+
+export function transformRawData(
+  raw: MockRawData,
+  __filepath__: string,
+): MockOptions | MockHttpItem | MockWebsocketItem {
+  let mockConfig: any
+  if (isArray(raw)) {
+    mockConfig = raw.map(item => ({ ...item, __filepath__ }))
+  }
+  else if ('url' in raw) {
+    mockConfig = { ...raw, __filepath__ }
+  }
+  else {
+    mockConfig = []
+    Object.keys((raw)).forEach((key) => {
+      const data = raw[key]
+      if (isArray(data)) {
+        mockConfig.push(...data.map(item => ({ ...item, __filepath__ })))
+      }
+      else {
+        mockConfig.push({ ...data, __filepath__ })
+      }
+    })
+  }
+  return mockConfig
+}
 
 export function transformMockData(
   mockList:

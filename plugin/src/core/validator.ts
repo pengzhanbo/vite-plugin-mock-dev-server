@@ -1,5 +1,5 @@
 import { isArray, isObject } from '@pengzhanbo/utils'
-import type { ExtraRequest } from './types'
+import type { ExtraRequest } from '../types'
 
 export function validate(
   request: ExtraRequest,

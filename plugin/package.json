@@ -1,0 +1,95 @@
+{
+  "name": "vite-plugin-mock-dev-server",
+  "type": "module",
+  "version": "1.6.1",
+  "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
+  "license": "MIT",
+  "homepage": "https://vite-plugin-mock-dev-server.netlify.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pengzhanbo/vite-plugin-mock-dev-server"
+  },
+  "keywords": [
+    "vite",
+    "plugin",
+    "vite-plugin",
+    "mock",
+    "mock-server",
+    "development"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./helper": {
+      "import": {
+        "types": "./dist/helper.d.ts",
+        "default": "./dist/helper.js"
+      },
+      "require": {
+        "types": "./dist/helper.d.cts",
+        "default": "./dist/helper.cjs"
+      }
+    },
+    "./server": {
+      "import": {
+        "types": "./dist/server.d.ts",
+        "default": "./dist/server.js"
+      },
+      "require": {
+        "types": "./dist/server.d.cts",
+        "default": "./dist/server.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": "^18 || >= 20"
+  },
+  "scripts": {
+    "build": "tsup"
+  },
+  "peerDependencies": {
+    "esbuild": ">=0.21.0",
+    "vite": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "esbuild": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@pengzhanbo/utils": "^1.1.2",
+    "@rollup/pluginutils": "^5.1.0",
+    "chokidar": "^3.6.0",
+    "co-body": "^6.2.0",
+    "cookies": "^0.9.1",
+    "cors": "^2.8.5",
+    "debug": "^4.3.6",
+    "fast-glob": "^3.3.2",
+    "formidable": "2.1.2",
+    "http-status": "^1.7.4",
+    "is-core-module": "^2.15.0",
+    "json5": "^2.2.3",
+    "mime-types": "^2.1.35",
+    "path-to-regexp": "6.2.2",
+    "picocolors": "^1.0.1",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.23.0",
+    "vite": "^5.3.5"
+  }
+}

@@ -1,13 +1,11 @@
 import fs, { promises as fsp } from 'node:fs'
-import { createRequire } from 'node:module'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import process from 'node:process'
 import type { Metafile, Plugin } from 'esbuild'
 import { build } from 'esbuild'
 import JSON5 from 'json5'
-import type { ResolvedConfig } from 'vite'
-import { getDirname } from './utils'
+import type { Alias } from 'vite'
 
 /* ===== esbuild begin ===== */
 
@@ -47,7 +45,22 @@ const jsonLoader: Plugin = {
   },
 }
 
-function aliasPlugin(alias: ResolvedConfig['resolve']['alias']): Plugin {
+const renamePlugin: Plugin = {
+  name: 'rename-plugin',
+  setup(build) {
+    build.onResolve({ filter: /.*/ }, ({ path: id }) => {
+      if (id === 'vite-plugin-mock-dev-server') {
+        return {
+          path: 'vite-plugin-mock-dev-server/helper',
+          external: true,
+        }
+      }
+      return null
+    })
+  },
+}
+
+function aliasPlugin(alias: Alias[]): Plugin {
   return {
     name: 'alias-plugin',
     setup(build) {
@@ -93,7 +106,7 @@ export function aliasMatches(pattern: string | RegExp, importee: string) {
 export interface TransformWithEsbuildOptions {
   isESM?: boolean
   define: Record<string, string>
-  alias: ResolvedConfig['resolve']['alias']
+  alias: Alias[]
   cwd?: string
 }
 
@@ -107,18 +120,26 @@ export async function transformWithEsbuild(
   options: TransformWithEsbuildOptions,
 ): TransformWithEsbuildResult {
   const { isESM = true, define, alias, cwd = process.cwd() } = options
+  const filepath = path.resolve(cwd, entryPoint)
+  const filename = path.basename(entryPoint)
+  const dirname = path.dirname(filepath)
   try {
     const result = await build({
       entryPoints: [entryPoint],
       outfile: 'out.js',
       write: false,
-      target: ['node16'],
+      target: ['node18'],
       platform: 'node',
       bundle: true,
       metafile: true,
       format: isESM ? 'esm' : 'cjs',
-      define,
-      plugins: [aliasPlugin(alias), externalizeDeps, jsonLoader, json5Loader],
+      define: {
+        ...define,
+        __dirname: JSON.stringify(dirname),
+        __filename: JSON.stringify(filename),
+        ...isESM ? {} : { 'import.meta.url': JSON.stringify(pathToFileURL(filepath)) },
+      },
+      plugins: [aliasPlugin(alias), renamePlugin, externalizeDeps, jsonLoader, json5Loader],
       absWorkingDir: cwd,
     })
     return {
@@ -133,10 +154,6 @@ export async function transformWithEsbuild(
 }
 
 /* ===== esbuild end ===== */
-
-const _dirname = getDirname(import.meta.url)
-const _require = createRequire(_dirname)
-
 interface LoadFromCodeOptions {
   filepath: string
   code: string
@@ -149,39 +166,19 @@ export async function loadFromCode<T = any>({
   code,
   isESM,
   cwd,
-}: LoadFromCodeOptions): Promise<{ [key: string]: T }> {
+}: LoadFromCodeOptions): Promise<T | { [key: string]: T }> {
   filepath = path.resolve(cwd, filepath)
-  if (isESM) {
-    const fileBase = `${filepath}.timestamp-${Date.now()}`
-    const fileNameTmp = `${fileBase}.mjs`
-    const fileUrl = `${pathToFileURL(fileBase)}.mjs`
-    await fsp.writeFile(fileNameTmp, code, 'utf8')
-    try {
-      return await import(fileUrl)
-    }
-    finally {
-      try {
-        fs.unlinkSync(fileNameTmp)
-      }
-      catch {}
-    }
+  const ext = isESM ? '.mjs' : '.cjs'
+  const file = `${filepath}.timestamp-${Date.now()}${ext}`
+  await fsp.writeFile(file, code, 'utf8')
+  try {
+    const mod = await import(file)
+    return mod.default || mod
   }
-  else {
-    const extension = path.extname(filepath)
-    const realFileName = fs.realpathSync(filepath)
-    const loaderExt = extension in _require.extensions ? extension : '.js'
-    const defaultLoader = _require.extensions[loaderExt]!
-    _require.extensions[loaderExt] = (module: NodeModule, filename: string) => {
-      if (filename === realFileName) {
-        ;(module as any)._compile(code, filename)
-      }
-      else {
-        defaultLoader(module, filename)
-      }
+  finally {
+    try {
+      fs.unlinkSync(file)
     }
-    delete _require.cache[_require.resolve(filepath)]
-    const raw = _require(filepath)
-    _require.extensions[loaderExt] = defaultLoader
-    return raw.__esModule ? raw : { default: raw }
+    catch {}
   }
 }

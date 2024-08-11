@@ -17,15 +17,14 @@ import { pathToRegexp } from 'path-to-regexp'
 import colors from 'picocolors'
 import type { WebSocket } from 'ws'
 import { WebSocketServer } from 'ws'
-import type { Logger } from './logger'
-import type { MockLoader } from './MockLoader'
 import type {
   MockRequest,
-  MockServerPluginOptions,
   MockWebsocketItem,
   WebSocketSetupContext,
-} from './types'
+} from '../types'
+import type { MockCompiler } from './mockCompiler'
 import { doesProxyContextMatchUrl, parseParams, urlParse } from './utils'
+import type { ResolvedMockServerPluginOptions } from './resolvePluginOptions'
 
 type PoolMap = Map<string, WSSMap>
 type WSSMap = Map<string, WebSocketServer>
@@ -42,21 +41,18 @@ interface WSSContext {
   connectionList: Connection[]
 }
 
-export interface MockSocketOptions {
-  loader: MockLoader
-  httpServer: Server | Http2SecureServer | null
-  proxies: string[]
-  cookiesOptions: MockServerPluginOptions['cookiesOptions']
-  logger: Logger
-}
-
-export function mockWebSocket({
-  loader,
-  httpServer,
-  proxies,
-  cookiesOptions,
-  logger,
-}: MockSocketOptions) {
+/**
+ * mock websocket
+ */
+export function mockWebSocket(
+  compiler: MockCompiler,
+  server: Server | Http2SecureServer | null,
+  {
+    wsProxies: proxies,
+    cookiesOptions,
+    logger,
+  }: ResolvedMockServerPluginOptions,
+) {
   // 热更新文件映射
   const hmrMap = new Map<string, Set<string>>()
   // 连接池
@@ -152,14 +148,14 @@ export function mockWebSocket({
 
   // 检测 ws 相关的 mock 文件更新
   // 如果 当前的 ws 配置已 建立 wss 连接，则重启该 wss 连接
-  loader.on?.('mock:update-end', (filepath: string) => {
+  compiler.on?.('mock:update-end', (filepath: string) => {
     if (!hmrMap.has(filepath))
       return
     const mockUrlList = hmrMap.get(filepath)
     if (!mockUrlList)
       return
     for (const mockUrl of mockUrlList.values()) {
-      for (const mock of loader.mockData[mockUrl]) {
+      for (const mock of compiler.mockData[mockUrl]) {
         if (!mock.ws || (mock as any).__filepath__ !== filepath)
           return
         const wssMap = getWssMap(mockUrl)
@@ -168,7 +164,7 @@ export function mockWebSocket({
       }
     }
   })
-  httpServer?.on('upgrade', (req, socket, head) => {
+  server?.on('upgrade', (req, socket, head) => {
     const { pathname, query } = urlParse(req.url!)
     if (
       !pathname
@@ -178,7 +174,7 @@ export function mockWebSocket({
       return
     }
 
-    const mockData = loader.mockData
+    const mockData = compiler.mockData
     const mockUrl = Object.keys(mockData).find((key) => {
       return pathToRegexp(key).test(pathname)
     })
@@ -233,7 +229,7 @@ export function mockWebSocket({
     })
   })
 
-  httpServer?.on('close', () => {
+  server?.on('close', () => {
     for (const wssMap of poolMap.values()) {
       for (const wss of wssMap.values()) {
         const wssContext = wssContextMap.get(wss)!
