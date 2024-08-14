@@ -6,7 +6,6 @@ import type { Metafile, Plugin } from 'esbuild'
 import { build } from 'esbuild'
 import JSON5 from 'json5'
 import type { Alias } from 'vite'
-import url from "url";
 
 /* ===== esbuild begin ===== */
 
@@ -170,15 +169,16 @@ export async function loadFromCode<T = any>({
 }: LoadFromCodeOptions): Promise<T | { [key: string]: T }> {
   filepath = path.resolve(cwd, filepath)
   const ext = isESM ? '.mjs' : '.cjs'
-  const file = url.pathToFileURL(`${filepath}.timestamp-${Date.now()}${ext}`)
-  await fsp.writeFile(file, code, 'utf8')
+  const filepathTmp = `${filepath}.timestamp-${Date.now()}${ext}`
+  const file = pathToFileURL(filepathTmp).toString()
+  await fsp.writeFile(filepathTmp, code, 'utf8')
   try {
     const mod = await import(file)
     return mod.default || mod
   }
   finally {
     try {
-      fs.unlinkSync(file)
+      fs.unlinkSync(filepathTmp)
     }
     catch {}
   }
