@@ -1,3 +1,17 @@
+## [1.7.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.7.0...v1.7.1) (2024-08-14)
+
+
+### Bug Fixes
+
+* incorrect filepath resolution during `dynamic import` ([#91](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/91)) ([be65433](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/be65433aba9a934775f8e7cda6c45b3f7e2ce4b3))
+
+
+### Performance Improvements
+
+* update deps to latest ([c37d2a6](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/c37d2a619711fb6f85dd996b695c4c31b632a2e5))
+
+
+
 # [1.7.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.6.1...v1.7.0) (2024-08-11)
 
 
