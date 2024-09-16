@@ -1,3 +1,12 @@
+## [1.7.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.7.1...v1.7.2) (2024-09-16)
+
+
+### Performance Improvements
+
+* update deps to latest ([fd596b7](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/fd596b7b54e862adc9c3c46aa072f3088a596723))
+
+
+
 ## [1.7.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.7.0...v1.7.1) (2024-08-14)
 
 
