@@ -1,12 +1,12 @@
-import type { Buffer } from 'node:buffer'
-import type http from 'node:http'
-import type { Readable } from 'node:stream'
+import type { Options as COBodyOptions } from 'co-body'
 import type Cookies from 'cookies'
 import type { CorsOptions } from 'cors'
 import type formidable from 'formidable'
+import type { Buffer } from 'node:buffer'
+import type http from 'node:http'
+import type { Readable } from 'node:stream'
 import type { Connect } from 'vite'
 import type { WebSocketServer } from 'ws'
-import type { Options as COBodyOptions } from 'co-body'
 
 /**
  * Configure plugin

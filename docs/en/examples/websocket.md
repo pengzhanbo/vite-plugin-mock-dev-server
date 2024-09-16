@@ -37,8 +37,8 @@ export default defineMock({
 ::: code-group
 
 ```ts [ws-chat.mock.ts]
-import type { MockRequest } from 'vite-plugin-mock-dev-server'
 import { defineMock } from 'vite-plugin-mock-dev-server'
+import type { MockRequest } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
   url: '/socket/chat',

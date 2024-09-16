@@ -10,20 +10,20 @@
  * 于 `server.proxy` 中，避免 vite 内的 http-proxy ws 与 插件的 ws 的冲突。
  */
 
-import type { Server } from 'node:http'
-import type { Http2SecureServer } from 'node:http2'
 import Cookies from 'cookies'
 import { pathToRegexp } from 'path-to-regexp'
 import colors from 'picocolors'
-import type { WebSocket } from 'ws'
 import { WebSocketServer } from 'ws'
+import type { Server } from 'node:http'
+import type { Http2SecureServer } from 'node:http2'
+import type { WebSocket } from 'ws'
+import { doesProxyContextMatchUrl, parseParams, urlParse } from './utils'
 import type {
   MockRequest,
   MockWebsocketItem,
   WebSocketSetupContext,
 } from '../types'
 import type { MockCompiler } from './mockCompiler'
-import { doesProxyContextMatchUrl, parseParams, urlParse } from './utils'
 import type { ResolvedMockServerPluginOptions } from './resolvePluginOptions'
 
 type PoolMap = Map<string, WSSMap>

@@ -1,12 +1,12 @@
 import process from 'node:process'
 import { isArray, isBoolean, toArray, uniq } from '@pengzhanbo/utils'
-import type { Alias, AliasOptions, ResolvedConfig } from 'vite'
 import color from 'picocolors'
 import type { CorsOptions } from 'cors'
-import type { MockServerPluginOptions, ServerBuildOption } from '../types'
-import { type Logger, createLogger } from './logger'
+import type { Alias, AliasOptions, ResolvedConfig } from 'vite'
 import { viteDefine } from './define'
+import { createLogger, type Logger } from './logger'
 import { ensureProxies } from './utils'
+import type { MockServerPluginOptions, ServerBuildOption } from '../types'
 
 export type ResolvedMockServerPluginOptions = Required<
   Omit<MockServerPluginOptions, 'build' | 'cors' | 'wsPrefix' | 'prefix'>

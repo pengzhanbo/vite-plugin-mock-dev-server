@@ -6,9 +6,9 @@ import {
   sortBy,
   toArray,
 } from '@pengzhanbo/utils'
-import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
 import { urlParse } from './utils'
 import { isObjectSubset } from './validator'
+import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
 
 type MockRawData = MockOptions | MockHttpItem | MockWebsocketItem | Record<string, MockOptions | MockHttpItem | MockWebsocketItem>
 

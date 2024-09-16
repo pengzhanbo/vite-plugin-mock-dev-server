@@ -13,6 +13,16 @@ import * as mime from 'mime-types'
 import { pathToRegexp } from 'path-to-regexp'
 import colors from 'picocolors'
 import type { Connect } from 'vite'
+import { matchingWeight } from './matchingWeight'
+import { parseReqBody } from './parseReqBody'
+import { collectRequest } from './requestRecovery'
+import {
+  doesProxyContextMatchUrl,
+  isReadableStream,
+  parseParams,
+  urlParse,
+} from './utils'
+import { validate } from './validator'
 import type {
   ExtraRequest,
   Method,
@@ -24,17 +34,7 @@ import type {
   ResponseBody,
 } from '../types'
 import type { Logger } from './logger'
-import { matchingWeight } from './matchingWeight'
 import type { MockCompiler } from './mockCompiler'
-import { parseReqBody } from './parseReqBody'
-import { collectRequest } from './requestRecovery'
-import {
-  doesProxyContextMatchUrl,
-  isReadableStream,
-  parseParams,
-  urlParse,
-} from './utils'
-import { validate } from './validator'
 
 export interface BaseMiddlewareOptions {
   formidableOptions: MockServerPluginOptions['formidableOptions']

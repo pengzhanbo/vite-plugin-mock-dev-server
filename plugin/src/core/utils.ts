@@ -1,11 +1,11 @@
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { parse as queryParse } from 'node:querystring'
-import type { Readable, Stream } from 'node:stream'
-import { URL, fileURLToPath } from 'node:url'
-import os from 'node:os'
+import { fileURLToPath, URL } from 'node:url'
 import Debug from 'debug'
 import { match } from 'path-to-regexp'
+import type { Readable, Stream } from 'node:stream'
 import type { ResolvedConfig } from 'vite'
 
 export function isStream(stream: unknown): stream is Stream {
@@ -65,8 +65,8 @@ export function ensureProxies(serverProxy: ResolvedConfig['server']['proxy'] = {
     if (
       typeof value === 'string'
       || (!value.ws
-      && !value.target?.toString().startsWith('ws:')
-      && !value.target?.toString().startsWith('wss:'))
+        && !value.target?.toString().startsWith('ws:')
+        && !value.target?.toString().startsWith('wss:'))
     ) {
       httpProxies.push(key)
     }

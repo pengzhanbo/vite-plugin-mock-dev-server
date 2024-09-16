@@ -1,16 +1,16 @@
 import { mockDevServerPlugin } from './plugin'
 
+export * from './helper'
+
+export * from './server'
 export type {
   FormidableFile,
-  MockOptions,
   MockHttpItem,
-  MockWebsocketItem,
-  MockServerPluginOptions,
+  MockOptions,
   MockRequest,
+  MockServerPluginOptions,
+  MockWebsocketItem,
 } from './types'
-
-export * from './helper'
-export * from './server'
 
 export { mockDevServerPlugin }
 
