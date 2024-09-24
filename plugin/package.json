@@ -73,7 +73,7 @@
   "dependencies": {
     "@pengzhanbo/utils": "^1.1.2",
     "@rollup/pluginutils": "^5.1.0",
-    "chokidar": "^4.0.0",
+    "chokidar": "3.6.0",
     "co-body": "^6.2.0",
     "cookies": "^0.9.1",
     "cors": "^2.8.5",
