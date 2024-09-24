@@ -1,3 +1,17 @@
+## [1.7.3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.7.2...v1.7.3) (2024-09-24)
+
+
+### Bug Fixes
+
+* incorrect hot replacement, close [#98](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/98) ([#99](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/99)) ([317287f](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/317287f93a10d2886e806b65ca38889326248adc))
+
+
+### Performance Improvements
+
+* update deps to latest ([08fd37f](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/08fd37f8dc19c9cd0e4124ee294aa208f3d67dc1))
+
+
+
 ## [1.7.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.7.1...v1.7.2) (2024-09-16)
 
 
