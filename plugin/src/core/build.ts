@@ -1,3 +1,7 @@
+import type { Metafile } from 'esbuild'
+import type { Plugin } from 'vite'
+import type { ServerBuildOption } from '../types'
+import type { ResolvedMockServerPluginOptions } from './resolvePluginOptions'
 import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
@@ -7,12 +11,8 @@ import { createFilter } from '@rollup/pluginutils'
 import fg from 'fast-glob'
 import isCore from 'is-core-module'
 import c from 'picocolors'
-import type { Metafile } from 'esbuild'
-import type { Plugin } from 'vite'
 import { aliasMatches, transformWithEsbuild } from './compiler'
 import { lookupFile, normalizePath } from './utils'
-import type { ServerBuildOption } from '../types'
-import type { ResolvedMockServerPluginOptions } from './resolvePluginOptions'
 
 declare const __PACKAGE_NAME__: string
 declare const __PACKAGE_VERSION__: string

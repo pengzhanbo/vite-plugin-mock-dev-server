@@ -1,3 +1,4 @@
+import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
 import {
   isArray,
   isEmptyObject,
@@ -8,7 +9,6 @@ import {
 } from '@pengzhanbo/utils'
 import { urlParse } from './utils'
 import { isObjectSubset } from './validator'
-import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
 
 type MockRawData = MockOptions | MockHttpItem | MockWebsocketItem | Record<string, MockOptions | MockHttpItem | MockWebsocketItem>
 

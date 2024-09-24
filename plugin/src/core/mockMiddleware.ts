@@ -1,14 +1,14 @@
-import cors from 'cors'
-import { pathToRegexp } from 'path-to-regexp'
 import type { Server } from 'node:http'
 import type { Http2SecureServer } from 'node:http2'
 import type { Connect, WebSocketServer } from 'vite'
+import type { MockCompiler } from './mockCompiler'
+import type { ResolvedMockServerPluginOptions } from './resolvePluginOptions'
+import cors from 'cors'
+import { pathToRegexp } from 'path-to-regexp'
 import { baseMiddleware } from './baseMiddleware'
 import { createMockCompiler } from './mockCompiler'
 import { doesProxyContextMatchUrl, urlParse } from './utils'
 import { mockWebSocket } from './ws'
-import type { MockCompiler } from './mockCompiler'
-import type { ResolvedMockServerPluginOptions } from './resolvePluginOptions'
 
 export function mockServerMiddleware(
   options: ResolvedMockServerPluginOptions,

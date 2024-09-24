@@ -1,7 +1,7 @@
-import bodyParser from 'co-body'
-import formidable from 'formidable'
 import type { Connect } from 'vite'
 import type { BodyParserOptions } from '../types'
+import bodyParser from 'co-body'
+import formidable from 'formidable'
 
 export async function parseReqBody(
   req: Connect.IncomingMessage,

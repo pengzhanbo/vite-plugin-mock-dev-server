@@ -1,15 +1,15 @@
+import type { Metafile } from 'esbuild'
+import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
+import type { ResolvedMockServerPluginOptions } from './resolvePluginOptions'
 import EventEmitter from 'node:events'
 import process from 'node:process'
 import { promiseParallel, toArray } from '@pengzhanbo/utils'
 import { createFilter } from '@rollup/pluginutils'
 import chokidar, { type FSWatcher } from 'chokidar'
 import fastGlob from 'fast-glob'
-import type { Metafile } from 'esbuild'
 import { loadFromCode, transformWithEsbuild } from './compiler'
 import { transformMockData, transformRawData } from './transform'
 import { debug, lookupFile, normalizePath } from './utils'
-import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
-import type { ResolvedMockServerPluginOptions } from './resolvePluginOptions'
 
 export function createMockCompiler(options: ResolvedMockServerPluginOptions) {
   return new MockCompiler(options)

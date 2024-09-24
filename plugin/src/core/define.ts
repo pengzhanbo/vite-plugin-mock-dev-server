@@ -12,8 +12,8 @@
  * 所以类似 其它插件 注入的一些 代码片段 的字符串值，在 mock 文件中都不能使用。
  */
 
-import process from 'node:process'
 import type { ResolvedConfig } from 'vite'
+import process from 'node:process'
 
 export function viteDefine(config: ResolvedConfig) {
   const processNodeEnv: Record<string, string> = {}

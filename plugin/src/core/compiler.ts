@@ -1,11 +1,11 @@
+import type { Metafile, Plugin } from 'esbuild'
+import type { Alias } from 'vite'
 import fs, { promises as fsp } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 import { build } from 'esbuild'
 import JSON5 from 'json5'
-import type { Metafile, Plugin } from 'esbuild'
-import type { Alias } from 'vite'
 
 /* ===== esbuild begin ===== */
 

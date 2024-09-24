@@ -1,3 +1,16 @@
+import type { Connect } from 'vite'
+import type {
+  ExtraRequest,
+  Method,
+  MockHttpItem,
+  MockOptions,
+  MockRequest,
+  MockResponse,
+  MockServerPluginOptions,
+  ResponseBody,
+} from '../types'
+import type { Logger } from './logger'
+import type { MockCompiler } from './mockCompiler'
 import { Buffer } from 'node:buffer'
 import {
   isArray,
@@ -12,7 +25,6 @@ import HTTP_STATUS from 'http-status'
 import * as mime from 'mime-types'
 import { pathToRegexp } from 'path-to-regexp'
 import colors from 'picocolors'
-import type { Connect } from 'vite'
 import { matchingWeight } from './matchingWeight'
 import { parseReqBody } from './parseReqBody'
 import { collectRequest } from './requestRecovery'
@@ -23,18 +35,6 @@ import {
   urlParse,
 } from './utils'
 import { validate } from './validator'
-import type {
-  ExtraRequest,
-  Method,
-  MockHttpItem,
-  MockOptions,
-  MockRequest,
-  MockResponse,
-  MockServerPluginOptions,
-  ResponseBody,
-} from '../types'
-import type { Logger } from './logger'
-import type { MockCompiler } from './mockCompiler'
 
 export interface BaseMiddlewareOptions {
   formidableOptions: MockServerPluginOptions['formidableOptions']

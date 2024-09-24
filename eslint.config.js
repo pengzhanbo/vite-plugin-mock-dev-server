@@ -6,5 +6,6 @@ export default config({
   files: ['**/*.md/*.ts'],
   rules: {
     'node/prefer-global/buffer': 'off',
+    'antfu/no-top-level-await': 'off',
   },
 })

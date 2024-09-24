@@ -1,3 +1,5 @@
+import type { Token } from 'path-to-regexp'
+import type { MockMatchPriority } from '../types'
 /**
  * 规则匹配优先级
  *
@@ -19,8 +21,6 @@ import {
   uniq,
 } from '@pengzhanbo/utils'
 import { parse, pathToRegexp } from 'path-to-regexp'
-import type { Token } from 'path-to-regexp'
-import type { MockMatchPriority } from '../types'
 
 const tokensCache: Record<string, Token[]> = {}
 

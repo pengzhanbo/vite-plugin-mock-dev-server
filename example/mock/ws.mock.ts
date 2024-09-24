@@ -1,5 +1,5 @@
-import { defineMock } from 'vite-plugin-mock-dev-server'
 import type { MockRequest } from 'vite-plugin-mock-dev-server'
+import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
   url: '/socket.io',

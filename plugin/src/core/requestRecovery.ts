@@ -1,3 +1,4 @@
+import type { Connect, UserConfig } from 'vite'
 /**
  * 请求复原
  *
@@ -6,7 +7,6 @@
  * 为此，我们在请求流中记录请求数据，当当前请求无法继续时，可以从备份中恢复请求流
  */
 import { Buffer } from 'node:buffer'
-import type { Connect, UserConfig } from 'vite'
 
 const cache = new WeakMap<Connect.IncomingMessage, Buffer>()
 

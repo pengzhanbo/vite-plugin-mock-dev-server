@@ -1,11 +1,11 @@
-import { toArray } from '@pengzhanbo/utils'
 import type { Plugin, ResolvedConfig } from 'vite'
+import type { ResolvedMockServerPluginOptions } from './core/resolvePluginOptions'
+import type { MockServerPluginOptions } from './types'
+import { toArray } from '@pengzhanbo/utils'
 import { generateMockServer } from './core/build'
 import { mockServerMiddleware } from './core/mockMiddleware'
 import { recoverRequest } from './core/requestRecovery'
 import { resolvePluginOptions } from './core/resolvePluginOptions'
-import type { ResolvedMockServerPluginOptions } from './core/resolvePluginOptions'
-import type { MockServerPluginOptions } from './types'
 
 export function mockDevServerPlugin(options: MockServerPluginOptions = {}): Plugin[] {
   const plugins: Plugin[] = [serverPlugin(options)]
