@@ -3,7 +3,7 @@
   "type": "module",
   "version": "1.7.2",
   "private": true,
-  "packageManager": "pnpm@9.10.0",
+  "packageManager": "pnpm@9.11.0",
   "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
   "license": "MIT",
   "scripts": {
@@ -21,7 +21,7 @@
     "release": "pnpm release:check && pnpm release:version && pnpm -r publish"
   },
   "devDependencies": {
-    "@pengzhanbo/eslint-config": "^1.16.0",
+    "@pengzhanbo/eslint-config": "^1.17.0",
     "@types/co-body": "^6.1.3",
     "@types/cookies": "^0.9.0",
     "@types/cors": "^2.8.17",
@@ -29,12 +29,12 @@
     "@types/formidable": "2.0.6",
     "@types/is-core-module": "^2.2.2",
     "@types/mime-types": "^2.1.4",
-    "@types/node": "^22.5.5",
+    "@types/node": "^22.6.1",
     "@types/ws": "^8.5.12",
     "bumpp": "^9.5.2",
     "conventional-changelog-cli": "^5.0.0",
-    "eslint": "^9.10.0",
-    "tsup": "^8.2.4",
+    "eslint": "^9.11.1",
+    "tsup": "^8.3.0",
     "typescript": "^5.6.2",
     "vitest": "^2.1.1"
   }
