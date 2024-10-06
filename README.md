@@ -43,7 +43,7 @@
 - 🌈 Support `vite preview` mode.
 - 📤 Support `multipart` content-type, mock upload file.
 - 📥 Support mock download file.
-- ⚜️ Support `WebSocket Mock`
+- ⚜️ Support `WebSocket Mock` and `Server-Sent Events Mock`
 - 🗂 Support building small independent deployable mock services.
 
 ## Documentation
@@ -152,6 +152,23 @@ const defineAPIMock = createDefineMock((mock) => {
 
 export default defineApiMock({
   url: '/test' // Complete as '/api/test'
+})
+```
+
+### createSSEStream(req, res)
+
+Create a `Server-sent events` write stream to support mocking `EventSource`.
+
+``` ts
+import { createSSEStream, defineMock } from 'vite-plugin-mock-dev-server'
+
+export default defineMock({
+  url: '/api/sse',
+  response: (req, res) => {
+    const sse = createSSEStream(req, res)
+    sse.write({ event: 'message', data: { message: 'hello world' } })
+    sse.end()
+  }
 })
 ```
 
@@ -958,6 +975,40 @@ ws.addEventListener('open', () => {
 }, { once: true })
 ws.addEventListener('message', (raw) => {
   console.log(raw)
+})
+```
+
+**示例：** EventSource Mock
+
+```ts
+// sse.mock.ts
+import { createSSEStream, defineMock } from 'vite-plugin-mock-dev-server'
+
+export default defineMock({
+  url: '/api/sse',
+  response(req, res) {
+    const sse = createSSEStream(req, res)
+    let count = 0
+    const timer = setInterval(() => {
+      sse.write({
+        event: 'count',
+        data: { count: ++count },
+      })
+      if (count >= 10) {
+        sse.end()
+        clearInterval(timer)
+      }
+    }, 1000)
+  },
+})
+```
+
+```ts
+// app.js
+const es = new EventSource('/api/sse')
+
+es.addEventListener('count', (e) => {
+  console.log(e.data)
 })
 ```
 
