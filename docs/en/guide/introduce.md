@@ -6,9 +6,11 @@ It uses the built-in `http` and `http-proxy` services of Vite to intercept the p
 
 You can use any third-party module in the mock configuration file with `node`. This means that you can use libraries like `mockjs` / `faker-js` to help generate mock data.
 
-The plugin supports responding with multiple data types including `text` / `json` / `Buffer` / `ReadStream`, and also supports setting headers and cookies.
+The plugin supports responding to various data types including `text/json/Buffer/ReadStream`, and also supports setting headers, cookies, etc.
 
-The plugin also supports simulating `WebSocket`, making it easy to debug `WebSocket` services in local development environment.
+The plugin supports simulating `WebSocket`, making it easy to debug `WebSocket` services in a local development environment.
+
+The plugin also supports simulating `Server-Sent Events`, making it easy to debug `EventSource` in a local development environment.
 
 ## Features
 
@@ -29,5 +31,5 @@ The plugin also supports simulating `WebSocket`, making it easy to debug `WebSoc
 - 🌈 Support `vite preview` mode.
 - 📤 Support `multipart` content-type, mock upload file.
 - 📥 Support mock download file.
-- ⚜️ Support `WebSocket Mock`
+- ⚜️ Support `WebSocket Mock`、`Server-Sent Events`
 - 🗂 Support building small independent deployable mock services.

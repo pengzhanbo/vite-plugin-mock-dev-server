@@ -4,7 +4,7 @@
 
 <<< @/../example/mock/ws.mock.ts
 
-## Simulated Real-time Push
+## Real-time Push
 
 ::: code-group
 
@@ -32,7 +32,7 @@ export default defineMock({
 
 :::
 
-## Simulated Chat Room
+## Chat Room
 
 ::: code-group
 

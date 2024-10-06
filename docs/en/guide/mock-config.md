@@ -2,7 +2,9 @@
 
 `type: MockOptionsItem | MockOptionsItem[]`
 
-```ts
+::: code-group
+
+```ts [*.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
@@ -10,6 +12,8 @@ export default defineMock({
   body: {}
 })
 ```
+
+:::
 
 **Type Definition:**
 
@@ -124,6 +128,7 @@ The actual `content-type` is determined internally by the plugin using `mime-typ
 - **Default**：
 
   The default value is determined based on the value of [type](#type):
+
   | Type     | Default                                                  |
   | -------- | -------------------------------------------------------- |
   | `text`   | `{ 'Content-Type': 'text/plain' }`                       |

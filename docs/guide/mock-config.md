@@ -2,7 +2,9 @@
 
 `type: MockOptionsItem | MockOptionsItem[]`
 
-```ts
+::: code-group
+
+```ts [*.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
@@ -10,6 +12,8 @@ export default defineMock({
   body: {}
 })
 ```
+
+:::
 
 **类型定义:**
 
@@ -125,6 +129,7 @@ export default defineMock({
 - **默认值**：
 
   默认值根据 [type](#type) 的值确定：
+
   | type     | 默认值                                            |
   | -------- | ------------------------------------------------- |
   | `text`   | `{ 'Content-Type': 'text/plain' }`                |

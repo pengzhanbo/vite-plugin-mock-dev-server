@@ -6,9 +6,11 @@
 
 你可以在 mock配置文件中使用`node` 任意第三方模块。 这表示，你可以使用如 `mockjs` / `faker-js` 等库帮助生成 `mock data`。
 
-插件支持响应多种数据类型包括 `text/json/Buffer/ReadStream`等，还支持设置 headers、cookies。
+插件支持响应多种数据类型包括 `text/json/Buffer/ReadStream`等，还支持设置 headers、cookies 等。
 
-插件还支持模拟 `WebSocket`，可以轻松的实现在本地开发环境调试 `WebSocket` 服务。
+插件支持模拟 `WebSocket`，可以轻松的实现在本地开发环境调试 `WebSocket` 服务。
+
+插件还支持 模拟 `Server-Sent Events`，可以轻松的实现在本地开发环境调试 `EventSource` 。
 
 ## 特性
 
@@ -29,5 +31,5 @@
 - 🌈 支持 `vite preview` 模式
 - 📤 支持 multipart 类型，模拟文件上传
 - 📥 支持模拟文件下载
-- ⚜️ 支持模拟 `WebSocket`
+- ⚜️ 支持模拟 `WebSocket`、 `Server-Sent Events`
 - 🗂 支持构建可独立部署的小型mock服务
