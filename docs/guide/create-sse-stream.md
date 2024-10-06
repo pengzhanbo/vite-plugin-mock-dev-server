@@ -2,7 +2,7 @@
 
 创建一个 `Server-sent events` 写入流，用于支持模拟 `EventSource`。
 
-## Usage
+## 使用
 
 ::: code-group
 
@@ -20,3 +20,22 @@ export default defineMock({
 ```
 
 :::
+
+## Types
+
+```ts
+import type { Transform } from 'node:stream'
+
+interface SSEStream extends Transform {
+  write: (message: SSEMessage, encoding?: BufferEncoding, cb?: (error: Error | null | undefined) => void) => boolean
+  write: (message: SSEMessage, cb?: (error: Error | null | undefined) => void) => boolean
+}
+
+interface SSEMessage {
+  data?: string | object
+  comment?: string
+  event?: string
+  id?: string
+  retry?: number
+}
+```

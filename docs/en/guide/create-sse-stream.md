@@ -20,3 +20,22 @@ export default defineMock({
 ```
 
 :::
+
+## Types
+
+```ts
+import type { Transform } from 'node:stream'
+
+interface SSEStream extends Transform {
+  write: (message: SSEMessage, encoding?: BufferEncoding, cb?: (error: Error | null | undefined) => void) => boolean
+  write: (message: SSEMessage, cb?: (error: Error | null | undefined) => void) => boolean
+}
+
+interface SSEMessage {
+  data?: string | object
+  comment?: string
+  event?: string
+  id?: string
+  retry?: number
+}
+```
