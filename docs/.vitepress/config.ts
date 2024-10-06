@@ -12,19 +12,21 @@ export default defineConfig({
     theme: { light: 'github-light', dark: 'github-dark' },
     headers: { level: [2, 3] },
   },
+  head: [
+    ['link', { rel: 'icon', type: 'image/svg', href: '/logo.svg' }],
+  ],
   sitemap: {
     hostname: 'https://vite-plugin-mock-dev-server.netlify.app',
   },
   themeConfig: {
+    logo: '/logo.svg',
     socialLinks: [
       {
         icon: 'github',
         link: 'https://github.com/pengzhanbo/vite-plugin-mock-dev-server',
       },
     ],
-    search: {
-      provider: 'local',
-    },
+    search: { provider: 'local' },
   },
   locales: {
     root: {
@@ -74,6 +76,7 @@ export default defineConfig({
                 { text: 'defineMock', link: '/guide/define-mock' },
                 { text: 'createDefineMock', link: '/guide/create-define-mock' },
                 { text: 'defineMockData', link: '/guide/define-mock-data' },
+                { text: 'createSSEStream', link: '/guide/create-sse-stream' },
               ],
             },
             {
@@ -107,8 +110,9 @@ export default defineConfig({
             { text: '请求验证器', link: '/examples/validator' },
             { text: '使用mockjs库', link: '/examples/mockjs' },
             { text: '使用faker-js库', link: '/examples/faker' },
-            { text: 'graphql', link: '/examples/graphql' },
-            { text: 'websocket', link: '/examples/websocket' },
+            { text: 'Graphql', link: '/examples/graphql' },
+            { text: 'Websocket', link: '/examples/websocket' },
+            { text: 'EventSource', link: '/examples/event-source' },
           ],
         },
       },
@@ -158,11 +162,9 @@ export default defineConfig({
               items: [
                 { text: 'mockDevServerPlugin', link: '/en/guide/mock-plugin' },
                 { text: 'defineMock', link: '/en/guide/define-mock' },
-                {
-                  text: 'createDefineMock',
-                  link: '/en/guide/create-define-mock',
-                },
+                { text: 'createDefineMock', link: '/en/guide/create-define-mock' },
                 { text: 'defineMockData', link: '/en/guide/define-mock-data' },
+                { text: 'createSSEStream', link: '/en/guide/create-sse-stream' },
               ],
             },
             {
@@ -202,8 +204,9 @@ export default defineConfig({
             { text: 'Request validator', link: '/en/examples/validator' },
             { text: 'Use mockjs', link: '/en/examples/mockjs' },
             { text: 'Use faker-js', link: '/en/examples/faker' },
-            { text: 'graphql', link: '/en/examples/graphql' },
-            { text: 'websocket', link: '/en/examples/websocket' },
+            { text: 'Graphql', link: '/en/examples/graphql' },
+            { text: 'Websocket', link: '/en/examples/websocket' },
+            { text: 'EventSource', link: '/en/examples/event-source' },
           ],
         },
       },
