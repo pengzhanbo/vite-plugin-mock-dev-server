@@ -1,3 +1,12 @@
+# [1.8.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.7.3...v1.8.0) (2024-10-06)
+
+
+### Features
+
+* add support for mock `Server-Sent-Events` ([#101](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/101)) ([3a088fc](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/3a088fc70d0d143e21c3e92ba31738ae76d73c3d))
+
+
+
 ## [1.7.3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.7.2...v1.7.3) (2024-09-24)
 
 
