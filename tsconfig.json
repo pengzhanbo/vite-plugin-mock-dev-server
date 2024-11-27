@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "lib": ["ESNext"],
+    "target": "ES2022",
     "baseUrl": ".",
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "strict": true,
     "noUnusedLocals": true,
+    "useUnknownInCatchVariables": false,
     "declaration": true,
     "sourceMap": false,
     "esModuleInterop": true,
