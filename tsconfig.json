@@ -13,11 +13,11 @@
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "include": ["./plugin", "./docs/.vitepress"],
+  "include": ["./plugin/**/*", "./docs/.vitepress/**/*"],
   "exclude": [
-    "dist",
-    "node_modules",
-    "./docs/.vitepress/cache",
-    "./docs/.vitepress/dist"
+    "**/dist/**",
+    "**/node_modules/**",
+    "./docs/.vitepress/cache/**",
+    "./docs/.vitepress/dist/**"
   ]
 }

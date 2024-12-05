@@ -56,7 +56,7 @@
     "dist"
   ],
   "engines": {
-    "node": "^18 || >= 20"
+    "node": "^18 || ^20 || >=22"
   },
   "scripts": {
     "build": "tsup"
@@ -90,7 +90,7 @@
   },
   "devDependencies": {
     "esbuild": "^0.24.0",
-    "vite": "^6.0.1"
+    "vite": "^6.0.2"
   },
   "publishConfig": {
     "access": "public"

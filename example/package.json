@@ -10,7 +10,7 @@
   "devDependencies": {
     "@types/mockjs": "^1.0.10",
     "mockjs": "^1.1.0",
-    "vite": "^6.0.1",
+    "vite": "^6.0.2",
     "vite-plugin-mock-dev-server": "workspace:*"
   }
 }
