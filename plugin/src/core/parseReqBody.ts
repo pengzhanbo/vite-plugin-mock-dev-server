@@ -9,7 +9,7 @@ export async function parseReqBody(
   bodyParserOptions: BodyParserOptions = {},
 ): Promise<any> {
   const method = req.method!.toUpperCase()
-  if (['GET', 'DELETE', 'HEAD'].includes(method))
+  if (['HEAD', 'OPTIONS'].includes(method))
     return undefined
   const type = req.headers['content-type']?.toLocaleLowerCase() || ''
   const { limit, formLimit, jsonLimit, textLimit, ...rest } = bodyParserOptions
