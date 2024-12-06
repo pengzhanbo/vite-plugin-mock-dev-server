@@ -978,7 +978,7 @@ ws.addEventListener('message', (raw) => {
 })
 ```
 
-**示例：** EventSource Mock
+**exp：** EventSource Mock
 
 ```ts
 // sse.mock.ts
