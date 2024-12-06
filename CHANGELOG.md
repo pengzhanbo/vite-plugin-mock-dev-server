@@ -1,3 +1,17 @@
+## [1.8.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.8.0...v1.8.1) (2024-12-06)
+
+
+### Features
+
+* support parse `DELETE` request body ([2d854cc](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/2d854cc2a925f60d6f0d5bdc37da0f2b984de7f9))
+
+
+### Performance Improvements
+
+* support `vite@6` ([995f25f](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/995f25fac38d5085421104a46d53efa398b2f163))
+
+
+
 # [1.8.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.7.3...v1.8.0) (2024-10-06)
 
 
