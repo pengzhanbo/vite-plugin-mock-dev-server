@@ -90,7 +90,7 @@
   },
   "devDependencies": {
     "esbuild": "^0.24.0",
-    "vite": "^6.0.2"
+    "vite": "^6.0.3"
   },
   "publishConfig": {
     "access": "public"
