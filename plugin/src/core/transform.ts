@@ -3,7 +3,7 @@ import {
   isArray,
   isEmptyObject,
   isFunction,
-  isObject,
+  isPlainObject,
   sortBy,
   toArray,
 } from '@pengzhanbo/utils'
@@ -52,7 +52,7 @@ export function transformMockData(
   const mocks: Record<string, MockOptions> = {}
 
   list
-    .filter(mock => isObject(mock) && mock.enabled !== false && mock.url)
+    .filter(mock => isPlainObject(mock) && mock.enabled !== false && mock.url)
     .forEach((mock) => {
       const { pathname, query } = urlParse(mock.url)
       const list = (mocks[pathname!] ??= [])
