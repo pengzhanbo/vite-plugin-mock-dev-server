@@ -1,3 +1,12 @@
+## [1.8.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.8.1...v1.8.2) (2024-12-07)
+
+
+### Bug Fixes
+
+* rename `isObject` to `isPlainObject`, close [#104](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/104) ([9ee63e8](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/9ee63e834de01d393a4dd9ce31c0bb85548cf55c))
+
+
+
 ## [1.8.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.8.0...v1.8.1) (2024-12-06)
 
 
