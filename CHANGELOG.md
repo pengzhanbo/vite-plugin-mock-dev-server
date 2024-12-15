@@ -1,3 +1,12 @@
+## [1.8.3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.8.2...v1.8.3) (2024-12-15)
+
+
+### Features
+
+* bump `path-to-regexp` to `[@6](https://github.com/6).3.0` ([#105](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/105)) ([34524a2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/34524a2831d7b188920e71a38fabdb31ae7f7517))
+
+
+
 ## [1.8.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.8.1...v1.8.2) (2024-12-07)
 
 
