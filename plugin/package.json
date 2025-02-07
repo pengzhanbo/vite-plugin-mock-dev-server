@@ -78,9 +78,9 @@
     "cookies": "^0.9.1",
     "cors": "^2.8.5",
     "debug": "^4.4.0",
-    "fast-glob": "^3.3.2",
+    "fast-glob": "^3.3.3",
     "formidable": "2.1.2",
-    "http-status": "^2.0.0",
+    "http-status": "^2.1.0",
     "is-core-module": "^2.16.1",
     "json5": "^2.2.3",
     "mime-types": "^2.1.35",
@@ -90,7 +90,7 @@
   },
   "devDependencies": {
     "esbuild": "^0.24.2",
-    "vite": "^6.0.7"
+    "vite": "^6.1.0"
   },
   "publishConfig": {
     "access": "public"
