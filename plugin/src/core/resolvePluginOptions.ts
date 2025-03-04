@@ -1,11 +1,12 @@
 import type { CorsOptions } from 'cors'
 import type { Alias, AliasOptions, ResolvedConfig } from 'vite'
 import type { MockServerPluginOptions, ServerBuildOption } from '../types'
+import type { Logger } from './logger'
 import process from 'node:process'
 import { isArray, isBoolean, toArray, uniq } from '@pengzhanbo/utils'
 import color from 'picocolors'
 import { viteDefine } from './define'
-import { createLogger, type Logger } from './logger'
+import { createLogger } from './logger'
 import { ensureProxies } from './utils'
 
 export type ResolvedMockServerPluginOptions = Required<
