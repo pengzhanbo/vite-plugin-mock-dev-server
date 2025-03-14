@@ -69,7 +69,7 @@ pnpm add -D vite-plugin-mock-dev-server
 
 ``` ts
 import { defineConfig } from 'vite'
-import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
+import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 
 export default defineConfig({
   plugins: [
@@ -115,7 +115,7 @@ vite plugin
 
 ``` ts
 import { defineConfig } from 'vite'
-import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
+import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 
 export default defineConfig({
   plugins: [

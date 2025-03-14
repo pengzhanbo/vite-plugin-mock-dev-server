@@ -11,7 +11,7 @@
 ``` ts [typescript]
 import { defineConfig } from 'vite'
 
-import mockDevServerPlugin from 'vite-plugin-mock-dev-server' // [!code ++]
+import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server' // [!code ++]
 
 export default defineConfig({
   plugins: [
@@ -21,7 +21,7 @@ export default defineConfig({
 ```
 
 ``` js [javascript]
-const mockDevServerPlugin = require('vite-plugin-mock-dev-server') // [!code ++]
+const { mockDevServerPlugin } = require('vite-plugin-mock-dev-server') // [!code ++]
 /**
  * @type {import('vite').defineConfig}
  */
@@ -46,7 +46,7 @@ module.exports = {
 
 ``` ts [typescript]
 import { defineConfig } from 'vite'
-import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
+import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 
 export default defineConfig({
   plugins: [
@@ -61,7 +61,7 @@ export default defineConfig({
 ```
 
 ``` js [javascript]
-const mockDevServerPlugin = require('vite-plugin-mock-dev-server')
+const { mockDevServerPlugin } = require('vite-plugin-mock-dev-server')
 
 /**
  * @type {import('vite').defineConfig}
