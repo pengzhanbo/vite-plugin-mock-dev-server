@@ -2,5 +2,48 @@ packages:
   - docs
   - example
   - plugin
+
+catalogs:
+  dev:
+    '@pengzhanbo/eslint-config': ^1.28.0
+    '@types/co-body': ^6.1.3
+    '@types/cookies': ^0.9.0
+    '@types/cors': ^2.8.17
+    '@types/debug': ^4.1.12
+    '@types/formidable': 2.0.6
+    '@types/is-core-module': ^2.2.2
+    '@types/mime-types': ^2.1.4
+    '@types/mockjs': ^1.0.10
+    '@types/node': ^22.13.10
+    '@types/ws': ^8.18.0
+    bumpp: ^10.1.0
+    conventional-changelog-cli: ^5.0.0
+    esbuild: ^0.25.1
+    eslint: ^9.22.0
+    mockjs: ^1.1.0
+    tsup: ^8.4.0
+    typescript: ^5.8.2
+    vite: ^6.2.2
+    vitepress: ^1.6.3
+    vitest: ^3.0.8
+
+  prod:
+    '@pengzhanbo/utils': ^1.2.0
+    '@rollup/pluginutils': ^5.1.4
+    chokidar: 3.6.0
+    co-body: ^6.2.0
+    cookies: ^0.9.1
+    cors: ^2.8.5
+    debug: ^4.4.0
+    fast-glob: ^3.3.3
+    formidable: 2.1.2
+    http-status: ^2.1.0
+    is-core-module: ^2.16.1
+    json5: ^2.2.3
+    mime-types: ^2.1.35
+    path-to-regexp: 6.3.0
+    picocolors: ^1.1.1
+    ws: ^8.18.1
+
 onlyBuiltDependencies:
   - esbuild

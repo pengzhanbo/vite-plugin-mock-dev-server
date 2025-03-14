@@ -1,6 +1,7 @@
 import config from '@pengzhanbo/eslint-config'
 
 export default config({
+  pnpm: true,
   vue: false,
 }, {
   files: ['**/*.md/*.ts'],

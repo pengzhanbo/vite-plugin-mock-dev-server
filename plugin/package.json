@@ -71,26 +71,26 @@
     }
   },
   "dependencies": {
-    "@pengzhanbo/utils": "^1.2.0",
-    "@rollup/pluginutils": "^5.1.4",
-    "chokidar": "3.6.0",
-    "co-body": "^6.2.0",
-    "cookies": "^0.9.1",
-    "cors": "^2.8.5",
-    "debug": "^4.4.0",
-    "fast-glob": "^3.3.3",
-    "formidable": "2.1.2",
-    "http-status": "^2.1.0",
-    "is-core-module": "^2.16.1",
-    "json5": "^2.2.3",
-    "mime-types": "^2.1.35",
-    "path-to-regexp": "6.3.0",
-    "picocolors": "^1.1.1",
-    "ws": "^8.18.1"
+    "@pengzhanbo/utils": "catalog:prod",
+    "@rollup/pluginutils": "catalog:prod",
+    "chokidar": "catalog:prod",
+    "co-body": "catalog:prod",
+    "cookies": "catalog:prod",
+    "cors": "catalog:prod",
+    "debug": "catalog:prod",
+    "fast-glob": "catalog:prod",
+    "formidable": "catalog:prod",
+    "http-status": "catalog:prod",
+    "is-core-module": "catalog:prod",
+    "json5": "catalog:prod",
+    "mime-types": "catalog:prod",
+    "path-to-regexp": "catalog:prod",
+    "picocolors": "catalog:prod",
+    "ws": "catalog:prod"
   },
   "devDependencies": {
-    "esbuild": "^0.25.0",
-    "vite": "^6.2.0"
+    "esbuild": "catalog:dev",
+    "vite": "catalog:dev"
   },
   "publishConfig": {
     "access": "public"
