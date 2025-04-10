@@ -14,5 +14,7 @@ export type {
 
 export { mockDevServerPlugin }
 
-/** @deprecated use named export `mockDevServerPlugin` instead */
+/**
+ * @deprecated use named export `mockDevServerPlugin` instead
+ */
 export default mockDevServerPlugin
