@@ -11,6 +11,7 @@
     "declaration": true,
     "sourceMap": false,
     "esModuleInterop": true,
+    "isolatedDeclarations": true,
     "skipLibCheck": true
   },
   "include": ["./plugin/**/*", "./docs/.vitepress/**/*"],

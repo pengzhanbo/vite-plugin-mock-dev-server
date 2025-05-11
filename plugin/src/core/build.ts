@@ -27,7 +27,7 @@ type PluginContext<T = Plugin['buildEnd']> = T extends (
 export async function generateMockServer(
   ctx: PluginContext,
   options: ResolvedMockServerPluginOptions,
-) {
+): Promise<void> {
   const include = toArray(options.include)
   const exclude = toArray(options.exclude)
   const cwd = options.cwd || process.cwd()

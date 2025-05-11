@@ -90,7 +90,7 @@ function aliasPlugin(alias: Alias[]): Plugin {
   }
 }
 
-export function aliasMatches(pattern: string | RegExp, importee: string) {
+export function aliasMatches(pattern: string | RegExp, importee: string): boolean {
   if (pattern instanceof RegExp)
     return pattern.test(importee)
 

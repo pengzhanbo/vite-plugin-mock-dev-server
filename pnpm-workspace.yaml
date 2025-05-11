@@ -21,7 +21,6 @@ catalogs:
     eslint: ^9.26.0
     mockjs: ^1.1.0
     tsdown: ^0.11.3
-    tsup: ^8.4.0
     typescript: ^5.8.3
     vite: ^6.3.5
     vitepress: ^1.6.3

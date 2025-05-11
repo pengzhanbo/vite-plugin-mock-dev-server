@@ -11,7 +11,7 @@ import { Buffer } from 'node:buffer'
 const cache = new WeakMap<Connect.IncomingMessage, Buffer>()
 
 // 备份请求数据
-export function collectRequest(req: Connect.IncomingMessage) {
+export function collectRequest(req: Connect.IncomingMessage): void {
   const chunks: Buffer[] = []
   req.addListener('data', (chunk) => {
     chunks.push(Buffer.from(chunk))
@@ -26,7 +26,7 @@ export function collectRequest(req: Connect.IncomingMessage) {
  * vite 在 proxy 配置中，允许通过 configure 访问 http-proxy 实例，
  * 通过 http-proxy 的 proxyReq 事件，重新写入请求流
  */
-export function recoverRequest(config: UserConfig) {
+export function recoverRequest(config: UserConfig): void {
   if (!config.server)
     return
 

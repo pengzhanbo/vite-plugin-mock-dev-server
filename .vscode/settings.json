@@ -9,7 +9,8 @@
     "picocolors",
     "picomatch",
     "proxied",
-    "referer"
+    "referer",
+    "tsdown"
   ],
   "typescript.tsdk": "node_modules/typescript/lib",
   "markdownlint.config": {

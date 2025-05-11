@@ -42,7 +42,7 @@ export function transformMockData(
   mockList:
     | Map<string, MockHttpItem | MockWebsocketItem | MockOptions>
     | (MockHttpItem | MockWebsocketItem | MockOptions)[],
-) {
+): Record<string, MockOptions> {
   const list: MockOptions = []
   for (const [, handle] of mockList.entries()) {
     if (handle)
@@ -97,7 +97,7 @@ export function transformMockData(
   return mocks
 }
 
-export function sortByValidator(mocks: MockOptions) {
+export function sortByValidator(mocks: MockOptions): (MockHttpItem | MockWebsocketItem)[] {
   return sortBy(mocks, (item) => {
     if (item.ws === true)
       return 0

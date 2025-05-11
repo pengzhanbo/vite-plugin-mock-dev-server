@@ -1,11 +1,11 @@
+import type { DefaultTheme, UserConfig } from 'vitepress'
 import { defineConfig } from 'vitepress'
 import { version } from '../../package.json'
 
-export default defineConfig({
+const vitepressConfig: UserConfig<DefaultTheme.Config> = defineConfig({
   lang: 'zh-CN',
   title: 'Mock-Dev-Server',
-  description:
-    'Mock-dev-server is injected into the Vite development environment to simulate API request and response data.',
+  description: 'Mock-dev-server is injected into the Vite development environment to simulate API request and response data.',
   lastUpdated: true,
   cleanUrls: true,
   markdown: {
@@ -34,8 +34,7 @@ export default defineConfig({
       lang: 'zh-CN',
       themeConfig: {
         editLink: {
-          pattern:
-            'https://github.com/pengzhanbo/vite-plugin-mock-dev-server/edit/main/docs/:path',
+          pattern: 'https://github.com/pengzhanbo/vite-plugin-mock-dev-server/edit/main/docs/:path',
           text: '在Github编辑此页',
         },
         footer: {
@@ -122,8 +121,7 @@ export default defineConfig({
       lang: 'en-US',
       themeConfig: {
         editLink: {
-          pattern:
-            'https://github.com/pengzhanbo/vite-plugin-mock-dev-server/edit/main/docs/:path',
+          pattern: 'https://github.com/pengzhanbo/vite-plugin-mock-dev-server/edit/main/docs/:path',
           text: 'Edit this page on Github',
         },
         footer: {
@@ -213,3 +211,4 @@ export default defineConfig({
     },
   },
 })
+export default vitepressConfig

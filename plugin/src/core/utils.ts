@@ -1,3 +1,4 @@
+import type { ParsedUrlQuery } from 'node:querystring'
 import type { Readable, Stream } from 'node:stream'
 import type { ResolvedConfig } from 'vite'
 import fs from 'node:fs'
@@ -25,7 +26,7 @@ export function getDirname(importMetaUrl: string): string {
   return path.dirname(fileURLToPath(importMetaUrl))
 }
 
-export const debug = Debug('vite:mock-dev-server')
+export const debug: Debug.Debugger = Debug('vite:mock-dev-server')
 
 interface LookupFileOptions {
   pathOnly?: boolean
@@ -57,7 +58,9 @@ export function lookupFile(
   }
 }
 
-export function ensureProxies(serverProxy: ResolvedConfig['server']['proxy'] = {}) {
+export function ensureProxies(
+  serverProxy: ResolvedConfig['server']['proxy'] = {},
+): { httpProxies: string[], wsProxies: string[] } {
   const httpProxies: string[] = []
   const wsProxies: string[] = []
   Object.keys(serverProxy).forEach((key) => {
@@ -98,7 +101,10 @@ export function parseParams(pattern: string, url: string): Record<string, any> {
  * nodejs 从 19.0.0 开始 弃用 url.parse，因此使用 url.parse 来解析 可能会报错，
  * 使用 URL 来解析
  */
-export function urlParse(input: string) {
+export function urlParse(input: string): {
+  pathname: string
+  query: ParsedUrlQuery
+} {
   const url = new URL(input, 'http://example.com')
   const pathname = decodeURIComponent(url.pathname)
   const query = queryParse(url.search.replace(/^\?/, ''))

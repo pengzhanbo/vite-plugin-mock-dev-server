@@ -35,7 +35,6 @@
     "conventional-changelog-cli": "catalog:dev",
     "eslint": "catalog:dev",
     "tsdown": "catalog:dev",
-    "tsup": "catalog:dev",
     "typescript": "catalog:dev",
     "vitest": "catalog:dev"
   }

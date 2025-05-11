@@ -52,7 +52,7 @@ class SSEStream extends Transform {
     return super.pipe(destination, options)
   }
 
-  _transform(message: SSEMessage, encoding: string, callback: (error?: (Error | null), data?: any) => void) {
+  _transform(message: SSEMessage, encoding: string, callback: (error?: (Error | null), data?: any) => void): void {
     if (message.comment)
       this.push(`: ${message.comment}\n`)
     if (message.event)

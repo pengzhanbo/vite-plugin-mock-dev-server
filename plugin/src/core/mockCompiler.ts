@@ -12,7 +12,7 @@ import { loadFromCode, transformWithEsbuild } from './compiler'
 import { transformMockData, transformRawData } from './transform'
 import { debug, lookupFile, normalizePath } from './utils'
 
-export function createMockCompiler(options: ResolvedMockServerPluginOptions) {
+export function createMockCompiler(options: ResolvedMockServerPluginOptions): MockCompiler {
   return new MockCompiler(options)
 }
 
@@ -42,11 +42,11 @@ export class MockCompiler extends EventEmitter {
     catch {}
   }
 
-  get mockData() {
+  get mockData(): Record<string, MockOptions> {
     return this._mockData
   }
 
-  run() {
+  run(): void {
     const { include, exclude } = this.options
     /**
      * 使用 rollup 提供的 include/exclude 规则，
@@ -156,7 +156,7 @@ export class MockCompiler extends EventEmitter {
     })
   }
 
-  close() {
+  close(): void {
     this.mockWatcher?.close()
     this.depsWatcher?.close()
   }

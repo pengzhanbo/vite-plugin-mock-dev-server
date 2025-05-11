@@ -15,7 +15,7 @@
 import type { ResolvedConfig } from 'vite'
 import process from 'node:process'
 
-export function viteDefine(config: ResolvedConfig) {
+export function viteDefine(config: ResolvedConfig): Record<string, string> {
   const processNodeEnv: Record<string, string> = {}
 
   const nodeEnv = process.env.NODE_ENV || config.mode
