@@ -6,11 +6,8 @@
 
 在你的项目的 `vite.config.{ts,js}`文件中，引入并配置插件:
 
-::: code-group
-
-``` ts [typescript]
+``` ts [vite.config.{ts,js}]
 import { defineConfig } from 'vite'
-
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server' // [!code ++]
 
 export default defineConfig({
@@ -20,20 +17,6 @@ export default defineConfig({
 })
 ```
 
-``` js [javascript]
-const { mockDevServerPlugin } = require('vite-plugin-mock-dev-server') // [!code ++]
-/**
- * @type {import('vite').defineConfig}
- */
-module.exports = {
-  plugins: [
-    mockDevServerPlugin(), // [!code ++]
-  ],
-}
-```
-
-:::
-
 ## Step2: 配置 `server.proxy`
 
 本插件会直接读取 `server.proxy` 配置的 请求路径前缀，作为请求拦截路径匹配。
@@ -42,9 +25,7 @@ module.exports = {
 在后端服务未完成接口开发但已经提供了接口文档时，我们也只需要对这部分接口进行 mock，使得前端的接口接入流程能并行开发。
 因此，本插件直接读取 `server.proxy` 配置，从而减少插件需要配置的参数复杂度。
 
-::: code-group
-
-``` ts [typescript]
+``` ts [vite.config.{ts,js}]
 import { defineConfig } from 'vite'
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 
@@ -52,41 +33,22 @@ export default defineConfig({
   plugins: [
     mockDevServerPlugin(),
   ],
-  server: { // [!code ++]
-    proxy: { // [!code ++]
-      '^/api': 'http://example.com/', // [!code ++]
-    }, // [!code ++]
-  }, // [!code ++]
+  // [!code ++:5]
+  server: {
+    proxy: {
+      '^/api': 'http://example.com/'
+    },
+  },
 })
 ```
-
-``` js [javascript]
-const { mockDevServerPlugin } = require('vite-plugin-mock-dev-server')
-
-/**
- * @type {import('vite').defineConfig}
- */
-module.exports = {
-  plugins: [
-    mockDevServerPlugin(),
-  ],
-  server: { // [!code ++]
-    proxy: { // [!code ++]
-      '^/api': 'http://example.com/', // [!code ++]
-    }, // [!code ++]
-  }, // [!code ++]
-}
-```
-
-:::
 
 ## Step3: 添加 `/mock` 目录
 
 在你的项目根目录下， 添加 `/mock` 目录，`mock` 目录将用于统一保存并管理所有的 **mock配置文件**。
 
-```sh {2}
+```sh
 .
-├── mock
+├── mock  # [!code ++]
 ├── src
 └── package.json
 ```
@@ -116,13 +78,12 @@ module.exports = {
 ```sh {3}
 .
 ├── mock
-│   └── api.mock.ts // [!code ++]
+│   └── api.mock.ts  # [!code ++]
 ├── src
 └── package.json
 ```
 
 插件提供了 [`defineMock()`](/guide/define-mock) 函数帮助编写 mock 配置。
-::: code-group
 
 ```ts [api.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
@@ -132,8 +93,6 @@ export default defineMock({
   body: {}
 })
 ```
-
-:::
 
 ## Step5: 启动 Vite 开发服务
 

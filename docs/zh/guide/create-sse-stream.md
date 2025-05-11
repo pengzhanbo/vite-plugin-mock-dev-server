@@ -4,8 +4,6 @@
 
 ## 使用
 
-::: code-group
-
 ``` ts [*.mock.ts]
 import { createSSEStream, defineMock } from 'vite-plugin-mock-dev-server'
 
@@ -18,8 +16,6 @@ export default defineMock({
   }
 })
 ```
-
-:::
 
 ## Types
 

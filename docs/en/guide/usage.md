@@ -8,11 +8,8 @@ If you haven't installed this plugin in your project yet, please refer to [Insta
 
 In your project's `vite.config.{ts,js}` file, import and configure the plugin:
 
-::: code-group
-
-``` ts [typescript]
+``` ts [vite.config.{ts,js}]
 import { defineConfig } from 'vite'
-
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server' // [!code ++]
 
 export default defineConfig({
@@ -22,29 +19,13 @@ export default defineConfig({
 })
 ```
 
-``` js [javascript]
-const { mockDevServerPlugin } = require('vite-plugin-mock-dev-server') // [!code ++]
-/**
- * @type {import('vite').defineConfig}
- */
-module.exports = {
-  plugins: [
-    mockDevServerPlugin(), // [!code ++]
-  ],
-}
-```
-
-:::
-
 ## Step2: Configure `server.proxy`
 
 The plugin directly reads the request path prefix configured in `server.proxy` as the matching path for request interception.
 
 In general scenarios, when configuring the `server.proxy` proxy forwarding configuration in the development environment, it directly forwards to the development environment address of the backend service. When the backend service has not completed the interface development but has provided the interface documentation, we only need to mock this part of the interface to enable parallel development of the frontend interface integration process. Therefore, this plugin directly reads the `server.proxy` configuration to reduce the complexity of plugin configuration.
 
-::: code-group
-
-``` ts [typescript]
+``` ts [vite.config.{ts,js}]
 import { defineConfig } from 'vite'
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 
@@ -52,41 +33,22 @@ export default defineConfig({
   plugins: [
     mockDevServerPlugin(),
   ],
-  server: { // [!code ++]
-    proxy: { // [!code ++]
-      '^/api': 'http://example.com/', // [!code ++]
-    }, // [!code ++]
-  }, // [!code ++]
+  // [!code ++:5]
+  server: {
+    proxy: {
+      '^/api': 'http://example.com/',
+    },
+  },
 })
 ```
-
-``` js [javascript]
-const { mockDevServerPlugin } = require('vite-plugin-mock-dev-server')
-
-/**
- * @type {import('vite').defineConfig}
- */
-module.exports = {
-  plugins: [
-    mockDevServerPlugin(),
-  ],
-  server: { // [!code ++]
-    proxy: { // [!code ++]
-      '^/api': 'http://example.com/', // [!code ++]
-    }, // [!code ++]
-  }, // [!code ++]
-}
-```
-
-:::
 
 ## Step3: Add `/mock` directory
 
 Add a `/mock` directory at the root of your project, and the `mock` directory will be used to save and manage all **mock configuration files** in a centralized location.
 
-```sh {2}
+```sh
 .
-├── mock
+├── mock # [!code ++]
 ├── src
 └── package.json
 ```
@@ -115,14 +77,12 @@ Add `*.mock.ts` files:
 ```sh {3}
 .
 ├── mock
-│   └── api.mock.ts // [!code ++]
+│   └── api.mock.ts  # [!code ++]
 ├── src
 └── package.json
 ```
 
 The plugin provides the `defineMock()` function to help write mock configurations.
-
-::: code-group
 
 ```ts [api.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
@@ -132,8 +92,6 @@ export default defineMock({
   body: {}
 })
 ```
-
-:::
 
 ## Step5: Start Vite Development Server
 

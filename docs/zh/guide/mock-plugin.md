@@ -4,8 +4,6 @@ Vite Plugin Function
 
 ## 使用
 
-::: code-group
-
 ``` ts [vite.config.ts]
 import { defineConfig } from 'vite'
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
@@ -16,8 +14,6 @@ export default defineConfig({
   ]
 })
 ```
-
-:::
 
 ## `options`
 

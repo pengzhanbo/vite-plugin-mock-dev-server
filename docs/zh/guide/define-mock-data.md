@@ -26,9 +26,7 @@ type MockData<T> = [
 
 ## 使用
 
-`data.ts`
-
-```ts
+```ts [mock/data.ts]
 import { defineMockData } from 'vite-plugin-mock-dev-server'
 
 export const posts = defineMockData('posts', [
@@ -46,7 +44,7 @@ export const posts = defineMockData('posts', [
 `*.mock.ts`  (`.value`)
 ::: code-group
 
-```ts [post-list.mock.ts]
+```ts [mock/post-list.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from './data'
 
@@ -56,7 +54,7 @@ export default defineMock({
 })
 ```
 
-```ts [post-delete.mock.ts]
+```ts [mock/post-delete.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from './data'
 
@@ -75,7 +73,7 @@ export default defineMock({
 `*.mock.ts`  (`[getter, setter]`)
 ::: code-group
 
-```ts [post-list.mock.ts]
+```ts [mock/post-list.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from './data'
 
@@ -88,7 +86,7 @@ export default defineMock({
 })
 ```
 
-```ts [post-delete.mock.ts]
+```ts [mock/post-delete.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 import { posts } from './data'
 

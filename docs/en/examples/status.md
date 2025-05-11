@@ -1,6 +1,6 @@
-# 自定义响应状态
+# Custom response status
 
-## 状态码：200
+## Status Code: 200
 
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
@@ -12,7 +12,7 @@ export default defineMock({
 })
 ```
 
-## 状态码：204
+## Status Code: 204
 
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
@@ -24,7 +24,7 @@ export default defineMock({
 })
 ```
 
-## 状态码：400
+## Status Code: 400
 
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
@@ -36,7 +36,7 @@ export default defineMock({
 })
 ```
 
-## 状态码： 403
+## Status Code: 403
 
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
@@ -48,7 +48,7 @@ export default defineMock({
 })
 ```
 
-## 状态码： 404
+## Status Code: 404
 
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
@@ -60,7 +60,7 @@ export default defineMock({
 })
 ```
 
-## 状态码： 502
+## Status Code: 502
 
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'

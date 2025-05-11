@@ -45,9 +45,9 @@ interface MockServerPluginOptions {
 
 ## prefix
 
-**Type**： `string | string[]`
+- **Type**： `string | string[]`
 
-**Default**： `[]`
+- **Default**： `[]`
 
 Configure the path matching rules for the mock service, where any request path starting with `prefix` will be intercepted and proxied.
 
@@ -55,9 +55,9 @@ If `prefix` starts with `^`, it will be recognized as a `RegExp`.
 
 ## wsPrefix
 
-**Type**： `string | string[]`
+- **Type**： `string | string[]`
 
-**Default**： `[]`
+- **Default**： `[]`
 
 Configure the matching rules for the WebSocket service. Any request path starting with the value of `wsPrefix` for `ws/wss` protocol requests will be proxied to the corresponding target.
 If the value of `wsPrefix` starts with `^`, it will be recognized as a RegExp.
@@ -68,9 +68,9 @@ This conflict is not a problem with Vite or the plugin itself; it is a reasonabl
 
 ## cwd
 
-**Type**： `string`
+- **Type**： `string`
 
-**Default**： `process.cwd()`
+- **Default**： `process.cwd()`
 
 Configure the matching context for `include` and `exclude`.
 
@@ -78,25 +78,31 @@ Configure the matching context for `include` and `exclude`.
 
 **Type**： `string | string[]`
 
-**Default**：
-`['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']`  relative to [`cwd`](#cwd)
+- **Default**：relative to [`cwd`](#cwd)
+
+  ```ts
+  ['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']
+  ```
 
 Configure the reading of mock files, which can be a directory, a glob pattern, or an array.
 
 ## exclude
 
-**Type**： `string | string[]`
+- **Type**： `string | string[]`
 
-**Default**：
-`['**/node_modules/**','**/test/**','**/cypress/**','src/**','**/.vscode/**','**/.git/**','**/dist/**']` relative to [`cwd`](#cwd)
+- **Default**：relative to [`cwd`](#cwd)
+
+  ```ts
+  ['**/node_modules/**', '**/test/**', '**/cypress/**', 'src/**', '**/.vscode/**', '**/.git/**', '**/dist/**']
+  ```
 
 Specifies the files to be excluded when reading mock files. It can be a directory, glob pattern, or an array.
 
 ## reload
 
-**Type**： `boolean`
+- **Type**： `boolean`
 
-**Default**： `false`
+- **Default**： `false`
 
 When mock resources are hot updated, only the data content is updated, but the page is not refreshed by default.
 
@@ -104,17 +110,17 @@ If you want to refresh the page every time the mock file is modified, you can en
 
 ## log
 
-**Type**： `boolean | 'debug' | 'info' | 'warn' | 'error' | 'silent'`
+- **Type**： `boolean | 'debug' | 'info' | 'warn' | 'error' | 'silent'`
 
-**Default**： `info`
+- **Default**： `info`
 
 Enable interface logging or configure log level.
 
 ## formidableOptions
 
-**Type**： `formidable.Options`
+- **Type**： `formidable.Options`
 
-**Default**： `undefined`
+- **Default**： `undefined`
 
 Configure `formidable` to handle `multipart` content-type.
 
@@ -124,9 +130,9 @@ Uploaded files are temporarily stored in the `os.tmpdir()` directory by default.
 
 ## cors
 
-**Type**： `boolean | CorsOptions`
+- **Type**： `boolean | CorsOptions`
 
-**Default**： `true`
+- **Default**： `true`
 
 Enable CORS or configure CORS options.
 
@@ -134,9 +140,9 @@ Usually, you don't need to configure it, as it inherits the configuration from V
 
 ## cookiesOptions
 
-**Type**： `Cookies.Option`
+- **Type**： `Cookies.Option`
 
-**Default**： `undefined`
+- **Default**： `undefined`
 
 Configure `cookies`
 
@@ -144,9 +150,9 @@ For detailed configuration, refer to [cookies](https://github.com/pillarjs/cooki
 
 ## bodyParserOptions
 
-**Type**： `coBody.Options & { formLimit?: string | number, jsonLimit?: string | number, textLimit?: string | number }`
+- **Type**： `coBody.Options & { formLimit?: string | number, jsonLimit?: string | number, textLimit?: string | number }`
 
-**Default**： `undefined`
+- **Default**： `undefined`
 
 Configure `co-body`
 
@@ -154,9 +160,9 @@ For detailed configuration, refer to [co-body](https://github.com/cojs/co-body#o
 
 ## build
 
-**Type**： `boolean | ServerBuildOption`
+- **Type**： `boolean | ServerBuildOption`
 
-**Default**： `false`
+- **Default**： `false`
 
 When you need to build a mock server that can be deployed independently, you can enable this configuration.
 
@@ -185,9 +191,9 @@ export interface ServerBuildOption {
 
 ## priority
 
-**Type**： `MockMatchPriority`
+- **Type**： `MockMatchPriority`
 
-**Default：** `undefined`
+- **Default**： `undefined`
 
 Customize the priority of path matching rules.
 

@@ -9,6 +9,9 @@
     "docs:preview": "vitepress preview ."
   },
   "devDependencies": {
-    "vitepress": "catalog:dev"
+    "vitepress": "catalog:dev",
+    "vitepress-plugin-group-icons": "catalog:dev",
+    "vitepress-plugin-llms": "catalog:dev"
+
   }
 }

@@ -4,8 +4,6 @@ Mock configuration type helper function
 
 ## Usage
 
-::: code-group
-
 ```ts [*.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
@@ -15,11 +13,9 @@ export default defineMock({
 })
 ```
 
-:::
-
 Pass in an array:
 
-```ts
+```ts [*.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock([

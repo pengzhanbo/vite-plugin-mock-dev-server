@@ -23,7 +23,9 @@ catalogs:
     tsdown: ^0.11.3
     typescript: ^5.8.3
     vite: ^6.3.5
-    vitepress: ^1.6.3
+    vitepress: ^2.0.0-alpha.5
+    vitepress-plugin-group-icons: ^1.5.2
+    vitepress-plugin-llms: ^1.1.3
     vitest: ^3.1.3
   prod:
     '@pengzhanbo/utils': ^2.1.0

@@ -4,8 +4,6 @@ mock配置 类型帮助函数
 
 ## 使用
 
-::: code-group
-
 ```ts [*.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
@@ -15,11 +13,9 @@ export default defineMock({
 })
 ```
 
-:::
+或者传入数组：
 
-传入数组：
-
-```ts
+```ts [*.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock([

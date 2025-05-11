@@ -2,15 +2,9 @@
 
 Pass in a transformation function to create a custom `defineMock` helper function. Implement preprocessing of mock configurations.
 
-```ts
-function createDefineMock(
-  transformer: (mock: MockOptionsItem) => MockOptionsItem | void
-): typeof defineMock
-```
-
 ## Usage
 
-```ts
+```ts [*.mock.ts]
 import path from 'node:path'
 import { createDefineMock } from 'vite-plugin-mock-dev-server'
 
@@ -24,4 +18,12 @@ export default definePostMock({
     list: []
   }
 })
+```
+
+## Types
+
+```ts
+function createDefineMock(
+  transformer: (mock: MockOptionsItem) => MockOptionsItem | void
+): typeof defineMock
 ```
