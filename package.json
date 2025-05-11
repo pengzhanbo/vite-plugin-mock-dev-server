@@ -3,7 +3,7 @@
   "type": "module",
   "version": "1.8.5",
   "private": true,
-  "packageManager": "pnpm@10.8.0",
+  "packageManager": "pnpm@10.10.0",
   "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
   "license": "MIT",
   "scripts": {
@@ -34,6 +34,7 @@
     "bumpp": "catalog:dev",
     "conventional-changelog-cli": "catalog:dev",
     "eslint": "catalog:dev",
+    "tsdown": "catalog:dev",
     "tsup": "catalog:dev",
     "typescript": "catalog:dev",
     "vitest": "catalog:dev"

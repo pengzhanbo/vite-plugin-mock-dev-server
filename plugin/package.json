@@ -7,7 +7,7 @@
   "homepage": "https://vite-plugin-mock-dev-server.netlify.app",
   "repository": {
     "type": "git",
-    "url": "https://github.com/pengzhanbo/vite-plugin-mock-dev-server"
+    "url": "git+https://github.com/pengzhanbo/vite-plugin-mock-dev-server"
   },
   "keywords": [
     "vite",
@@ -59,7 +59,7 @@
     "node": "^18 || ^20 || >=22"
   },
   "scripts": {
-    "build": "tsup"
+    "build": "tsdown"
   },
   "peerDependencies": {
     "esbuild": ">=0.21.0",
