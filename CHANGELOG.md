@@ -1,3 +1,12 @@
+## [1.8.7](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.8.6...v1.8.7) (2025-05-12)
+
+
+### Features
+
+* deprecate default export and encourage named export usage ([8d915bd](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/8d915bd05c23abf449eedc387f46e1c2227b6eba))
+
+
+
 ## [1.8.6](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.8.5...v1.8.6) (2025-05-11)
 
 
