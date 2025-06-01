@@ -12,6 +12,5 @@
     "vitepress": "catalog:dev",
     "vitepress-plugin-group-icons": "catalog:dev",
     "vitepress-plugin-llms": "catalog:dev"
-
   }
 }

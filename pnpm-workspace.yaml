@@ -4,29 +4,29 @@ packages:
   - plugin
 catalogs:
   dev:
-    '@pengzhanbo/eslint-config': ^1.31.0
+    '@pengzhanbo/eslint-config': ^1.32.0
     '@types/co-body': ^6.1.3
     '@types/cookies': ^0.9.0
     '@types/cors': ^2.8.18
     '@types/debug': ^4.1.12
     '@types/formidable': 2.0.6
     '@types/is-core-module': ^2.2.2
-    '@types/mime-types': ^2.1.4
+    '@types/mime-types': ^3.0.0
     '@types/mockjs': ^1.0.10
-    '@types/node': ^22.15.17
+    '@types/node': ^22.15.29
     '@types/ws': ^8.18.1
-    bumpp: ^10.1.0
+    bumpp: ^10.1.1
     conventional-changelog-cli: ^5.0.0
-    esbuild: ^0.25.4
-    eslint: ^9.26.0
+    esbuild: ^0.25.5
+    eslint: ^9.28.0
     mockjs: ^1.1.0
-    tsdown: ^0.11.3
+    tsdown: ^0.12.6
     typescript: ^5.8.3
     vite: ^6.3.5
     vitepress: ^2.0.0-alpha.5
-    vitepress-plugin-group-icons: ^1.5.2
-    vitepress-plugin-llms: ^1.1.3
-    vitest: ^3.1.3
+    vitepress-plugin-group-icons: ^1.5.5
+    vitepress-plugin-llms: ^1.3.4
+    vitest: ^3.1.4
   prod:
     '@pengzhanbo/utils': ^2.1.0
     '@rollup/pluginutils': ^5.1.4
@@ -34,7 +34,7 @@ catalogs:
     co-body: ^6.2.0
     cookies: ^0.9.1
     cors: ^2.8.5
-    debug: ^4.4.0
+    debug: ^4.4.1
     fast-glob: ^3.3.3
     formidable: 2.1.2
     http-status: ^2.1.0
