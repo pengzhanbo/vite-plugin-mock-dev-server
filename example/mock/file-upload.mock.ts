@@ -8,7 +8,7 @@ export default defineMock({
     const files = Array.isArray(body.files) ? body.files : [body.files]
     return {
       name: body.name,
-      files: files.map((file: any) => file.originalFilename),
+      files: files.filter(Boolean).map((file: any) => file.originalFilename),
     }
   },
 })

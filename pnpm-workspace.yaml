@@ -36,7 +36,7 @@ catalogs:
     cors: ^2.8.5
     debug: ^4.4.1
     fast-glob: ^3.3.3
-    formidable: 2.1.2
+    formidable: 3.5.4
     http-status: ^2.1.0
     is-core-module: ^2.16.1
     json5: ^2.2.3
