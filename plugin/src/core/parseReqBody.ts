@@ -3,6 +3,13 @@ import type { BodyParserOptions } from '../types'
 import bodyParser from 'co-body'
 import formidable from 'formidable'
 
+const DEFAULT_FORMIDABLE_OPTIONS: formidable.Options = {
+  keepExtensions: true,
+  filename(name, ext, part) {
+    return part?.originalFilename || `${name}.${Date.now()}${ext ? `.${ext}` : ''}`
+  },
+}
+
 export async function parseReqBody(
   req: Connect.IncomingMessage,
   formidableOptions: formidable.Options,
@@ -48,7 +55,8 @@ async function parseMultipart(
   req: Connect.IncomingMessage,
   options: formidable.Options,
 ): Promise<any> {
-  const form = formidable(options)
+  const form = formidable({ ...DEFAULT_FORMIDABLE_OPTIONS, ...options })
+
   return new Promise((resolve, reject) => {
     form.parse(req, (error, fields, files) => {
       if (error) {

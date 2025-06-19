@@ -12,10 +12,6 @@ export default defineConfig(({ mode }) => ({
       formidableOptions: {
         // 配置上传资源存放目录
         uploadDir: path.join(process.cwd(), '/uploads'),
-        // 可修改上传资源名称
-        filename: (name, ext, part) => {
-          return part.originalFilename!
-        },
       },
       build: true,
     }),
