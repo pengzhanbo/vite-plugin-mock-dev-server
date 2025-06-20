@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: 快速开始
-      link: /guide/introduce
+      link: /zh/guide/introduce
     - theme: alt
       text: Github
       link: https://github.com/pengzhanbo/vite-plugin-mock-dev-server
