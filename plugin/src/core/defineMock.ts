@@ -6,8 +6,8 @@ import { isArray } from '@pengzhanbo/utils'
  *
  * mock配置 类型帮助函数
  * @param config see config docs:
- * {@link https://vite-plugin-mock-dev-server.netlify.app/en/guide/mock-config en-US DOC} |
- * {@link https://vite-plugin-mock-dev-server.netlify.app/guide/mock-config zh-CN DOC}
+ * {@link https://vite-plugin-mock-dev-server.netlify.app/guide/mock-config en-US DOC} |
+ * {@link https://vite-plugin-mock-dev-server.netlify.app/zh/guide/mock-config zh-CN DOC}
  *
  * @example
  * Mock Http Request
