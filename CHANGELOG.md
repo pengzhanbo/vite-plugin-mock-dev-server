@@ -1,3 +1,12 @@
+# [1.9.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.8.7...v1.9.0) (2025-06-23)
+
+
+### Features
+
+* upgrade formidable to `v3`, close [#112](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/112) ([#114](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/114)) ([6d6461f](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/6d6461fd63d94cb7934116f12630bd1a2914f833))
+
+
+
 ## [1.8.7](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.8.6...v1.8.7) (2025-05-12)
 
 

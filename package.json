@@ -1,7 +1,7 @@
 {
   "name": "mock-dev-server-monorepo",
   "type": "module",
-  "version": "1.8.7",
+  "version": "1.9.0",
   "private": true,
   "packageManager": "pnpm@10.12.2",
   "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
