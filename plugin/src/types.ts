@@ -249,26 +249,26 @@ export interface ServerBuildOption {
   log?: LogLevel
 }
 
-export type Method =
-  | 'GET'
-  | 'POST'
-  | 'PUT'
-  | 'DELETE'
-  | 'PATCH'
-  | 'HEAD'
-  | 'TRACE'
-  | 'OPTIONS'
+export type Method
+  = | 'GET'
+    | 'POST'
+    | 'PUT'
+    | 'DELETE'
+    | 'PATCH'
+    | 'HEAD'
+    | 'TRACE'
+    | 'OPTIONS'
 
 type Headers = http.IncomingHttpHeaders
 
-export type ResponseBody =
-  | Record<string, any>
-  | any[]
-  | string
-  | number
-  | Readable
-  | Buffer
-  | null
+export type ResponseBody
+  = | Record<string, any>
+    | any[]
+    | string
+    | number
+    | Readable
+    | Buffer
+    | null
 
 /**
  * 扩展 request，添加额外的属性和方法

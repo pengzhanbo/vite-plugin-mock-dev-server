@@ -64,9 +64,9 @@ Supported request methods.
 Only the matching request methods will return `mock data`, otherwise they will be ignored. Multiple request methods can be configured using an array.
 
 ```ts
-type Method =
-  | 'GET' | 'POST' | 'PUT' | 'DELETE'
-  | 'PATCH' | 'HEAD' | 'TRACE' | 'OPTIONS'
+type Method
+  = | 'GET' | 'POST' | 'PUT' | 'DELETE'
+    | 'PATCH' | 'HEAD' | 'TRACE' | 'OPTIONS'
 ```
 
 ## enabled

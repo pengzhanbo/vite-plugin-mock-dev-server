@@ -65,9 +65,9 @@ export default defineMock([
 仅符合的请求方法返回 `mock data`，否则忽略。可通过数组配置接口支持多种请求方法。
 
 ```ts
-type Method =
-  | 'GET' | 'POST' | 'PUT' | 'DELETE'
-  | 'PATCH' | 'HEAD' | 'TRACE' | 'OPTIONS'
+type Method
+  = | 'GET' | 'POST' | 'PUT' | 'DELETE'
+    | 'PATCH' | 'HEAD' | 'TRACE' | 'OPTIONS'
 ```
 
 ## enabled
