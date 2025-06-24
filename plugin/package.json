@@ -71,7 +71,6 @@
     }
   },
   "dependencies": {
-    "@pengzhanbo/utils": "catalog:prod",
     "@rollup/pluginutils": "catalog:prod",
     "chokidar": "catalog:prod",
     "co-body": "catalog:prod",
@@ -89,6 +88,7 @@
     "ws": "catalog:prod"
   },
   "devDependencies": {
+    "@pengzhanbo/utils": "catalog:prod",
     "esbuild": "catalog:dev",
     "vite": "catalog:dev"
   },

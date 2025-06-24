@@ -207,9 +207,6 @@ importers:
 
   plugin:
     dependencies:
-      '@pengzhanbo/utils':
-        specifier: catalog:prod
-        version: 2.1.0
       '@rollup/pluginutils':
         specifier: catalog:prod
         version: 5.2.0(rollup@4.34.9)
@@ -256,6 +253,9 @@ importers:
         specifier: catalog:prod
         version: 8.18.2
     devDependencies:
+      '@pengzhanbo/utils':
+        specifier: catalog:prod
+        version: 2.1.0
       esbuild:
         specifier: catalog:dev
         version: 0.25.5
