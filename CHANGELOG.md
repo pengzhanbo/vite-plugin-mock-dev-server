@@ -1,3 +1,12 @@
+## [1.9.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.9.0...v1.9.1) (2025-06-24)
+
+
+### Bug Fixes
+
+* fix  `cjs` deps compatibility, close [#116](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/116) ([d335a41](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/d335a41f8039112abd202d784e9bf742e1b8156c))
+
+
+
 # [1.9.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.8.7...v1.9.0) (2025-06-23)
 
 
