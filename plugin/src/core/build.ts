@@ -14,9 +14,6 @@ import c from 'picocolors'
 import { aliasMatches, transformWithEsbuild } from './compiler'
 import { lookupFile, normalizePath } from './utils'
 
-declare const __PACKAGE_NAME__: string
-declare const __PACKAGE_VERSION__: string
-
 type PluginContext<T = Plugin['buildEnd']> = T extends (
   this: infer R,
   ...args: any[]
