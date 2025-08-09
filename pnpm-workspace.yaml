@@ -9,23 +9,23 @@ catalogs:
     '@types/cookies': ^0.9.1
     '@types/cors': ^2.8.19
     '@types/debug': ^4.1.12
-    '@types/formidable': 2.0.6
+    '@types/formidable': ^3.4.5
     '@types/is-core-module': ^2.2.2
     '@types/mime-types': ^3.0.1
     '@types/mockjs': ^1.0.10
-    '@types/node': ^24.0.3
+    '@types/node': ^24.2.1
     '@types/ws': ^8.18.1
-    bumpp: ^10.2.0
+    bumpp: ^10.2.2
     conventional-changelog-cli: ^5.0.0
-    esbuild: ^0.25.5
-    eslint: ^9.29.0
+    esbuild: ^0.25.8
+    eslint: ^9.33.0
     mockjs: ^1.1.0
-    tsdown: ^0.12.8
-    typescript: ^5.8.3
-    vite: ^6.3.5
-    vitepress: ^2.0.0-alpha.6
-    vitepress-plugin-group-icons: ^1.6.0
-    vitepress-plugin-llms: ^1.5.1
+    tsdown: ^0.13.4
+    typescript: ^5.9.2
+    vite: ^7.1.1
+    vitepress: ^2.0.0-alpha.9
+    vitepress-plugin-group-icons: ^1.6.2
+    vitepress-plugin-llms: ^1.7.2
     vitest: ^3.2.4
   prod:
     '@pengzhanbo/utils': ^2.1.0
@@ -43,7 +43,7 @@ catalogs:
     mime-types: ^3.0.1
     path-to-regexp: 6.3.0
     picocolors: ^1.1.1
-    ws: ^8.18.2
+    ws: ^8.18.3
 onlyBuiltDependencies:
   - esbuild
   - unrs-resolver
