@@ -1,3 +1,17 @@
+## [1.9.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.9.1...v1.9.2) (2025-08-09)
+
+
+### Bug Fixes
+
+* fix declaration variables `__PACKAGE_NAME` and `__PACKAGE_VERSION`, close [#118](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/118) ([3d26927](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/3d26927ae636a11462f80ab1e8fe2c2aca52d9ab))
+
+
+### Performance Improvements
+
+* update deps to latest ([9ab029e](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/9ab029ee257e0ef6e59ee3e3f82d2a284c5216e1))
+
+
+
 ## [1.9.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.9.0...v1.9.1) (2025-06-24)
 
 
