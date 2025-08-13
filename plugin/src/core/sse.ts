@@ -72,6 +72,14 @@ class SSEStream extends Transform {
   write(message: SSEMessage, ...args: any[]): boolean {
     return super.write(message, ...args)
   }
+
+  destroy(error?: Error): this {
+    if (error) {
+      this.write({ event: 'error', data: error.message })
+    }
+    this.end()
+    return this
+  }
 }
 
 function dataString(data: string | object): string {
