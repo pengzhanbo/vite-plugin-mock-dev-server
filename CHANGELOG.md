@@ -1,3 +1,13 @@
+## [1.9.3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.9.2...v1.9.3) (2025-08-13)
+
+
+### Bug Fixes
+
+* SSE `destroy` not triggering `error` event and causing process exit, close [#120](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/120) ([#122](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/122)) ([753ada8](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/753ada8f3db4572b10739a000a374f5399e37ce6))
+* vitest to fail to exit properly in ci, close [#119](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/119) ([#121](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/121)) ([5ade4a8](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/5ade4a8647b31eebb1b202c3d96e4813991c39dd))
+
+
+
 ## [1.9.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.9.1...v1.9.2) (2025-08-09)
 
 
