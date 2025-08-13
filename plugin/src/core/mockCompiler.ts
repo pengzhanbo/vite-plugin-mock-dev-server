@@ -46,7 +46,7 @@ export class MockCompiler extends EventEmitter {
     return this._mockData
   }
 
-  run(): void {
+  run(watch?: boolean): void {
     const { include, exclude } = this.options
     /**
      * 使用 rollup 提供的 include/exclude 规则，
@@ -67,6 +67,9 @@ export class MockCompiler extends EventEmitter {
       )
       .then(loadList => promiseParallel(loadList, 10))
       .then(() => this.updateMockList())
+
+    if (!watch)
+      return
 
     this.watchMockEntry()
     this.watchDeps()

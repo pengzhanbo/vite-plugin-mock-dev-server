@@ -23,7 +23,7 @@ export function mockServerMiddleware(
    */
   const compiler = createMockCompiler(options)
 
-  compiler.run()
+  compiler.run(!!server)
 
   /**
    * 监听 mock 文件是否发生变更，如何配置了 reload 为 true，
