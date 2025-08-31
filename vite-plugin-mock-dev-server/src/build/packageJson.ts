@@ -1,7 +1,11 @@
 import type { ResolvedMockServerPluginOptions } from '../options'
 import isCore from 'is-core-module'
+import { name as __PACKAGE_NAME__, version as __PACKAGE_VERSION__ } from '../../package.json'
 import { aliasMatches } from '../compiler'
 
+/**
+ * 从 mock 文件的 importers 中获取依赖
+ */
 export function getMockDependencies(
   deps: string[],
   alias: ResolvedMockServerPluginOptions['alias'],
@@ -11,9 +15,18 @@ export function getMockDependencies(
   const isAlias = (p: string) => alias.find(({ find }) => aliasMatches(find, p))
   deps.forEach((dep) => {
     const name = normalizePackageName(dep)
-    if (name.startsWith('<define:') || isAlias(name) || isCore(name))
+    if (
+      // 在 esbuild 中 define 会被处理
+      name.startsWith('<define:')
+      // 排除 别名配置的模块
+      || isAlias(name)
+      // 排除 node 内置模块
+      || isCore(name)
+    ) {
       return
-    if (name[0] === '/' || name[0] === '.')
+    }
+    // 对于绝对路径和相对路径，直接排除
+    if (name[0] === '/' || name.startsWith('./') || name.startsWith('../'))
       return
     if (!excludeDeps.includes(name))
       list.add(name)

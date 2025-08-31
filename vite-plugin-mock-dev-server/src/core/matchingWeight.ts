@@ -1,19 +1,9 @@
-import type { Parameter, Text, Token, Wildcard } from 'path-to-regexp'
-import type { MockMatchPriority } from '../types'
 /**
  * 规则匹配优先级
  *
- * 由于一个请求可能会同时命中多个 匹配规则，需要计算 优先级，并根据优先级 从高到低 排序。
- *
- * 规则：
- * 1. 无参数的规则优先级最高
- * 2. 参数规则少的优先级高，对于参数数量相同的，根据参数所在位置，参数越靠后的优先级越高
- * 3. 命名参数优先级比非命名参数优先级高
- * 4. 对于 有修饰符 *+?, 优先级需要对比无修饰符的参数进行降低，
- * 5. 同位置修饰符， * 比 + 的优先级低
- * 6. 对于 (.*) 的参数规则，无论其出现在任何位置，都拥有该位置的最低优先级，(.*)? 比 (.*) 优先级更低
- *
  * @see https://github.com/pillarjs/path-to-regexp
+ *
+ * 由于一个请求可能会同时命中多个 匹配规则，需要计算 优先级，并根据优先级 从高到低 排序。
  *
  * 规则：
  * 1. 无参数的规则优先级最高
@@ -21,6 +11,8 @@ import type { MockMatchPriority } from '../types'
  * 3. 对于可选参数，优先级应该比必填参数低
  * 4. 对于通配符的参数，优先级应该比其他参数低
  */
+import type { Parameter, Text, Token, Wildcard } from 'path-to-regexp'
+import type { MockMatchPriority } from '../types'
 import {
   isArray,
   isEmptyObject,

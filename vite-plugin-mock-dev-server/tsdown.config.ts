@@ -1,8 +1,7 @@
-import type { UserConfig, UserConfigFn } from 'tsdown'
+import type { UserConfig } from 'tsdown'
 import { defineConfig } from 'tsdown'
-import { name, version } from './package.json'
 
-const tsdownConfig: UserConfig | UserConfigFn = defineConfig({
+const tsdownConfig: UserConfig = defineConfig({
   entry: {
     index: 'src/index.ts',
     types: 'src/types.ts',
@@ -12,10 +11,6 @@ const tsdownConfig: UserConfig | UserConfigFn = defineConfig({
   shims: true,
   sourcemap: false,
   dts: true,
-  define: {
-    __PACKAGE_NAME__: JSON.stringify(name),
-    __PACKAGE_VERSION__: JSON.stringify(version),
-  },
   format: 'esm',
 })
 

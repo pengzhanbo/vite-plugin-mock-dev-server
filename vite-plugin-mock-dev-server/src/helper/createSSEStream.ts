@@ -88,6 +88,22 @@ function dataString(data: string | object): string {
   return data.split(/\r\n|\r|\n/).map(line => `data: ${line}\n`).join('')
 }
 
+/**
+ * 创建一个 Server-sent events 写入流，用于支持模拟 EventSource
+ *
+ * @example
+ * ```ts
+ * import { createSSEStream, defineMock } from 'vite-plugin-mock-dev-server'
+ *
+ * export default defineMock({
+ *   url: '/api',
+ *   response: (req, res) => {
+ *     const sse = createSSEStream(req, res)
+ *     sse.write({ event: 'message', data: { message: 'hello world' } })
+ *   }
+ * })
+ * ```
+ */
 export function createSSEStream(req: IncomingMessage, res: ServerResponse): SSEStream {
   const sse = new SSEStream(req)
   sse.pipe(res)

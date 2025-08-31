@@ -18,7 +18,6 @@ export class Compiler extends EventEmitter {
 
   private moduleDeps: Map<string, Set<string>> = new Map()
   cwd: string
-  sourceDir: string
   private mockWatcher!: FSWatcher
   private depsWatcher!: FSWatcher
   private isESM = false
@@ -28,7 +27,6 @@ export class Compiler extends EventEmitter {
   constructor(public options: ResolvedMockServerPluginOptions) {
     super()
     this.cwd = options.cwd || process.cwd()
-    this.sourceDir = path.join(this.cwd, this.options.dir)
     try {
       const pkg = lookupFile(this.cwd, ['package.json'])
       this.isESM = !!pkg && JSON.parse(pkg).type === 'module'
@@ -44,7 +42,7 @@ export class Compiler extends EventEmitter {
     const { include, exclude } = this.options
     const { pattern, ignore, isMatch } = createMatcher(include, exclude)
 
-    glob(pattern, { ignore, cwd: this.sourceDir })
+    glob(pattern, { ignore, cwd: path.join(this.cwd, this.options.dir) })
     /**
      * 控制 文件编译 并发 数量。
      * 当使用 Promise.all 时，可能在一些比较大型的项目中，过多的 mock 文件
@@ -53,7 +51,7 @@ export class Compiler extends EventEmitter {
      * 实测在控制并发数的前提下，总编译时间 差异不大，但内存开销更小更加稳定。
      */
       .then(files => files.map(file => () => this.load(path.join(this.options.dir, file))))
-      .then(loaders => promiseParallel(loaders, 10))
+      .then(loaders => promiseParallel(loaders, 64))
       .then(() => this.updateMockData())
 
     if (!watch)
