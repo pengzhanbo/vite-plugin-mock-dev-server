@@ -36,6 +36,9 @@ catalogs:
     '@types/node':
       specifier: ^24.3.0
       version: 24.3.0
+    '@types/picomatch':
+      specifier: ^4.0.2
+      version: 4.0.2
     '@types/ws':
       specifier: ^8.18.1
       version: 8.18.1
@@ -163,7 +166,7 @@ importers:
         specifier: catalog:dev
         version: 24.3.0
       '@types/picomatch':
-        specifier: ^4.0.2
+        specifier: catalog:dev
         version: 4.0.2
       '@types/ws':
         specifier: catalog:dev
