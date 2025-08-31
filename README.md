@@ -28,7 +28,7 @@
 
 - ⚡️ Lightweight, Flexible, Fast.
 - 🧲 Not injection-based, non-intrusive to client code.
-- 💡 ESModule/commonjs.
+- 💡 ESModule/CommonJS.
 - 🦾 Typescript.
 - 🔥 HMR
 - 🏷 Support `.[cm]?js` / `.ts` / `.json` / `.json5`.
@@ -205,10 +205,18 @@ export default defineMock({
 
   Configure the matching context for `include` and `exclude`.
 
+### dir
+
+- **Type:** `string`
+- **Default:** `'mock'`
+- **Details:**
+
+  Configure the directory to read mock files.
+
 ### include
 
 - **Type:** `string | string[]`
-- **Default：** `['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']` (Relative to the root directory)
+- **Default：** `['**/*.mock.{js,ts,cjs,mjs,json,json5}']`
 - **Details:**
 
   Configure to read mock files, which can be a directory, glob, or an array.
@@ -216,7 +224,7 @@ export default defineMock({
 ### exclude
 
 - **Type:** `string | string[]`
-- **Default：** `['**/node_modules/**','**/.vscode/**','**/.git/**']`
+- **Default：** `['**/node_modules/**']`
 - **Details:**
 
   When reading mock files for configuration, the files that need to be excluded can be a directory, glob, or array.
