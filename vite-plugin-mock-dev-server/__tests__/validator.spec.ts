@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest'
-import { isObjectSubset } from '../plugin/src/core/validator'
+import { isObjectSubset } from '../src/utils'
 
-it('validator isObjectSubset', () => {
+it('isObjectSubset', () => {
   // 浅层比较
   expect(isObjectSubset({ a: 1 })).toBe(true)
   expect(isObjectSubset({ a: 1 }, { a: 1 })).toBe(true)

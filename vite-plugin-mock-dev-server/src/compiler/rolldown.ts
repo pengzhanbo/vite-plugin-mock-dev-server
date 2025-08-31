@@ -4,6 +4,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 import JSON5 from 'json5'
+import { aliasMatches } from './esbuild'
 
 const renamePlugin: Plugin = {
   name: 'vite-mock:rename-plugin',
@@ -47,6 +48,7 @@ export async function transformWithRolldown(
   const filepath = path.resolve(cwd, entryPoint)
   const filename = path.basename(entryPoint)
   const dirname = path.dirname(filepath)
+  const isAlias = (p: string) => !!alias.find(({ find }) => aliasMatches(find, p))
   try {
     const { build, aliasPlugin } = await rolldown()
     const result = await build({
@@ -66,6 +68,8 @@ export async function transformWithRolldown(
         ...isESM ? {} : { 'import.meta.url': JSON.stringify(pathToFileURL(filepath)) },
       },
       external(id) {
+        if (isAlias(id))
+          return false
         if (id[0] !== '.' && !path.isAbsolute(id) && id !== 'vite-plugin-mock-dev-server')
           return true
       },
