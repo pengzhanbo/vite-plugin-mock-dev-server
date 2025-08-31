@@ -3,7 +3,7 @@
   "type": "module",
   "version": "1.9.3",
   "private": true,
-  "packageManager": "pnpm@10.14.0",
+  "packageManager": "pnpm@10.15.0",
   "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
   "license": "MIT",
   "scripts": {
@@ -15,10 +15,10 @@
     "docs:preview": "pnpm -F docs docs:preview",
     "lint": "eslint .",
     "test": "vitest",
-    "release:check": "vitest run && pnpm run build",
+    "prepublishOnly": "vitest run && pnpm run build",
     "release:changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "release:version": "bumpp package.json {plugin,docs,example}/package.json --execute=\"pnpm release:changelog\" --commit --all --push --tag",
-    "release": "pnpm release:check && pnpm release:version && pnpm -r publish"
+    "release": "pnpm release:version && pnpm -r publish"
   },
   "devDependencies": {
     "@pengzhanbo/eslint-config": "catalog:dev",
@@ -30,6 +30,7 @@
     "@types/is-core-module": "catalog:dev",
     "@types/mime-types": "catalog:dev",
     "@types/node": "catalog:dev",
+    "@types/picomatch": "^4.0.2",
     "@types/ws": "catalog:dev",
     "bumpp": "catalog:dev",
     "conventional-changelog-cli": "catalog:dev",

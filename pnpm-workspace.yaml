@@ -2,6 +2,7 @@ packages:
   - docs
   - example
   - plugin
+  - vite-plugin-mock-dev-server
 catalogs:
   dev:
     '@pengzhanbo/eslint-config': ^1.36.0
@@ -13,24 +14,26 @@ catalogs:
     '@types/is-core-module': ^2.2.2
     '@types/mime-types': ^3.0.1
     '@types/mockjs': ^1.0.10
-    '@types/node': ^24.2.1
+    '@types/node': ^24.3.0
     '@types/ws': ^8.18.1
     bumpp: ^10.2.3
     conventional-changelog-cli: ^5.0.0
     esbuild: ^0.25.9
-    eslint: ^9.33.0
+    eslint: ^9.34.0
     mockjs: ^1.1.0
+    rolldown: ^1.0.0-beta.34
     tsdown: ^0.14.1
     typescript: ^5.9.2
-    vite: ^7.1.2
-    vitepress: ^2.0.0-alpha.10
+    vite: 'npm:rolldown-vite@latest'
+    vitepress: ^2.0.0-alpha.12
     vitepress-plugin-group-icons: ^1.6.3
     vitepress-plugin-llms: ^1.7.3
     vitest: ^3.2.4
   prod:
     '@pengzhanbo/utils': ^2.1.0
     '@rollup/pluginutils': ^5.2.0
-    chokidar: 3.6.0
+    ansis: ^4.1.0
+    chokidar: ^4.0.3
     co-body: ^6.2.0
     cookies: ^0.9.1
     cors: ^2.8.5
@@ -40,9 +43,12 @@ catalogs:
     http-status: ^2.1.0
     is-core-module: ^2.16.1
     json5: ^2.2.3
+    local-pkg: ^1.1.2
     mime-types: ^3.0.1
-    path-to-regexp: 6.3.0
+    path-to-regexp: ^8.2.0
     picocolors: ^1.1.1
+    picomatch: ^4.0.3
+    tinyglobby: ^0.2.14
     ws: ^8.18.3
 onlyBuiltDependencies:
   - esbuild

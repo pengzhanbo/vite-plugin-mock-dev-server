@@ -1,16 +1,13 @@
 import type { Server } from 'node:http'
 import type { Http2SecureServer } from 'node:http2'
 import type { Connect, WebSocketServer } from 'vite'
-import type { MockCompiler } from './mockCompiler'
-import type { ResolvedMockServerPluginOptions } from './resolvePluginOptions'
-import cors from 'cors'
-import { pathToRegexp } from 'path-to-regexp'
-import { baseMiddleware } from './baseMiddleware'
-import { createMockCompiler } from './mockCompiler'
-import { doesProxyContextMatchUrl, urlParse } from './utils'
+import type { ResolvedMockServerPluginOptions } from '../options'
+import { Compiler } from '../compiler'
+import { createCorsMiddleware } from './corsMiddleware'
+import { createMockMiddleware } from './mockMiddleware'
 import { mockWebSocket } from './ws'
 
-export function mockServerMiddleware(
+export function initMockMiddlewares(
   options: ResolvedMockServerPluginOptions,
   // vite@5 httpServer 类型发生变更
   // https://github.com/vitejs/vite/pull/14834
@@ -21,7 +18,7 @@ export function mockServerMiddleware(
    * 加载 mock 文件, 包括监听 mock 文件的依赖文件变化，
    * 并注入 vite  `define` / `alias`
    */
-  const compiler = createMockCompiler(options)
+  const compiler = new Compiler(options)
 
   compiler.run(!!server)
 
@@ -61,36 +58,8 @@ export function mockServerMiddleware(
      * 也会使用 viteConfig.server.cors 配置，并支持 用户可以对 mock 中的 cors 中间件进行配置。
      * 而用户的配置也仅对 mock 的接口生效。
      */
-    corsMiddleware(compiler, options),
-    baseMiddleware(compiler, options),
+    createCorsMiddleware(compiler, options),
+    createMockMiddleware(compiler, options),
   )
   return middlewares.filter(Boolean) as Connect.NextHandleFunction[]
-}
-
-function corsMiddleware(
-  compiler: MockCompiler,
-  { proxies, cors: corsOptions }: ResolvedMockServerPluginOptions,
-): Connect.NextHandleFunction | undefined {
-  return !corsOptions
-    ? undefined
-    : function (req, res, next) {
-      const { pathname } = urlParse(req.url!)
-      if (
-        !pathname || proxies.length === 0
-        || !proxies.some(context => doesProxyContextMatchUrl(context, req.url!))
-      ) {
-        return next()
-      }
-
-      const mockData = compiler.mockData
-
-      const mockUrl = Object.keys(mockData).find(key =>
-        pathToRegexp(key).regexp.test(pathname),
-      )
-
-      if (!mockUrl)
-        return next()
-
-      cors(corsOptions)(req, res, next)
-    }
 }

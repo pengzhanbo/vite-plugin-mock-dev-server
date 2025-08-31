@@ -1,4 +1,4 @@
-import type { Token } from 'path-to-regexp'
+import type { Parameter, Text, Token, Wildcard } from 'path-to-regexp'
 import type { MockMatchPriority } from '../types'
 /**
  * 规则匹配优先级
@@ -24,25 +24,27 @@ import type { MockMatchPriority } from '../types'
 import {
   isArray,
   isEmptyObject,
-  isString,
   sortBy,
   uniq,
 } from '@pengzhanbo/utils'
 import { parse, pathToRegexp } from 'path-to-regexp'
+import { isPathMatch } from '../utils'
 
-type PathToken = Token & { optional?: boolean }
+type PathToken = (Text & { optional?: boolean })
+  | (Parameter & { optional?: boolean })
+  | (Wildcard & { optional?: boolean })
+
 const tokensCache: Record<string, PathToken[]> = {}
 
 function getTokens(rule: string) {
   if (tokensCache[rule])
     return tokensCache[rule]
-  const tks = parse(rule).tokens
   const res: PathToken[] = []
   const flatten = (tokens: Token[], group = false) => {
     for (const token of tokens) {
       if (token.type === 'text') {
         const sub = token.value.split('/').filter(Boolean)
-        sub.length && res.push(...sub.map(v => ({ type: 'text', value: v } as Token)))
+        sub.length && res.push(...sub.map(v => ({ type: 'text', value: v } as PathToken)))
       }
       else if (token.type === 'group') {
         flatten(token.tokens, true)
@@ -54,7 +56,7 @@ function getTokens(rule: string) {
       }
     }
   }
-  flatten(tks)
+  flatten(parse(rule).tokens)
   tokensCache[rule] = res
   return res
 }
@@ -110,47 +112,34 @@ function defaultPriority(rules: string[]) {
     let exp = 0
     for (let i = 0; i < tokens.length; i++) {
       const token = tokens[i]
-      const isDynamic = !isString(token)
-      const {
-        pattern = '',
-        modifier,
-        prefix,
-        name,
-      } = isDynamic ? token : ({} as any)
-      const isGlob = pattern && pattern.includes('.*')
-      const isSlash = prefix === '/'
-      const isNamed = isString(name)
+      // 动态参数，包括命名参数、可选参数、剩余参数通配符
+      const isDynamic = token.type !== 'text'
+      // 通配符 剩余参数 foo/*bar
+      //                     ^^^^
+      const isWildcard = token.type === 'wildcard'
+      // 可选参数: foo{/:bar}  可选剩余参数 foo{/*bar}
+      //              ^^^^^^^                  ^^^^^^^
+      const isOptional = !!token.optional
 
-      exp += isDynamic && isSlash ? 1 : 0
+      exp += isDynamic ? 1 : 0
 
       // 如果规则末尾是通配，则优先级最低
-      if (i === tokens.length - 1 && isGlob) {
-        weight += 5 * 10 ** (tokens.length === 1 ? highest + 1 : highest)
+      if (i === tokens.length - 1 && isWildcard) {
+        weight += (isOptional ? 5 : 4) * 10 ** (tokens.length === 1 ? highest + 1 : highest)
       }
       else {
         // 非末尾的通配，优先级次低
-        if (isGlob) {
+        if (isWildcard) {
           weight += 3 * 10 ** (highest - 1)
         }
-        else if (pattern) {
-          if (isSlash) {
-            // 具名参数优先级高于非命名参数
-            weight += (isNamed ? 2 : 1) * 10 ** (exp + 1)
-          }
-          else {
-            // :foo{-:bar}{-:baz}? 优先级高于 :foo
-            weight -= 1 * 10 ** exp
-          }
+        else {
+          weight += 2 * 10 ** exp
+        }
+        // 降低可选参数优先级
+        if (isOptional) {
+          weight += 10 ** exp
         }
       }
-      if (modifier === '+')
-        weight += 1 * 10 ** (highest - 1)
-
-      if (modifier === '*')
-        weight += 1 * 10 ** (highest - 1) + 1
-
-      if (modifier === '?')
-        weight += 1 * 10 ** (exp + (isSlash ? 1 : 0))
     }
     return weight
   })

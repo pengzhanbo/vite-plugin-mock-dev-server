@@ -1,14 +1,11 @@
-import type { Metafile, Plugin } from 'esbuild'
+import type { Plugin } from 'esbuild'
 import type { Alias } from 'vite'
-import fs, { promises as fsp } from 'node:fs'
+import type { CompilerOptions, TransformResult } from './types'
+import fsp from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
-import { build as esbuild } from 'esbuild'
 import JSON5 from 'json5'
-import { build as rolldownBuild } from 'rolldown'
-
-/* ===== esbuild begin ===== */
 
 const externalizeDeps: Plugin = {
   name: 'externalize-deps',
@@ -104,28 +101,23 @@ export function aliasMatches(pattern: string | RegExp, importee: string): boolea
   return importee.startsWith(`${pattern}/`)
 }
 
-export interface TransformWithEsbuildOptions {
-  isESM?: boolean
-  define: Record<string, string>
-  alias: Alias[]
-  cwd?: string
-}
+let _build: null | typeof import('esbuild').build = null
 
-export type TransformWithEsbuildResult = Promise<{
-  code: string
-  deps: Metafile['inputs']
-}>
+async function esbuild(): Promise<NonNullable<typeof _build>> {
+  _build ||= (await import('esbuild')).build
+  return _build
+}
 
 export async function transformWithEsbuild(
   entryPoint: string,
-  options: TransformWithEsbuildOptions,
-): TransformWithEsbuildResult {
-  const { isESM = true, define, alias, cwd = process.cwd() } = options
+  { isESM = true, define, alias, cwd = process.cwd() }: CompilerOptions,
+): Promise<TransformResult> {
   const filepath = path.resolve(cwd, entryPoint)
   const filename = path.basename(entryPoint)
   const dirname = path.dirname(filepath)
   try {
-    const result = await esbuild({
+    const build = await esbuild()
+    const result = await build({
       entryPoints: [entryPoint],
       outfile: 'out.js',
       write: false,
@@ -143,44 +135,19 @@ export async function transformWithEsbuild(
       plugins: [aliasPlugin(alias), renamePlugin, externalizeDeps, jsonLoader, json5Loader],
       absWorkingDir: cwd,
     })
+    const deps: Set<string> = new Set()
+    const inputs = result.metafile?.inputs || {}
+    Object.keys(inputs).forEach(key =>
+      inputs[key].imports.forEach(dep => deps.add(dep.path)),
+    )
+
     return {
       code: result.outputFiles[0].text,
-      deps: result.metafile?.inputs || {},
+      deps: Array.from(deps),
     }
   }
   catch (e) {
     console.error(e)
   }
-  return { code: '', deps: {} }
-}
-
-/* ===== esbuild end ===== */
-interface LoadFromCodeOptions {
-  filepath: string
-  code: string
-  isESM: boolean
-  cwd: string
-}
-
-export async function loadFromCode<T = any>({
-  filepath,
-  code,
-  isESM,
-  cwd,
-}: LoadFromCodeOptions): Promise<T | { [key: string]: T }> {
-  filepath = path.resolve(cwd, filepath)
-  const ext = isESM ? '.mjs' : '.cjs'
-  const filepathTmp = `${filepath}.timestamp-${Date.now()}${ext}`
-  const file = pathToFileURL(filepathTmp).toString()
-  await fsp.writeFile(filepathTmp, code, 'utf8')
-  try {
-    const mod = await import(file)
-    return mod.default || mod
-  }
-  finally {
-    try {
-      fs.unlinkSync(filepathTmp)
-    }
-    catch {}
-  }
+  return { code: '', deps: [] }
 }

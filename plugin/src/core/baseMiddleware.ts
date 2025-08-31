@@ -36,13 +36,9 @@ import {
 } from './utils'
 import { validate } from './validator'
 
-export interface BaseMiddlewareOptions {
-  formidableOptions: MockServerPluginOptions['formidableOptions']
-  cookiesOptions: MockServerPluginOptions['cookiesOptions']
-  bodyParserOptions: MockServerPluginOptions['bodyParserOptions']
+export interface BaseMiddlewareOptions extends Pick<MockServerPluginOptions, 'formidableOptions' | 'cookiesOptions' | 'bodyParserOptions' | 'priority'> {
   proxies: string[]
   logger: Logger
-  priority: MockServerPluginOptions['priority']
 }
 
 export function baseMiddleware(

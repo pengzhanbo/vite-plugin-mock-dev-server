@@ -1,5 +1,5 @@
 {
-  "name": "vite-plugin-mock-dev-server-old",
+  "name": "vite-plugin-mock-dev-server",
   "type": "module",
   "version": "1.9.3",
   "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
@@ -22,30 +22,18 @@
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
       }
     },
     "./helper": {
       "import": {
         "types": "./dist/helper.d.ts",
         "default": "./dist/helper.js"
-      },
-      "require": {
-        "types": "./dist/helper.d.cts",
-        "default": "./dist/helper.cjs"
       }
     },
     "./server": {
       "import": {
         "types": "./dist/server.d.ts",
         "default": "./dist/server.js"
-      },
-      "require": {
-        "types": "./dist/server.d.cts",
-        "default": "./dist/server.cjs"
       }
     },
     "./package.json": "./package.json"
@@ -75,20 +63,21 @@
     }
   },
   "dependencies": {
-    "@rollup/pluginutils": "catalog:prod",
+    "ansis": "catalog:prod",
     "chokidar": "catalog:prod",
     "co-body": "catalog:prod",
     "cookies": "catalog:prod",
     "cors": "catalog:prod",
     "debug": "catalog:prod",
-    "fast-glob": "catalog:prod",
     "formidable": "catalog:prod",
     "http-status": "catalog:prod",
     "is-core-module": "catalog:prod",
     "json5": "catalog:prod",
+    "local-pkg": "catalog:prod",
     "mime-types": "catalog:prod",
     "path-to-regexp": "catalog:prod",
-    "picocolors": "catalog:prod",
+    "picomatch": "catalog:prod",
+    "tinyglobby": "catalog:prod",
     "ws": "catalog:prod"
   },
   "devDependencies": {
