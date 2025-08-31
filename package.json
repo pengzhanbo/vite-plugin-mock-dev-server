@@ -30,7 +30,7 @@
     "@types/is-core-module": "catalog:dev",
     "@types/mime-types": "catalog:dev",
     "@types/node": "catalog:dev",
-    "@types/picomatch": "^4.0.2",
+    "@types/picomatch": "catalog:dev",
     "@types/ws": "catalog:dev",
     "bumpp": "catalog:dev",
     "conventional-changelog-cli": "catalog:dev",

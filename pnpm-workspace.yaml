@@ -1,7 +1,6 @@
 packages:
   - docs
   - example
-  - plugin
   - vite-plugin-mock-dev-server
 catalogs:
   dev:
@@ -15,6 +14,7 @@ catalogs:
     '@types/mime-types': ^3.0.1
     '@types/mockjs': ^1.0.10
     '@types/node': ^24.3.0
+    '@types/picomatch': ^4.0.2
     '@types/ws': ^8.18.1
     bumpp: ^10.2.3
     conventional-changelog-cli: ^5.0.0
@@ -31,14 +31,12 @@ catalogs:
     vitest: ^3.2.4
   prod:
     '@pengzhanbo/utils': ^2.1.0
-    '@rollup/pluginutils': ^5.2.0
     ansis: ^4.1.0
     chokidar: ^4.0.3
     co-body: ^6.2.0
     cookies: ^0.9.1
     cors: ^2.8.5
     debug: ^4.4.1
-    fast-glob: ^3.3.3
     formidable: 3.5.4
     http-status: ^2.1.0
     is-core-module: ^2.16.1
@@ -46,7 +44,6 @@ catalogs:
     local-pkg: ^1.1.2
     mime-types: ^3.0.1
     path-to-regexp: ^8.2.0
-    picocolors: ^1.1.1
     picomatch: ^4.0.3
     tinyglobby: ^0.2.14
     ws: ^8.18.3
