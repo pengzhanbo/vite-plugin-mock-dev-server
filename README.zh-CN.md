@@ -53,6 +53,9 @@
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/9ccda610-2c6a-4cd0-aeaa-a8932f2b477c/deploy-status)](https://app.netlify.com/sites/vite-plugin-mock-dev-server/deploys)
 
+> [!IMPORTANT]
+> 当前文档为插件的 `v2` 版本，如果您正在使用 `v1` 版本，请参考 [迁移文档](https://vite-plugin-mock-dev-server.netlify.app/zh/guide/migrate-v2)
+
 ## 安装
 
 ```sh
@@ -101,7 +104,7 @@ export default defineConfig({
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
-  url: '/api/test',
+  url: '/api/user/:id',
   body: { a: 1, b: 2 }
 })
 ```
