@@ -1,6 +1,6 @@
 # 静态资源服务
 
-通过 动态路由匹配，获取请求的文件路径 `:filepath(.*)`, 获取请求中的文件路径，
+通过 动态路由匹配，获取请求的文件路径 `*filepath`, 获取请求中的文件路径，
 在 `body` 中以文件流的方式返回，并在 `headers` 中设置正确的 `Content-Type`。
 
 ```ts
@@ -13,10 +13,10 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineMock({
-  url: '/mockData/:filepath(.*)',
+  url: '/mock-static/*filepath',
   method: 'GET',
   headers(request) {
-    const { filepath } = request.params
+    const filepath = request.params.filepath.join('/')
     const filename = path.basename(filepath)
     return {
       'Content-Type': mime.lookup(filename) || 'text/plain',
@@ -24,7 +24,7 @@ export default defineMock({
   },
   body(request) {
     const { filepath } = request.params
-    return createReadStream(path.join(__dirname, 'mockData', filepath))
+    return createReadStream(path.join(__dirname, 'mock-static', filepath))
   },
 })
 ```

@@ -57,6 +57,7 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
         { text: 'Introduce', link: 'introduce' },
         { text: 'Install', link: 'install' },
         { text: 'Usage', link: 'usage' },
+        { text: 'Migrate from v1.0', link: 'migrate-v2' },
       ],
     },
     {

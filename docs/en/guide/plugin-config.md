@@ -3,6 +3,7 @@
 `type: MockServerPluginOptions`
 
 ``` ts
+import process from 'node:process'
 import { defineConfig } from 'vite'
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 
@@ -11,7 +12,9 @@ export default defineConfig({
     mockDevServerPlugin({
       prefix: [],
       wsPrefix: [],
-      include: ['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}'],
+      cwd: process.cwd(),
+      dir: 'mock',
+      include: ['**/*.mock.{js,ts,cjs,mjs,json,json5}'],
       exclude: '',
       log: 'info',
       reload: false,
@@ -31,6 +34,8 @@ export default defineConfig({
 interface MockServerPluginOptions {
   prefix?: string | string[]
   wsPrefix?: string | string[]
+  cwd?: string
+  dir?: string
   include?: string | string[]
   exclude?: string | string[]
   reload?: boolean
@@ -74,11 +79,18 @@ This conflict is not a problem with Vite or the plugin itself; it is a reasonabl
 
 Configure the matching context for `include` and `exclude`.
 
+## dir
+
+- **Type**： `string`
+- **Default**： `'mock'`
+
+The directory for configuring mock data, relative to `cwd`.
+
 ## include
 
 **Type**： `string | string[]`
 
-- **Default**：relative to [`cwd`](#cwd)
+- **Default**：relative to [`cwd`](#cwd) + [`dir`](#dir)
 
   ```ts
   ['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']
@@ -90,10 +102,10 @@ Configure the reading of mock files, which can be a directory, a glob pattern, o
 
 - **Type**： `string | string[]`
 
-- **Default**：relative to [`cwd`](#cwd)
+- **Default**：relative to [`cwd`](#cwd) + [`dir`](#dir)
 
   ```ts
-  ['**/node_modules/**', '**/test/**', '**/cypress/**', 'src/**', '**/.vscode/**', '**/.git/**', '**/dist/**']
+  ['**/node_modules/**']
   ```
 
 Specifies the files to be excluded when reading mock files. It can be a directory, glob pattern, or an array.
