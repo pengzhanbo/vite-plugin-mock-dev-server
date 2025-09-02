@@ -7,11 +7,15 @@ import path from 'node:path'
 import process from 'node:process'
 import { promiseParallel } from '@pengzhanbo/utils'
 import { watch } from 'chokidar'
+import { loadPackageJSONSync } from 'local-pkg'
 import { glob } from 'tinyglobby'
-import { createMatcher, debug, lookupFile, normalizePath } from '../utils'
+import { createMatcher, debug, normalizePath } from '../utils'
 import { compile } from './compile'
 import { processMockData, processRawData } from './processData'
 
+/**
+ * Mock 文件加载编译，并转换为 Mock 数据
+ */
 export class Compiler extends EventEmitter {
   private moduleCache: Map<string, MockOptions | MockHttpItem | MockWebsocketItem>
     = new Map()
@@ -28,8 +32,8 @@ export class Compiler extends EventEmitter {
     super()
     this.cwd = options.cwd || process.cwd()
     try {
-      const pkg = lookupFile(this.cwd, ['package.json'])
-      this.isESM = !!pkg && JSON.parse(pkg).type === 'module'
+      const pkg = loadPackageJSONSync(this.cwd)
+      this.isESM = pkg?.type === 'module'
     }
     catch {}
   }
@@ -129,7 +133,11 @@ export class Compiler extends EventEmitter {
     const watcher = this.mockWatcher = watch(this.options.dir, {
       ignoreInitial: true,
       cwd: this.cwd,
-      ignored: (filepath, stats) => !!stats?.isFile() && !isMatch(filepath),
+      ignored: (filepath, stats) => {
+        if (filepath.includes('node_modules'))
+          return true
+        return !!stats?.isFile() && !isMatch(filepath)
+      },
     })
 
     watcher.on('add', async (filepath: string) => {

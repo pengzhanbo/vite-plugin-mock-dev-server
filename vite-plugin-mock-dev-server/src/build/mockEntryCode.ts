@@ -7,7 +7,7 @@ export async function generateMockEntryCode(
   dir: string,
   include: string[],
   exclude: string[],
-) {
+): Promise<string> {
   const { pattern, ignore } = createMatcher(include, exclude)
   const mockFiles = await glob(pattern, { ignore, cwd: path.join(cwd, dir) })
 

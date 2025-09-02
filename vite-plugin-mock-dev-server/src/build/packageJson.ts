@@ -1,5 +1,6 @@
 import type { ResolvedMockServerPluginOptions } from '../options'
 import isCore from 'is-core-module'
+import { getPackageInfoSync } from 'local-pkg'
 import { name as __PACKAGE_NAME__, version as __PACKAGE_VERSION__ } from '../../package.json'
 import { aliasMatches } from '../compiler'
 
@@ -42,7 +43,7 @@ function normalizePackageName(dep: string): string {
   return scope
 }
 
-export function generatePackageJson(pkg: any, mockDeps: string[]) {
+export function generatePackageJson(pkg: any, mockDeps: string[]): string {
   const { dependencies = {}, devDependencies = {} } = pkg
   const dependents = { ...dependencies, ...devDependencies }
   const mockPkg = {
@@ -58,8 +59,16 @@ export function generatePackageJson(pkg: any, mockDeps: string[]) {
     } as Record<string, string>,
     pnpm: { peerDependencyRules: { ignoreMissing: ['vite'] } },
   }
-  mockDeps.forEach((dep) => {
-    mockPkg.dependencies[dep] = dependents[dep] || 'latest'
-  })
+  const ignores: string[] = ['catalog:', 'file:', 'workspace:']
+  for (const dep of mockDeps) {
+    const version = dependents[dep] as string | undefined
+    if (!version || ignores.some(ignore => version.startsWith(ignore))) {
+      const info = getPackageInfoSync(dep)
+      mockPkg.dependencies[dep] = info?.version ? `^${info.version}` : 'latest'
+    }
+    else {
+      mockPkg.dependencies[dep] = 'latest'
+    }
+  }
   return JSON.stringify(mockPkg, null, 2)
 }

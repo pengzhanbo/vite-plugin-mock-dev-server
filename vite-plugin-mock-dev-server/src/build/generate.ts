@@ -6,9 +6,9 @@ import fsp from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
 import { toArray } from '@pengzhanbo/utils'
-import c from 'picocolors'
+import ansis from 'ansis'
+import { loadPackageJSON } from 'local-pkg'
 import { transform } from '../compiler'
-import { lookupFile } from '../utils'
 import { generateMockEntryCode } from './mockEntryCode'
 import { generatePackageJson, getMockDependencies } from './packageJson'
 import { generatorServerEntryCode } from './serverEntryCode'
@@ -29,14 +29,7 @@ export async function generateMockServer(
   const cwd = options.cwd || process.cwd()
   const dir = options.dir
 
-  let pkg = {}
-  try {
-    const pkgStr = lookupFile(options.context, ['package.json'])
-    if (pkgStr)
-      pkg = JSON.parse(pkgStr)
-  }
-  catch {}
-
+  const pkg = await loadPackageJSON(options.context) || {}
   const outputDir = (options.build as ServerBuildOption).dist!
 
   const content = await generateMockEntryCode(cwd, dir, include, exclude)
@@ -67,14 +60,14 @@ export async function generateMockServer(
         if (fs.existsSync(filename))
           await fsp.rm(filename)
       }
-      options.logger.info(`${c.green('✓')} generate mock server in ${c.cyan(outputDir)}`)
+      options.logger.info(`${ansis.green('✓')} generate mock server in ${ansis.cyan(outputDir)}`)
       for (const { filename, source } of outputList) {
         fs.mkdirSync(path.dirname(filename), { recursive: true })
         await fsp.writeFile(filename, source, 'utf-8')
         const sourceSize = (source.length / 1024).toFixed(2)
         const name = path.relative(outputDir, filename)
         const space = name.length < 30 ? ' '.repeat(30 - name.length) : ''
-        options.logger.info(`  ${c.green(name)}${space}${c.bold(c.dim(`${sourceSize} kB`))}`)
+        options.logger.info(`  ${ansis.green(name)}${space}${ansis.bold.dim(`${sourceSize} kB`)}`)
       }
     }
     else {

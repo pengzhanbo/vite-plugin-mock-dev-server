@@ -20,7 +20,7 @@ export function provideResponseStatus(
   response: MockResponse,
   status = 200,
   statusText?: string,
-) {
+): void {
   response.statusCode = status
   response.statusMessage = statusText || getHTTPStatusText(status)
 }
@@ -33,7 +33,7 @@ export async function provideResponseHeaders(
   res: MockResponse,
   mock: MockHttpItem,
   logger: Logger,
-) {
+): Promise<void> {
   const { headers, type = 'json' } = mock
   const filepath = (mock as any).__filepath__ as string
   const contentType
@@ -75,7 +75,7 @@ export async function provideResponseCookies(
   res: MockResponse,
   mock: MockHttpItem,
   logger: Logger,
-) {
+): Promise<void> {
   const { cookies } = mock
   const filepath = (mock as any).__filepath__ as string
   if (!cookies)
@@ -106,7 +106,7 @@ export async function provideResponseCookies(
 /**
  * 设置响应数据
  */
-export function sendResponseData(res: MockResponse, raw: ResponseBody, type: string) {
+export function sendResponseData(res: MockResponse, raw: ResponseBody, type: string): void {
   if (isReadableStream(raw)) {
     raw.pipe(res)
   }
@@ -122,7 +122,7 @@ export function sendResponseData(res: MockResponse, raw: ResponseBody, type: str
 /**
  * 实际响应延迟
  */
-export async function responseRealDelay(startTime: number, delay?: MockHttpItem['delay']) {
+export async function responseRealDelay(startTime: number, delay?: MockHttpItem['delay']): Promise<void> {
   if (
     !delay
     || (typeof delay === 'number' && delay <= 0)

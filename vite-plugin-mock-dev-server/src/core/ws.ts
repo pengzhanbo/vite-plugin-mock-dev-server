@@ -20,8 +20,8 @@ import type {
   MockWebsocketItem,
   WebSocketSetupContext,
 } from '../types'
+import ansis from 'ansis'
 import Cookies from 'cookies'
-import colors from 'picocolors'
 import { WebSocketServer } from 'ws'
 import { doesProxyContextMatchUrl, isPathMatch, urlParse } from '../utils'
 import { parseRequestParams } from './request'
@@ -95,7 +95,7 @@ export function mockWebSocket(
       wss.on('close', () => wssMap.delete(pathname))
       wss.on('error', (e) => {
         logger.error(
-          `${colors.red(
+          `${ansis.red(
             `WebSocket mock error at ${wss.path}`,
           )}\n${e}\n  at setup (${filepath})`,
           mock.log,
@@ -104,7 +104,7 @@ export function mockWebSocket(
     }
     catch (e) {
       logger.error(
-        `${colors.red(
+        `${ansis.red(
           `WebSocket mock error at ${wss.path}`,
         )}\n${e}\n  at setup (${filepath})`,
         mock.log,
@@ -216,9 +216,9 @@ export function mockWebSocket(
 
     wss.handleUpgrade(request, socket, head, (ws) => {
       logger.info(
-        `${colors.magenta(colors.bold('WebSocket'))} ${colors.green(
+        `${ansis.magenta.bold('WebSocket')} ${ansis.green(
           req.url,
-        )} connected ${colors.dim(`(${filepath})`)}`,
+        )} connected ${ansis.dim(`(${filepath})`)}`,
         mock.log,
       )
       wssContext.connectionList.push({ req: request, ws })

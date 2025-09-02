@@ -14,7 +14,7 @@
     "isolatedDeclarations": true,
     "skipLibCheck": true
   },
-  "include": ["./plugin/**/*", "./docs/.vitepress/**/*"],
+  "include": ["./vite-plugin-mock-dev-server/**/*", "./docs/.vitepress/**/*"],
   "exclude": [
     "**/dist/**",
     "**/node_modules/**",
