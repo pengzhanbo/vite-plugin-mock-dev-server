@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { matchingWeight } from '../src/core/matchingWeight'
 
 describe('matching weight', () => {
-  const rules = [
+  const rules: string[] = [
     '/api/*rest',
     '/api{/*rest}',
     '/api/*rest/:d',
@@ -27,7 +27,7 @@ describe('matching weight', () => {
     '/api/:a{/:b/:c}/d',
   ]
 
-  const expects = {
+  const expects: Record<string, string[]> = {
     '/api/a/c/b': [
       '/api/a/:b/:c',
       '/api/:a/:b/:c',
