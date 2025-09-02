@@ -110,6 +110,7 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
         { text: '介绍', link: 'introduce' },
         { text: '安装', link: 'install' },
         { text: '使用', link: 'usage' },
+        { text: '从 v1.x 迁移', link: 'migrate-v2' },
       ],
     },
     {
@@ -125,8 +126,8 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
     {
       text: '配置',
       items: [
-        { text: 'pluginConfig', link: 'plugin-config' },
-        { text: 'mockConfig', link: 'mock-config' },
+        { text: '插件配置', link: 'plugin-config' },
+        { text: 'mock 配置', link: 'mock-config' },
       ],
     },
     {

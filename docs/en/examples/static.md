@@ -1,6 +1,6 @@
 # Static resource service
 
-Retrieve the file path from the request through dynamic route matching using `:filepath(.*)`, obtain the file path from the request, return it as a file stream in the body, and set the correct `Content-Type` in the headers.
+Retrieve the file path from the request through dynamic route matching using `*filepath`, obtain the file path from the request, return it as a file stream in the body, and set the correct `Content-Type` in the headers.
 
 ```ts
 import { createReadStream } from 'node:fs'
@@ -12,10 +12,10 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineMock({
-  url: '/mockData/:filepath(.*)',
+  url: '/mock-static/*filepath',
   method: 'GET',
   headers(request) {
-    const { filepath } = request.params
+    const filepath = request.params.filepath.join('/')
     const filename = path.basename(filepath)
     return {
       'Content-Type': mime.lookup(filename) || 'text/plain',
@@ -23,7 +23,7 @@ export default defineMock({
   },
   body(request) {
     const { filepath } = request.params
-    return createReadStream(path.join(__dirname, 'mockData', filepath))
+    return createReadStream(path.join(__dirname, 'mock-static', filepath))
   },
 })
 ```

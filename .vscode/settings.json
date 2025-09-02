@@ -10,6 +10,7 @@
     "picomatch",
     "proxied",
     "referer",
+    "rolldown",
     "tsdown"
   ],
   "typescript.tsdk": "node_modules/typescript/lib",

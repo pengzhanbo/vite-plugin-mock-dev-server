@@ -1,8 +1,9 @@
-# pluginConfig
+# 插件配置
 
 `type: MockServerPluginOptions`
 
 ``` ts [vite.config.ts]
+import process from 'node:process'
 import { defineConfig } from 'vite'
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 
@@ -11,7 +12,9 @@ export default defineConfig({
     mockDevServerPlugin({
       prefix: [],
       wsPrefix: [],
-      include: ['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}'],
+      cwd: process.cwd(),
+      dir: 'mock',
+      include: ['**/*.mock.{js,ts,cjs,mjs,json,json5}'],
       exclude: '',
       log: 'info',
       reload: false,
@@ -31,6 +34,8 @@ export default defineConfig({
 interface MockServerPluginOptions {
   prefix?: string | string[]
   wsPrefix?: string | string[]
+  cwd?: string
+  dir?: string
   include?: string | string[]
   exclude?: string | string[]
   reload?: boolean
@@ -78,14 +83,21 @@ interface MockServerPluginOptions {
 
 配置 `include` 和 `exclude` 的匹配上下文
 
+## dir
+
+- **类型**： `string`
+- **默认值**： `'mock'`
+
+配置mock数据的目录，相对于 `cwd`
+
 ## include
 
 - **类型**： `string | string[]`
 
-- **默认值**：相对于 [`cwd`](#cwd)
+- **默认值**：相对于 [`cwd`](#cwd) + [`dir`](#dir)
 
   ```ts
-  ['mock/**/*.mock.{js,ts,cjs,mjs,json,json5}']
+  ['**/*.mock.{js,ts,cjs,mjs,json,json5}']
   ```
 
 配置读取 mock文件，可以是一个 目录，glob，或者一个数组
@@ -94,10 +106,10 @@ interface MockServerPluginOptions {
 
 - **类型**： `string | string[]`
 
-- **默认值**：相对于 [`cwd`](#cwd)
+- **默认值**：相对于 [`cwd`](#cwd) + [`dir`](#dir)
 
   ```ts
-  ['**/node_modules/**', '**/test/**', '**/cypress/**', 'src/**', '**/.vscode/**', '**/.git/**', '**/dist/**']
+  ['**/node_modules/**']
   ```
 
 配置读取 mock文件时，需要排除的文件， 可以是一个 目录、glob、或者一个数组

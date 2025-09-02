@@ -1,0 +1,92 @@
+{
+  "name": "vite-plugin-mock-dev-server",
+  "type": "module",
+  "version": "1.9.3",
+  "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
+  "license": "MIT",
+  "homepage": "https://vite-plugin-mock-dev-server.netlify.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pengzhanbo/vite-plugin-mock-dev-server"
+  },
+  "keywords": [
+    "vite",
+    "plugin",
+    "vite-plugin",
+    "mock",
+    "mock-server",
+    "development"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./helper": {
+      "import": {
+        "types": "./dist/helper.d.ts",
+        "default": "./dist/helper.js"
+      }
+    },
+    "./server": {
+      "import": {
+        "types": "./dist/server.d.ts",
+        "default": "./dist/server.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": "^18 || ^20 || >=22"
+  },
+  "scripts": {
+    "build": "tsdown"
+  },
+  "peerDependencies": {
+    "esbuild": ">=0.21.0",
+    "rolldown": ">=1.0.0-beta.34",
+    "vite": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "esbuild": {
+      "optional": true
+    },
+    "rolldown": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@pengzhanbo/utils": "catalog:prod",
+    "ansis": "catalog:prod",
+    "chokidar": "catalog:prod",
+    "co-body": "catalog:prod",
+    "cookies": "catalog:prod",
+    "cors": "catalog:prod",
+    "debug": "catalog:prod",
+    "formidable": "catalog:prod",
+    "http-status": "catalog:prod",
+    "is-core-module": "catalog:prod",
+    "json5": "catalog:prod",
+    "local-pkg": "catalog:prod",
+    "mime-types": "catalog:prod",
+    "path-to-regexp": "catalog:prod",
+    "picomatch": "catalog:prod",
+    "tinyglobby": "catalog:prod",
+    "ws": "catalog:prod"
+  },
+  "devDependencies": {
+    "esbuild": "catalog:dev",
+    "rolldown": "catalog:dev",
+    "vite": "catalog:dev"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -51,7 +51,7 @@ const vitepressConfig: UserConfig<DefaultTheme.Config> = defineConfig({
   },
   vite: {
     plugins: [
-      groupIconVitePlugin(),
+      groupIconVitePlugin() as any,
       prod && llmstxt({
         workDir: 'en',
         ignoreFiles: ['index.md'],

@@ -10,10 +10,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
  * 模拟一个 静态资源服务
  */
 export default defineMock({
-  url: '/static/:filepath(.*)',
+  url: '/static/*filepath',
   method: 'GET',
   headers(request) {
-    const { filepath } = request.params
+    const filepath = request.params.filepath.join('/')
     const filename = path.basename(filepath)
     return {
       'Content-Type': mime.lookup(filename) || 'text/plain',

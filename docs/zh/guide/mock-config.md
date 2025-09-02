@@ -1,4 +1,4 @@
-# mockConfig
+# mock 配置
 
 `type: MockOptionsItem | MockOptionsItem[]`
 
