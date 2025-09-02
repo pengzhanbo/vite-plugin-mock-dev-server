@@ -1,5 +1,17 @@
 # 从 v1.x 迁移
 
+## 纯 ESM 支持
+
+插件不再提供 `CommonJS` 代码导出，请使用 ESM 模式导入插件。
+
+```ts
+import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server' // ✔️
+```
+
+```js
+const { mockDevServerPlugin } = require('vite-plugin-mock-dev-server') // ✖️ // [!code error]
+```
+
 ## Rolldown & Esbuild 支持
 
 插件现在会根据 Vite 不同版本，自动选择不同的编译器处理 mock 文件。

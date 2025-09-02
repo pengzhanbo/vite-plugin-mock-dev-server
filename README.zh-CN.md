@@ -29,7 +29,7 @@
 
 - ⚡️ 轻量，灵活，快速
 - 🧲 非注入式，对客户端代码无侵入
-- 💡 ESModule/CommonJS
+- 💡 ESModule
 - 🦾 Typescript
 - 🔥 热更新
 - 🏷 支持 `.[cm]?js` / `.ts` / `.json` / `.json5` 编写 mock 数据
@@ -52,6 +52,11 @@
 查看 [Documentation](https://vite-plugin-mock-dev-server.netlify.app/zh/) 了解更多。
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/9ccda610-2c6a-4cd0-aeaa-a8932f2b477c/deploy-status)](https://app.netlify.com/sites/vite-plugin-mock-dev-server/deploys)
+
+> [!IMPORTANT]
+> 插件不再支持 `CommonJS` 导入使用，请使用 `ESModule` 导入插件
+
+----
 
 > [!IMPORTANT]
 > 当前文档为插件的 `v2` 版本，如果您正在使用 `v1` 版本，请参考 [迁移文档](https://vite-plugin-mock-dev-server.netlify.app/zh/guide/migrate-v2)

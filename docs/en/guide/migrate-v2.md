@@ -1,5 +1,17 @@
 # Migrate from v1.x
 
+## Pure ESM Support
+
+The plugin no longer provides `CommonJS` code exports. Please use the ESM mode to import the plugin.
+
+```ts
+import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server' // ✔️
+```
+
+```js
+const { mockDevServerPlugin } = require('vite-plugin-mock-dev-server') // ✖️ // [!code error]
+```
+
 ## Rolldown & Esbuild Support
 
 The plugin now automatically selects different compilers to process mock files based on different versions of Vite.

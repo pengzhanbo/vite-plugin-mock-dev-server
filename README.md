@@ -28,7 +28,7 @@
 
 - ⚡️ Lightweight, Flexible, Fast.
 - 🧲 Not injection-based, non-intrusive to client code.
-- 💡 ESModule/CommonJS.
+- 💡 Pure ESModule.
 - 🦾 Typescript.
 - 🔥 HMR
 - 🏷 Support `.[cm]?js` / `.ts` / `.json` / `.json5`.
@@ -51,6 +51,11 @@
 See the [documentation](https://vite-plugin-mock-dev-server.netlify.app/) for more details.
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/9ccda610-2c6a-4cd0-aeaa-a8932f2b477c/deploy-status)](https://app.netlify.com/sites/vite-plugin-mock-dev-server/deploys)
+
+> [!IMPORTANT]
+> The plugin no longer supports `CommonJS` imports. Please use `ESModule` to import the plugin.
+
+----
 
 > [!IMPORTANT]
 > The current document is for the `v2` version of the plugin. If you are using the `v1` version, please refer to the [Migration Guide](https://vite-plugin-mock-dev-server.netlify.app/guide/migrate-v2).
