@@ -1,3 +1,12 @@
+# [2.0.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.9.3...v2.0.0) (2025-09-02)
+
+
+### Features
+
+* v2 ! pure esm, rolldown support, upgrade `path-to-regexp` to v8 ([#124](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/124)) ([1cf4bf7](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/1cf4bf7cfd16e4690d986b51a36ae43879a77b42))
+
+
+
 ## [1.9.3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.9.2...v1.9.3) (2025-08-13)
 
 
