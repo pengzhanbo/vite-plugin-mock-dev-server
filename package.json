@@ -15,10 +15,9 @@
     "docs:preview": "pnpm -F docs docs:preview",
     "lint": "eslint .",
     "test": "vitest",
-    "prepublishOnly": "vitest run && pnpm run build",
     "release:changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "release:version": "bumpp package.json {vite-plugin-mock-dev-server,docs,example}/package.json --execute=\"pnpm release:changelog\" --commit --all --push --tag",
-    "release": "pnpm release:version && pnpm -r publish"
+    "release": "pnpm release:version && vitest run && pnpm run build && pnpm -r publish"
   },
   "devDependencies": {
     "@pengzhanbo/eslint-config": "catalog:dev",
