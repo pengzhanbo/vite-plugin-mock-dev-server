@@ -1,3 +1,17 @@
+## [2.0.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.0.0...v2.0.1) (2025-09-04)
+
+
+### Bug Fixes
+
+* `isPackageExists` checks for the package incorrectly, close [#125](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/125) ([#126](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/126)) ([ecd53f0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/ecd53f0856be5c4b79353848313ee1a0e6d3518f))
+
+
+### Performance Improvements
+
+* update deps to latest ([a83cf78](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/a83cf78f177eaf261242d1f35791df3786c0e86e))
+
+
+
 # [2.0.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v1.9.3...v2.0.0) (2025-09-02)
 
 
