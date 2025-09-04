@@ -1,17 +1,14 @@
 import type { CompilerOptions, CompilerResult, MockRawData, TransformResult } from './types'
 import process from 'node:process'
-import { isPackageExists } from 'local-pkg'
+import { isPackageExists } from '../utils'
 import { transformWithEsbuild } from './esbuild'
 import { loadFromCode } from './loadFromCode'
 import { transformWithRolldown } from './rolldown'
 
-const hasRolldown = isPackageExists('rolldown')
-const hasEsbuild = isPackageExists('esbuild')
-
 export async function transform(entryPoint: string, options: CompilerOptions): Promise<TransformResult> {
-  if (hasRolldown)
+  if (await isPackageExists('rolldown'))
     return transformWithRolldown(entryPoint, options)
-  if (hasEsbuild)
+  if (await isPackageExists('esbuild'))
     return transformWithEsbuild(entryPoint, options)
   throw new Error('rolldown or esbuild not found')
 }
