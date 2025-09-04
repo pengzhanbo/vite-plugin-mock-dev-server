@@ -43,7 +43,7 @@ catalogs:
     json5: ^2.2.3
     local-pkg: ^1.1.2
     mime-types: ^3.0.1
-    path-to-regexp: ^8.2.0
+    path-to-regexp: ^8.3.0
     picomatch: ^4.0.3
     tinyglobby: ^0.2.14
     ws: ^8.18.3

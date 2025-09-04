@@ -122,8 +122,8 @@ catalogs:
       specifier: ^3.0.1
       version: 3.0.1
     path-to-regexp:
-      specifier: ^8.2.0
-      version: 8.2.0
+      specifier: ^8.3.0
+      version: 8.3.0
     picomatch:
       specifier: ^4.0.3
       version: 4.0.3
@@ -260,7 +260,7 @@ importers:
         version: 3.0.1
       path-to-regexp:
         specifier: catalog:prod
-        version: 8.2.0
+        version: 8.3.0
       picomatch:
         specifier: catalog:prod
         version: 4.0.3
@@ -2873,6 +2873,9 @@ packages:
   path-to-regexp@8.2.0:
     resolution: {integrity: sha512-TdrF7fW9Rphjq4RjrW0Kp2AW0Ahwu9sRGTkS6bvDi0SCwZlEZYmcfDbEsTz8RVk0EHIS/Vd1bv3JhG+1xZuAyQ==}
     engines: {node: '>=16'}
+
+  path-to-regexp@8.3.0:
+    resolution: {integrity: sha512-7jdwVIRtsP8MYpdXSwOS0YdD0Du+qOoF/AEPIt88PcCFrZCzx41oxku1jD88hZBwbNUIEfpqvuhjFaMAqMTWnA==}
 
   pathe@2.0.3:
     resolution: {integrity: sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w==}
@@ -6510,6 +6513,8 @@ snapshots:
   path-key@3.1.1: {}
 
   path-to-regexp@8.2.0: {}
+
+  path-to-regexp@8.3.0: {}
 
   pathe@2.0.3: {}
 
