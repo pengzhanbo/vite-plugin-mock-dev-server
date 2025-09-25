@@ -25,6 +25,9 @@
 <br>
 <br>
 
+> [!IMPORTANT]
+> 插件已适配 `vite@7.x` 以上版本，现在会根据 `vite` 版本自动选择 `esbuild`/`rolldown`编译 mock 文件。
+
 ## 特性
 
 - ⚡️ 轻量，灵活，快速

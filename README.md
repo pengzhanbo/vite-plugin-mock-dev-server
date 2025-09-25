@@ -24,6 +24,9 @@
 <br>
 <br>
 
+> [!IMPORTANT]
+> The plugin has been adapted for `vite@7.x` and above versions. It will now automatically choose `esbuild`/`rolldown` to compile mock files based on the `vite` version.
+
 ## Features
 
 - ⚡️ Lightweight, Flexible, Fast.
