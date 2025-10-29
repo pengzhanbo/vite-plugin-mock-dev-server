@@ -27,9 +27,11 @@ export class Compiler extends EventEmitter {
   private isESM = false
 
   private _mockData: Record<string, MockOptions> = {}
+  options!: ResolvedMockServerPluginOptions
 
-  constructor(public options: ResolvedMockServerPluginOptions) {
+  constructor(options: ResolvedMockServerPluginOptions) {
     super()
+    this.options = options
     this.cwd = options.cwd || process.cwd()
     try {
       const pkg = loadPackageJSONSync(this.cwd)

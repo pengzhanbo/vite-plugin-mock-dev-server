@@ -3,6 +3,9 @@ import config from '@pengzhanbo/eslint-config'
 export default config({
   pnpm: true,
   vue: false,
+  typescript: {
+    erasableOnly: true,
+  },
 }, {
   files: ['**/*.md/*.ts'],
   rules: {
