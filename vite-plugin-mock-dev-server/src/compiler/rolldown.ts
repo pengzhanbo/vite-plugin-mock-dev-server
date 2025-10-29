@@ -61,11 +61,13 @@ export async function transformWithRolldown(
         file: 'out.js',
       },
       platform: 'node',
-      define: {
-        ...define,
-        __dirname: JSON.stringify(dirname),
-        __filename: JSON.stringify(filename),
-        ...isESM ? {} : { 'import.meta.url': JSON.stringify(pathToFileURL(filepath)) },
+      transform: {
+        define: {
+          ...define,
+          __dirname: JSON.stringify(dirname),
+          __filename: JSON.stringify(filename),
+          ...isESM ? {} : { 'import.meta.url': JSON.stringify(pathToFileURL(filepath)) },
+        },
       },
       external(id) {
         if (isAlias(id))
