@@ -21,8 +21,8 @@ import type {
   WebSocketSetupContext,
 } from '../types'
 import ansis from 'ansis'
-import Cookies from 'cookies'
 import { WebSocketServer } from 'ws'
+import { Cookies } from '../cookies'
 import { doesProxyContextMatchUrl, isPathMatch, urlParse } from '../utils'
 import { parseRequestParams } from './request'
 

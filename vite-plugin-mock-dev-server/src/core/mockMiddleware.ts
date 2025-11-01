@@ -9,7 +9,7 @@ import type {
 import type { Logger } from '../utils'
 import { isFunction, timestamp } from '@pengzhanbo/utils'
 import ansis from 'ansis'
-import Cookies from 'cookies'
+import { Cookies } from '../cookies'
 import { doesProxyContextMatchUrl, urlParse } from '../utils'
 import { fineMockData } from './findMockData'
 import { matchingWeight } from './matchingWeight'
