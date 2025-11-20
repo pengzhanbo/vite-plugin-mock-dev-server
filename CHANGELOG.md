@@ -1,3 +1,18 @@
+## [2.0.3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.0.2...v2.0.3) (2025-11-20)
+
+
+### Bug Fixes
+
+* duplicate initialization of definiteMackData in multi-threads ([#133](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/133)) ([7baa8e1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/7baa8e1728d9d7702d46b7574d2f94d1c5f82e1c))
+* update aliasPlugin import to use viteAliasPlugin, close [#132](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/132) ([#134](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/134)) ([68e6a07](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/68e6a073ba11aad1bb16f80c6c3046bf579c0fdd))
+
+
+### Performance Improvements
+
+* update deps to latest ([4839e95](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/4839e9524ce09bc082ff841a537c83649656c6ba))
+
+
+
 ## [2.0.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.0.1...v2.0.2) (2025-10-29)
 
 
