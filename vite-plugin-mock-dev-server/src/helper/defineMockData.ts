@@ -58,10 +58,18 @@ export function defineMockData<T = any>(
   key: string,
   initialData: T,
 ): MockData<T> {
-  if (!mockDataCache.has(key))
-    mockDataCache.set(key, new CacheImpl(initialData))
-
-  const cache = mockDataCache.get(key)! as CacheImpl<T>
+  let cache = mockDataCache.get(key) as CacheImpl<T> | undefined
+  if (!cache) {
+    const newCache = new CacheImpl(initialData)
+    const existing = mockDataCache.get(key)
+    if (existing) {
+      cache = existing as CacheImpl<T>
+    }
+    else {
+      mockDataCache.set(key, newCache)
+      cache = newCache
+    }
+  }
 
   cache.hotUpdate(initialData)
 
