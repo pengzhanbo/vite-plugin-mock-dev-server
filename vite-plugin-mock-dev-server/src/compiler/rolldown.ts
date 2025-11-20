@@ -30,13 +30,13 @@ const json5Plugin: Plugin = {
 
 let _rolldown: null | {
   build: typeof import('rolldown').build
-  aliasPlugin: typeof import('rolldown/experimental').aliasPlugin
+  aliasPlugin: typeof import('rolldown/experimental').viteAliasPlugin
 } = null
 
 async function rolldown() {
   _rolldown ||= {
     build: (await import('rolldown')).build,
-    aliasPlugin: (await import('rolldown/experimental')).aliasPlugin,
+    aliasPlugin: (await import('rolldown/experimental')).viteAliasPlugin,
   }
   return _rolldown
 }
