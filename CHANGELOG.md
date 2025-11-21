@@ -1,3 +1,12 @@
+## [2.0.4](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.0.3...v2.0.4) (2025-11-21)
+
+
+### Bug Fixes
+
+* fix incorrect package exports, close [#135](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/135) ([4439ddf](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/4439ddf831918b79ae844f1b1833aeb7057ecf59))
+
+
+
 ## [2.0.3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.0.2...v2.0.3) (2025-11-20)
 
 
