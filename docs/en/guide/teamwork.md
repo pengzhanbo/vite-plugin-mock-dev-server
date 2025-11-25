@@ -7,7 +7,7 @@ On the other hand, within the plugin, a solution is provided to address team col
 
 ## Solution
 
-In [File Directory Management](/guide/file-management), we have provided the recommended approach for standardizing and refining the management of `mock files`. However, even when refining to a single file for **single interface + parameter validation**, it is still inevitable to encounter conflicts when multiple people modify the same interface.
+In [File Directory Management](./file-management), we have provided the recommended approach for standardizing and refining the management of `mock files`. However, even when refining to a single file for **single interface + parameter validation**, it is still inevitable to encounter conflicts when multiple people modify the same interface.
 
 In this scenario, a recommended solution is to localize the mock file and exclude it from being committed to git:
 

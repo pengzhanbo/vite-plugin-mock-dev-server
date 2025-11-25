@@ -2,7 +2,7 @@
 
 This section will guide you through the process of using this plugin in your project.
 
-If you haven't installed this plugin in your project yet, please refer to [Install](/en/guide/install).
+If you haven't installed this plugin in your project yet, please refer to [Install](./install).
 
 ## Step1: Import plugin
 
