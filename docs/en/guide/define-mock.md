@@ -34,4 +34,4 @@ export default defineMock([
 
 `type: MockOptionsItem | MockOptionsItem[]`
 
-See [mock-config](/en/guide/mock-config)
+See [mock-config](./mock-config)

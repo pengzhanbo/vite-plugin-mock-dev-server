@@ -1,6 +1,6 @@
 # 使用
 
-本节将帮助你在项目中使用此插件，如果你还未在项目中安装此插件，请先查看 [安装](/guide/install)。
+本节将帮助你在项目中使用此插件，如果你还未在项目中安装此插件，请先查看 [安装](./install)。
 
 ## Step1: 引入插件
 
@@ -83,7 +83,7 @@ export default defineConfig({
 └── package.json
 ```
 
-插件提供了 [`defineMock()`](/guide/define-mock) 函数帮助编写 mock 配置。
+插件提供了 [`defineMock()`](./define-mock) 函数帮助编写 mock 配置。
 
 ```ts [api.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'

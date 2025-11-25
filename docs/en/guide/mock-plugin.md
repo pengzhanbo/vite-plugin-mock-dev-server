@@ -19,4 +19,4 @@ export default defineConfig({
 
 `type: MockServerPluginOptions`
 
-See [pluginConfig](/en/guide/plugin-config)
+See [pluginConfig](./plugin-config)

@@ -19,4 +19,4 @@ export default defineConfig({
 
 `type: MockServerPluginOptions`
 
-查看 [pluginConfig](/guide/plugin-config)
+查看 [pluginConfig](./plugin-config)
