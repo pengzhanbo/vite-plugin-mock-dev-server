@@ -66,6 +66,15 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "weibangtuo",
+      "name": "weibt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4394281?v=4",
+      "profile": "https://github.com/weibangtuo",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
