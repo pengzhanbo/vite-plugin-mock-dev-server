@@ -1062,7 +1062,7 @@ You can access related `mock` interfaces through `localhost:8080/`.
 ## Contributors
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-7-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
@@ -1077,6 +1077,7 @@ You can access related `mock` interfaces through `localhost:8080/`.
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/pfdgithub"><img src="https://avatars.githubusercontent.com/u/3262762?v=4?s=100" width="100px;" alt="pfdgithub"/><br /><sub><b>pfdgithub</b></sub></a><br /><a href="https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commits?author=pfdgithub" title="Code">💻</a> <a href="https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues?q=author%3Apfdgithub" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/chuyuandu"><img src="https://avatars.githubusercontent.com/u/6959138?v=4?s=100" width="100px;" alt="chuyuan du"/><br /><sub><b>chuyuan du</b></sub></a><br /><a href="https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commits?author=chuyuandu" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://www.hlwen.com"><img src="https://avatars.githubusercontent.com/u/13469676?v=4?s=100" width="100px;" alt="hlwen"/><br /><sub><b>hlwen</b></sub></a><br /><a href="https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues?q=author%3Ahlwen" title="Bug reports">🐛</a> <a href="https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commits?author=hlwen" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/weibangtuo"><img src="https://avatars.githubusercontent.com/u/4394281?v=4?s=100" width="100px;" alt="weibt"/><br /><sub><b>weibt</b></sub></a><br /><a href="https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commits?author=weibangtuo" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
