@@ -56,7 +56,7 @@ export class Compiler extends EventEmitter {
      * 性能开销，从而影响编译速度。
      * 实测在控制并发数的前提下，总编译时间 差异不大，但内存开销更小更加稳定。
      */
-      .then(files => files.map(file => () => this.load(path.join(this.options.dir, file))))
+      .then(files => files.map(file => () => this.load(normalizePath(path.join(this.options.dir, file)))))
       .then(loaders => promiseParallel(loaders, 64))
       .then(() => this.updateMockData())
 
