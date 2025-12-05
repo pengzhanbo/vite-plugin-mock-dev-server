@@ -76,6 +76,15 @@
         "doc",
         "code"
       ]
+    },
+    {
+      "login": "Yuan-ZW",
+      "name": "Yuan-ZW",
+      "avatar_url": "https://avatars.githubusercontent.com/u/31435244?v=4",
+      "profile": "https://github.com/Yuan-ZW",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
