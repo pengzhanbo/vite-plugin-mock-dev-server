@@ -1,3 +1,12 @@
+## [2.0.6](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.0.5...v2.0.6) (2025-12-05)
+
+
+### Bug Fixes
+
+* hot reload failure caused by Windows slash ([#139](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/139)) ([4d93ccd](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/4d93ccd20136b418b6afbfb87cfa215cd6820064))
+
+
+
 ## [2.0.5](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.0.4...v2.0.5) (2025-11-25)
 
 
