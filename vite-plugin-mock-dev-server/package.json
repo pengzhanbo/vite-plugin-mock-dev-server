@@ -44,15 +44,15 @@
     "dist"
   ],
   "engines": {
-    "node": "^18 || ^20 || >=22"
+    "node": "^20 || >=22"
   },
   "scripts": {
     "build": "tsdown"
   },
   "peerDependencies": {
     "esbuild": ">=0.21.0",
-    "rolldown": ">=1.0.0-beta.34",
-    "vite": ">=4.0.0"
+    "rolldown": ">=1.0.0-beta.1",
+    "vite": ">=5.0.0"
   },
   "peerDependenciesMeta": {
     "esbuild": {

@@ -1,10 +1,14 @@
+shellEmulator: true
+
+trustPolicy: no-downgrade
+
 packages:
   - docs
   - example
   - vite-plugin-mock-dev-server
 catalogs:
   dev:
-    '@pengzhanbo/eslint-config': ^1.41.0
+    '@pengzhanbo/eslint-config': ^1.45.0
     '@types/co-body': ^6.1.3
     '@types/cors': ^2.8.19
     '@types/debug': ^4.1.12
@@ -12,26 +16,26 @@ catalogs:
     '@types/is-core-module': ^2.2.2
     '@types/mime-types': ^3.0.1
     '@types/mockjs': ^1.0.10
-    '@types/node': ^24.10.1
+    '@types/node': ^25.0.3
     '@types/picomatch': ^4.0.2
     '@types/ws': ^8.18.1
-    bumpp: ^10.3.1
+    bumpp: ^10.3.2
     conventional-changelog-cli: ^5.0.0
-    esbuild: ^0.27.0
-    eslint: ^9.39.1
+    esbuild: ^0.27.2
+    eslint: ^9.39.2
     mockjs: ^1.1.0
-    rolldown: ^1.0.0-beta.51
-    tsdown: ^0.16.6
+    rolldown: ^1.0.0-beta.56
+    tsdown: ^0.18.2
     typescript: ^5.9.3
-    vite: 'npm:rolldown-vite@latest'
+    vite: ^8.0.0-beta.4
     vitepress: ^2.0.0-alpha.15
     vitepress-plugin-group-icons: ^1.6.5
     vitepress-plugin-llms: ^1.9.3
-    vitest: ^4.0.13
+    vitest: ^4.0.16
   prod:
     '@pengzhanbo/utils': ^2.1.2
     ansis: ^4.2.0
-    chokidar: ^4.0.3
+    chokidar: ^5.0.0
     co-body: ^6.2.0
     cors: ^2.8.5
     debug: ^4.4.3
