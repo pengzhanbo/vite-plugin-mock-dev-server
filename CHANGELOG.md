@@ -1,3 +1,17 @@
+## [2.0.7](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.0.6...v2.0.7) (2025-12-23)
+
+
+### Bug Fixes
+
+* ignore some builtin logging ([b500617](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/b5006178031e06110d7dfd7108f1059ad1c7c0b2))
+
+
+### Performance Improvements
+
+* update deps to latest ([7b1b7dc](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/7b1b7dccbfa23d90bbe1415d0dc9c5e3f32c2744))
+
+
+
 ## [2.0.6](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.0.5...v2.0.6) (2025-12-05)
 
 
