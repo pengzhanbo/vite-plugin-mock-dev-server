@@ -76,6 +76,11 @@ export async function transformWithRolldown(
           return true
       },
       plugins: [aliasPlugin({ entries: alias }), renamePlugin, json5Plugin],
+      onLog(level, log, defaultHandler) {
+        if (log.code === 'PLUGIN_TIMINGS' && log.message.includes('vite-mock'))
+          return
+        defaultHandler(level, log)
+      },
     })
     return {
       code: result.output[0].code,
