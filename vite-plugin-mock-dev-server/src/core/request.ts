@@ -10,7 +10,15 @@ import { match } from 'path-to-regexp'
 import { isObjectSubset } from '../utils'
 
 /**
+ * Parse request body
+ *
  * 解析请求体 request.body
+ *
+ * @param req - Incoming message object / 入站消息对象
+ * @param logger - Logger instance / 日志实例
+ * @param formidableOptions - Formidable options for multipart form data / 用于 multipart 表单数据的 Formidable 配置项
+ * @param bodyParserOptions - Body parser options / 请求体解析配置项
+ * @returns Parsed request body / 解析后的请求体
  */
 export async function parseRequestBody(
   req: Connect.IncomingMessage,
@@ -54,6 +62,11 @@ export async function parseRequestBody(
   return undefined
 }
 
+/**
+ * Default formidable options
+ *
+ * 默认的 formidable 配置项
+ */
 const DEFAULT_FORMIDABLE_OPTIONS: formidable.Options = {
   keepExtensions: true,
   filename(name, ext, part) {
@@ -62,7 +75,13 @@ const DEFAULT_FORMIDABLE_OPTIONS: formidable.Options = {
 }
 
 /**
+ * Parse request body with multipart form data
+ *
  * 解析 request form multipart body
+ *
+ * @param req - Incoming message object / 入站消息对象
+ * @param options - Formidable options / Formidable 配置项
+ * @returns Parsed request body / 解析后的请求体
  */
 async function parseRequestBodyWithMultipart(
   req: Connect.IncomingMessage,
@@ -81,10 +100,21 @@ async function parseRequestBodyWithMultipart(
   })
 }
 
+/**
+ * Cache for path-to-regexp match functions
+ *
+ * path-to-regexp 匹配函数缓存
+ */
 const matcherCache: Map<string, MatchFunction<Partial<Record<string, string | string[]>>>> = new Map()
 
 /**
+ * Parse request URL dynamic parameters
+ *
  * 解析请求 url 中的动态参数 params
+ *
+ * @param pattern - URL pattern / URL 模式
+ * @param url - Request URL / 请求 URL
+ * @returns Parsed parameters / 解析后的参数
  */
 export function parseRequestParams(
   pattern: string,
@@ -100,7 +130,13 @@ export function parseRequestParams(
 }
 
 /**
+ * Validate request against validator
+ *
  * 验证请求是否符合 validator
+ *
+ * @param request - Request object / 请求对象
+ * @param validator - Validator object / 验证器对象
+ * @returns Whether the request is valid / 请求是否有效
  */
 export function requestValidate(
   request: ExtraRequest,
@@ -115,12 +151,30 @@ export function requestValidate(
   )
 }
 
+/**
+ * Format log data
+ *
+ * 格式化日志数据
+ *
+ * @param prefix - Log prefix / 日志前缀
+ * @param data - Data to format / 要格式化的数据
+ * @returns Formatted log string / 格式化后的日志字符串
+ */
 function formatLog(prefix: string, data: any) {
   return !data || isEmptyObject(data)
     ? ''
     : `  ${ansis.gray(`${prefix}:`)}${JSON.stringify(data)}`
 }
 
+/**
+ * Generate request log
+ *
+ * 生成请求日志
+ *
+ * @param request - Request object / 请求对象
+ * @param filepath - Mock file path / Mock 文件路径
+ * @returns Formatted log string / 格式化后的日志字符串
+ */
 export function requestLog(request: MockRequest, filepath: string): string {
   const { url, method, query, params, body } = request
   let { pathname } = new URL(url!, 'http://example.com')

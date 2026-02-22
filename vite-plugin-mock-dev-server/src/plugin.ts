@@ -5,6 +5,14 @@ import { generateMockServer } from './build'
 import { initMockMiddlewares, recoverRequest } from './core'
 import { type ResolvedMockServerPluginOptions, resolvePluginOptions } from './options'
 
+/**
+ * Create mock dev server plugin
+ *
+ * 创建 Mock 开发服务器插件
+ *
+ * @param options - Plugin options / 插件配置项
+ * @returns Array of Vite plugin objects / Vite 插件对象数组
+ */
 export function mockDevServerPlugin(options: MockServerPluginOptions = {}): Plugin[] {
   const plugins: Plugin[] = [serverPlugin(options)]
   if (options.build)
@@ -13,6 +21,14 @@ export function mockDevServerPlugin(options: MockServerPluginOptions = {}): Plug
   return plugins
 }
 
+/**
+ * Create build plugin
+ *
+ * 创建构建插件
+ *
+ * @param options - Plugin options / 插件配置项
+ * @returns Vite plugin object / Vite 插件对象
+ */
 export function buildPlugin(
   options: MockServerPluginOptions,
 ): Plugin {
@@ -36,6 +52,14 @@ export function buildPlugin(
   }
 }
 
+/**
+ * Create server plugin
+ *
+ * 创建服务器插件
+ *
+ * @param options - Plugin options / 插件配置项
+ * @returns Vite plugin object / Vite 插件对象
+ */
 export function serverPlugin(
   options: MockServerPluginOptions,
 ): Plugin {

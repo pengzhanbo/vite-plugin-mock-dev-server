@@ -14,21 +14,75 @@ import { compile } from './compile'
 import { processMockData, processRawData } from './processData'
 
 /**
+ * Mock file loading and compilation, converting to Mock data
+ *
  * Mock 文件加载编译，并转换为 Mock 数据
  */
 export class Compiler extends EventEmitter {
+  /**
+   * Cache for mock modules
+   *
+   * Mock 模块缓存
+   */
   private moduleCache: Map<string, MockOptions | MockHttpItem | MockWebsocketItem>
     = new Map()
 
+  /**
+   * Dependencies mapping for mock modules
+   *
+   * Mock 模块依赖映射
+   */
   private moduleDeps: Map<string, Set<string>> = new Map()
+
+  /**
+   * Current working directory
+   *
+   * 当前工作目录
+   */
   cwd: string
+
+  /**
+   * File watcher for mock files
+   *
+   * Mock 文件监视器
+   */
   private mockWatcher!: FSWatcher
+
+  /**
+   * File watcher for dependency files
+   *
+   * 依赖文件监视器
+   */
   private depsWatcher!: FSWatcher
+
+  /**
+   * Whether the project uses ES modules
+   *
+   * 项目是否使用 ES 模块
+   */
   private isESM = false
 
+  /**
+   * Processed mock data
+   *
+   * 处理后的 Mock 数据
+   */
   private _mockData: Record<string, MockOptions> = {}
+
+  /**
+   * Resolved plugin options
+   *
+   * 解析后的插件配置项
+   */
   options!: ResolvedMockServerPluginOptions
 
+  /**
+   * Constructor
+   *
+   * 构造函数
+   *
+   * @param options - Resolved plugin options / 解析后的插件配置项
+   */
   constructor(options: ResolvedMockServerPluginOptions) {
     super()
     this.options = options
@@ -40,10 +94,24 @@ export class Compiler extends EventEmitter {
     catch {}
   }
 
+  /**
+   * Get processed mock data
+   *
+   * 获取处理后的 Mock 数据
+   *
+   * @returns Processed mock data / 处理后的 Mock 数据
+   */
   get mockData(): Record<string, MockOptions> {
     return this._mockData
   }
 
+  /**
+   * Run the compiler
+   *
+   * 运行编译器
+   *
+   * @param watch - Whether to watch for file changes / 是否监视文件变化
+   */
   run(watch?: boolean): void {
     const { include, exclude } = this.options
     const { pattern, ignore, isMatch } = createMatcher(include, exclude)
@@ -91,11 +159,23 @@ export class Compiler extends EventEmitter {
     })
   }
 
+  /**
+   * Close the compiler and watchers
+   *
+   * 关闭编译器和监视器
+   */
   close(): void {
     this.mockWatcher?.close()
     this.depsWatcher?.close()
   }
 
+  /**
+   * Load and compile a mock file
+   *
+   * 加载并编译 Mock 文件
+   *
+   * @param filepath - Path to the mock file / Mock 文件路径
+   */
   private async load(filepath?: string) {
     if (!filepath)
       return
@@ -116,10 +196,23 @@ export class Compiler extends EventEmitter {
     }
   }
 
+  /**
+   * Update mock data from module cache
+   *
+   * 从模块缓存更新 Mock 数据
+   */
   private updateMockData() {
     this._mockData = processMockData(this.moduleCache)
   }
 
+  /**
+   * Update module dependencies
+   *
+   * 更新模块依赖
+   *
+   * @param filepath - Path to the mock file / Mock 文件路径
+   * @param deps - Dependencies of the mock file / Mock 文件的依赖
+   */
   private updateModuleDeps(filepath: string, deps: string[]) {
     for (const dep of deps) {
       if (!this.moduleDeps.has(dep))
@@ -131,6 +224,13 @@ export class Compiler extends EventEmitter {
     this.emit('update:deps')
   }
 
+  /**
+   * Watch mock entry files
+   *
+   * 监视 Mock 入口文件
+   *
+   * @param isMatch - Function to check if a file matches the include/exclude pattern / 检查文件是否匹配包含/排除模式的函数
+   */
   watchMockEntry(isMatch: Matcher): void {
     const watcher = this.mockWatcher = watch(this.options.dir, {
       ignoreInitial: true,
@@ -159,6 +259,11 @@ export class Compiler extends EventEmitter {
     })
   }
 
+  /**
+   * Watch dependency files
+   *
+   * 监视依赖文件
+   */
   watchDeps(): void {
     let oldDeps: string[] = [...this.moduleDeps.keys()]
     const watcher = this.depsWatcher = watch([...oldDeps], {

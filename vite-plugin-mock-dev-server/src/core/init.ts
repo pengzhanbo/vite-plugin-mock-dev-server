@@ -7,6 +7,16 @@ import { createCorsMiddleware } from './corsMiddleware'
 import { createMockMiddleware } from './mockMiddleware'
 import { mockWebSocket } from './ws'
 
+/**
+ * Initialize mock middlewares
+ *
+ * 初始化 Mock 中间件
+ *
+ * @param options - Resolved plugin options / 解析后的插件配置项
+ * @param server - HTTP server instance / HTTP 服务器实例
+ * @param ws - WebSocket server instance / WebSocket 服务器实例
+ * @returns Array of connect middleware functions / Connect 中间件函数数组
+ */
 export function initMockMiddlewares(
   options: ResolvedMockServerPluginOptions,
   // vite@5 httpServer 类型发生变更

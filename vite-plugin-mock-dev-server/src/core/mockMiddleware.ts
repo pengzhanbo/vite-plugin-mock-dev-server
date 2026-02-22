@@ -32,6 +32,21 @@ export interface CreateMockMiddlewareOptions extends Pick<MockServerPluginOption
   logger: Logger
 }
 
+/**
+ * Create mock middleware
+ *
+ * 创建 Mock 中间件
+ *
+ * @param compiler - Compiler instance / 编译器实例
+ * @param options - Middleware options / 中间件配置项
+ * @param options.formidableOptions - Formidable options / Formidable 配置项
+ * @param options.bodyParserOptions - Body parser options / 请求体解析配置项
+ * @param options.proxies - Proxy paths / 代理路径
+ * @param options.cookiesOptions - Cookies options / Cookies 配置项
+ * @param options.logger - Logger instance / 日志实例
+ * @param options.priority - Path matching priority / 路径匹配优先级
+ * @returns Connect middleware function / Connect 中间件函数
+ */
 export function createMockMiddleware(
   compiler: Compiler,
   {

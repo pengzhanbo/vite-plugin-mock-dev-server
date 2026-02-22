@@ -8,22 +8,76 @@
  */
 import { deepClone, deepEqual, isFunction } from '@pengzhanbo/utils'
 
+/**
+ * Mock data cache
+ *
+ * Mock 数据缓存
+ */
 const mockDataCache = new Map<string, CacheImpl<any>>()
+
+/**
+ * Response cache for MockData objects
+ *
+ * MockData 对象的响应缓存
+ */
 const responseCache = new WeakMap<CacheImpl, MockData>()
+
+/**
+ * Stale interval in milliseconds
+ *
+ * 缓存过期间隔（毫秒）
+ */
 const staleInterval = 70
 
+/**
+ * Cache implementation for mock data
+ *
+ * Mock 数据缓存实现
+ *
+ * @template T - Type of cached data / 缓存数据的类型
+ */
 class CacheImpl<T = any> {
+  /**
+   * Current cached value
+   *
+   * 当前缓存值
+   */
   value: T
-  // 初始化数据的备份，用于 判断 传入的初始化数据是否发生变更
+
+  /**
+   * Initial value backup, used to detect if initial data has changed
+   *
+   * 初始化数据的备份，用于 判断 传入的初始化数据是否发生变更
+   */
   #initialValue: T
+
+  /**
+   * Last update timestamp
+   *
+   * 最后更新时间戳
+   */
   #lastUpdate: number
 
+  /**
+   * Constructor
+   *
+   * 构造函数
+   *
+   * @param value - Initial value / 初始值
+   */
   constructor(value: T) {
     this.value = value
     this.#initialValue = deepClone(value)
     this.#lastUpdate = Date.now()
   }
 
+  /**
+   * Hot update cached value
+   *
+   * 热更新缓存值
+   *
+   * @param value - New value / 新值
+   */
   hotUpdate(value: T) {
     // 用于针对重复编译时，如果是通过 `mockjs` 或 `faker-js` 等
     // 生成的随机数据，由于随机性带来的可能的不同mock文件关联的接口数据不一致的情况
@@ -41,19 +95,49 @@ class CacheImpl<T = any> {
   }
 }
 
+/**
+ * Mock data type with getter, setter, and value property
+ *
+ * 带有 getter、setter 和 value 属性的 Mock 数据类型
+ *
+ * @template T - Type of mock data / Mock 数据的类型
+ */
 export type MockData<T = any> = readonly [
   /**
-   * getter
+   * Getter function
+   *
+   * getter 函数
+   *
+   * @returns Current value / 当前值
    */
   () => T,
   /**
-   * setter
+   * Setter function
+   *
+   * setter 函数
+   *
+   * @param val - New value or function to update value / 新值或更新值的函数
    */
   (val: T | ((val: T) => T | void)) => void,
 ] & {
+  /**
+   * Current value
+   *
+   * 当前值
+   */
   value: T
 }
 
+/**
+ * Define mock data with memory-based sharing mechanism
+ *
+ * 定义带有基于内存的共享机制的 Mock 数据
+ *
+ * @template T - Type of mock data / Mock 数据的类型
+ * @param key - Unique key for mock data / Mock 数据的唯一键
+ * @param initialData - Initial data value / 初始数据值
+ * @returns MockData object with getter, setter, and value property / 带有 getter、setter 和 value 属性的 MockData 对象
+ */
 export function defineMockData<T = any>(
   key: string,
   initialData: T,

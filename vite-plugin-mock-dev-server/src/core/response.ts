@@ -7,14 +7,25 @@ import * as mime from 'mime-types'
 import { isReadableStream, type Logger } from '../utils'
 
 /**
+ * Get HTTP status text by status code
+ *
  * 根据状态码获取状态文本
+ *
+ * @param status - HTTP status code / HTTP 状态码
+ * @returns HTTP status text / HTTP 状态文本
  */
 export function getHTTPStatusText(status: number): string {
   return HTTP_STATUS[status as keyof typeof HTTP_STATUS] as string || 'Unknown'
 }
 
 /**
+ * Set response status
+ *
  * 设置响应状态
+ *
+ * @param response - Response object / 响应对象
+ * @param status - HTTP status code / HTTP 状态码
+ * @param statusText - HTTP status text / HTTP 状态文本
  */
 export function provideResponseStatus(
   response: MockResponse,
@@ -26,7 +37,14 @@ export function provideResponseStatus(
 }
 
 /**
+ * Set response headers
+ *
  * 设置响应头
+ *
+ * @param req - Request object / 请求对象
+ * @param res - Response object / 响应对象
+ * @param mock - Mock HTTP item / Mock HTTP 配置项
+ * @param logger - Logger instance / 日志实例
  */
 export async function provideResponseHeaders(
   req: MockRequest,
@@ -67,7 +85,14 @@ export async function provideResponseHeaders(
 }
 
 /**
+ * Set response cookies
+ *
  * 设置响应cookie
+ *
+ * @param req - Request object / 请求对象
+ * @param res - Response object / 响应对象
+ * @param mock - Mock HTTP item / Mock HTTP 配置项
+ * @param logger - Logger instance / 日志实例
  */
 export async function provideResponseCookies(
   req: MockRequest,
@@ -100,7 +125,13 @@ export async function provideResponseCookies(
 }
 
 /**
+ * Send response data
+ *
  * 设置响应数据
+ *
+ * @param res - Response object / 响应对象
+ * @param raw - Response body data / 响应体数据
+ * @param type - Response data type / 响应数据类型
  */
 export function sendResponseData(res: MockResponse, raw: ResponseBody, type: string): void {
   if (isReadableStream(raw)) {
@@ -116,7 +147,12 @@ export function sendResponseData(res: MockResponse, raw: ResponseBody, type: str
 }
 
 /**
+ * Apply real response delay
+ *
  * 实际响应延迟
+ *
+ * @param startTime - Request start time / 请求开始时间
+ * @param delay - Delay configuration / 延迟配置
  */
 export async function responseRealDelay(startTime: number, delay?: MockHttpItem['delay']): Promise<void> {
   if (

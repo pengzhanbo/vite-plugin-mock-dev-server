@@ -1,6 +1,16 @@
+/**
+ * Test for isObjectSubset functionality
+ *
+ * 对象子集比较功能测试
+ */
 import { expect, it } from 'vitest'
 import { isObjectSubset } from '../src/utils'
 
+/**
+ * Test isObjectSubset function
+ *
+ * 测试 isObjectSubset 函数
+ */
 it('isObjectSubset', () => {
   // 浅层比较
   expect(isObjectSubset({ a: 1 })).toBe(true)
