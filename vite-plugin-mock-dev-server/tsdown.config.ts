@@ -13,6 +13,7 @@ const tsdownConfig: UserConfig = defineConfig({
   minify: true,
   dts: true,
   format: 'esm',
+  fixedExtension: false,
 })
 
 export default tsdownConfig
