@@ -16,7 +16,7 @@ import type { MockMatchPriority } from '../types'
 import {
   isArray,
   isEmptyObject,
-  orderBy,
+  partition,
   uniq,
 } from '@pengzhanbo/utils'
 import { parse, pathToRegexp } from 'path-to-regexp'
@@ -59,82 +59,51 @@ function getHighest(rules: string[]) {
   return Math.max(...weights) + 2
 }
 
-function sortFn(rule: string) {
+function computedWeight(rule: string, highest: number): number {
   const tokens = getTokens(rule)
-  let w = 0
+  const dym = tokens.filter(token => token.type !== 'text')
+  if (dym.length === 0)
+    return 0
+
+  let weight = dym.length
+  let exp = 0
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i]
-    if (token.type !== 'text')
-      w += 10 ** (i + 1)
+    // 动态参数，包括命名参数、可选参数、剩余参数通配符
+    const isDynamic = token.type !== 'text'
+    // 通配符 剩余参数 foo/*bar
+    //                     ^^^^
+    const isWildcard = token.type === 'wildcard'
+    // 可选参数: foo{/:bar}  可选剩余参数 foo{/*bar}
+    //              ^^^^^^^                  ^^^^^^^
+    const isOptional = !!token.optional
 
-    w += 10 ** (i + 1)
+    exp += isDynamic ? 1 : 0
+
+    // 如果规则末尾是通配，则优先级最低
+    if (i === tokens.length - 1 && isWildcard) {
+      weight += (isOptional ? 5 : 4) * 10 ** (tokens.length === 1 ? highest + 1 : highest)
+    }
+    else {
+      // 非末尾的通配，优先级次低
+      if (isWildcard) {
+        weight += 3 * 10 ** (highest - 1)
+      }
+      else {
+        weight += 2 * 10 ** exp
+      }
+      // 降低可选参数优先级
+      if (isOptional) {
+        weight += 10 ** exp
+      }
+    }
   }
-  return w
-}
-
-function preSort(rules: string[]) {
-  let matched: string[] = []
-  const preMatch: string[][] = []
-
-  for (const rule of rules) {
-    const tokens = getTokens(rule)
-
-    const len = tokens.filter(token => token.type !== 'text').length
-    if (!preMatch[len])
-      preMatch[len] = []
-    preMatch[len].push(rule)
-  }
-  // 归类相同参数数量，并根据参数位置进行排序
-  for (const match of preMatch.filter(v => v && v.length > 0))
-    matched = [...matched, ...orderBy(match, sortFn, 'desc')]
-
-  return matched
+  return weight
 }
 
 function defaultPriority(rules: string[]) {
   const highest = getHighest(rules)
-
-  return orderBy(rules, (rule) => {
-    const tokens = getTokens(rule)
-    const dym = tokens.filter(token => token.type !== 'text')
-    if (dym.length === 0)
-      return 0
-
-    let weight = dym.length
-    let exp = 0
-    for (let i = 0; i < tokens.length; i++) {
-      const token = tokens[i]
-      // 动态参数，包括命名参数、可选参数、剩余参数通配符
-      const isDynamic = token.type !== 'text'
-      // 通配符 剩余参数 foo/*bar
-      //                     ^^^^
-      const isWildcard = token.type === 'wildcard'
-      // 可选参数: foo{/:bar}  可选剩余参数 foo{/*bar}
-      //              ^^^^^^^                  ^^^^^^^
-      const isOptional = !!token.optional
-
-      exp += isDynamic ? 1 : 0
-
-      // 如果规则末尾是通配，则优先级最低
-      if (i === tokens.length - 1 && isWildcard) {
-        weight += (isOptional ? 5 : 4) * 10 ** (tokens.length === 1 ? highest + 1 : highest)
-      }
-      else {
-        // 非末尾的通配，优先级次低
-        if (isWildcard) {
-          weight += 3 * 10 ** (highest - 1)
-        }
-        else {
-          weight += 2 * 10 ** exp
-        }
-        // 降低可选参数优先级
-        if (isOptional) {
-          weight += 10 ** exp
-        }
-      }
-    }
-    return weight
-  })
+  return rules.sort((a, b) => computedWeight(a, highest) - computedWeight(b, highest))
 }
 
 export function matchingWeight(
@@ -143,9 +112,7 @@ export function matchingWeight(
   priority: MockMatchPriority,
 ): string[] {
   // 基于默认规则下进行优先级排序
-  let matched = defaultPriority(
-    preSort(rules.filter(rule => isPathMatch(rule, url))),
-  )
+  let matched = defaultPriority(rules.filter(rule => isPathMatch(rule, url)))
 
   const { global = [], special = {} } = priority
 
@@ -153,7 +120,11 @@ export function matchingWeight(
   if ((global.length === 0 && isEmptyObject(special)) || matched.length === 0)
     return matched
 
-  const [statics, dynamics] = twoPartMatch(matched)
+  // 将匹配结果分为静态规则和动态规则
+  const [dynamics, statics] = partition(
+    matched,
+    rule => getTokens(rule).filter(token => token.type !== 'text').length > 0,
+  )
   const globalMatch = global.filter(rule => dynamics.includes(rule))
 
   if (globalMatch.length > 0) {
@@ -187,21 +158,4 @@ export function matchingWeight(
   }
 
   return matched
-}
-
-/**
- * 将规则分为静态和动态两部分
- */
-function twoPartMatch(rules: string[]) {
-  const statics: string[] = []
-  const dynamics: string[] = []
-  for (const rule of rules) {
-    const tokens = getTokens(rule)
-    // 如果 tokens 中包含动态参数，则为动态规则
-    const dym = tokens.filter(token => token.type !== 'text')
-    if (dym.length > 0)
-      dynamics.push(rule)
-    else statics.push(rule)
-  }
-  return [statics, dynamics]
 }
