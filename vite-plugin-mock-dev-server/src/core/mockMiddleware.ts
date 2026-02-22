@@ -138,22 +138,30 @@ export function createMockMiddleware(
     response.setCookie = cookies.set.bind(cookies)
 
     const {
-      body,
       delay,
       type = 'json',
       response: responseFn,
-      status = 200,
-      statusText,
       log: logLevel,
+      error: errorConfig,
       __filepath__: filepath,
     } = mock as MockHttpItem & { __filepath__: string }
+    let { body, status = 200, statusText } = mock
+
+    const shouldSimulateError = errorConfig && (errorConfig.probability ?? 0.5) > Math.random()
+
+    // error simulation
+    if (shouldSimulateError) {
+      status = errorConfig.status ?? 500
+      statusText = errorConfig.statusText
+      body = errorConfig.body
+    }
 
     // provide headers
     provideResponseStatus(response, status, statusText)
     await provideResponseHeaders(request, response, mock, logger)
     await provideResponseCookies(request, response, mock, logger)
 
-    logger.info(requestLog(request, filepath), logLevel)
+    logger.info(requestLog(request, filepath, shouldSimulateError), logLevel)
     logger.debug(
       `${ansis.magenta('DEBUG')} ${ansis.underline(
         pathname,

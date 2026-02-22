@@ -390,6 +390,37 @@ interface MockBaseItem {
   log?: boolean | LogLevel
 }
 
+export interface MockErrorConfig {
+  /**
+   * Error probability (0-1), default is 0.5
+   *
+   * 错误概率（0-1），默认 0.5
+   * @default 0.5
+   */
+  probability?: number
+  /**
+   * Error status code, default is 500
+   *
+   * 错误状态码，默认 500
+   * @default 500
+   */
+  status?: number
+  /**
+   * Error status text
+   *
+   * 错误状态文本
+   */
+  statusText?: string
+  /**
+   * Custom error response body, suitable for when the status is 200, but the response body needs to simulate an error scenario
+   *
+   * 自定义错误响应体，适用于 status 为 200，但响应体需要模拟错误场景
+   * @example
+   * { code: 500, msg: 'Internal Server Error', result: null }
+   */
+  body?: ResponseBody | ResponseBodyFn
+}
+
 export interface MockHttpItem extends MockBaseItem {
   /**
    * The interface allows request methods, and by default allows both GET and POST.
@@ -578,6 +609,23 @@ export interface MockHttpItem extends MockBaseItem {
   validator?:
     | Partial<Omit<ExtraRequest, 'getCookie'>>
     | ((request: ExtraRequest) => boolean)
+
+  /**
+   * Configure error simulation
+   *
+   * 配置错误模拟
+   * @example
+   * ```ts
+   * export default {
+   *   error: {
+   *     probability: 0.5,
+   *     status: 500,
+   *     message: 'Internal Server Error'
+   *   }
+   * }
+   * ```
+   */
+  error?: MockErrorConfig
 
   ws?: false
 }

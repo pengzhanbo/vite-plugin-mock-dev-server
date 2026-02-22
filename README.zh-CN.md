@@ -534,6 +534,38 @@ interface WebSocketSetupContext {
 }
 ```
 
+### options.error
+
+- **类型：** `MockErrorConfig | undefined`
+- **详情：**
+
+  配置错误模拟，包括错误概率、错误状态码、错误状态文本、以及自定义错误响应体。
+
+```ts
+interface MockErrorConfig {
+  /**
+   * 错误概率（0-1），默认 0.5
+   * @default 0.5
+   */
+  probability?: number
+  /**
+   * 错误状态码，默认 500
+   * @default 500
+   */
+  status?: number
+  /**
+   * 错误状态文本
+   */
+  statusText?: string
+  /**
+   * 自定义错误响应体，适用于 status 为 200，但响应体需要模拟错误场景
+   * @example
+   * { code: 500, msg: 'Internal Server Error', result: null }
+   */
+  body?: ResponseBody | ResponseBodyFn
+}
+```
+
 ### Request/Response 增强
 
 当你配置 `headers`, `body`, and `response` 的函数形式时, 插件在参数 `request` 和 `response` 添加了新的内容用于帮助获取必要的数据.

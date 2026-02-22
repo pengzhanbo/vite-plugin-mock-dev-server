@@ -175,7 +175,7 @@ function formatLog(prefix: string, data: any) {
  * @param filepath - Mock file path / Mock 文件路径
  * @returns Formatted log string / 格式化后的日志字符串
  */
-export function requestLog(request: MockRequest, filepath: string): string {
+export function requestLog(request: MockRequest, filepath: string, shouldSimulateError?: boolean): string {
   const { url, method, query, params, body } = request
   let { pathname } = new URL(url!, 'http://example.com')
   pathname = ansis.green(decodeURIComponent(pathname))
@@ -183,6 +183,7 @@ export function requestLog(request: MockRequest, filepath: string): string {
   const qs = formatLog('query', query)
   const ps = formatLog('params', params)
   const bs = formatLog('body', body)
+  const es = shouldSimulateError ? ` 🎲 ${ansis.bgYellow('ERR')}` : ''
   const file = `  ${ansis.dim.underline(`(${filepath})`)}`
-  return `${ms} ${pathname}${qs}${ps}${bs}${file}`
+  return `${ms}${es} ${pathname}${qs}${ps}${bs}${file}`
 }

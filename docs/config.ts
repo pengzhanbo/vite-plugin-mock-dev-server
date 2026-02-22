@@ -113,5 +113,6 @@ function sidebarExamples(): DefaultTheme.SidebarItem[] {
     { text: 'Graphql', link: 'graphql' },
     { text: 'Websocket', link: 'websocket' },
     { text: 'EventSource', link: 'event-source' },
+    { text: 'Error simulation', link: 'error-simulation' },
   ]
 }

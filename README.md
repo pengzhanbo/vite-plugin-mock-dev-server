@@ -541,6 +541,38 @@ interface WebSocketSetupContext {
 }
 ```
 
+### options.error
+
+- **Type:** `MockErrorConfig | undefined`
+- **Details:**
+
+  Configure error simulation, including error probability, error status code, error status text, and custom error response body.
+
+```ts
+interface MockErrorConfig {
+  /**
+   * Error probability (0-1), default is 0.5
+   * @default 0.5
+   */
+  probability?: number
+  /**
+   * Error status code, default is 500
+   * @default 500
+   */
+  status?: number
+  /**
+   * Error status text
+   */
+  statusText?: string
+  /**
+   * Custom error response body, suitable for when the status is 200, but the response body needs to simulate an error scenario
+   * @example
+   * { code: 500, msg: 'Internal Server Error', result: null }
+   */
+  body?: ResponseBody | ResponseBodyFn
+}
+```
+
 ## Request/Response Enhance
 
 When defining methods using `headers`, `body`, and `response`, the plugin adds new content to the `request` and `response` parameters.
