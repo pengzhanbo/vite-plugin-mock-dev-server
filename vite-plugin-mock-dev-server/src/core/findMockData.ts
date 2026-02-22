@@ -1,6 +1,6 @@
 import type { ExtraRequest, Method, MockHttpItem, MockOptions } from '../types'
 import type { Logger } from '../utils'
-import { isArray, isFunction } from '@pengzhanbo/utils'
+import { attempt, isArray, isFunction } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import { isPathMatch } from '../utils'
 import { parseRequestParams, requestValidate } from './request'
@@ -20,7 +20,7 @@ export function fineMockData(
   { pathname, method, request }: FindMockDataOptions,
 ): MockHttpItem | undefined {
   return mockList.find((mock) => {
-    // !mock : 这部分是为了避免 用户编写 mock 文件时，在 文件内容为空时的情况
+    // 避免 用户编写 mock 文件时，在 文件内容为空
     if (!pathname || !mock || !mock.url || mock.ws)
       return false
     const methods: Method[] = mock.method
@@ -40,19 +40,18 @@ export function fineMockData(
         return mock.validator({ params, ...request })
       }
       else {
-        try {
-          return requestValidate({ params, ...request }, mock.validator)
-        }
-        catch (e) {
+        const [error, validated] = attempt(requestValidate, { params, ...request }, mock.validator)
+        if (error) {
           const file = (mock as any).__filepath__
           logger.error(
             `${ansis.red(
               `mock error at ${pathname}`,
-            )}\n${e}\n  at validator (${ansis.underline(file)})`,
+            )}\n${error}\n  at validator (${ansis.underline(file)})`,
             mock.log,
           )
           return false
         }
+        return validated
       }
     }
     return hasMock

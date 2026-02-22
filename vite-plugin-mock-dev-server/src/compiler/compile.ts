@@ -5,11 +5,21 @@ import { transformWithEsbuild } from './esbuild'
 import { loadFromCode } from './loadFromCode'
 import { transformWithRolldown } from './rolldown'
 
+let bundler: 'esbuild' | 'rolldown' | 'none' | undefined
+
 export async function transform(entryPoint: string, options: CompilerOptions): Promise<TransformResult> {
-  if (await isPackageExists('rolldown'))
+  bundler ??= await isPackageExists('rolldown')
+    ? 'rolldown'
+    : await isPackageExists('esbuild')
+      ? 'esbuild'
+      : 'none'
+
+  if (bundler === 'rolldown')
     return transformWithRolldown(entryPoint, options)
-  if (await isPackageExists('esbuild'))
+
+  if (bundler === 'esbuild')
     return transformWithEsbuild(entryPoint, options)
+
   throw new Error('rolldown or esbuild not found')
 }
 

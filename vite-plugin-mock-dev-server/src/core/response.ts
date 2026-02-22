@@ -1,6 +1,6 @@
 import type { MockHttpItem, MockRequest, MockResponse, ResponseBody } from '../types'
 import { Buffer } from 'node:buffer'
-import { isArray, isFunction, random, sleep, timestamp } from '@pengzhanbo/utils'
+import { attemptAsync, isArray, isFunction, objectKeys, random, sleep, timestamp } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import HTTP_STATUS from 'http-status'
 import * as mime from 'mime-types'
@@ -51,20 +51,19 @@ export async function provideResponseHeaders(
   if (!headers)
     return
 
-  try {
-    const raw = isFunction(headers) ? await headers(req) : headers
-    Object.keys(raw).forEach((key) => {
-      res.setHeader(key, raw[key]!)
-    })
-  }
-  catch (e) {
+  const [error, data] = await attemptAsync(async () =>
+    isFunction(headers) ? await headers(req) : headers,
+  )
+  if (error) {
     logger.error(
       `${ansis.red(
         `mock error at ${req.url!.split('?')[0]}`,
-      )}\n${e}\n  at headers (${ansis.underline(filepath)})`,
+      )}\n${error}\n  at headers (${ansis.underline(filepath)})`,
       mock.log,
     )
+    return
   }
+  objectKeys(data).forEach(key => res.setHeader(key, data[key]!))
 }
 
 /**
@@ -77,30 +76,27 @@ export async function provideResponseCookies(
   logger: Logger,
 ): Promise<void> {
   const { cookies } = mock
-  const filepath = (mock as any).__filepath__ as string
   if (!cookies)
     return
-  try {
-    const raw = isFunction(cookies) ? await cookies(req) : cookies
-    Object.keys(raw).forEach((key) => {
-      const cookie = raw[key]
-      if (isArray(cookie)) {
-        const [value, options] = cookie
-        res.setCookie(key, value, options)
-      }
-      else {
-        res.setCookie(key, cookie)
-      }
-    })
-  }
-  catch (e) {
+
+  const [error, data] = await attemptAsync(async () =>
+    isFunction(cookies) ? await cookies(req) : cookies,
+  )
+  if (error) {
+    const filepath = (mock as any).__filepath__ as string
     logger.error(
       `${ansis.red(
         `mock error at ${req.url!.split('?')[0]}`,
-      )}\n${e}\n  at cookies (${ansis.underline(filepath)})`,
+      )}\n${error}\n  at cookies (${ansis.underline(filepath)})`,
       mock.log,
     )
+    return
   }
+  objectKeys(data).forEach((key) => {
+    const cookie = data[key]
+    const [value, options] = isArray(cookie) ? cookie : [cookie]
+    res.setCookie(key, value, options)
+  })
 }
 
 /**

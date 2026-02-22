@@ -16,7 +16,7 @@ import type { MockMatchPriority } from '../types'
 import {
   isArray,
   isEmptyObject,
-  sortBy,
+  orderBy,
   uniq,
 } from '@pengzhanbo/utils'
 import { parse, pathToRegexp } from 'path-to-regexp'
@@ -86,7 +86,7 @@ function preSort(rules: string[]) {
   }
   // 归类相同参数数量，并根据参数位置进行排序
   for (const match of preMatch.filter(v => v && v.length > 0))
-    matched = [...matched, ...sortBy(match, sortFn).reverse()]
+    matched = [...matched, ...orderBy(match, sortFn, 'desc')]
 
   return matched
 }
@@ -94,7 +94,7 @@ function preSort(rules: string[]) {
 function defaultPriority(rules: string[]) {
   const highest = getHighest(rules)
 
-  return sortBy(rules, (rule) => {
+  return orderBy(rules, (rule) => {
     const tokens = getTokens(rule)
     const dym = tokens.filter(token => token.type !== 'text')
     if (dym.length === 0)

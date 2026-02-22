@@ -1,6 +1,7 @@
 import type { MatchFunction } from 'path-to-regexp'
 import type { Connect } from 'vite'
 import type { BodyParserOptions, ExtraRequest, MockRequest } from '../types'
+import type { Logger } from '../utils'
 import { isEmptyObject } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import bodyParser from 'co-body'
@@ -13,6 +14,7 @@ import { isObjectSubset } from '../utils'
  */
 export async function parseRequestBody(
   req: Connect.IncomingMessage,
+  logger: Logger,
   formidableOptions: formidable.Options,
   bodyParserOptions: BodyParserOptions = {},
 ): Promise<any> {
@@ -47,7 +49,7 @@ export async function parseRequestBody(
       return await parseRequestBodyWithMultipart(req, formidableOptions)
   }
   catch (e) {
-    console.error(e)
+    logger.error(e)
   }
   return undefined
 }

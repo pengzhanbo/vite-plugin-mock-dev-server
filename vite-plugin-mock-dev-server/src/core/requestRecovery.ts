@@ -7,6 +7,7 @@
  */
 import type { Connect, UserConfig } from 'vite'
 import { Buffer } from 'node:buffer'
+import { objectKeys } from '@pengzhanbo/utils'
 
 const cache = new WeakMap<Connect.IncomingMessage, Buffer>()
 
@@ -19,8 +20,7 @@ export function collectRequest(req: Connect.IncomingMessage): void {
     chunks.push(Buffer.from(chunk))
   })
   req.addListener('end', () => {
-    if (chunks.length)
-      cache.set(req, Buffer.concat(chunks))
+    chunks.length && cache.set(req, Buffer.concat(chunks))
   })
 }
 
@@ -34,7 +34,7 @@ export function recoverRequest(config: UserConfig): void {
 
   const proxies = config.server.proxy || {}
 
-  Object.keys(proxies).forEach((key) => {
+  objectKeys(proxies).forEach((key) => {
     const target = proxies[key]
     const options = typeof target === 'string' ? { target } : target
     if (options.ws)

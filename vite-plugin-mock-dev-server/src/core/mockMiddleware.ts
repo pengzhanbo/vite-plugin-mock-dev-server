@@ -7,7 +7,7 @@ import type {
   MockServerPluginOptions,
 } from '../types'
 import type { Logger } from '../utils'
-import { isFunction, timestamp } from '@pengzhanbo/utils'
+import { attemptAsync, isFunction, timestamp } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import { Cookies } from '../cookies'
 import { doesProxyContextMatchUrl, urlParse } from '../utils'
@@ -69,7 +69,7 @@ export function createMockMiddleware(
     collectRequest(req)
 
     const { query: refererQuery } = urlParse(req.headers.referer || '')
-    const reqBody = await parseRequestBody(req, formidableOptions, bodyParserOptions)
+    const reqBody = await parseRequestBody(req, logger, formidableOptions, bodyParserOptions)
     const cookies = new Cookies(req, res, cookiesOptions)
     const getCookie = cookies.get.bind(cookies)
 
@@ -98,9 +98,7 @@ export function createMockMiddleware(
 
     if (!mock) {
       const matched = mockUrls
-        .map(m =>
-          m === _mockUrl ? ansis.underline.bold(m) : ansis.dim(m),
-        )
+        .map(m => m === _mockUrl ? ansis.underline.bold(m) : ansis.dim(m))
         .join(', ')
       logger.warn(
         `${ansis.green(
@@ -150,16 +148,17 @@ export function createMockMiddleware(
     )
 
     if (body) {
-      try {
+      const [error] = await attemptAsync(async () => {
         const content = isFunction(body) ? await body(request) : body
         await responseRealDelay(startTime, delay)
         sendResponseData(response, content, type)
-      }
-      catch (e) {
+      })
+
+      if (error) {
         logger.error(
           `${ansis.red(
             `mock error at ${pathname}`,
-          )}\n${e}\n  at body (${ansis.underline(filepath)})`,
+          )}\n${error}\n  at body (${ansis.underline(filepath)})`,
           logLevel,
         )
         provideResponseStatus(response, 500)
@@ -169,15 +168,15 @@ export function createMockMiddleware(
     }
 
     if (responseFn) {
-      try {
+      const [error] = await attemptAsync(async () => {
         await responseRealDelay(startTime, delay)
         await responseFn(request, response, next)
-      }
-      catch (e) {
+      })
+      if (error) {
         logger.error(
           `${ansis.red(
             `mock error at ${pathname}`,
-          )}\n${e}\n  at response (${ansis.underline(filepath)})`,
+          )}\n${error}\n  at response (${ansis.underline(filepath)})`,
           logLevel,
         )
         provideResponseStatus(response, 500)
