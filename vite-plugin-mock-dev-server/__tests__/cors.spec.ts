@@ -4,7 +4,7 @@
  * CORS 中间件测试
  */
 import { describe, expect, it, vi } from 'vitest'
-import { createCorsMiddleware } from '../src/core/corsMiddleware'
+import { createCorsMiddleware } from '../src/core/cors'
 
 /**
  * Mock compiler

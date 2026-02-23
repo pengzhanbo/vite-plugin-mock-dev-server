@@ -1,3 +1,4 @@
+import type { CorsOptions } from 'cors'
 import type { Connect } from 'vite'
 import type { Compiler } from '../compiler'
 import type {
@@ -11,6 +12,7 @@ import { attemptAsync, isFunction, timestamp } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import { Cookies } from '../cookies'
 import { doesProxyContextMatchUrl, urlParse } from '../utils'
+import { createCors } from './cors'
 import { fineMockData } from './findMockData'
 import { matchingWeight } from './matchingWeight'
 import {
@@ -30,6 +32,7 @@ import {
 export interface CreateMockMiddlewareOptions extends Pick<MockServerPluginOptions, 'formidableOptions' | 'cookiesOptions' | 'bodyParserOptions' | 'priority'> {
   proxies: string[]
   logger: Logger
+  cors: false | CorsOptions
 }
 
 /**
@@ -45,6 +48,7 @@ export interface CreateMockMiddlewareOptions extends Pick<MockServerPluginOption
  * @param options.cookiesOptions - Cookies options / Cookies 配置项
  * @param options.logger - Logger instance / 日志实例
  * @param options.priority - Path matching priority / 路径匹配优先级
+ * @param options.cors - CORS options / CORS 配置项
  * @returns Connect middleware function / Connect 中间件函数
  */
 export function createMockMiddleware(
@@ -56,8 +60,11 @@ export function createMockMiddleware(
     cookiesOptions,
     logger,
     priority = {},
+    cors: corsOptions,
   }: CreateMockMiddlewareOptions,
 ): Connect.NextHandleFunction {
+  const cors = createCors(corsOptions)
+
   return async function mockMiddleware(req, res, next) {
     const startTime = timestamp()
     const { query, pathname } = urlParse(req.url!)
@@ -122,6 +129,15 @@ export function createMockMiddleware(
       )
 
       return next()
+    }
+
+    // 处理 CORS - 仅对匹配到 mock 数据的请求应用
+    if (cors) {
+      const [error] = await attemptAsync(cors, req, res)
+      if (error) {
+        logger.error(`CORS error: ${error}`)
+        return next(error)
+      }
     }
 
     const request = req as MockRequest

@@ -3,7 +3,6 @@ import type { Http2SecureServer } from 'node:http2'
 import type { Connect, WebSocketServer } from 'vite'
 import type { ResolvedMockServerPluginOptions } from '../options'
 import { Compiler } from '../compiler'
-import { createCorsMiddleware } from './corsMiddleware'
 import { createMockMiddleware } from './mockMiddleware'
 import { mockWebSocket } from './ws'
 
@@ -54,22 +53,19 @@ export function initMockMiddlewares(
    */
   mockWebSocket(compiler, server, options)
 
-  const middlewares: (Connect.NextHandleFunction | undefined)[] = []
+  const middlewares: Connect.NextHandleFunction[] = []
 
   middlewares.push(
     /**
-     * 在 vite 的开发服务中，由于插件 的 enforce 为 `pre`，
-     * mock 中间件的执行顺序 早于 vite 内部的 cors 中间件执行,
-     * 这导致了 vite 默认开启的 cors 对 mock 请求不生效。
-     * 在一些比如 微前端项目、或者联合项目中，会由于端口不一致而导致跨域问题。
-     * 所以在这里，使用 cors 中间件 来解决这个问题。
+     * Mock 中间件（整合了 CORS 处理）
      *
-     * 同时为了使 插件内的 cors 和 vite 的 cors 不产生冲突，并拥有一致的默认行为，
-     * 也会使用 viteConfig.server.cors 配置，并支持 用户可以对 mock 中的 cors 中间件进行配置。
-     * 而用户的配置也仅对 mock 的接口生效。
+     * 在 vite 的开发服务中，由于插件的 enforce 为 `pre`，
+     * mock 中间件的执行顺序早于 vite 内部的 cors 中间件执行,
+     * 这导致了 vite 默认开启的 cors 对 mock 请求不生效。
+     * 所以在 mock 中间件内部整合了 cors 处理来解决这个问题。
      */
-    createCorsMiddleware(compiler, options),
     createMockMiddleware(compiler, options),
   )
-  return middlewares.filter(Boolean) as Connect.NextHandleFunction[]
+
+  return middlewares
 }

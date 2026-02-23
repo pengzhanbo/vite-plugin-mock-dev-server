@@ -8,6 +8,7 @@ export function generatorServerEntryCode({
   bodyParserOptions,
   priority,
   build,
+  cors,
 }: ResolvedMockServerPluginOptions) {
   const { serverPort, log } = build as ServerBuildOption
   // 生成的 entry code 有一个 潜在的问题：
@@ -20,7 +21,6 @@ export function generatorServerEntryCode({
   // 当前也还未收到有用户有关于该功能的潜在问题报告，暂时作为一个 待优化的问题。
   return `import { createServer } from 'node:http';
 import connect from 'connect';
-import corsMiddleware from 'cors';
 import { createMockMiddleware, createLogger, mockWebSocket } from 'vite-plugin-mock-dev-server/server';
 import mockData from './mock-data.js';
 
@@ -32,11 +32,11 @@ const wsProxies = ${JSON.stringify(wsProxies)};
 const cookiesOptions = ${JSON.stringify(cookiesOptions)};
 const bodyParserOptions = ${JSON.stringify(bodyParserOptions)};
 const priority = ${JSON.stringify(priority)};
+const cors = ${JSON.stringify(cors)};
 const compiler = { mockData }
 
 mockWebSocket(compiler, server, { wsProxies, cookiesOptions, logger });
 
-app.use(corsMiddleware());
 app.use(createMockMiddleware(compiler, {
   formidableOptions: { multiples: true },
   proxies,
@@ -44,6 +44,7 @@ app.use(createMockMiddleware(compiler, {
   cookiesOptions,
   bodyParserOptions,
   logger,
+  cors,
 }));
 
 server.listen(${serverPort});
