@@ -4,6 +4,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 import JSON5 from 'json5'
+import { normalizePath } from '../utils'
 import { aliasMatches } from './esbuild'
 
 const renamePlugin: Plugin = {
@@ -84,7 +85,7 @@ export async function transformWithRolldown(
     })
     return {
       code: result.output[0].code,
-      deps: result.output[0].imports,
+      deps: result.output[0].imports.map(normalizePath),
     }
   }
   catch (e) {

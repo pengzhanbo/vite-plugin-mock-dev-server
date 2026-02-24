@@ -238,7 +238,9 @@ export class Compiler extends EventEmitter {
       ignored: (filepath, stats) => {
         if (filepath.includes('node_modules'))
           return true
-        return !!stats?.isFile() && !isMatch(filepath)
+        // Normalize path for cross-platform compatibility (Windows)
+        // 规范化路径以确保跨平台兼容性（Windows）
+        return !!stats?.isFile() && !isMatch(normalizePath(filepath))
       },
     })
 

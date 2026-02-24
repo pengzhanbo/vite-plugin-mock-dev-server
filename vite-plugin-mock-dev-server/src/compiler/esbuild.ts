@@ -6,6 +6,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 import JSON5 from 'json5'
+import { normalizePath } from '../utils'
 
 const externalizeDeps: Plugin = {
   name: 'externalize-deps',
@@ -138,7 +139,7 @@ export async function transformWithEsbuild(
     const deps: Set<string> = new Set()
     const inputs = result.metafile?.inputs || {}
     Object.keys(inputs).forEach(key =>
-      inputs[key].imports.forEach(dep => deps.add(dep.path)),
+      inputs[key].imports.forEach(dep => deps.add(normalizePath(dep.path))),
     )
 
     return {
