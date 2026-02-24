@@ -4,7 +4,7 @@ import { defineConfig } from 'tsdown'
 const tsdownConfig: UserConfig = defineConfig({
   entry: {
     index: 'src/index.ts',
-    types: 'src/types.ts',
+    types: 'src/types/index.ts',
     server: 'src/server.ts',
     helper: 'src/helper/index.ts',
   },

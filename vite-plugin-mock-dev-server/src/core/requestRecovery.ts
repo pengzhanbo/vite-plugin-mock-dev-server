@@ -24,6 +24,10 @@ export function collectRequest(req: Connect.IncomingMessage): void {
   })
 }
 
+export function clearRequestCache(req: Connect.IncomingMessage): void {
+  cache.delete(req)
+}
+
 /**
  * vite 在 proxy 配置中，允许通过 configure 访问 http-proxy 实例，
  * 通过 http-proxy 的 proxyReq 事件，重新写入请求流

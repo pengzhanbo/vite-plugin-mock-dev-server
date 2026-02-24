@@ -1,4 +1,4 @@
-import type { SetCookieOption } from './types'
+import type { SetCookieOption } from '../types'
 import {
   fieldContentRegExp,
   PRIORITY_REGEXP,

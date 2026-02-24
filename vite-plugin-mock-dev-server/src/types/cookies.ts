@@ -1,7 +1,5 @@
-import type { Keygrip } from './Keygrip'
-
 export interface CookiesOption {
-  keys?: string[] | Keygrip
+  keys?: string[]
   secure?: boolean
 }
 

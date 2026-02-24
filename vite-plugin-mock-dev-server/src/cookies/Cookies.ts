@@ -1,10 +1,15 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import type { CookiesOption, GetCookieOption, SetCookieOption } from './types'
+import type { GetCookieOption, SetCookieOption } from '../types'
 import http from 'node:http'
 import { isArray, toArray } from '@pengzhanbo/utils'
 import { REGEXP_CACHE, REGEXP_ESCAPE_CHARS_REGEXP } from './constants'
 import { Cookie } from './Cookie'
 import { Keygrip } from './Keygrip'
+
+interface CookiesOption {
+  keys?: string[] | Keygrip
+  secure?: boolean
+}
 
 export class Cookies {
   request: IncomingMessage
