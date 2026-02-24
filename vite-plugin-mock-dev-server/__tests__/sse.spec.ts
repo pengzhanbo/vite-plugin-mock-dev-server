@@ -1,11 +1,13 @@
+import { Buffer } from 'node:buffer'
+import { PassThrough, Writable } from 'node:stream'
+import { describe, expect, it, vi } from 'vitest'
+import { createSSEStream } from '../src/helper'
+
 /**
  * Test for SSE (Server-Sent Events) functionality
  *
  * SSE (Server-Sent Events) 功能测试
  */
-import { describe, expect, it, vi } from 'vitest'
-import { PassThrough, Writable } from 'node:stream'
-import { createSSEStream } from '../src/helper'
 
 /**
  * Create mock request with socket
@@ -28,7 +30,7 @@ function createMockReq() {
  * 从 SSE 流中收集输出
  */
 function collectStreamOutput(sseStream: any): Promise<string> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const chunks: Buffer[] = []
     const output = new Writable({
       write(chunk, encoding, callback) {
@@ -40,7 +42,7 @@ function collectStreamOutput(sseStream: any): Promise<string> {
         callback()
       },
     })
-    
+
     sseStream.pipe(output)
   })
 }
@@ -50,13 +52,13 @@ function collectStreamOutput(sseStream: any): Promise<string> {
  *
  * SSE 功能测试套件
  */
-describe('SSE', () => {
+describe('sSE', () => {
   it('should call socket methods on initialization', () => {
     const req = createMockReq()
     const res = new PassThrough()
-    
+
     createSSEStream(req, res as any)
-    
+
     expect(req.socket.setKeepAlive).toHaveBeenCalledWith(true)
     expect(req.socket.setNoDelay).toHaveBeenCalledWith(true)
     expect(req.socket.setTimeout).toHaveBeenCalledWith(0)
@@ -66,11 +68,11 @@ describe('SSE', () => {
     const req = createMockReq()
     const res = new PassThrough()
     const sse = createSSEStream(req, res as any)
-    
+
     const outputPromise = collectStreamOutput(sse)
     sse.write({ data: 'test' })
     sse.end()
-    
+
     const output = await outputPromise
     expect(output).toContain(':ok\n\n')
     expect(output).toContain('data: test\n')
@@ -80,11 +82,11 @@ describe('SSE', () => {
     const req = createMockReq()
     const res = new PassThrough()
     const sse = createSSEStream(req, res as any)
-    
+
     const outputPromise = collectStreamOutput(sse)
     sse.write({ event: 'message', data: 'test' })
     sse.end()
-    
+
     const output = await outputPromise
     expect(output).toContain('event: message\n')
     expect(output).toContain('data: test\n')
@@ -94,11 +96,11 @@ describe('SSE', () => {
     const req = createMockReq()
     const res = new PassThrough()
     const sse = createSSEStream(req, res as any)
-    
+
     const outputPromise = collectStreamOutput(sse)
     sse.write({ id: '123', data: 'test' })
     sse.end()
-    
+
     const output = await outputPromise
     expect(output).toContain('id: 123\n')
   })
@@ -107,11 +109,11 @@ describe('SSE', () => {
     const req = createMockReq()
     const res = new PassThrough()
     const sse = createSSEStream(req, res as any)
-    
+
     const outputPromise = collectStreamOutput(sse)
     sse.write({ retry: 1000, data: 'test' })
     sse.end()
-    
+
     const output = await outputPromise
     expect(output).toContain('retry: 1000\n')
   })
@@ -120,11 +122,11 @@ describe('SSE', () => {
     const req = createMockReq()
     const res = new PassThrough()
     const sse = createSSEStream(req, res as any)
-    
+
     const outputPromise = collectStreamOutput(sse)
     sse.write({ comment: 'this is a comment' })
     sse.end()
-    
+
     const output = await outputPromise
     expect(output).toContain(': this is a comment\n')
   })
@@ -133,11 +135,11 @@ describe('SSE', () => {
     const req = createMockReq()
     const res = new PassThrough()
     const sse = createSSEStream(req, res as any)
-    
+
     const outputPromise = collectStreamOutput(sse)
     sse.write({ data: { message: 'hello' } })
     sse.end()
-    
+
     const output = await outputPromise
     expect(output).toContain('data: {"message":"hello"}\n')
   })
@@ -146,11 +148,11 @@ describe('SSE', () => {
     const req = createMockReq()
     const res = new PassThrough()
     const sse = createSSEStream(req, res as any)
-    
+
     const outputPromise = collectStreamOutput(sse)
     sse.write({ data: 'line1\nline2' })
     sse.end()
-    
+
     const output = await outputPromise
     expect(output).toContain('data: line1\n')
     expect(output).toContain('data: line2\n')
@@ -160,10 +162,10 @@ describe('SSE', () => {
     const req = createMockReq()
     const res = new PassThrough()
     const sse = createSSEStream(req, res as any)
-    
+
     const endSpy = vi.spyOn(sse, 'end')
     sse.destroy()
-    
+
     expect(endSpy).toHaveBeenCalled()
   })
 
@@ -171,11 +173,11 @@ describe('SSE', () => {
     const req = createMockReq()
     const res = new PassThrough()
     const sse = createSSEStream(req, res as any)
-    
+
     const writeSpy = vi.spyOn(sse, 'write')
     const endSpy = vi.spyOn(sse, 'end')
     sse.destroy(new Error('test error'))
-    
+
     expect(writeSpy).toHaveBeenCalledWith({ event: 'error', data: 'test error' })
     expect(endSpy).toHaveBeenCalled()
   })

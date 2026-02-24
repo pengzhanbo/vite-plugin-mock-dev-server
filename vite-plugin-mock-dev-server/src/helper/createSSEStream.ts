@@ -114,6 +114,7 @@ class SSEStream extends Transform {
    * @template T - Type of destination stream / 目标流的类型
    * @param destination - Destination stream / 目标流
    * @param options - Pipe options / 管道选项
+   * @param options.end - Whether to end the stream after piping / 是否在管道传输后结束流
    * @returns Destination stream / 目标流
    */
   pipe<T extends HeaderStream>(destination: T, options?: { end?: boolean }): T {
