@@ -2,6 +2,7 @@ import type { CorsOptions } from 'cors'
 import type { Connect } from 'vite'
 import type { Compiler } from '../compiler'
 import type {
+  ExtraRequest,
   MockHttpItem,
   MockRequest,
   MockResponse,
@@ -90,28 +91,23 @@ export function createMockMiddleware(
     // 记录请求流中被消费的数据，形成备份，当当前请求无法继续时，可以从备份中恢复请求流
     collectRequest(req)
 
-    const { query: refererQuery } = urlParse(req.headers.referer || '')
-    const reqBody = await parseRequestBody(req, logger, formidableOptions, bodyParserOptions)
     const cookies = new Cookies(req, res, cookiesOptions)
-    const getCookie = cookies.get.bind(cookies)
 
-    const method = req.method!.toUpperCase()
     let mock: MockHttpItem | undefined
     let _mockUrl: string | undefined
 
+    const method = req.method!.toUpperCase()
+    const extraReq: Omit<ExtraRequest, 'params'> = {
+      query,
+      refererQuery: urlParse(req.headers.referer || '').query,
+      body: await parseRequestBody(req, logger, formidableOptions, bodyParserOptions),
+      headers: req.headers,
+      getCookie: cookies.get.bind(cookies),
+    }
+
     // 查找匹配的mock，仅找出首个匹配的配置项后立即结束
     for (const mockUrl of mockUrls) {
-      mock = fineMockData(mockData[mockUrl], logger, {
-        pathname,
-        method,
-        request: {
-          query,
-          refererQuery,
-          body: reqBody,
-          headers: req.headers,
-          getCookie,
-        },
-      })
+      mock = fineMockData(mockData[mockUrl], logger, { pathname, method, request: extraReq })
       if (mock) {
         _mockUrl = mockUrl
         break
@@ -122,11 +118,7 @@ export function createMockMiddleware(
       const matched = mockUrls
         .map(m => m === _mockUrl ? ansis.underline.bold(m) : ansis.dim(m))
         .join(', ')
-      logger.warn(
-        `${ansis.green(
-          pathname,
-        )} matches  ${matched} , but mock data is not found.`,
-      )
+      logger.warn(`${ansis.green(pathname)} matches ${matched}, but mock data is not found.`)
 
       return next()
     }
@@ -144,11 +136,8 @@ export function createMockMiddleware(
     const response = res as MockResponse
 
     // provide request 往请求实例中注入额外的请求信息
-    request.body = reqBody
-    request.query = query
-    request.refererQuery = refererQuery
+    Object.assign(request, extraReq)
     request.params = parseRequestParams(mock.url, pathname)
-    request.getCookie = getCookie
 
     // provide response
     response.setCookie = cookies.set.bind(cookies)
@@ -179,9 +168,7 @@ export function createMockMiddleware(
 
     logger.info(requestLog(request, filepath, shouldSimulateError), logLevel)
     logger.debug(
-      `${ansis.magenta('DEBUG')} ${ansis.underline(
-        pathname,
-      )}  matches: [ ${mockUrls
+      `${ansis.magenta('DEBUG')} ${ansis.underline(pathname)} matches: [ ${mockUrls
         .map(m => m === _mockUrl ? ansis.underline.bold(m) : ansis.dim(m))
         .join(', ')} ]\n`,
     )
@@ -195,9 +182,7 @@ export function createMockMiddleware(
 
       if (error) {
         logger.error(
-          `${ansis.red(
-            `mock error at ${pathname}`,
-          )}\n${error}\n  at body (${ansis.underline(filepath)})`,
+          `${ansis.red(`mock error at ${pathname}`)}\n${error}\n  at body (${ansis.underline(filepath)})`,
           logLevel,
         )
         provideResponseStatus(response, 500)

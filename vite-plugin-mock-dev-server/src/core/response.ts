@@ -74,9 +74,7 @@ export async function provideResponseHeaders(
   )
   if (error) {
     logger.error(
-      `${ansis.red(
-        `mock error at ${req.url!.split('?')[0]}`,
-      )}\n${error}\n  at headers (${ansis.underline(filepath)})`,
+      `${ansis.red(`mock error at ${req.url!.split('?')[0]}`)}\n${error}\n  at headers (${ansis.underline(filepath)})`,
       mock.log,
     )
     return
@@ -110,9 +108,7 @@ export async function provideResponseCookies(
   if (error) {
     const filepath = (mock as any).__filepath__ as string
     logger.error(
-      `${ansis.red(
-        `mock error at ${req.url!.split('?')[0]}`,
-      )}\n${error}\n  at cookies (${ansis.underline(filepath)})`,
+      `${ansis.red(`mock error at ${req.url!.split('?')[0]}`)}\n${error}\n  at cookies (${ansis.underline(filepath)})`,
       mock.log,
     )
     return
