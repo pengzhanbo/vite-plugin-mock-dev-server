@@ -1,4 +1,21 @@
 /**
+ * The reason for not reusing the websocket proxy in `viteConfig.server.proxy` is that
+ * it is difficult to check in a satisfactory way whether there are websocket-related
+ * mock configurations in the mock files, comparing them with those used in `server.proxy`,
+ * and removing them from `viteConfig.server.proxy`.
+ *
+ * Due to uncertainty about the scale of mock files, parsing all mock files to find
+ * corresponding path matching rules and then modifying `viteConfig` would add time overhead
+ * to the vite dev server startup, which goes against the expectations of vite and the plugin.
+ *
+ * Moreover, if newly added mock files contain other rules that require modifying `viteConfig`,
+ * causing the vite server to restart, this is not a suitable solution and is difficult
+ * to align with user expectations.
+ *
+ * A more appropriate solution is to provide the `wsPrefix` configuration option for users
+ * to customize, and ensure that items in `wsPrefix` do not exist in `server.proxy` to avoid
+ * conflicts between vite's internal http-proxy ws and the plugin's ws.
+ *
  * 不复用 `viteConfig.server.proxy` 中 websocket proxy的原因是，
  * 很难通过一种令人满意的方式，检查 mock 文件中是否有 websocket 相关的 mock 配置，
  * 对比 `server.proxy` 中被使用的，并从 `viteConfig.server.proxy` 中删除。
@@ -14,7 +31,7 @@ import type { Server } from 'node:http'
 import type { Http2SecureServer } from 'node:http2'
 import type { WebSocket } from 'ws'
 import type { Compiler } from '../compiler'
-import type { ResolvedMockServerPluginOptions } from '../options'
+import type { ResolvedMockServerPluginOptions } from '../core/options'
 import type {
   MockRequest,
   MockWebsocketItem,
@@ -23,8 +40,8 @@ import type {
 import ansis from 'ansis'
 import { WebSocketServer } from 'ws'
 import { Cookies } from '../cookies'
+import { parseRequestParams } from '../mockHttp'
 import { doesProxyContextMatchUrl, isPathMatch, urlParse } from '../utils'
-import { parseRequestParams } from './request'
 
 type PoolMap = Map<string, WSSMap>
 type WSSMap = Map<string, WebSocketServer>
@@ -42,7 +59,16 @@ interface WSSContext {
 }
 
 /**
- * mock websocket
+ * Mock WebSocket server
+ *
+ * Mock WebSocket 服务器
+ *
+ * @param compiler - Compiler instance / 编译器实例
+ * @param server - HTTP server instance / HTTP 服务器实例
+ * @param options - Resolved plugin options / 解析后的插件配置
+ * @param options.wsProxies - WebSocket proxy prefixes / WebSocket 代理前缀
+ * @param options.cookiesOptions - Cookies options / Cookies 配置项
+ * @param options.logger - Logger instance / 日志实例
  */
 export function mockWebSocket(
   compiler: Compiler,
@@ -53,8 +79,10 @@ export function mockWebSocket(
     logger,
   }: ResolvedMockServerPluginOptions,
 ): void {
+  // Hot update file mapping
   // 热更新文件映射
   const hmrMap = new Map<string, Set<string>>()
+  // Connection pool
   // 连接池
   const poolMap: PoolMap = new Map()
   const wssContextMap: WSSContextMap = new WeakMap()
@@ -134,7 +162,11 @@ export function mockWebSocket(
     filepath: string,
   ) => {
     const { cleanupList, connectionList, context } = wssContextMap.get(wss)!
-    // 重启/热更新时， 需要重新执行 setup()，在执行前，需要清除旧的循环/自动任务/监听
+    // During restart/hot update, need to re-execute setup(). Before execution,
+    // need to clear old loops/auto tasks/listeners
+    // For multiple client ws connections, each ws connection needs to clear old listeners
+    // and manually trigger a connection listener
+    // 重启/热更新时，需要重新执行 setup()，在执行前，需要清除旧的循环/自动任务/监听
     // 多个客户端 ws 连接，每个 ws连接都需要清除旧的监听，并手动触发一次 connection 监听
     cleanupRunner(cleanupList)
     connectionList.forEach(({ ws }) => ws.removeAllListeners())
@@ -146,8 +178,10 @@ export function mockWebSocket(
     )
   }
 
+  // Detect ws-related mock file updates
+  // If the current ws configuration has established a wss connection, restart that wss connection
   // 检测 ws 相关的 mock 文件更新
-  // 如果 当前的 ws 配置已 建立 wss 连接，则重启该 wss 连接
+  // 如果当前的 ws 配置已建立 wss 连接，则重启该 wss 连接
   compiler.on?.('mock:update-end', (filepath: string) => {
     if (!hmrMap.has(filepath))
       return
@@ -164,6 +198,7 @@ export function mockWebSocket(
       }
     }
   })
+
   server?.on('upgrade', (req, socket, head) => {
     const { pathname, query } = urlParse(req.url!)
     if (
@@ -241,6 +276,13 @@ export function mockWebSocket(
   })
 }
 
+/**
+ * Run cleanup functions
+ *
+ * 执行清理函数
+ *
+ * @param cleanupList - Array of cleanup functions / 清理函数数组
+ */
 function cleanupRunner(cleanupList: WSSContext['cleanupList']) {
   let cleanup: (() => void) | undefined
   // eslint-disable-next-line no-cond-assign

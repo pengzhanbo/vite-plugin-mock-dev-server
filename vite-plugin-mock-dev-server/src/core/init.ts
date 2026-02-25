@@ -1,10 +1,10 @@
 import type { Server } from 'node:http'
 import type { Http2SecureServer } from 'node:http2'
 import type { Connect, WebSocketServer } from 'vite'
-import type { ResolvedMockServerPluginOptions } from '../options'
+import type { ResolvedMockServerPluginOptions } from './options'
 import { Compiler } from '../compiler'
-import { createMockMiddleware } from './mockMiddleware'
-import { mockWebSocket } from './ws'
+import { createMockMiddleware } from '../mockHttp'
+import { mockWebSocket } from '../mockWebsocket'
 
 /**
  * Initialize mock middlewares
@@ -25,7 +25,7 @@ export function initMockMiddlewares(
 ): Connect.NextHandleFunction[] {
   /**
    * 加载 mock 文件, 包括监听 mock 文件的依赖文件变化，
-   * 并注入 vite  `define` / `alias`
+   * 并注入 vite `define` / `alias`
    */
   const compiler = new Compiler(options)
 

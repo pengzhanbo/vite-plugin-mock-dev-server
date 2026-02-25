@@ -2,7 +2,7 @@ import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
 import { isArray } from '@pengzhanbo/utils'
 
 /**
- * mock config Type helper
+ * Mock config Type helper
  *
  * mock配置 类型帮助函数
  * @param config see config docs:

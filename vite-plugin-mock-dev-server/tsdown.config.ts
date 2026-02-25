@@ -6,7 +6,7 @@ const tsdownConfig: UserConfig = defineConfig({
     index: 'src/index.ts',
     types: 'src/types/index.ts',
     server: 'src/server.ts',
-    helper: 'src/helper/index.ts',
+    helper: 'src/helpers/index.ts',
   },
   shims: true,
   sourcemap: false,

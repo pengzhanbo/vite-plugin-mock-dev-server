@@ -1,11 +1,12 @@
-import type { MockHttpItem, MockWebsocketItem } from '../src'
 /**
  * Test for helper functions
  *
  * 辅助函数测试
  */
+
+import type { MockHttpItem, MockWebsocketItem } from '../src/types'
 import { describe, expect, it, vi } from 'vitest'
-import { createDefineMock, defineMock } from '../src'
+import { createDefineMock, defineMock } from '../src/helpers'
 
 /**
  * Test suite for defineMock function

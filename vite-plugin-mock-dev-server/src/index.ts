@@ -1,6 +1,6 @@
-import { mockDevServerPlugin } from './plugin'
+import { mockDevServerPlugin } from './core'
 
-export * from './helper'
+export * from './helpers'
 export * from './server'
 export type {
   FormidableFile,

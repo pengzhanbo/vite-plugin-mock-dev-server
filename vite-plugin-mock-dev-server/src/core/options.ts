@@ -1,12 +1,12 @@
 import type { CorsOptions } from 'cors'
 import type { Alias, AliasOptions, ResolvedConfig } from 'vite'
-import type { MockServerPluginOptions, ServerBuildOption } from './types'
-import type { Logger } from './utils'
+import type { MockServerPluginOptions, ServerBuildOption } from '../types'
+import type { Logger } from './logger'
 import process from 'node:process'
 import { isArray, isBoolean, toArray, uniq } from '@pengzhanbo/utils'
 import ansis from 'ansis'
-import { viteDefine } from './core'
-import { createLogger } from './utils'
+import { viteDefine } from './define'
+import { createLogger } from './logger'
 
 export type ResolvedMockServerPluginOptions = Required<
   Omit<MockServerPluginOptions, 'build' | 'cors' | 'wsPrefix' | 'prefix'>

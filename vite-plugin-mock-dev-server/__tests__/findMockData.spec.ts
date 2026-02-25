@@ -1,11 +1,12 @@
-import type { MockOptions } from 'vite-plugin-mock-dev-server/src'
 /**
  * Test for findMockData function
  *
  * findMockData 函数测试
  */
+
+import type { MockOptions } from 'vite-plugin-mock-dev-server/src'
 import { describe, expect, it, vi } from 'vitest'
-import { fineMockData } from '../src/core/findMockData'
+import { fineMockData } from '../src/mockHttp/matcher'
 
 /**
  * Test suite for fineMockData function

@@ -4,8 +4,8 @@
  * 高级集成测试
  */
 import { describe, expect, it } from 'vitest'
-import { matchingWeight } from '../src/core/matchingWeight'
-import { parseRequestParams, requestValidate } from '../src/core/request'
+import { matchingWeight } from '../src/mockHttp/matchingWeight'
+import { parseRequestParams, requestValidate } from '../src/mockHttp/request'
 import {
   createMatcher,
   doesProxyContextMatchUrl,

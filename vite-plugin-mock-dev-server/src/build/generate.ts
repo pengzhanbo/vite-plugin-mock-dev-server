@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite'
-import type { ResolvedMockServerPluginOptions } from '../options'
+import type { ResolvedMockServerPluginOptions } from '../core/options'
 import type { ServerBuildOption } from '../types'
 import fs from 'node:fs'
 import fsp from 'node:fs/promises'

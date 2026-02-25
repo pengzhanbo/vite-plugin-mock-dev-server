@@ -1,5 +1,13 @@
 /**
+ * Request recovery
+ *
  * 请求复原
+ *
+ * Since parseReqBody consumes the request stream when parsing requests,
+ * when the interface does not need to be mocked and is forwarded by vite http-proxy,
+ * the request stream cannot continue.
+ * To solve this, we record the request data in the request stream as a backup.
+ * When the current request cannot continue, the request stream can be restored from the backup.
  *
  * 由于 parseReqBody 在解析请求时，会将请求流消费，
  * 导致当接口不需要被 mock，继而由 vite http-proxy 转发时，请求流无法继续。
@@ -12,7 +20,11 @@ import { objectKeys } from '@pengzhanbo/utils'
 const cache = new WeakMap<Connect.IncomingMessage, Buffer>()
 
 /**
+ * Collect request data
+ *
  * 备份请求数据
+ *
+ * @param req - Incoming message / 入站消息
  */
 export function collectRequest(req: Connect.IncomingMessage): void {
   const chunks: Buffer[] = []
@@ -25,8 +37,12 @@ export function collectRequest(req: Connect.IncomingMessage): void {
 }
 
 /**
+ * Recover request for proxy
+ *
  * vite 在 proxy 配置中，允许通过 configure 访问 http-proxy 实例，
  * 通过 http-proxy 的 proxyReq 事件，重新写入请求流
+ *
+ * @param config - Vite user config / Vite 用户配置
  */
 export function recoverRequest(config: UserConfig): void {
   if (!config.server)
@@ -52,7 +68,7 @@ export function recoverRequest(config: UserConfig): void {
           if (buffer) {
             cache.delete(req)
             /**
-             * 使用 http-proxy 的 agent 配置会提前写入代理请求流
+             * Using http-proxy's agent configuration will write to the proxy request stream in advance
              * https://github.com/http-party/node-http-proxy/issues/1287
              */
             if (!proxyReq.headersSent)

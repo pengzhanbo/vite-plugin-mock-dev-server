@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer'
 import { PassThrough, Writable } from 'node:stream'
 import { describe, expect, it, vi } from 'vitest'
-import { createSSEStream } from '../src/helper'
+import { createSSEStream } from '../src/helpers'
 
 /**
  * Test for SSE (Server-Sent Events) functionality

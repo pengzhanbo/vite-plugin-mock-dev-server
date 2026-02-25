@@ -4,7 +4,7 @@
  * 选项解析函数测试
  */
 import { describe, expect, it } from 'vitest'
-import { ensureProxies } from '../src/options'
+import { ensureProxies } from '../src/core/options'
 
 /**
  * Test suite for ensureProxies function

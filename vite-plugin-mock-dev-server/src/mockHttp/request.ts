@@ -1,7 +1,7 @@
 import type { MatchFunction } from 'path-to-regexp'
 import type { Connect } from 'vite'
+import type { Logger } from '../core'
 import type { BodyParserOptions, ExtraRequest, MockRequest } from '../types'
-import type { Logger } from '../utils'
 import { isEmptyObject } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import bodyParser from 'co-body'
@@ -173,6 +173,7 @@ function formatLog(prefix: string, data: any) {
  *
  * @param request - Request object / 请求对象
  * @param filepath - Mock file path / Mock 文件路径
+ * @param shouldSimulateError - Whether to simulate error / 是否模拟错误
  * @returns Formatted log string / 格式化后的日志字符串
  */
 export function requestLog(request: MockRequest, filepath: string, shouldSimulateError?: boolean): string {

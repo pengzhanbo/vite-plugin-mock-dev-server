@@ -1,8 +1,9 @@
 import type { Plugin, ResolvedConfig } from 'vite'
-import type { MockServerPluginOptions } from './types'
+import type { MockServerPluginOptions } from '../types'
 import { toArray } from '@pengzhanbo/utils'
-import { generateMockServer } from './build'
-import { initMockMiddlewares, recoverRequest } from './core'
+import { generateMockServer } from '../build'
+import { recoverRequest } from '../mockHttp'
+import { initMockMiddlewares } from './init'
 import { type ResolvedMockServerPluginOptions, resolvePluginOptions } from './options'
 
 /**

@@ -1,5 +1,5 @@
+import type { Logger } from '../core'
 import type { ExtraRequest, Method, MockHttpItem, MockOptions } from '../types'
-import type { Logger } from '../utils'
 import { attempt, isArray, isFunction } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import { isPathMatch } from '../utils'
@@ -12,7 +12,17 @@ interface FindMockDataOptions {
 }
 
 /**
+ * Find matching mock data
+ *
  * 查找匹配的 mock data
+ *
+ * @param mockList - Mock options list / Mock 配置列表
+ * @param logger - Logger instance / 日志实例
+ * @param options - Find options / 查找选项
+ * @param options.pathname - Request pathname / 请求路径
+ * @param options.method - HTTP method / HTTP 方法
+ * @param options.request - Request object / 请求对象
+ * @returns Matched mock HTTP item or undefined / 匹配的 Mock HTTP 项或未定义
  */
 export function fineMockData(
   mockList: MockOptions,
@@ -20,7 +30,7 @@ export function fineMockData(
   { pathname, method, request }: FindMockDataOptions,
 ): MockHttpItem | undefined {
   return mockList.find((mock) => {
-    // 避免 用户编写 mock 文件时，在 文件内容为空
+    // 避免用户编写 mock 文件时，在文件内容为空
     if (!pathname || !mock || !mock.url || mock.ws)
       return false
     const methods: Method[] = mock.method

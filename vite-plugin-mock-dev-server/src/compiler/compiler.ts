@@ -1,6 +1,6 @@
 import type { FSWatcher } from 'chokidar'
 import type { Matcher } from 'picomatch'
-import type { ResolvedMockServerPluginOptions } from '../options'
+import type { ResolvedMockServerPluginOptions } from '../core'
 import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
 import EventEmitter from 'node:events'
 import path from 'node:path'

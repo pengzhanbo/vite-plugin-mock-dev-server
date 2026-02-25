@@ -1,4 +1,4 @@
-import type { ResolvedMockServerPluginOptions } from '../options'
+import type { ResolvedMockServerPluginOptions } from '../core/options'
 import type { ServerBuildOption } from '../types'
 
 export function generatorServerEntryCode({

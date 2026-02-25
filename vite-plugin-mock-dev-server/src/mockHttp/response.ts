@@ -1,10 +1,11 @@
+import type { Logger } from '../core'
 import type { MockHttpItem, MockRequest, MockResponse, ResponseBody } from '../types'
 import { Buffer } from 'node:buffer'
 import { attemptAsync, isArray, isFunction, objectKeys, random, sleep, timestamp } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import HTTP_STATUS from 'http-status'
 import * as mime from 'mime-types'
-import { isReadableStream, type Logger } from '../utils'
+import { isReadableStream } from '../utils'
 
 /**
  * Get HTTP status text by status code

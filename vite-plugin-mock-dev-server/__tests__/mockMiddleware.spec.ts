@@ -7,7 +7,7 @@ import type { Connect } from 'vite'
 import type { Compiler } from '../src/compiler'
 import type { MockHttpItem, MockOptions } from '../src/types'
 import { describe, expect, it, vi } from 'vitest'
-import { createMockMiddleware } from '../src/core/mockMiddleware'
+import { createMockMiddleware } from '../src/mockHttp/middleware'
 
 /**
  * Create a mock compiler for testing

@@ -4,7 +4,7 @@
  * CORS 模块测试
  */
 import { describe, expect, it, vi } from 'vitest'
-import { createCors } from '../src/core/cors'
+import { createCors } from '../src/mockHttp/cors'
 
 describe('createCors', () => {
   it('should return undefined when corsOptions is false', () => {

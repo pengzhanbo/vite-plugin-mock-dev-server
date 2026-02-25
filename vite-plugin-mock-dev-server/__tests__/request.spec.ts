@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest'
 import {
   parseRequestParams,
   requestValidate,
-} from '../src/core/request'
+} from '../src/mockHttp/request'
 
 /**
  * Test suite for parseRequestParams function

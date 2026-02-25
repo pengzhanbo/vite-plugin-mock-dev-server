@@ -1,4 +1,4 @@
-import type { ResolvedMockServerPluginOptions } from '../options'
+import type { ResolvedMockServerPluginOptions } from '../core/options'
 import isCore from 'is-core-module'
 import { getPackageInfoSync } from 'local-pkg'
 import { name as __PACKAGE_NAME__, version as __PACKAGE_VERSION__ } from '../../package.json'
