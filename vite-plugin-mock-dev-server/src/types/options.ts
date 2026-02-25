@@ -255,27 +255,4 @@ export interface MockServerPluginOptions {
    * ```
    */
   priority?: MockMatchPriority
-
-  /**
-   * Configure request recording options.
-   * When enabled, the plugin will record API requests and responses,
-   * and automatically generate mock files.
-   *
-   * 配置请求录制选项。
-   * 启用后，插件将录制 API 请求和响应，并自动生成 mock 文件。
-   *
-   * @default false
-   * @example
-   * ```ts
-   * export default {
-   *   recorder: {
-   *     enabled: true,
-   *     outputDir: 'mock/recorded',
-   *     include: ['/api/**'],
-   *     exclude: ['/api/auth/**']
-   *   }
-   * }
-   * ```
-   */
-  recorder?: boolean
 }

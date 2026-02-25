@@ -20,7 +20,7 @@ import {
   parseRequestParams,
   requestLog,
 } from './request'
-import { clearRequestCache, collectRequest } from './requestRecovery'
+import { collectRequest } from './requestRecovery'
 import {
   provideResponseCookies,
   provideResponseHeaders,
@@ -139,9 +139,6 @@ export function createMockMiddleware(
         return next(error)
       }
     }
-
-    // 查找到可模拟的配置项，无需复原请求，立即清理请求缓存
-    clearRequestCache(req)
 
     const request = req as MockRequest
     const response = res as MockResponse
