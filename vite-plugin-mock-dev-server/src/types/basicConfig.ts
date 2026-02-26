@@ -19,16 +19,16 @@ export type ResponseCookiesFn = (
 export interface MockBaseItem {
   /**
    * The interface address that needs to be mocked,
-   * supported by `path-to-regexp` for path matching.
+   * supported by `path-to-regexp@8.3.0` for path matching.
    *
-   * 需要进行 mock 的接口地址, 由 `path-to-regexp` 提供路径匹配支持
+   * 需要进行 mock 的接口地址, 由 `path-to-regexp@8.3.0` 提供路径匹配支持
    * @see [path-to-regexp](https://github.com/pillarjs/path-to-regexp)
    * @example
    * ```txt
    * /api/login
    * /api/post/:id
-   * /api/post/:id
-   * /api/anything/(.*)
+   * /api/users{/:id}
+   * /api/files/*path
    * ```
    */
   url: string

@@ -1,30 +1,84 @@
 import type { DefaultTheme } from 'vitepress'
 import { defineAdditionalConfig } from 'vitepress'
-import { version } from './package.json'
+import { version } from '../package.json'
 
 export default defineAdditionalConfig({
   lang: 'en-US',
-  description: 'Mock-dev-server is injected into the Vite development environment to simulate API request and response data.',
+  description: 'Inject mock-dev-server into the Vite development environment, simulating requests and data responses.',
 
   themeConfig: {
-    editLink: {
-      pattern: 'https://github.com/pengzhanbo/vite-plugin-mock-dev-server/edit/main/docs/:path',
-      text: 'Edit this page on Github',
-    },
-    footer: {
-      message: 'Released under the MIT License.',
-      copyright: `Copyright © 2022-${new Date().getFullYear()} pengzhanbo`,
-    },
-    docFooter: {
-      prev: 'Prev Page',
-      next: 'Next Page',
-    },
     nav: nav(),
 
     sidebar: {
       '/guide/': { base: '/guide/', items: sidebarGuide() },
       '/examples/': { base: '/examples/', items: sidebarExamples() },
+      '/api/': { base: '/api/', items: sidebarApi() },
     },
+
+    search: {
+      options: {
+        translations: {
+          button: {
+            buttonText: 'Search',
+            buttonAriaLabel: 'Search',
+          },
+          modal: {
+            displayDetails: 'Display detailed list',
+            resetButtonTitle: 'Clear query',
+            backButtonTitle: 'Back',
+            noResultsText: 'No results found',
+            footer: {
+              selectText: 'Select',
+              selectKeyAriaLabel: 'Enter',
+              navigateText: 'Navigate',
+              navigateUpKeyAriaLabel: 'Up',
+              navigateDownKeyAriaLabel: 'Down',
+              closeText: 'Close',
+              closeKeyAriaLabel: 'Exit',
+            },
+          },
+        },
+      } as DefaultTheme.LocalSearchOptions,
+    },
+
+    editLink: {
+      pattern: 'https://github.com/pengzhanbo/vite-plugin-mock-dev-server/edit/main/docs/:path',
+      text: 'Edit this page on GitHub',
+    },
+
+    footer: {
+      message: 'Released under the MIT License',
+      copyright: `Copyright © 2022-${new Date().getFullYear()} pengzhanbo`,
+    },
+
+    docFooter: {
+      prev: 'Previous page',
+      next: 'Next page',
+    },
+
+    outline: {
+      label: 'Page navigation',
+    },
+
+    lastUpdated: {
+      text: 'Last updated',
+    },
+
+    notFound: {
+      title: 'Page not found',
+      quote:
+        'But if you do not change direction, and continue to seek, you may end up where you are headed.',
+      linkLabel: 'Go to home',
+      linkText: 'Take me home',
+    },
+
+    langMenuLabel: 'Languages',
+    returnToTopLabel: 'Return to top',
+    sidebarMenuLabel: 'Menu',
+    darkModeSwitchLabel: 'Theme',
+    lightModeSwitchTitle: 'Switch to light mode',
+    darkModeSwitchTitle: 'Switch to dark mode',
+    skipToContentLabel: 'Skip to content',
   },
 })
 
@@ -41,6 +95,11 @@ function nav(): DefaultTheme.NavItem[] {
       activeMatch: '/examples/',
     },
     {
+      text: 'API Reference',
+      link: '/api/',
+      activeMatch: '/api/',
+    },
+    {
       text: `v${version}`,
       items: [
         { text: 'Changelog', link: 'https://github.com/pengzhanbo/vite-plugin-mock-dev-server/blob/main/CHANGELOG.md' },
@@ -52,12 +111,19 @@ function nav(): DefaultTheme.NavItem[] {
 function sidebarGuide(): DefaultTheme.SidebarItem[] {
   return [
     {
-      text: 'Quick Start',
+      text: 'Getting Started',
       items: [
-        { text: 'Introduce', link: 'introduce' },
-        { text: 'Install', link: 'install' },
+        { text: 'Introduction', link: 'introduce' },
         { text: 'Usage', link: 'usage' },
-        { text: 'Migrate from v1.0', link: 'migrate-v2' },
+        { text: 'Migrate from v1.x', link: 'migrate-v2' },
+      ],
+    },
+    {
+      text: 'Core Concepts',
+      items: [
+        { text: 'Request Lifecycle', link: 'request-lifecycle' },
+        { text: 'Path Matching Rules', link: 'path-matching' },
+        { text: 'Directory File Management', link: 'file-management' },
       ],
     },
     {
@@ -73,25 +139,25 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
     {
       text: 'Configuration',
       items: [
-        { text: 'pluginConfig', link: 'plugin-config' },
-        { text: 'mockConfig', link: 'mock-config' },
+        { text: 'Plugin Configuration', link: 'plugin-config' },
+        { text: 'Mock Configuration', link: 'mock-config' },
+        { text: 'WebSocket Configuration', link: 'websocket-config' },
       ],
     },
     {
-      text: 'Practical suggestion',
+      text: 'Best Practices',
       items: [
-        {
-          text: 'Directory file management',
-          link: 'file-management',
-        },
-        { text: 'Share Content', link: 'shared' },
-        { text: 'Shared', link: 'shared-data' },
+        { text: 'Shared Content', link: 'shared' },
+        { text: 'Shared Mutable Data', link: 'shared-data' },
         { text: 'File Upload', link: 'upload' },
-        { text: 'Teamwork', link: 'teamwork' },
-        {
-          text: 'Mock Service Deployment',
-          link: 'mock-service',
-        },
+        { text: 'Team Collaboration', link: 'teamwork' },
+        { text: 'Mock Service Deployment', link: 'mock-service' },
+      ],
+    },
+    {
+      text: 'Troubleshooting',
+      items: [
+        { text: 'FAQ', link: 'troubleshooting/' },
       ],
     },
   ]
@@ -99,20 +165,53 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
 
 function sidebarExamples(): DefaultTheme.SidebarItem[] {
   return [
-    { text: 'Basic example', link: 'basic' },
-    { text: 'Format extension', link: 'format-extension' },
-    { text: 'Custom header', link: 'header' },
-    { text: 'cookies', link: 'cookies' },
-    { text: 'Custom body', link: 'body' },
-    { text: 'Custom response', link: 'response' },
-    { text: 'File upload/download', link: 'file' },
-    { text: 'Static resources', link: 'static' },
-    { text: 'Request validator', link: 'validator' },
-    { text: 'Use mockjs', link: 'mockjs' },
-    { text: 'Use faker-js', link: 'faker' },
+    { text: 'Basic Example', link: 'basic' },
+    { text: 'Type Format', link: 'format-extension' },
+    { text: 'Custom Response Headers', link: 'header' },
+    { text: 'Cookies', link: 'cookies' },
+    { text: 'Custom Response Body', link: 'body' },
+    { text: 'Custom Response Content', link: 'response' },
+    { text: 'File Upload/Download', link: 'file' },
+    { text: 'Static Resource Service', link: 'static' },
+    { text: 'Request Validator', link: 'validator' },
+    { text: 'Using mockjs Library', link: 'mockjs' },
+    { text: 'Using faker-js Library', link: 'faker' },
     { text: 'Graphql', link: 'graphql' },
     { text: 'Websocket', link: 'websocket' },
     { text: 'EventSource', link: 'event-source' },
-    { text: 'Error simulation', link: 'error-simulation' },
+    { text: 'Request Error Simulation', link: 'error-simulation' },
+    { text: 'CRUD Complete Example', link: 'crud' },
+    { text: 'Authentication Example', link: 'auth' },
+    { text: 'Real-world Example', link: 'real-world' },
+  ]
+}
+
+function sidebarApi(): DefaultTheme.SidebarItem[] {
+  return [
+    {
+      text: 'Overview',
+      items: [
+        { text: 'API Reference', link: 'index' },
+      ],
+    },
+    {
+      text: 'Helper Functions',
+      items: [
+        { text: 'mockDevServerPlugin', link: 'mock-dev-server-plugin' },
+        { text: 'defineMock', link: 'define-mock' },
+        { text: 'createDefineMock', link: 'create-define-mock' },
+        { text: 'defineMockData', link: 'define-mock-data' },
+        { text: 'createSSEStream', link: 'create-sse-stream' },
+      ],
+    },
+    {
+      text: 'Type Definitions',
+      items: [
+        { text: 'MockServerPluginOptions', link: 'mock-server-plugin-options' },
+        { text: 'MockHttpItem', link: 'mock-http-item' },
+        { text: 'MockRequest', link: 'mock-request' },
+        { text: 'MockResponse', link: 'mock-response' },
+      ],
+    },
   ]
 }

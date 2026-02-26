@@ -1,10 +1,40 @@
 # 使用
 
-本节将帮助你在项目中使用此插件，如果你还未在项目中安装此插件，请先查看 [安装](./install)。
+## Step1: 安装插件
 
-## Step1: 引入插件
+<div class="tip custom-block" style="padding-top: 8px">
 
-在你的项目的 `vite.config.{ts,js}`文件中，引入并配置插件:
+推荐使用 [pnpm](https://pnpm.io/) 作为包管理工具
+
+</div>
+
+::: code-group
+
+``` sh [pnpm]
+pnpm add -D vite-plugin-mock-dev-server
+```
+
+``` sh [npm]
+npm i -D vite-plugin-mock-dev-server
+```
+
+``` sh [yarn]
+yarn add -D vite-plugin-mock-dev-server
+```
+
+``` sh [deno]
+deno add -D vite-plugin-mock-dev-server
+```
+
+``` sh [bun]
+bun add -D vite-plugin-mock-dev-server
+```
+
+:::
+
+## Step2: 导入插件
+
+打开项目的 `vite.config.{ts,js}` 文件，导入并配置插件：
 
 ``` ts [vite.config.{ts,js}]
 import { defineConfig } from 'vite'
@@ -17,13 +47,14 @@ export default defineConfig({
 })
 ```
 
-## Step2: 配置 `server.proxy`
+## Step3: 配置代理规则
 
-本插件会直接读取 `server.proxy` 配置的 请求路径前缀，作为请求拦截路径匹配。
+插件会自动读取 `vite.config.js` 中 `server.proxy` 配置项的路径前缀，将其作为请求拦截的匹配条件。
+这种设计源于常见的开发场景：
 
-因为在一般场景中，在开发环境中，我们配置的 `server.proxy` 代理转发配置，会直接转发后端服务的开发环境的地址，
-在后端服务未完成接口开发但已经提供了接口文档时，我们也只需要对这部分接口进行 mock，使得前端的接口接入流程能并行开发。
-因此，本插件直接读取 `server.proxy` 配置，从而减少插件需要配置的参数复杂度。
+通常我们在开发环境中配置代理，将请求转发到后端服务地址。
+但当后端接口尚未完成而文档已提供时，我们可以仅针对这部分接口进行 mock，实现前后端并行开发。
+插件直接复用 `server.proxy` 配置，省去了额外的参数配置，简化了流程：
 
 ``` ts [vite.config.{ts,js}]
 import { defineConfig } from 'vite'
@@ -42,7 +73,7 @@ export default defineConfig({
 })
 ```
 
-## Step3: 添加 `/mock` 目录
+## Step4: 添加 `mock` 目录
 
 在你的项目根目录下， 添加 `/mock` 目录，`mock` 目录将用于统一保存并管理所有的 **mock配置文件**。
 
@@ -53,37 +84,40 @@ export default defineConfig({
 └── package.json
 ```
 
-## Step4: 编写 mock配置文件
+## Step5: 编写 mock配置文件
 
-在 `/mock` 目录中，新增 `**/*.mock.{js,ts,cjs,cts,mjs,mts,json,json5}` 格式文件。
+在 `mock` 目录下创建 `**/*.mock.{js,ts,cjs,cts,mjs,mts,json,json5}` 格式的文件。插件会自动完成以下工作：
 
-本插件通过 `fast-glob` 模块进行文件匹配，自动加载文件，并监听文件以及依赖文件，实现热更新。
+- 使用 tinyglobby 进行文件匹配和自动加载
+- 监听文件及其依赖变化，实现热更新
+- 支持 JavaScript/TypeScript/JSON/JSON5 等多种文件格式
+- 兼容 ESModule 和 CommonJS 模块规范
 
-同时，支持 使用 `javascript/typescript/json/json5` 等文件格式，
-还支持 `ESModule/Commonjs` 模块规范编写代码。
-
-插件会根据项目 `package.json` 的  `type` 字段值判断 项目默认使用的模块类型，并通过文件后缀格式判断模块类型。
+插件会根据 `package.json` 的 `type` 字段判断项目默认模块类型，并通过文件后缀确定具体模块格式：
 
 ``` json
 {
   "esm": [".mjs", ".mts"],
-  "cjs": [".cjs", ".cts"]
+  "cjs": [".cjs", ".cts"],
+  "json": [".json", ".json5"]
 }
 ```
 
-**`.js/.ts` 文件根据 `package.json` 的  `type` 字段值判断， 默认为 `cjs`。**
+::: warning
+`.js/.ts` 文件默认为 cjs（CommonJS）格式，除非 `package.json` 的 `type` 字段指定为 `"module"`。
+:::
 
-新增 `*.mock.ts` 文件：
+现在，让我们创建一个 mock 配置文件：
 
 ```sh {3}
 .
 ├── mock
-│   └── api.mock.ts  # [!code ++]
+│   └── api.mock.ts # mock配置文件  # [!code ++]
 ├── src
 └── package.json
 ```
 
-插件提供了 [`defineMock()`](./define-mock) 函数帮助编写 mock 配置。
+使用插件提供的 [`defineMock()`](./define-mock) 辅助函数编写配置：
 
 ```ts [api.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
@@ -94,8 +128,9 @@ export default defineMock({
 })
 ```
 
-## Step5: 启动 Vite 开发服务
+## Step6: 启动 Vite 开发服务
 
-启动你的 `Vite` 开发服务，即可在项目中使用 插件了！
+完成上述配置后，启动 Vite 开发服务即可使用插件。所有满足以下条件的请求都将返回 mock 数据：
 
-通过 `server.proxy` 代理的请求，被你的mock配置 命中的请求路径，都会返回 mock数据。
+- 请求路径匹配 `server.proxy` 中配置的代理前缀
+- 请求路径与某个 mock 配置的 `url` 规则匹配

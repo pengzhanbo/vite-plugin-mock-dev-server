@@ -2,7 +2,7 @@
 
 `vite-plugin-mock-dev-server` 专注于在 `Vite` 开发环境下 提供 Mock 服务。
 通过 vite 内置的 `http` 和 `http-proxy` 服务，以 `middleware` 的方式，对 `server.proxy` 配置的代理路径
-进行二次拦截，命中规则后，返回配置的 `mock data` 。
+进行二次拦截，命中 **请求匹配规则** 后，返回配置的 `mock data` 。
 
 你可以在 mock配置文件中使用`node` 任意第三方模块。 这表示，你可以使用如 `mockjs` / `faker-js` 等库帮助生成 `mock data`。
 

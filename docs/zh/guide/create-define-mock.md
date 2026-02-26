@@ -1,6 +1,6 @@
 # createDefineMock(transformer)
 
-传入一个转换函数，创建自定义的 `defineMock` 辅助函数。实现预处理 mock 配置。
+创建自定义的 `defineMock` 函数，用于对 Mock 配置进行预处理。
 
 ## 使用
 
@@ -20,10 +20,21 @@ export default definePostMock({
 })
 ```
 
-## Types
+## 参数
 
-```ts
-function createDefineMock(
-  transformer: (mock: MockOptionsItem) => MockOptionsItem | void
-): typeof defineMock
-```
+### transformer
+
+- **类型**: `(mock: MockHttpItem | MockWebsocketItem) => MockHttpItem | MockWebsocketItem | void`
+- **必填**: 是
+
+预处理函数，接收一个 Mock 配置对象，可以修改并返回，或返回新的配置对象。
+
+## 使用场景
+
+1. **统一添加路径前缀**: 避免在每个配置中重复写相同的前缀
+2. **统一添加响应头**: 为所有 Mock 添加统一的响应头
+3. **统一设置延迟**: 为所有 Mock 添加统一的响应延迟
+
+## 更多详情
+
+查看 [API 参考 - createDefineMock](../api/create-define-mock) 获取完整的类型定义和更多示例。

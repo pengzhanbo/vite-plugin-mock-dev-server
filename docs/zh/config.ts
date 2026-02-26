@@ -12,6 +12,7 @@ export default defineAdditionalConfig({
     sidebar: {
       '/zh/guide/': { base: '/zh/guide/', items: sidebarGuide() },
       '/zh/examples/': { base: '/zh/examples/', items: sidebarExamples() },
+      '/zh/api/': { base: '/zh/api/', items: sidebarApi() },
     },
 
     search: {
@@ -94,6 +95,11 @@ function nav(): DefaultTheme.NavItem[] {
       activeMatch: '/zh/examples/',
     },
     {
+      text: 'API 参考',
+      link: '/zh/api/',
+      activeMatch: '/zh/api/',
+    },
+    {
       text: `v${version}`,
       items: [
         { text: '更新日志', link: 'https://github.com/pengzhanbo/vite-plugin-mock-dev-server/blob/main/CHANGELOG.md' },
@@ -108,9 +114,16 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       text: '快速开始',
       items: [
         { text: '介绍', link: 'introduce' },
-        { text: '安装', link: 'install' },
         { text: '使用', link: 'usage' },
         { text: '从 v1.x 迁移', link: 'migrate-v2' },
+      ],
+    },
+    {
+      text: '核心概念',
+      items: [
+        { text: '请求生命周期', link: 'request-lifecycle' },
+        { text: '路径匹配规则', link: 'path-matching' },
+        { text: '目录文件管理', link: 'file-management' },
       ],
     },
     {
@@ -128,17 +141,23 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: '插件配置', link: 'plugin-config' },
         { text: 'mock 配置', link: 'mock-config' },
+        { text: 'WebSocket 配置', link: 'websocket-config' },
       ],
     },
     {
       text: '实践建议',
       items: [
-        { text: '目录文件管理', link: 'file-management' },
         { text: '共享内容', link: 'shared' },
         { text: '共享可变数据', link: 'shared-data' },
         { text: '文件上传', link: 'upload' },
         { text: '团队协作', link: 'teamwork' },
         { text: 'mock服务部署', link: 'mock-service' },
+      ],
+    },
+    {
+      text: '故障排查',
+      items: [
+        { text: '常见问题', link: 'troubleshooting/' },
       ],
     },
   ]
@@ -161,5 +180,38 @@ function sidebarExamples(): DefaultTheme.SidebarItem[] {
     { text: 'Websocket', link: 'websocket' },
     { text: 'EventSource', link: 'event-source' },
     { text: '请求错误模拟', link: 'error-simulation' },
+    { text: 'CRUD 完整示例', link: 'crud' },
+    { text: '认证授权示例', link: 'auth' },
+    { text: '真实场景示例', link: 'real-world' },
+  ]
+}
+
+function sidebarApi(): DefaultTheme.SidebarItem[] {
+  return [
+    {
+      text: '概述',
+      items: [
+        { text: 'API 参考', link: 'index' },
+      ],
+    },
+    {
+      text: '辅助函数',
+      items: [
+        { text: 'mockDevServerPlugin', link: 'mock-dev-server-plugin' },
+        { text: 'defineMock', link: 'define-mock' },
+        { text: 'createDefineMock', link: 'create-define-mock' },
+        { text: 'defineMockData', link: 'define-mock-data' },
+        { text: 'createSSEStream', link: 'create-sse-stream' },
+      ],
+    },
+    {
+      text: '类型定义',
+      items: [
+        { text: 'MockServerPluginOptions', link: 'mock-server-plugin-options' },
+        { text: 'MockHttpItem', link: 'mock-http-item' },
+        { text: 'MockRequest', link: 'mock-request' },
+        { text: 'MockResponse', link: 'mock-response' },
+      ],
+    },
   ]
 }

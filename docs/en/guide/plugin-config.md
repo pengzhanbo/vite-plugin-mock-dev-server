@@ -216,7 +216,7 @@ interface MockMatchPriority {
    * The rules declared in this option will take priority over the default rules.
    * The higher the position of the rule in the array, the higher the priority.
    *
-   * Do not declare general rules in this option, such as /api/(.*),
+   * Do not declare general rules in this option, such as /api/*path,
    * as it will prevent subsequent rules from taking effect.
    * Unless you are clear about the priority of the rules,
    * most of the time you do not need to configure this option.

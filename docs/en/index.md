@@ -5,7 +5,7 @@ title: Vite-Plugin-Mock-Dev-Server
 hero:
   name: Mock-Dev-Server
   text: Vite-plugin-mock-dev-server
-  tagline: Injected into the vite development environment to simulate requests and data responses.
+  tagline: Injects Mock Server into the Vite development environment, intercepts proxied API requests, and returns mock data.
   actions:
     - theme: brand
       text: Quick Start
@@ -15,18 +15,25 @@ hero:
       link: https://github.com/pengzhanbo/vite-plugin-mock-dev-server
 
 features:
-  - title: Lightweight, Flexible, Fast.
+  - title: Lightweight, Flexible, Fast
     icon: ⚡️
-  - title: JavaScript/Typescript/JSON/JSON5
+    details: Works out of the box, no configuration required after importing the plugin, reads server.proxy configuration for request interception.
+  - title: Multiple File Format Support
     icon: 📦
-  - title: Not injection-based, non-intrusive to client code.
+    details: Supports JavaScript/Typescript/JSON/JSON5 files, supports CJS/ESM module types.
+  - title: Non-intrusive to Client Code
     icon: 💡
-  - title: Auto import & HMR
+    details: Intercepts requests and returns response data in the node http server, without injecting any code into the source code.
+  - title: Auto Import & Hot Reload
     icon: 🔥
-  - title: Routing match rule
+    details: Automatically imports mock files and monitors files and their dependencies for hot reload.
+  - title: Path Rule Matching
     icon: 🦾
-  - title: Enabled/Disabled any one of the API mock
+    details: Uses <b>path-to-regexp</b> to match request paths and supports parameter matching.
+  - title: Enable/Disable Any Mock Config
     icon: ⚙️
-  - title: building small independent deployable mock services.
+    details: Supports enabling/disabling any single or multiple mock configurations individually without restarting the service.
+  - title: Independently Deployable Mock Service
     icon: 🗂
+    details: Supports building a standalone deployable mock service.
 ---
