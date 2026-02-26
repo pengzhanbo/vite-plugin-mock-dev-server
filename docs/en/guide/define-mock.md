@@ -1,6 +1,6 @@
 # defineMock(mockConfig)
 
-Mock configuration type helper function
+`defineMock` is a type helper function used for defining mock configurations, providing complete TypeScript type hints and code completion.
 
 ## Usage
 
@@ -13,7 +13,7 @@ export default defineMock({
 })
 ```
 
-Pass in an array:
+Supports passing an array to define multiple configurations:
 
 ```ts [*.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
@@ -30,8 +30,16 @@ export default defineMock([
 ])
 ```
 
-## `mockConfig`
+## Parameters
 
-`type: MockOptionsItem | MockOptionsItem[]`
+### mockConfig
 
-See [mock-config](./mock-config)
+- **Type**: `MockHttpItem | MockHttpItem[] | MockWebsocketItem | MockWebsocketItem[]`
+- **Required**: Yes
+
+Mock configuration object or configuration array.
+
+## More Details
+
+- View [Mock Configuration](./mock-config) for configuration item details
+- View [API Reference - defineMock](../api/define-mock) for complete type definitions and more examples

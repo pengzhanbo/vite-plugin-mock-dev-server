@@ -2,11 +2,41 @@
 
 This section will guide you through the process of using this plugin in your project.
 
-If you haven't installed this plugin in your project yet, please refer to [Install](./install).
+## Step1: Install Plugin
 
-## Step1: Import plugin
+<div class="tip custom-block" style="padding-top: 8px">
 
-In your project's `vite.config.{ts,js}` file, import and configure the plugin:
+It is recommended to use [pnpm](https://pnpm.io/) as the package manager
+
+</div>
+
+::: code-group
+
+``` sh [pnpm]
+pnpm add -D vite-plugin-mock-dev-server
+```
+
+``` sh [npm]
+npm i -D vite-plugin-mock-dev-server
+```
+
+``` sh [yarn]
+yarn add -D vite-plugin-mock-dev-server
+```
+
+``` sh [deno]
+deno add -D vite-plugin-mock-dev-server
+```
+
+``` sh [bun]
+bun add -D vite-plugin-mock-dev-server
+```
+
+:::
+
+## Step2: Import Plugin
+
+Open your project's `vite.config.{ts,js}` file, import and configure the plugin:
 
 ``` ts [vite.config.{ts,js}]
 import { defineConfig } from 'vite'
@@ -19,11 +49,14 @@ export default defineConfig({
 })
 ```
 
-## Step2: Configure `server.proxy`
+## Step3: Configure Proxy Rules
 
-The plugin directly reads the request path prefix configured in `server.proxy` as the matching path for request interception.
+The plugin automatically reads the path prefix configured in `server.proxy` in `vite.config.js` as the matching condition for request interception.
+This design stems from common development scenarios:
 
-In general scenarios, when configuring the `server.proxy` proxy forwarding configuration in the development environment, it directly forwards to the development environment address of the backend service. When the backend service has not completed the interface development but has provided the interface documentation, we only need to mock this part of the interface to enable parallel development of the frontend interface integration process. Therefore, this plugin directly reads the `server.proxy` configuration to reduce the complexity of plugin configuration.
+Usually, we configure proxies in the development environment to forward requests to the backend service address.
+However, when the backend interface is not yet completed but the documentation is provided, we can mock only these interfaces to achieve parallel development of frontend and backend.
+The plugin directly reuses the `server.proxy` configuration, eliminating the need for additional parameter configuration and simplifying the process:
 
 ``` ts [vite.config.{ts,js}]
 import { defineConfig } from 'vite'
@@ -36,53 +69,57 @@ export default defineConfig({
   // [!code ++:5]
   server: {
     proxy: {
-      '^/api': 'http://example.com/',
+      '^/api': 'http://example.com/'
     },
   },
 })
 ```
 
-## Step3: Add `/mock` directory
+## Step4: Add `mock` Directory
 
-Add a `/mock` directory at the root of your project, and the `mock` directory will be used to save and manage all **mock configuration files** in a centralized location.
+Add a `/mock` directory in your project root. The `mock` directory will be used to centrally save and manage all **mock configuration files**.
 
 ```sh
 .
-├── mock # [!code ++]
+├── mock  # [!code ++]
 ├── src
 └── package.json
 ```
 
-## Step4: Edit mock files
+## Step5: Write Mock Configuration Files
 
-Add `**/*.mock.{js,ts,cjs,cts,mjs,mts,json,json5}` format files in the `/mock` directory.
+Create files in the format `**/*.mock.{js,ts,cjs,cts,mjs,mts,json,json5}` in the `mock` directory. The plugin will automatically complete the following work:
 
-This plugin uses the `fast-glob` module for file matching, automatically loads files, and listens to files and dependency files for hot updates.
+- Use tinyglobby for file matching and automatic loading
+- Listen to file and dependency changes for hot updates
+- Support multiple file formats such as JavaScript/TypeScript/JSON/JSON5
+- Compatible with ESModule and CommonJS module specifications
 
-It also supports using file formats such as `javascript/typescript/json/json5`, and supports writing code in `ESModule/Commonjs` module specification.
-
-The plugin determines the project's default module type based on the `type` field in the project's `package.json`, and determines the module type based on the file extension format.
+The plugin determines the project's default module type based on the `type` field in `package.json`, and determines the specific module format based on the file extension:
 
 ``` json
 {
   "esm": [".mjs", ".mts"],
-  "cjs": [".cjs", ".cts"]
+  "cjs": [".cjs", ".cts"],
+  "json": [".json", ".json5"]
 }
 ```
 
-**`.js/.ts` files are determined based on the `type` field value in the `package.json`, which is `cjs` by default.**
+::: warning
+`.js/.ts` files default to cjs (CommonJS) format unless the `type` field in `package.json` is specified as `"module"`.
+:::
 
-Add `*.mock.ts` files:
+Now, let's create a mock configuration file:
 
 ```sh {3}
 .
 ├── mock
-│   └── api.mock.ts  # [!code ++]
+│   └── api.mock.ts # mock configuration file  # [!code ++]
 ├── src
 └── package.json
 ```
 
-The plugin provides the `defineMock()` function to help write mock configurations.
+Use the [`defineMock()`](./define-mock) helper function provided by the plugin to write the configuration:
 
 ```ts [api.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
@@ -93,8 +130,9 @@ export default defineMock({
 })
 ```
 
-## Step5: Start Vite Development Server
+## Step6: Start Vite Development Server
 
-Start your `Vite` development server, and you can use the plugin in your project!
+After completing the above configuration, start the Vite development server to use the plugin. All requests meeting the following conditions will return mock data:
 
-For requests that are proxied through `server.proxy` and matched by your mock configuration, mock data will be returned.
+- The request path matches the proxy prefix configured in `server.proxy`
+- The request path matches the `url` rule of a mock configuration
