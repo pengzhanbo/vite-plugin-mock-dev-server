@@ -1089,6 +1089,10 @@ es.addEventListener('count', (e) => {
 - [awesome-vite](https://github.com/vitejs/awesome-vite#helpers)
 - [rspack-plugin-mock](https://github.com/pengzhanbo/rspack-plugin-mock) - **Rspack** 和 **Rsbuild** 的 API mock 服务插件
 
+## 贡献指南
+
+在为本项目做出贡献之前，请阅读 [贡献指南](./CONTRIBUTING.zh-CN.md)。
+
 ## LICENSE
 
 [MIT License](./LICENSE)

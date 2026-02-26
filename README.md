@@ -1091,6 +1091,10 @@ You can access related `mock` interfaces through `localhost:8080/`.
 - [awesome-vite](https://github.com/vitejs/awesome-vite#helpers)
 - [rspack-plugin-mock](https://github.com/pengzhanbo/rspack-plugin-mock) - **Rspack** and **Rsbuild** plugin for API mock server
 
+## Contributing
+
+Please read the [Contributing Guide](./CONTRIBUTING.md) before contributing to this project.
+
 ## Contributors
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
