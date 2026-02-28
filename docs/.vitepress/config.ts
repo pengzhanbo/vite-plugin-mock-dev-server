@@ -34,13 +34,13 @@ const vitepressConfig: UserConfig<DefaultTheme.Config> = defineConfig({
     },
   },
   head: [
-    ['link', { rel: 'icon', type: 'image/svg', href: '/logo.svg' }],
+    ['link', { rel: 'icon', type: 'image/svg', href: '/logo.png' }],
   ],
   sitemap: {
     hostname: 'https://vite-plugin-mock-dev-server.netlify.app',
   },
   themeConfig: {
-    logo: '/logo.svg',
+    logo: '/logo.png',
     socialLinks: [
       {
         icon: 'github',

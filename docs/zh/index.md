@@ -13,6 +13,9 @@ hero:
     - theme: alt
       text: Github
       link: https://github.com/pengzhanbo/vite-plugin-mock-dev-server
+  image:
+    src: /hero.webp
+    alt: Mock-Dev-Server
 
 features:
   - title: 轻量，灵活，快速
