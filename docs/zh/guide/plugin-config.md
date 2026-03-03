@@ -23,6 +23,7 @@ export default defineConfig({
 
 | 配置项 | 类型 | 默认值 | 说明 |
 | ------ | ---- | ------ | ---- |
+| [enabled](../api/mock-server-plugin-options#enabled) | `boolean` | `true` | 是否开启 Mock 服务 |
 | [prefix](../api/mock-server-plugin-options#prefix) | `string \| string[]` | `[]` | HTTP Mock 路径前缀 |
 | [wsPrefix](../api/mock-server-plugin-options#wsprefix) | `string \| string[]` | `[]` | WebSocket 路径前缀 |
 | [cwd](../api/mock-server-plugin-options#cwd) | `string` | `process.cwd()` | 工作目录 |

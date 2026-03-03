@@ -6,6 +6,7 @@ Plugin configuration options interface, used to configure the behavior of Mock D
 
 ```ts
 interface MockServerPluginOptions {
+  enabled?: boolean
   prefix?: string | string[]
   wsPrefix?: string | string[]
   cwd?: string
@@ -24,6 +25,12 @@ interface MockServerPluginOptions {
 ```
 
 ## Property Details
+
+### enabled
+
+- **Type**: `boolean`
+- **Default**: `true`
+- **Description**: Whether to enable Mock server, if set to `false`, the plugin will not work.
 
 ### prefix
 

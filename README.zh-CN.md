@@ -188,6 +188,14 @@ export default defineMock({
 
 ## Plugin Options
 
+### enabled
+
+- **类型：** `boolean`
+- **默认值：** `true`
+- **详情：**
+
+  是否开启 mock 服务。如果设置为 `false`，插件将不会生效。
+
 ### prefix
 
 - **类型：** `string | string[]`

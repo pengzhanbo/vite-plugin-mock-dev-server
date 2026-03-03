@@ -18,6 +18,9 @@ import { resolvePluginOptions, resolveRecordOptions } from './options'
  * @returns Array of Vite plugin objects / Vite 插件对象数组
  */
 export function mockDevServerPlugin(options: MockServerPluginOptions = {}): Plugin[] {
+  if (options.enabled === false)
+    return []
+
   const plugins: Plugin[] = [serverPlugin(options)]
   if (options.build)
     plugins.push(buildPlugin(options))

@@ -23,6 +23,7 @@ export default defineConfig({
 
 | Configuration | Type | Default | Description |
 | ------------- | ---- | ------- | ----------- |
+| [enabled](../api/mock-server-plugin-options#enabled) | `boolean` | `true` | Whether to enable Mock server |
 | [prefix](../api/mock-server-plugin-options#prefix) | `string \| string[]` | `[]` | HTTP Mock path prefix |
 | [wsPrefix](../api/mock-server-plugin-options#wsprefix) | `string \| string[]` | `[]` | WebSocket path prefix |
 | [cwd](../api/mock-server-plugin-options#cwd) | `string` | `process.cwd()` | Working directory |

@@ -187,6 +187,14 @@ export default defineMock({
 
 ## Plugin Options
 
+### enabled
+
+- **Type:** `boolean`
+- **Default:** `true`
+- **Details:**
+
+  Whether to enable mock server, if set to `false`, the plugin will not work.
+
 ### prefix
 
 - **Type:** `string | string[]`

@@ -6,6 +6,7 @@
 
 ```ts
 interface MockServerPluginOptions {
+  enabled?: boolean
   prefix?: string | string[]
   wsPrefix?: string | string[]
   cwd?: string
@@ -26,6 +27,12 @@ interface MockServerPluginOptions {
 ```
 
 ## 属性详解
+
+### enabled
+
+- **类型**: `boolean`
+- **默认值**: `true`
+- **描述**: 是否开启 Mock 服务，设置为 `false` 时插件将不生效。
 
 ### prefix
 

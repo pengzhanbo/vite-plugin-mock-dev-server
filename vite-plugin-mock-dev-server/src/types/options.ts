@@ -149,6 +149,14 @@ export interface MockServerPluginOptions {
   wsPrefix?: string | string[]
 
   /**
+   * Whether to enable mock server
+   *
+   * 是否开启 mock 服务
+   * @default true
+   */
+  enabled?: boolean
+
+  /**
    * Configure the matching context for `include` and `exclude`.
    *
    * 配置 `include` 和 `exclude` 的匹配上下文
