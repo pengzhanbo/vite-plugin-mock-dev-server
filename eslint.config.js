@@ -12,4 +12,9 @@ export default config({
     'node/prefer-global/buffer': 'off',
     'antfu/no-top-level-await': 'off',
   },
+}, {
+  files: ['README.md', 'README.zh-CN.md'],
+  rules: {
+    'markdown/no-missing-link-fragments': 'off',
+  },
 })
