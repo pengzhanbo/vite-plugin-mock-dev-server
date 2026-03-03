@@ -1,3 +1,25 @@
+# [2.1.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.0.7...v2.1.0) (2026-03-03)
+
+
+### Bug Fixes
+
+* resolve Windows platform path compatibility ([4f4e9f5](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/4f4e9f5c08926c73a77a136fb927debe334fa0f1))
+
+
+### Features
+
+* add `enabled` plugin options ([06df4af](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/06df4af514b22f440688c74e85db63c7a75b106b))
+* add error simulation ([6b341e0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/6b341e064db11778c3cefbc5d8a9d7e964212bf3))
+* add request recording and replay ([e54687f](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/e54687f6af94c7c467e9af97888c12606b950fe6))
+
+
+### Performance Improvements
+
+* update deps to latest ([475f128](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/475f128a53546b77822f50c381fa217a02417b4a))
+* update deps to latest ([fdbd1e3](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/fdbd1e33fb27dc4cac15e52bf7ae565889fdabab))
+
+
+
 ## [2.0.7](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.0.6...v2.0.7) (2025-12-23)
 
 
