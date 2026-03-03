@@ -48,6 +48,7 @@
 - 📤 Support `multipart` content-type, mock upload file.
 - 📥 Support mock download file.
 - ⚜️ Support `WebSocket Mock` and `Server-Sent Events Mock`
+- 📝 Support **recording** and **replay requests**
 - 🗂 Support building small independent deployable mock services.
 
 ## Documentation
@@ -325,6 +326,108 @@ export default defineMock({
     log?: LogLevel
   }
   ```
+
+### record
+
+- **Type:** `false | RecordOptions`
+- **Default:** `false`
+- **Details：**
+
+  Whether to enable the request recording feature. Once enabled, the plugin will record all request data for subsequent request playback.
+
+  Based on `vite.server.proxy`, the plugin records request data proxied by `http-proxy`.
+  After receiving a response, the plugin will record the request data and response data to the specified directory.
+
+  ```ts
+  interface RecordOptions {
+    /**
+     * Whether to enable the record feature
+     * - true: Enable, automatically record proxy responses
+     * - false: Disable (default)
+     * @default false
+     */
+    enabled?: boolean
+    /**
+     * Filter requests to record
+     * - Function: Custom filter function, return true to record
+     * - Object: Include/exclude patterns with glob or path-to-regexp mode
+     * @example
+     * ```ts
+     * // Record all requests
+     * filter: (req) => true
+     * // Record requests using glob pattern
+     * filter: { mode: 'glob', include: '/api/**' }
+     * // Record requests using path-to-regexp pattern
+     * filter: { mode: 'path-to-regexp', include: '/api/:id' }
+     * ```
+     */
+    filter?: ((req: RecordedReq) => boolean) | {
+      /**
+       * Include the request links that need to be recorded
+       *
+       * String: Glob pattern or path-to-regexp pattern
+       * (Use the mode option to set the mode, default is glob)
+       */
+      include?: string | string[]
+      /**
+       * Exclude request links that do not need to be recorded
+       *
+       * String: Glob pattern or path-to-regexp pattern
+       * (Use the mode option to set the mode, default is glob)
+       */
+      exclude?: string | string[]
+      /**
+       * Matching mode for include/exclude patterns
+       * - 'glob': Glob pattern matching (default)
+       * - 'path-to-regexp': Path-to-regexp pattern matching
+       */
+      mode: 'glob' | 'path-to-regexp'
+    }
+
+    /**
+     * Directory to store recorded data
+     * Relative to project root
+     * @default 'mock/.recordings'
+     */
+    dir?: string
+    /**
+     * Whether to overwrite existing recorded data
+     * - true: Overwrite old data for the same request (default)
+     * - false: Keep old data, do not record new data
+     * @default true
+     */
+    overwrite?: boolean
+    /**
+     * Expiration time for recorded data in seconds
+     * - 0: Never expire (default)
+     * - Positive number: Expire after specified seconds
+     * @default 0
+     */
+    expires?: number
+    /**
+     * Status codes to record
+     * - Empty array: Record all status codes (default)
+     * - Specify one or more status codes to filter
+     * @default []
+     */
+    status?: number | number[]
+    /**
+     * Should a .gitignore be added to the recording directory
+     * - true: Add (default)
+     * - false: Do not add
+     * @default true
+     */
+    gitignore?: boolean
+  }
+  ```
+
+### replay
+
+- **Type:** `boolean`
+- **Default:** `false`
+- **Details：**
+
+  Whether to enable the request playback feature. Once enabled, the plugin will simulate responses based on the recorded request data.
 
 ### priority
 

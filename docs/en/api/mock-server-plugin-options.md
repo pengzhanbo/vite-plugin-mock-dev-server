@@ -259,45 +259,130 @@ mockDevServerPlugin({
 })
 ```
 
-## Complete Configuration Example
+### record
 
-```ts [vite.config.ts]
-import path from 'node:path'
-import { defineConfig } from 'vite'
-import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
+- **Type**: `boolean | RecordOptions`
+- **Default**: `false`
+- **Description**: Request recording and playback configuration
 
-export default defineConfig({
-  plugins: [
-    mockDevServerPlugin({
-      // Path matching
-      prefix: ['/api', '/mock'],
-      wsPrefix: ['/ws'],
+When enabled, the plugin automatically records request responses forwarded through the Proxy and plays back the recorded data when Mock data is unavailable.
 
-      // File configuration
-      cwd: process.cwd(),
-      dir: 'mock',
-      include: ['**/*.mock.{js,ts}'],
-      exclude: ['**/node_modules/**'],
+```ts
+interface RecordOptions {
+  /**
+   * Whether to enable the record feature
+   * - true: Enable, automatically record proxy responses
+   * - false: Disable (default)
+   * @default false
+   */
+  enabled?: boolean
 
-      // Behavior configuration
-      reload: false,
-      log: 'info',
-      cors: true,
+  /**
+   * Filter requests to record
+   * - Function: Custom filter function, return true to record
+   * - Object: Include/exclude patterns with glob or path-to-regexp mode
+   * @example
+   * ```ts
+   * // Record all requests
+   * filter: (req) => true
+   * // Record requests using glob pattern
+   * filter: { mode: 'glob', include: '/api/**' }
+   * // Record requests using path-to-regexp pattern
+   * filter: { mode: 'path-to-regexp', include: '/api/:id' }
+   * ```
+   */
+  filter?: ((req: RecordedReq) => boolean) | {
+    /**
+     * Include the request links that need to be recorded
+     *
+     * String: Glob pattern or path-to-regexp pattern
+     * (Use the mode option to set the mode, default is glob)
+     */
+    include?: string | string[]
+    /**
+     * Exclude request links that do not need to be recorded
+     *
+     * String: Glob pattern or path-to-regexp pattern
+     * (Use the mode option to set the mode, default is glob)
+     */
+    exclude?: string | string[]
+    /**
+     * Matching mode for include/exclude patterns
+     * - 'glob': Glob pattern matching (default)
+     * - 'path-to-regexp': Path-to-regexp pattern matching
+     */
+    mode: 'glob' | 'path-to-regexp'
+  }
 
-      // Parsing configuration
-      formidableOptions: {
-        uploadDir: path.join(process.cwd(), 'uploads')
-      },
-      bodyParserOptions: {
-        jsonLimit: '10mb'
-      },
+  /**
+   * Directory to store recorded data
+   * Relative to project root
+   *
+   * @default 'mock/.recordings'
+   */
+  dir?: string
 
-      // Build configuration
-      build: {
-        serverPort: 8080,
-        dist: 'mockServer'
-      }
-    })
-  ]
+  /**
+   * Whether to overwrite existing recorded data
+   * - true: Overwrite old data for the same request (default)
+   * - false: Keep old data, do not record new data
+   *
+   * @default true
+   */
+  overwrite?: boolean
+
+  /**
+   * Expiration time for recorded data in seconds
+   * - 0: Never expire (default)
+   * - Positive number: Expire after specified seconds
+   *
+   * @default 0
+   */
+  expires?: number
+
+  /**
+   * Status codes to record
+   * - Empty array: Record all status codes (default)
+   * - Specify one or more status codes to filter
+   *
+   * @default []
+   */
+  status?: number | number[]
+
+  /**
+   * Should a .gitignore be added to the recording directory
+   * - true: Add (default)
+   * - false: Do not add
+   *
+   * @default true
+   */
+  gitignore?: boolean
+}
+```
+
+```ts
+// Abbreviation form: One-click activation
+mockDevServerPlugin({
+  record: true
+})
+
+// Full configuration
+mockDevServerPlugin({
+  record: {
+    enabled: true,
+    dir: 'mock/.recordings',
+    overwrite: true,
+    expires: 0,
+    status: [],
+    gitignore: true
+  }
 })
 ```
+
+replay
+
+- **Type**: `boolean`
+- **Default**: `false` (defaults to `true` when recording is enabled)
+- **Description**: Request replay configuration
+
+When enabled, the plugin will replay request responses based on recorded data when Mock data is not available.

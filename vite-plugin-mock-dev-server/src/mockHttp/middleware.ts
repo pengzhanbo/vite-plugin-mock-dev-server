@@ -1,17 +1,17 @@
 import type { CorsOptions } from 'cors'
 import type { Connect } from 'vite'
 import type { Compiler } from '../compiler'
-import type { Logger } from '../core'
+import type { Logger, ResolvedMockServerPluginOptions } from '../core'
 import type {
   ExtraRequest,
   MockHttpItem,
   MockRequest,
   MockResponse,
-  MockServerPluginOptions,
 } from '../types'
 import { attemptAsync, isFunction, timestamp } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import { Cookies } from '../cookies'
+import { recordRequestWithRawReq, replayRecordedRequest } from '../recorder'
 import { doesProxyContextMatchUrl, urlParse } from '../utils'
 import { createCors } from './cors'
 import { fineMockData } from './matcher'
@@ -30,7 +30,7 @@ import {
   sendResponseData,
 } from './response'
 
-export interface CreateMockMiddlewareOptions extends Pick<MockServerPluginOptions, 'formidableOptions' | 'cookiesOptions' | 'bodyParserOptions' | 'priority'> {
+export interface CreateMockMiddlewareOptions extends Pick<ResolvedMockServerPluginOptions, 'formidableOptions' | 'cookiesOptions' | 'bodyParserOptions' | 'priority' | 'record' | 'replay'> {
   proxies: string[]
   logger: Logger
   cors: false | CorsOptions
@@ -50,6 +50,9 @@ export interface CreateMockMiddlewareOptions extends Pick<MockServerPluginOption
  * @param options.logger - Logger instance / 日志实例
  * @param options.priority - Path matching priority / 路径匹配优先级
  * @param options.cors - CORS options / CORS 配置项
+ * @param options.record - Record options / 录制配置项
+ * @param options.replay - Replay options / 回放配置项
+ *
  * @returns Connect middleware function / Connect 中间件函数
  */
 export function createMockMiddleware(
@@ -62,6 +65,8 @@ export function createMockMiddleware(
     logger,
     priority = {},
     cors: corsOptions,
+    record,
+    replay,
   }: CreateMockMiddlewareOptions,
 ): Connect.NextHandleFunction {
   const cors = createCors(corsOptions)
@@ -83,7 +88,9 @@ export function createMockMiddleware(
     // 对满足匹配规则的配置进行优先级排序
     const mockUrls = matchingWeight(Object.keys(mockData), pathname, priority)
 
-    if (mockUrls.length === 0) {
+    // 如果没有匹配到 mock 数据，且录制功能未启用，则直接跳过
+    // 由于录制功能还需要额外记录请求，所以不能直接在这里跳过
+    if (mockUrls.length === 0 && !record.enabled) {
       return next()
     }
 
@@ -114,11 +121,18 @@ export function createMockMiddleware(
       }
     }
 
+    // 如果没有匹配到 mock 数据，且回放功能已启用，则尝试从录制记录中回放
+    if (replay && !mock) {
+      mock = await replayRecordedRequest(req, pathname, extraReq.body, record)
+    }
+
     if (!mock) {
+      // 请求体录制时，需要记录请求体，以便后续回放时使用
+      record.enabled && recordRequestWithRawReq(req, pathname, extraReq.body)
       const matched = mockUrls
         .map(m => m === _mockUrl ? ansis.underline.bold(m) : ansis.dim(m))
         .join(', ')
-      logger.warn(`${ansis.green(pathname)} matches ${matched}, but mock data is not found.`)
+      matched.length && logger.warn(`${ansis.green(pathname)} matches ${matched}, but mock data is not found.`)
 
       return next()
     }

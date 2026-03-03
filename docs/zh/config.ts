@@ -58,6 +58,7 @@ export default defineAdditionalConfig({
 
     outline: {
       label: '页面导航',
+      level: [2, 3],
     },
 
     lastUpdated: {
@@ -123,6 +124,7 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: '请求生命周期', link: 'request-lifecycle' },
         { text: '路径匹配规则', link: 'path-matching' },
+        { text: '请求录制与回放', link: 'record-and-replay' },
         { text: '目录文件管理', link: 'file-management' },
       ],
     },

@@ -35,3 +35,13 @@ export async function isPackageExists(mod: string): Promise<boolean> {
   PACKAGE_CACHE[mod] = false
   return false
 }
+
+/**
+ * 判断内容类型是否为文本类型
+ *
+ * @param contentType 内容类型
+ * @returns 是否为文本类型
+ */
+export function isTextContent(contentType: string): boolean {
+  return ['text', 'json', 'xml'].some(type => contentType.includes(type))
+}

@@ -49,6 +49,7 @@
 - 📤 支持 multipart 类型，模拟文件上传
 - 📥 支持模拟文件下载
 - ⚜️ 支持模拟 `WebSocket` 和 `Server-Sent Events`
+- 📝 支持 **请求录制** 和 **请求回放**
 - 🗂 支持构建可独立部署的小型mock服务
 
 ## 文档
@@ -324,6 +325,110 @@ export default defineMock({
     log?: LogLevel
   }
   ```
+
+### record
+
+- **类型：** `false | RecordOptions`
+- **默认值：** `false`
+- **详情：**
+
+  是否开启请求录制功能。开启后，插件会记录所有请求数据，用于后续的请求回放。
+
+  插件在 `vite.server.proxy` 的基础上，记录被 `http-proxy` 代理的请求数据。
+  在获得响应后，插件会将请求数据和响应数据记录到指定的目录中。
+
+  ```ts
+  interface RecordOptions {
+    /**
+     * 是否启用录制功能
+     * - true: 启用，自动录制 proxy 响应
+     * - false: 禁用（默认）
+     * @default false
+     */
+    enabled?: boolean
+    /**
+     * 过滤要录制的请求
+     * - 函数：自定义过滤函数，返回 true 表示录制
+     * - 对象：包含/排除模式，支持 glob 或 path-to-regexp 模式
+     * @example
+     * ```ts
+     * // Record all requests
+     * filter: (req) => true
+     * // Record requests using glob pattern
+     * filter: { mode: 'glob', include: '/api/**' }
+     * // Record requests using path-to-regexp pattern
+     * filter: { mode: 'path-to-regexp', include: '/api/:id' }
+     * ```
+     */
+    filter?: ((req: RecordedReq) => boolean) | {
+      /**
+       * 包含需要录制的请求链接
+       *
+       * glob 模式或 path-to-regexp 模式
+       * (使用 mode 选项设置模式，默认为 glob)
+       */
+      include?: string | string[]
+      /**
+       * 排除不需要录制的请求链接
+       *
+       * glob 模式或 path-to-regexp 模式
+       * (使用 mode 选项设置模式，默认为 glob)
+       */
+      exclude?: string | string[]
+      /**
+       * 包含/排除模式的匹配模式
+       * - 'glob': glob 模式匹配（默认）
+       * - 'path-to-regexp': path-to-regexp 模式匹配
+       */
+      mode: 'glob' | 'path-to-regexp'
+    }
+    /**
+     * 录制数据存储目录
+     * 相对于项目根目录
+     * @default 'mock/.recordings'
+     */
+    dir?: string
+
+    /**
+     * 是否覆盖已有录制数据
+     * - true: 相同请求覆盖旧数据（默认）
+     * - false: 保留旧数据，不录制新数据
+     * @default true
+     */
+    overwrite?: boolean
+    /**
+     * 录制数据过期时间（秒）
+     * - 0: 永不过期（默认）
+     * - 正数：指定秒数后过期
+     * @default 0
+     */
+    expires?: number
+
+    /**
+     * 要录制的状态码
+     * - 为空数组时记录所有状态码（默认）
+     * - 指定一个或多个状态码进行过滤
+     * @default []
+     */
+    status?: number | number[]
+
+    /**
+     * 是否在录制目录中添加 .gitignore
+     * - true: 添加（默认）
+     * - false: 不添加
+     * @default true
+     */
+    gitignore?: boolean
+  }
+  ```
+
+### replay
+
+- **类型：** `boolean`
+- **默认值：** `false`
+- **详情：**
+
+  是否开启请求回放功能。开启后，插件会根据记录的请求数据，模拟响应。
 
 ### priority
 

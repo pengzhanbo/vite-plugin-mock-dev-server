@@ -2,6 +2,7 @@ import type { Options as COBodyOptions } from 'co-body'
 import type { CorsOptions } from 'cors'
 import type formidable from 'formidable'
 import type { CookiesOption } from './cookies'
+import type { RecordOptions } from './record'
 
 export type BodyParserOptions = COBodyOptions & {
   jsonLimit?: string | number
@@ -36,6 +37,15 @@ export interface ServerBuildOption {
    * @default 'error'
    */
   log?: LogLevel
+
+  /**
+   * Whether to include record files in the build output
+   *
+   * 是否在构建输出中包含录制文件
+   *
+   * @default true
+   */
+  includeRecord?: boolean
 }
 
 export interface MockMatchPriority {
@@ -255,4 +265,35 @@ export interface MockServerPluginOptions {
    * ```
    */
   priority?: MockMatchPriority
+
+  /**
+   * Record and replay configuration
+   * Can be abbreviated as: record: true
+   *
+   * 录制回放配置
+   * 可简写为：record: true
+   *
+   * @default false
+   * @example
+   * ```ts
+   * // Enable with default settings
+   * record: true
+   *
+   * // Or with custom configuration
+   * record: {
+   *   enabled: true,
+   *   dir: 'mock/.recordings',
+   *   overwrite: true,
+   *   sensitiveFields: ['password', 'token']
+   * }
+   * ```
+   */
+  record?: boolean | RecordOptions
+
+  /**
+   * Replay recorded requests, default enabled when record enabled
+   *
+   * 回放已记录的请求，默认请求录制启用时自动启用回放功能
+   */
+  replay?: boolean
 }

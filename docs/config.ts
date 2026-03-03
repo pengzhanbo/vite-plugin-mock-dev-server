@@ -58,6 +58,7 @@ export default defineAdditionalConfig({
 
     outline: {
       label: 'Page navigation',
+      level: [2, 3],
     },
 
     lastUpdated: {
@@ -142,6 +143,7 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
         { text: 'Plugin Configuration', link: 'plugin-config' },
         { text: 'Mock Configuration', link: 'mock-config' },
         { text: 'WebSocket Configuration', link: 'websocket-config' },
+        { text: 'Record and Replay', link: 'record-and-replay' },
       ],
     },
     {

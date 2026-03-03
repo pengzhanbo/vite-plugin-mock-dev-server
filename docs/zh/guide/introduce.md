@@ -12,6 +12,12 @@
 
 插件还支持 模拟 `Server-Sent Events`，可以轻松的实现在本地开发环境调试 `EventSource` 。
 
+<div class="tip custom-block" style="padding-top: 8px">
+
+📣 从 `v2.1.0` 开始，插件支持 **请求录制与回放** 功能
+
+</div>
+
 ## 特性
 
 - ⚡️ 轻量，灵活，快速
@@ -32,4 +38,5 @@
 - 📤 支持 multipart 类型，模拟文件上传
 - 📥 支持模拟文件下载
 - ⚜️ 支持模拟 `WebSocket`、 `Server-Sent Events`
+- 📝 支持请求录制与回放功能
 - 🗂 支持构建可独立部署的小型mock服务

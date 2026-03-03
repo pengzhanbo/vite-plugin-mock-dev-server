@@ -22,7 +22,7 @@ export default defineConfig({
 ## Configuration Overview
 
 | Configuration | Type | Default | Description |
-|--------|------|--------|------|
+| ------------- | ---- | ------- | ----------- |
 | [prefix](../api/mock-server-plugin-options#prefix) | `string \| string[]` | `[]` | HTTP Mock path prefix |
 | [wsPrefix](../api/mock-server-plugin-options#wsprefix) | `string \| string[]` | `[]` | WebSocket path prefix |
 | [cwd](../api/mock-server-plugin-options#cwd) | `string` | `process.cwd()` | Working directory |
@@ -36,6 +36,8 @@ export default defineConfig({
 | [cookiesOptions](../api/mock-server-plugin-options#cookiesoptions) | `Cookies.Option` | - | Cookie configuration |
 | [bodyParserOptions](../api/mock-server-plugin-options#bodyparseroptions) | `BodyParserOptions` | - | Request body parsing configuration |
 | [build](../api/mock-server-plugin-options#build) | `boolean \| ServerBuildOption` | `false` | Build standalone service |
+| [record](../api/mock-server-plugin-options#record) | `boolean \| RecordOption` | `false` | Request recording configuration |
+| [replay](../api/mock-server-plugin-options#replay) | `boolean \| ReplayOption` | `false` | Request playback configuration |
 | [priority](../api/mock-server-plugin-options#priority) | `MockMatchPriority` | - | Matching priority configuration |
 
 ## Detailed Documentation

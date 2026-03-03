@@ -9,6 +9,8 @@ export function generatorServerEntryCode({
   priority,
   build,
   cors,
+  record,
+  replay,
 }: ResolvedMockServerPluginOptions) {
   const { serverPort, log } = build as ServerBuildOption
   // 生成的 entry code 有一个 潜在的问题：
@@ -20,6 +22,7 @@ export function generatorServerEntryCode({
   // 从功能的优先级上看，还没有实现 `mock.config.ts` 的必要性。
   // 当前也还未收到有用户有关于该功能的潜在问题报告，暂时作为一个 待优化的问题。
   return `import { createServer } from 'node:http';
+import process from 'node:process';
 import connect from 'connect';
 import { createMockMiddleware, createLogger, mockWebSocket } from 'vite-plugin-mock-dev-server/server';
 import mockData from './mock-data.js';
@@ -33,6 +36,14 @@ const cookiesOptions = ${JSON.stringify(cookiesOptions)};
 const bodyParserOptions = ${JSON.stringify(bodyParserOptions)};
 const priority = ${JSON.stringify(priority)};
 const cors = ${JSON.stringify(cors)};
+const record = {
+  enabled: ${record.enabled ? 'true' : 'false'},
+  cwd: process.cwd(),
+  dir: ${JSON.stringify(record.dir)},
+  expires: ${record.expires === Number.MAX_SAFE_INTEGER ? 'Number.MAX_SAFE_INTEGER' : record.expires},
+  status: ${JSON.stringify(record.status)},
+};
+
 const compiler = { mockData }
 
 mockWebSocket(compiler, server, { wsProxies, cookiesOptions, logger });
@@ -45,6 +56,8 @@ app.use(createMockMiddleware(compiler, {
   bodyParserOptions,
   logger,
   cors,
+  record,
+  replay: ${replay ? 'true' : 'false'},
 }));
 
 server.listen(${serverPort});

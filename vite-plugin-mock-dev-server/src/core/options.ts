@@ -1,7 +1,13 @@
 import type { CorsOptions } from 'cors'
 import type { Alias, AliasOptions, ResolvedConfig } from 'vite'
-import type { MockServerPluginOptions, ServerBuildOption } from '../types'
+import type {
+  MockServerPluginOptions,
+  RecordOptions,
+  ResolvedRecordOptions,
+  ServerBuildOption,
+} from '../types'
 import type { Logger } from './logger'
+import path from 'node:path'
 import process from 'node:process'
 import { isArray, isBoolean, toArray, uniq } from '@pengzhanbo/utils'
 import ansis from 'ansis'
@@ -9,7 +15,7 @@ import { viteDefine } from './define'
 import { createLogger } from './logger'
 
 export type ResolvedMockServerPluginOptions = Required<
-  Omit<MockServerPluginOptions, 'build' | 'cors' | 'wsPrefix' | 'prefix'>
+  Omit<MockServerPluginOptions, 'build' | 'cors' | 'wsPrefix' | 'prefix' | 'record'>
 > & {
   context: string
   logger: Logger
@@ -19,12 +25,13 @@ export type ResolvedMockServerPluginOptions = Required<
   wsProxies: string[]
   build: false | ServerBuildOption
   cors: false | CorsOptions
+  record: ResolvedRecordOptions
 }
 
 export function resolvePluginOptions({
   prefix = [],
   wsPrefix = [],
-  cwd,
+  cwd: rawCwd,
   dir = 'mock',
   include = ['**/*.mock.{js,ts,cjs,mjs,json,json5}'],
   exclude = [],
@@ -36,7 +43,10 @@ export function resolvePluginOptions({
   cookiesOptions = {},
   bodyParserOptions = {},
   priority = {},
+  record = false,
+  replay,
 }: MockServerPluginOptions, config: ResolvedConfig): ResolvedMockServerPluginOptions {
+  const cwd = rawCwd || process.cwd()
   const logger = createLogger('vite:mock', isBoolean(log) ? (log ? 'info' : 'error') : log)
 
   const { httpProxies } = ensureProxies(config.server.proxy || {})
@@ -77,8 +87,10 @@ export function resolvePluginOptions({
     })
   }
 
+  const resolvedRecord = resolveRecordOptions(cwd, dir, record)
+
   return {
-    cwd: cwd || process.cwd(),
+    cwd,
     dir,
     include,
     exclude,
@@ -95,6 +107,7 @@ export function resolvePluginOptions({
           serverPort: 8080,
           dist: 'mockServer',
           log: 'error',
+          includeRecord: replay ?? resolvedRecord.enabled ?? false,
           ...typeof build === 'object' ? build : {},
         }
       : false,
@@ -103,6 +116,8 @@ export function resolvePluginOptions({
     logger,
     alias,
     define: viteDefine(config),
+    record: resolvedRecord,
+    replay: replay ?? resolvedRecord.enabled ?? false,
   }
 }
 
@@ -126,4 +141,32 @@ export function ensureProxies(
     }
   })
   return { httpProxies, wsProxies }
+}
+
+/**
+ * Resolve record options
+ *
+ * 解析录制配置
+ *
+ * @param cwd - Current working directory / 当前工作目录
+ * @param dir - Mock context directory / 模拟上下文目录
+ * @param record - Record options / 录制配置
+ * @returns Resolved record options / 解析后的录制配置
+ */
+export function resolveRecordOptions(cwd: string, dir: string, record?: boolean | RecordOptions): ResolvedRecordOptions {
+  // Parse record configuration
+  const recordOptions = typeof record === 'boolean'
+    ? { enabled: record }
+    : record
+  const expires = recordOptions?.expires ?? 0
+  return {
+    enabled: recordOptions?.enabled ?? false,
+    cwd,
+    dir: path.join(dir, recordOptions?.dir || '.recordings'),
+    overwrite: recordOptions?.overwrite ?? true,
+    status: toArray(recordOptions?.status).map(Number),
+    expires: expires === 0 ? Number.MAX_SAFE_INTEGER : expires * 1000,
+    gitignore: recordOptions?.gitignore ?? true,
+    filter: recordOptions?.filter || (() => true),
+  }
 }

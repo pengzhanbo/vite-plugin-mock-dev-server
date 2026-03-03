@@ -17,6 +17,7 @@ When encountering issues, please check in the following order:
 ### Mock API Not Responding
 
 #### Symptoms
+
 Requesting Mock API returns 404 or no response.
 
 #### Possible Causes and Solutions
@@ -41,7 +42,7 @@ export default defineConfig({
 
 By default, the plugin looks for files in the `mock` directory:
 
-```
+```txt
 project-root/
 ├── mock/                 # Mock files directory
 │   ├── api.mock.ts
@@ -61,6 +62,7 @@ mockDevServerPlugin({
 **3. File Extension Mismatch**
 
 By default, only the following extensions are recognized:
+
 - `.mock.js`
 - `.mock.ts`
 - `.mock.cjs`
@@ -75,6 +77,7 @@ After modifying `vite.config.ts`, you need to restart the dev server.
 ### Hot Reload Not Working
 
 #### Symptoms
+
 After modifying Mock files, data is not updated.
 
 #### Solutions
@@ -113,6 +116,7 @@ mockDevServerPlugin({
 ### Path Matching Failed
 
 #### Symptoms
+
 Request path does not match Mock configuration.
 
 #### Debugging Methods
@@ -126,7 +130,8 @@ mockDevServerPlugin({
 ```
 
 Check console output:
-```
+
+```txt
 [mock-dev-server] Request: GET /api/users
 [mock-dev-server] Trying to match: /api/users
 [mock-dev-server] Matched: /api/users
@@ -172,6 +177,7 @@ fetch('/mock/users')
 ### WebSocket Connection Failed
 
 #### Symptoms
+
 WebSocket connection cannot be established or disconnects immediately.
 
 #### Solutions
@@ -216,6 +222,7 @@ const wrongSocket = new WebSocket('http://localhost:5173/ws/chat')
 ### Cookie Settings Not Working
 
 #### Symptoms
+
 Set cookies are not visible in the browser.
 
 #### Solutions
@@ -254,6 +261,7 @@ mockDevServerPlugin({
 ### File Upload Failed
 
 #### Symptoms
+
 Uploading files returns 413 or cannot parse files.
 
 #### Solutions
@@ -286,13 +294,14 @@ mockDevServerPlugin({
 
 Ensure the request header contains the correct Content-Type:
 
-```
+```txt
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
 ```
 
 ### Request Body Parsing Failed
 
 #### Symptoms
+
 Cannot get request body data or data format is incorrect.
 
 #### Solutions
@@ -338,6 +347,7 @@ export default defineMock({
 ### Conflict with Backend API
 
 #### Symptoms
+
 Mock API and real backend API conflict when both exist.
 
 #### Solutions
@@ -406,7 +416,7 @@ mockDevServerPlugin({
 
 View in browser console or terminal:
 
-```
+```txt
 [mock-dev-server] Loaded mock files:
 - /project/mock/api.mock.ts
 - /project/mock/users.mock.ts

@@ -19,6 +19,8 @@ interface MockServerPluginOptions {
   cookiesOptions?: CookiesOption
   bodyParserOptions?: BodyParserOptions
   build?: boolean | ServerBuildOption
+  record?: boolean | RecordOption
+  replay?: boolean
   priority?: MockMatchPriority
 }
 ```
@@ -219,8 +221,13 @@ mockDevServerPlugin({
 ```ts
 interface ServerBuildOption {
   serverPort?: number // 默认 8080
-  dist?: string // 默认 'dist/mockServer'
+  dist?: string // 默认 'mockServer'
   log?: LogLevel // 默认 'error'
+  /**
+   * 是否包含请求录制数据
+   * @default true
+   */
+  includeRecord?: boolean
 }
 ```
 
@@ -259,45 +266,127 @@ mockDevServerPlugin({
 })
 ```
 
-## 完整配置示例
+### record
 
-```ts [vite.config.ts]
-import path from 'node:path'
-import { defineConfig } from 'vite'
-import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
+- **类型**: `boolean | RecordOptions`
+- **默认值**: `false`
+- **描述**: 请求录制与回放配置
 
-export default defineConfig({
-  plugins: [
-    mockDevServerPlugin({
-      // 路径匹配
-      prefix: ['/api', '/mock'],
-      wsPrefix: ['/ws'],
+启用后，插件会自动录制通过 Proxy 转发的请求响应，并在 Mock 数据不存在时回放录制的数据。
 
-      // 文件配置
-      cwd: process.cwd(),
-      dir: 'mock',
-      include: ['**/*.mock.{js,ts}'],
-      exclude: ['**/node_modules/**'],
+```ts
+interface RecordOptions {
+  /**
+   * 是否启用录制功能
+   * - true: 启用，自动录制 proxy 响应
+   * - false: 禁用（默认）
+   *
+   * @default false
+   */
+  enabled?: boolean
+  /**
+   * 过滤要录制的请求
+   * - 函数：自定义过滤函数，返回 true 表示录制
+   * - 对象：包含/排除模式，支持 glob 或 path-to-regexp 模式
+   * @example
+   * ```ts
+   * // Record all requests
+   * filter: (req) => true
+   * // Record requests using glob pattern
+   * filter: { mode: 'glob', include: '/api/**' }
+   * // Record requests using path-to-regexp pattern
+   * filter: { mode: 'path-to-regexp', include: '/api/:id' }
+   * ```
+   */
+  filter?: ((req: RecordedReq) => boolean) | {
+    /**
+     * 包含需要录制的请求链接
+     *
+     * glob 模式或 path-to-regexp 模式
+     * (使用 mode 选项设置模式，默认为 glob)
+     */
+    include?: string | string[]
+    /**
+     * 排除不需要录制的请求链接
+     *
+     * glob 模式或 path-to-regexp 模式
+     * (使用 mode 选项设置模式，默认为 glob)
+     */
+    exclude?: string | string[]
+    /**
+     * 包含/排除模式的匹配模式
+     * - 'glob': glob 模式匹配（默认）
+     * - 'path-to-regexp': path-to-regexp 模式匹配
+     */
+    mode: 'glob' | 'path-to-regexp'
+  }
+  /**
+   * Directory to store recorded data
+   * Relative to project root
+   *
+   * 录制数据存储目录
+   * 相对于项目根目录
+   *
+   * @default 'mock/.recordings'
+   */
+  dir?: string
+  /**
+   * 是否覆盖已有录制数据
+   * - true: 相同请求覆盖旧数据（默认）
+   * - false: 保留旧数据，不录制新数据
+   *
+   * @default true
+   */
+  overwrite?: boolean
+  /**
+   * 录制数据过期时间（秒）
+   * - 0: 永不过期（默认）
+   * - 正数：指定秒数后过期
+   *
+   * @default 0
+   */
+  expires?: number
+  /**
+   * 要录制的状态码
+   * - 为空数组时记录所有状态码（默认）
+   * - 指定一个或多个状态码进行过滤
+   *
+   * @default []
+   */
+  status?: number | number[]
+  /**
+   * 是否在录制目录中添加 .gitignore
+   * - true: 添加（默认）
+   * - false: 不添加
+   * @default true
+   */
+  gitignore?: boolean
+}
+```
 
-      // 行为配置
-      reload: false,
-      log: 'info',
-      cors: true,
+```ts
+// 简写形式：一键启用
+mockDevServerPlugin({
+  record: true
+})
 
-      // 解析配置
-      formidableOptions: {
-        uploadDir: path.join(process.cwd(), 'uploads')
-      },
-      bodyParserOptions: {
-        jsonLimit: '10mb'
-      },
-
-      // 构建配置
-      build: {
-        serverPort: 8080,
-        dist: 'mockServer'
-      }
-    })
-  ]
+// 完整配置
+mockDevServerPlugin({
+  record: {
+    enabled: true,
+    dir: 'mock/.recordings',
+    overwrite: true,
+    expires: 0,
+    status: [],
+    gitignore: true
+  }
 })
 ```
+
+### replay
+
+- **类型**: `boolean`
+- **默认值**: `false` (record 启用时，默认值为 true)
+- **描述**: 请求回放配置
+
+启用后，插件会在 Mock 数据不存在时，根据录制数据回放请求响应。

@@ -8,6 +8,7 @@ import process from 'node:process'
 import { toArray } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import { loadPackageJSON } from 'local-pkg'
+import { glob } from 'tinyglobby'
 import { transform } from '../compiler'
 import { generateMockEntryCode } from './mockEntryCode'
 import { generatePackageJson, getMockDependencies } from './packageJson'
@@ -28,9 +29,10 @@ export async function generateMockServer(
   const exclude = toArray(options.exclude)
   const cwd = options.cwd || process.cwd()
   const dir = options.dir
+  const buildOptions = options.build as Required<ServerBuildOption>
 
   const pkg = await loadPackageJSON(options.context) || {}
-  const outputDir = (options.build as ServerBuildOption).dist!
+  const outputDir = buildOptions.dist
 
   const content = await generateMockEntryCode(cwd, dir, include, exclude)
   const mockEntry = path.join(cwd, `mock-data-${Date.now()}.js`)
@@ -54,6 +56,21 @@ export async function generateMockServer(
       source: generatePackageJson(pkg, mockDeps),
     },
   ]
+
+  // 构建录制文件，复制到输出目录
+  if (options.record.enabled && buildOptions.includeRecord) {
+    const files = await glob(path.join(options.record.dir, '**/*.json'), {
+      cwd: options.cwd,
+      dot: true,
+    })
+    for (const file of files) {
+      outputList.push({
+        filename: path.join(outputDir, file),
+        source: await fsp.readFile(path.join(options.cwd, file), 'utf-8'),
+      })
+    }
+  }
+
   try {
     if (path.isAbsolute(outputDir)) {
       for (const { filename } of outputList) {

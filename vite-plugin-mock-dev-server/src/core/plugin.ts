@@ -1,10 +1,13 @@
 import type { Plugin, ResolvedConfig } from 'vite'
 import type { MockServerPluginOptions } from '../types'
+import type { ResolvedMockServerPluginOptions } from './options'
+import process from 'node:process'
 import { toArray } from '@pengzhanbo/utils'
 import { generateMockServer } from '../build'
 import { recoverRequest } from '../mockHttp'
+import { Recorder } from '../recorder'
 import { initMockMiddlewares } from './init'
-import { type ResolvedMockServerPluginOptions, resolvePluginOptions } from './options'
+import { resolvePluginOptions, resolveRecordOptions } from './options'
 
 /**
  * Create mock dev server plugin
@@ -87,6 +90,14 @@ export function serverPlugin(
       // #52 由于请求流被消费，vite http-proxy 无法获取已消费的请求，导致请求流无法继续
       // 通过 http-proxy 的 proxyReq 事件，重新写入请求流
       recoverRequest(config)
+
+      // 初始化请求录制
+      const { cwd, dir } = options
+      const recordOptions = resolveRecordOptions(cwd || process.cwd(), dir || 'mock', options.record)
+      if (recordOptions.enabled) {
+        const recorder = new Recorder(recordOptions)
+        recorder.setup(config)
+      }
     },
 
     configResolved(config) {

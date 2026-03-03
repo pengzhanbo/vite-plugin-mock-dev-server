@@ -127,7 +127,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/other/path' })
     const res = createMockResponse()
@@ -144,7 +146,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/api/users' })
     const res = createMockResponse()
@@ -172,7 +176,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/api/users' })
     const res = createMockResponse()
@@ -203,7 +209,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/api/users', method: 'POST' })
     const res = createMockResponse()
@@ -231,7 +239,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/api/users?id=123&name=test' })
     const res = createMockResponse()
@@ -259,7 +269,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/api/users/123' })
     const res = createMockResponse()
@@ -287,7 +299,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/api/text' })
     const res = createMockResponse()
@@ -315,7 +329,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/api/dynamic?foo=bar' })
     const res = createMockResponse()
@@ -344,7 +360,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/api/custom-headers' })
     const res = createMockResponse()
@@ -375,7 +393,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/api/cookies' })
     const res = createMockResponse()
@@ -411,7 +431,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/api/error' })
     const res = createMockResponse()
@@ -444,7 +466,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/api/custom-response' })
     const res = createMockResponse()
@@ -474,7 +498,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/api/validated?version=1' })
     const res = createMockResponse()
@@ -503,7 +529,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/api/validated?version=2' })
     const res = createMockResponse()
@@ -530,7 +558,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/api/users' })
     const res = createMockResponse()
@@ -559,7 +589,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/api/empty' })
     const res = createMockResponse()
@@ -587,7 +619,9 @@ describe('mockMiddleware', () => {
       proxies: ['/api'],
       logger: mockLogger as any,
       cors: false,
-    })
+      record: { enabled: false },
+      replay: false,
+    } as any)
 
     const req = createMockRequest({ url: '/api/list' })
     const res = createMockResponse()

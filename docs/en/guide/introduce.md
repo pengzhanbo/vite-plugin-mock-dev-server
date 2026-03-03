@@ -12,6 +12,12 @@ The plugin supports simulating `WebSocket`, making it easy to debug `WebSocket` 
 
 The plugin also supports simulating `Server-Sent Events`, making it easy to debug `EventSource` in a local development environment.
 
+<div class="tip custom-block" style="padding-top: 8px">
+
+📣 Starting from `v2.1.0`, the plugin supports the request recording and replay feature
+
+</div>
+
 ## Features
 
 - ⚡️ Lightweight, Flexible, Fast.
@@ -32,4 +38,5 @@ The plugin also supports simulating `Server-Sent Events`, making it easy to debu
 - 📤 Support `multipart` content-type, mock upload file.
 - 📥 Support mock download file.
 - ⚜️ Support `WebSocket Mock`、`Server-Sent Events`
+- 📝 Support request recording and replay feature.
 - 🗂 Support building small independent deployable mock services.

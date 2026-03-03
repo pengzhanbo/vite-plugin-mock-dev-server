@@ -27,12 +27,13 @@ const cache = new WeakMap<Connect.IncomingMessage, Buffer>()
  * @param req - Incoming message / 入站消息
  */
 export function collectRequest(req: Connect.IncomingMessage): void {
-  const chunks: Buffer[] = []
+  let chunks: Buffer[] | null = []
   req.addListener('data', (chunk) => {
-    chunks.push(Buffer.from(chunk))
+    chunks?.push(Buffer.from(chunk))
   })
   req.addListener('end', () => {
-    chunks.length && cache.set(req, Buffer.concat(chunks))
+    chunks?.length && cache.set(req, Buffer.concat(chunks!))
+    chunks = null
   })
 }
 
