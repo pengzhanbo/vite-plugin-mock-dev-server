@@ -727,6 +727,9 @@ type Response = http.ServerResponse<http.IncomingMessage> & {
 type defineMockData<T> = (
   key: string, // 数据唯一标识符
   initialData: T, // 初始化数据
+  options?: {
+    persistOnHMR?: boolean // 是否在热更新时保持数据状态
+  } // 可选配置
 ) => [getter, setter] & { value: T }
 ```
 

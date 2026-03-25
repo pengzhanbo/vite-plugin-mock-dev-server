@@ -31,6 +31,18 @@ function defineMockData<T = any>(
 - **Description**: Initial data value
 - **Required**: Yes
 
+### options
+
+- **Type**: `{ persistOnHMR?: boolean }`
+- **Description**: An options object used to configure the data sharing mechanism.
+- **Optional**: Yes
+- **Default Value**: `{}`
+  - **persistOnHMR**: Whether to preserve the initial data during HMR. The default value is `false`, meaning whether data will be reinitialized during HMR.
+
+By default, the plugin internally determines whether data needs to be reinitialized by comparing whether the initial data has changed.
+However, when using libraries such as `mockjs` or `faker`, since the data is randomly generated, the plugin cannot directly determine whether the data has changed.
+Therefore, manual configuration of the `persistOnHMR` option is required.
+
 ## Return Value
 
 - **Type**: `MockData<T>`
@@ -155,10 +167,14 @@ interface Todo {
   createdAt: number
 }
 
-const todos = defineMockData<Todo[]>('todos', [
-  { id: 1, text: 'Learn Vite', completed: false, createdAt: Date.now() },
-  { id: 2, text: 'Build Mock API', completed: true, createdAt: Date.now() }
-])
+const todos = defineMockData<Todo[]>(
+  'todos',
+  [
+    { id: 1, text: 'Learn Vite', completed: false, createdAt: Date.now() },
+    { id: 2, text: 'Build Mock API', completed: true, createdAt: Date.now() }
+  ],
+  { persistOnHMR: true }, // Ensure data is not reset during HMR, preserving existing data state
+)
 
 export default defineMock([
   // Get todo list (supports filtering)
@@ -231,7 +247,7 @@ export default defineMock([
 `defineMockData` has built-in hot reload handling mechanism:
 
 1. **Caching Mechanism**: Data is cached to ensure multiple Mock files access the same instance
-2. **Hot Reload Protection**: Repeated compilations in a short time (such as using `mockjs` or `faker-js` to generate random data) will not cause data reset
+2. **Hot Reload Protection**: During hot updates, the initial data will not be reset if it remains unchanged (however, if using `mockjs` or `faker-js` to generate random data, you need to manually configure `persistOnHMR` to `true`).
 3. **Data Persistence**: Data state is preserved after file modification and recompilation
 
 ## Important Notes

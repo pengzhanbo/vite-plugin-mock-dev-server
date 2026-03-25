@@ -1,4 +1,4 @@
-# defineMockData(key, initialData)
+# defineMockData(key, initialData [, options])
 
 定义可共享的 mock data，用于在多个 Mock 文件之间共享状态。
 

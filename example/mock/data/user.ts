@@ -27,4 +27,4 @@ export default defineMockData<Record<string, User>>('users', {
     username: mock.mock('@first()'),
     age: 20,
   },
-})
+}, { persistOnHMR: true })
