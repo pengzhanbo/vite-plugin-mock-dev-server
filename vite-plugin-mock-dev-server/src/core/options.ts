@@ -90,6 +90,7 @@ export function resolvePluginOptions({
   const resolvedRecord = resolveRecordOptions(cwd, dir, record)
 
   return {
+    enabled: true,
     cwd,
     dir,
     include,

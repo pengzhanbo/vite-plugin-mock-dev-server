@@ -13,7 +13,10 @@
 ```ts
 function defineMockData<T = any>(
   key: string,
-  initialData: T
+  initialData: T,
+  options?: {
+    persistOnHMR?: boolean // 是否在 HMR 时保持初始数据
+  }
 ): MockData<T>
 ```
 
@@ -30,6 +33,18 @@ function defineMockData<T = any>(
 - **类型**: `T`
 - **描述**: 初始数据值
 - **必填**: 是
+
+### options
+
+- **类型**: `{ persistOnHMR?: boolean }`
+- **描述**: 选项对象，用于配置数据共享机制
+- **可选**: 是
+- **默认值**: `{}`
+  - **persistOnHMR**: 是否在 HMR 时保持初始数据，默认值为 `false`, 即在 HMR 时会不会重新初始化数据。
+
+插件内部默认会通过比对初始数据是否发生变化来判断是否需要重新初始化数据。
+但是在使用 `mockjs` 或 `faker` 等库时，由于数据随机产生，插件无法直接判断数据是否发生变化，
+因此需要手动配置 `persistOnHMR` 选项。
 
 ## 返回值
 
@@ -155,10 +170,14 @@ interface Todo {
   createdAt: number
 }
 
-const todos = defineMockData<Todo[]>('todos', [
-  { id: 1, text: 'Learn Vite', completed: false, createdAt: Date.now() },
-  { id: 2, text: 'Build Mock API', completed: true, createdAt: Date.now() }
-])
+const todos = defineMockData<Todo[]>(
+  'todos',
+  [
+    { id: 1, text: 'Learn Vite', completed: false, createdAt: Date.now() },
+    { id: 2, text: 'Build Mock API', completed: true, createdAt: Date.now() }
+  ],
+  { persistOnHMR: true }, // 热更新时确保数据不被重置，保留已有的数据状态
+)
 
 export default defineMock([
   // 获取待办列表（支持筛选）
@@ -231,7 +250,7 @@ export default defineMock([
 `defineMockData` 内置了热更新处理机制：
 
 1. **缓存机制**: 数据会被缓存，确保多个 Mock 文件访问的是同一实例
-2. **热更新保护**: 在短时间内的重复编译（如使用 `mockjs` 或 `faker-js` 生成随机数据）不会导致数据重置
+2. **热更新保护**: 热更新时，初始数据未发生变化时，不会重置数据 （但如使用 `mockjs` 或 `faker-js` 生成随机数据，需要手动配置 `persistOnHMR` 为 `true`）
 3. **数据持久**: 文件修改后的重新编译会保留已有的数据状态
 
 ## 注意事项

@@ -726,6 +726,9 @@ To address this, the plugin offers a `defineMockData` function, which allows usi
 type defineMockData<T> = (
   key: string, // key
   initialData: T, // initial data
+  options?: {
+    persistOnHMR?: boolean // persist the data value on HMR
+  } // options
 ) => [getter, setter] & { value: T }
 ```
 

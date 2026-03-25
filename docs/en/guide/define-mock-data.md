@@ -1,4 +1,4 @@
-# defineMockData(key, initialData)
+# defineMockData(key, initialData [, options])
 
 Define shareable mock data.
 

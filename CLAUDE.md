@@ -73,7 +73,7 @@ pnpm docs:build
 
 ## Project Structure
 
-```
+```txt
 vite-plugin-mock-server/
 ├── pnpm-workspace.yaml      # Monorepo workspace config
 ├── vitest.config.ts         # Test configuration (runs spec.ts in __tests__)
