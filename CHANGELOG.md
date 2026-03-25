@@ -1,3 +1,17 @@
+## [2.1.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.1.0...v2.1.1) (2026-03-25)
+
+
+### Features
+
+* add `persistOnHMR` options for `defineMockData`, close [#144](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/144) ([#145](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/145)) ([beaf44a](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/beaf44a2a908f4936de1dd42c58ddfaf6299b968))
+
+
+### Performance Improvements
+
+* update deps to latest ([8a90f74](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/8a90f74ac0551b992c0e1ee488789a3b4284c91e))
+
+
+
 # [2.1.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.0.7...v2.1.0) (2026-03-03)
 
 
