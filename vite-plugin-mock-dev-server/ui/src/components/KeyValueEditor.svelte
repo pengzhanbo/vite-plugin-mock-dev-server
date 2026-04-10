@@ -3,7 +3,7 @@
   import { cn } from '../utils/cn'
   import IconRemove from './IconRemove.svelte'
 
-  const { items = $bindable([]), disableKey = false, valueType = false, immutable = false, class: classValue }: {
+  let { items = $bindable([]), disableKey = false, valueType = false, immutable = false, class: classValue }: {
     items: KeyValue[]
     // 是否禁用键
     disableKey?: boolean
@@ -49,18 +49,26 @@
             {/if}
           </td>
           <td>
-            <input
-              type={item.type}
-              class='w-full px-2 py-1 focus:outline-none m-0 border border-transparent transition-colors focus:border-primary'
-              placeholder='Value'
-              bind:value={item.value}
-            />
+            {#if item.type === 'text'}
+              <input
+                type='text'
+                class='w-full px-2 py-1 focus:outline-none m-0 border border-transparent transition-colors focus:border-primary'
+                bind:value={item.value}
+              />
+            {:else}
+              <input
+                type='file'
+                class='w-full px-2 py-1 focus:outline-none m-0 border border-transparent transition-colors'
+                multiple
+                onchange={e => item.value = e.currentTarget.files as FileList}
+              />
+            {/if}
           </td>
           {#if !immutable}
             <td class='px-2'>
               <button
                 class='text-gray-500 dark:text-gray-400 cursor-pointer'
-                onclick={() => items.splice(index, 1)}
+                onclick={() => items = [...items.filter((_, i) => i !== index)]}
               ><IconRemove /></button>
             </td>
           {/if}
@@ -72,7 +80,7 @@
   {#if !immutable}
     <button
       class='text-gray-500 dark:text-gray-400 border border-divider cursor-pointer px-4 py-1 rounded-md'
-      onclick={() => items.push({ key: '', value: '', type: 'text' })}
+      onclick={() => items = [...items, { key: '', value: '', type: 'text' }]}
     >+</button>
   {/if}
 </div>

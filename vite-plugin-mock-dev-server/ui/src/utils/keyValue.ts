@@ -13,14 +13,22 @@ export function keyValueToForm(keyValue?: KeyValue[]): FormData {
   if (!keyValue || keyValue.length === 0)
     return new FormData()
   const formData = new FormData()
-  keyValue.forEach(({ key, value }) => formData.append(key, value))
+  keyValue.forEach(({ key, value }) => {
+    if (typeof value === 'string') {
+      formData.append(key, value)
+    }
+    else if (value instanceof FileList) {
+      for (const file of value)
+        formData.append(key, file)
+    }
+  })
   return formData
 }
 
 export function keyValueToUrlSearchParams(url: string, keyValue?: KeyValue[]): string {
   if (!keyValue || keyValue.length === 0)
     return url
-  const u = new URL(url, 'https://example.com')
+  const u = new URL(url, window.location.origin)
   keyValue.forEach(({ key, value, type }) =>
     type === 'text' && key && u.searchParams.append(key, value as string),
   )

@@ -14,7 +14,7 @@
 
 <main class='mt-14 w-full min-h-[calc(100vh-56px)]'>
   <Sidebar />
-  <div class='flex-1 min-w-0 w-full min-h-full pl-80'>
+  <div class='flex-1 min-w-0 w-full min-h-full pl-(--sidebar-width)'>
     <Panel />
   </div>
 </main>

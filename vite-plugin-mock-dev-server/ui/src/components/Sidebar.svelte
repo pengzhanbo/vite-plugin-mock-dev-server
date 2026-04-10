@@ -34,7 +34,7 @@
 
 <aside class={cn(
   'sidebar',
-  'fixed top-14 left-0 z-10 w-[320px] h-[calc(100vh-56px)] p-4 overflow-y-auto border-r border-divider transition-colors',
+  'fixed top-14 left-0 z-10 w-(--sidebar-width) h-[calc(100vh-56px)] p-4 overflow-y-auto border-r border-divider transition-colors',
 )}>
   {#if dynamicList.length}
     <p class='font-medium text-gray-600 dark:text-gray-400 mb-2'>{t('dynamicPattern')}</p>

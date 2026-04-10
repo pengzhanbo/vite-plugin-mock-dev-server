@@ -43,7 +43,7 @@ export interface MockItem {
 
 export interface KeyValue {
   key: string
-  value: string | File
+  value: string | FileList
   type: 'text' | 'file'
 }
 
@@ -54,7 +54,7 @@ export interface TestRequest {
     'raw': string
     'form-data': KeyValue[]
     'x-www-form-urlencoded': KeyValue[]
-    'binary'?: File
+    'binary'?: FileList
   }
   query: KeyValue[]
   params: KeyValue[]

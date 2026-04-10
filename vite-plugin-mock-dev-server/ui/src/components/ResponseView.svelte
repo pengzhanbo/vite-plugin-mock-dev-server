@@ -15,6 +15,13 @@
     if (length) {
       return `${(Number(length) / 1024).toFixed(2)}KB`
     }
+    if (response.body) {
+      try {
+        const size = new Blob([JSON.stringify(response.body)]).size
+        return `${(size / 1024).toFixed(2)}KB`
+      }
+      catch {}
+    }
     return ''
   })
 

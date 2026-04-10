@@ -3,6 +3,10 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  --sidebar-width: 320px;
+}
+
+:root {
   --color-primary: rgb(174, 44, 241);
   --color-background: #ffffff;
   --color-code: rgb(142 150 170 / 0.14);

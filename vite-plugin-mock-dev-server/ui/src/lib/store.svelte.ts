@@ -28,8 +28,20 @@ export function setupStore() {
         store.active = parsed.active || ''
       }
     }
+    const onMedia = (event: MediaQueryListEvent) => {
+      if (store.appearance === 'auto') {
+        document.documentElement.classList.remove('dark', 'light')
+        document.documentElement.classList.add(event.matches ? 'dark' : 'light')
+      }
+    }
+    let mediaQuery: MediaQueryList | null = window.matchMedia('(prefers-color-scheme: dark)')
     window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
+    mediaQuery.addEventListener('change', onMedia)
+    return () => {
+      window.removeEventListener('storage', onStorage)
+      mediaQuery?.removeEventListener('change', onMedia)
+      mediaQuery = null
+    }
   })
 
   $effect(() => {
@@ -47,18 +59,11 @@ export function setupStore() {
   $effect(() => {
     document.documentElement.classList.remove('dark', 'light')
     if (store.appearance === 'auto') {
-      const matched = matchMedia('(prefers-color-scheme: dark)').matches
+      const matched = window.matchMedia('(prefers-color-scheme: dark)').matches
       document.documentElement.classList.add(matched ? 'dark' : 'light')
     }
     else {
       document.documentElement.classList.add(store.appearance)
-    }
-  })
-
-  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
-    if (store.appearance === 'auto') {
-      document.documentElement.classList.remove('dark', 'light')
-      document.documentElement.classList.add(event.matches ? 'dark' : 'light')
     }
   })
 }

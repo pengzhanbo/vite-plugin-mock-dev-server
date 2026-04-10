@@ -94,7 +94,7 @@
       request.headers.unshift(item)
     }
     if (request.bodyType === 'binary') {
-      item.value = request.body.binary?.type || contentType[request.bodyType]
+      item.value = request.body.binary?.[0]?.type || contentType[request.bodyType]
     }
     else {
       item.value = contentType[request.bodyType]
@@ -122,8 +122,7 @@
         url = compile(pathname)(keyValueToObj(request.params)) + (search ? `?${search}` : '')
       }
       catch (error) {
-        // eslint-disable-next-line no-alert
-        alert(`Error compiling URL: ${(error as Error).message}`)
+        console.error(error)
         return
       }
     }
@@ -134,7 +133,13 @@
     else if (request.bodyType === 'form-data') {
       body = new FormData()
       request.body['form-data']?.forEach((item) => {
-        (body as FormData).append(item.key, item.value)
+        if (typeof item.value === 'string') {
+          (body as FormData).append(item.key, item.value)
+        }
+        else if (item.value instanceof FileList) {
+          for (const file of item.value)
+            (body as FormData).append(item.key, file)
+        }
       })
     }
     else if (request.bodyType === 'x-www-form-urlencoded') {
@@ -144,7 +149,7 @@
       })
     }
     else if (request.bodyType === 'binary') {
-      body = request.body.binary || ''
+      body = request.body.binary?.[0] || ''
     }
     await ofetch(url, {
       method: request.method,
