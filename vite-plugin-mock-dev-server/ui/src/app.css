@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --color-primary: rgb(174, 44, 241);
+  --color-background: #ffffff;
+  --color-code: rgb(142 150 170 / 0.14);
+
+  --color-divider: #e2e2e3;
+}
+
+.dark {
+  --color-primary: rgb(184, 72, 237);
+  --color-background: #1b1b1f;
+  --color-code: rgb(142 150 170 / 0.14);
+
+  --color-divider: #2e2e32;
+}
+
+@theme inline {
+  --color-primary: var(--color-primary);
+  --color-code: var(--color-code);
+  --color-divider: var(--color-divider);
+  --color-background: var(--color-background);
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+table,
+table tr,
+table th,
+table td {
+  @apply border border-divider transition-colors leading-7;
+}
+
+table th {
+  @apply bg-gray-50 dark:bg-gray-600/10;
+}

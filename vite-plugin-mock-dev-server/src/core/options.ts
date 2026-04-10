@@ -26,6 +26,7 @@ export type ResolvedMockServerPluginOptions = Required<
   build: false | ServerBuildOption
   cors: false | CorsOptions
   record: ResolvedRecordOptions
+  base: string
 }
 
 export function resolvePluginOptions({
@@ -45,6 +46,7 @@ export function resolvePluginOptions({
   priority = {},
   record = false,
   replay,
+  ui = false,
 }: MockServerPluginOptions, config: ResolvedConfig): ResolvedMockServerPluginOptions {
   const cwd = rawCwd || process.cwd()
   const logger = createLogger('vite:mock', isBoolean(log) ? (log ? 'info' : 'error') : log)
@@ -91,7 +93,9 @@ export function resolvePluginOptions({
 
   return {
     enabled: true,
+    base: config.base || '/',
     cwd,
+    ui,
     dir,
     include,
     exclude,

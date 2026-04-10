@@ -5,6 +5,9 @@ import type { ResolvedMockServerPluginOptions } from './options'
 import { Compiler } from '../compiler'
 import { createMockMiddleware } from '../mockHttp'
 import { mockWebSocket } from '../mockWebsocket'
+import { uiMiddleware } from '../ui'
+
+type MiddlewareParams = Parameters<Connect.Server['use']>
 
 /**
  * Initialize mock middlewares
@@ -22,7 +25,7 @@ export function initMockMiddlewares(
   // https://github.com/vitejs/vite/pull/14834
   server: Server | Http2SecureServer | null,
   ws?: WebSocketServer,
-): Connect.NextHandleFunction[] {
+): MiddlewareParams[] {
   /**
    * 加载 mock 文件, 包括监听 mock 文件的依赖文件变化，
    * 并注入 vite `define` / `alias`
@@ -53,7 +56,7 @@ export function initMockMiddlewares(
    */
   mockWebSocket(compiler, server, options)
 
-  const middlewares: Connect.NextHandleFunction[] = []
+  const middlewares: MiddlewareParams[] = []
 
   middlewares.push(
     /**
@@ -64,8 +67,16 @@ export function initMockMiddlewares(
      * 这导致了 vite 默认开启的 cors 对 mock 请求不生效。
      * 所以在 mock 中间件内部整合了 cors 处理来解决这个问题。
      */
-    createMockMiddleware(compiler, options),
+    [createMockMiddleware(compiler, options)] as unknown as MiddlewareParams,
   )
+
+  /**
+   * UI 中间件
+   * 如果配置了 ui 为 true，则会添加 UI 中间件，用于处理 UI 相关的请求。
+   */
+  if (options.ui) {
+    middlewares.push(...uiMiddleware(compiler, options))
+  }
 
   return middlewares
 }

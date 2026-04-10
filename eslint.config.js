@@ -1,4 +1,4 @@
-import config from '@pengzhanbo/eslint-config'
+import config from '@pengzhanbo/eslint-config-svelte'
 
 export default config({
   pnpm: true,

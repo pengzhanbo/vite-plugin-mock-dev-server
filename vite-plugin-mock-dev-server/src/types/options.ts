@@ -249,6 +249,14 @@ export interface MockServerPluginOptions {
   build?: boolean | ServerBuildOption
 
   /**
+   * Whether to enable the visual interface
+   *
+   * 是否启用可视化界面
+   * @default false
+   */
+  ui?: boolean
+
+  /**
    * Priority sorting for path matching rules is valid only for rules containing dynamic parameters.
    * In most cases, the default sorting rules can meet the needs.
    * However, in some cases where custom sorting rules are required, this option can be used.

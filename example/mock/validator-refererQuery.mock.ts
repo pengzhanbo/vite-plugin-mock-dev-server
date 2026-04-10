@@ -12,7 +12,7 @@ export default defineMock([
       refererQuery: { from: 'post-page' },
     },
     body: {
-      list: postList,
+      list: postList.value,
     },
   },
   // localhost/recommend.html?from=recommend-page
@@ -23,7 +23,7 @@ export default defineMock([
       refererQuery: { from: 'recommend-page' },
     },
     body: {
-      list: postList.slice(0, 4),
+      list: postList.value.slice(0, 4),
     },
   },
 ])
