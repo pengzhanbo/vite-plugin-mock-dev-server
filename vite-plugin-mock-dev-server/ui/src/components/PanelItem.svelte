@@ -1,10 +1,10 @@
 <script lang='ts'>
   import type { MockItem } from '../types'
   import { isArray, toArray } from '@pengzhanbo/utils'
+  import { clsx as cn } from 'clsx'
   import { t } from '../lib/i18n.svelte'
   import { store } from '../lib/store.svelte'
-  import { cn } from '../utils/cn'
-  import { ofetch } from '../utils/fetch'
+  import { fetchMockApi } from '../utils/fetch'
   import CodeView from './CodeView.svelte'
   import FieldBlock from './FieldBlock.svelte'
   import FieldInline from './FieldInline.svelte'
@@ -24,7 +24,7 @@
 
   const methods = $derived(toArray(config.method ?? ['GET', 'POST']))
 
-  const launchEditor = () => ofetch('launch-editor', {
+  const launchEditor = () => fetchMockApi('launch-editor', {
     query: {
       file: encodeURIComponent(config.__filepath__),
     },

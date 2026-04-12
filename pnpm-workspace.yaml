@@ -13,11 +13,11 @@ catalogs:
     '@types/co-body': ^6.1.3
     '@types/cors': ^2.8.19
     '@types/debug': ^4.1.13
-    '@types/formidable': ^3.5.0
+    '@types/formidable': ^3.5.1
     '@types/is-core-module': ^2.2.2
     '@types/mime-types': ^3.0.1
     '@types/mockjs': ^1.0.10
-    '@types/node': ^25.5.2
+    '@types/node': ^25.6.0
     '@types/picomatch': ^4.0.3
     '@types/ws': ^8.18.1
     bumpp: ^11.0.1
@@ -25,14 +25,14 @@ catalogs:
     esbuild: ^0.28.0
     eslint: ^10.2.0
     mockjs: ^1.1.0
-    rolldown: ^1.0.0-rc.13
+    rolldown: ^1.0.0-rc.15
     tsdown: ^0.21.7
     typescript: ^6.0.2
-    vite: ^8.0.3
+    vite: ^8.0.8
     vitepress: ^2.0.0-alpha.17
     vitepress-plugin-group-icons: ^1.7.3
     vitepress-plugin-llms: ^1.12.0
-    vitest: ^4.1.2
+    vitest: ^4.1.4
     zstd-codec: ^0.1.5
   prod:
     '@pengzhanbo/utils': ^3.3.1
@@ -51,7 +51,7 @@ catalogs:
     path-to-regexp: ^8.4.2
     picomatch: ^4.0.4
     sirv: ^3.0.2
-    tinyglobby: ^0.2.15
+    tinyglobby: ^0.2.16
     ws: ^8.20.0
   ui:
     '@sveltejs/vite-plugin-svelte': ^7.0.0
@@ -59,8 +59,7 @@ catalogs:
     '@tsconfig/svelte': ^5.0.8
     clsx: ^2.1.1
     ofetch: ^1.5.1
-    svelte: ^5.55.1
-    tailwind-merge: ^3.5.0
+    svelte: ^5.55.3
     tailwindcss: ^4.2.2
 
 onlyBuiltDependencies:

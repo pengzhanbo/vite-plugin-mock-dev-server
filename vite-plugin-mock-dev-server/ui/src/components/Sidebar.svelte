@@ -1,7 +1,7 @@
 <script lang='ts'>
+  import { clsx as cn } from 'clsx'
   import { t } from '../lib/i18n.svelte'
   import { store } from '../lib/store.svelte'
-  import { cn } from '../utils/cn'
 
   const RE_DYNAMIC = /[*:{}]/
   const dynamicList = $derived(store.mockList.filter(([url]) => RE_DYNAMIC.test(url)).sort((a, b) => sort(a[0], b[0])))

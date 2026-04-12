@@ -69,4 +69,8 @@ export interface TestResponse {
   type?: string
   headers?: Record<string, string>
   timestamp?: number
+  error?: {
+    type: 'network' | 'timeout' | 'abort' | 'unknown'
+    message: string
+  }
 }

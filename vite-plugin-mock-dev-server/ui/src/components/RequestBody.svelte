@@ -1,6 +1,6 @@
 <script lang='ts'>
   import type { TestRequest } from '../types'
-  import { cn } from '../utils/cn'
+  import { clsx as cn } from 'clsx'
   import KeyValueEditor from './KeyValueEditor.svelte'
 
   let {

@@ -1,11 +1,11 @@
 <script lang='ts'>
   import type { TestRequest, TestResponse } from '../types'
   import { isPlainObject, simpleClone, toArray } from '@pengzhanbo/utils'
-  import { ofetch } from 'ofetch'
+  import { clsx as cn } from 'clsx'
   import { compile, pathToRegexp } from 'path-to-regexp'
   import { t } from '../lib/i18n.svelte'
   import { store } from '../lib/store.svelte'
-  import { cn } from '../utils/cn'
+  import { fetchMock } from '../utils/fetch'
   import { keyValueToObj, keyValueToUrlSearchParams, objToKeyValue } from '../utils/keyValue'
   import IconRemove from './IconRemove.svelte'
   import KeyValueEditor from './KeyValueEditor.svelte'
@@ -44,6 +44,7 @@
   let request: TestRequest = $state(simpleClone(_default))
 
   let response: TestResponse | null = $state(null)
+  let isLoading = $state(false)
 
   $effect(() => {
     if (!config) {
@@ -101,10 +102,10 @@
     }
   })
 
-  const tabs = $derived([isDynamic ? 'Params' : undefined, 'Query', 'Body', 'Headers'].filter(Boolean)) as string[]
+  const tabs = $derived([isDynamic ? 'Param' : undefined, 'Query', 'Body', 'Header'].filter(Boolean)) as string[]
   let currentTab = $state('')
   $effect(() => {
-    currentTab = isDynamic ? 'Params' : 'Query'
+    currentTab = isDynamic ? 'Param' : 'Query'
   })
 
   function tabClass(tab: string) {
@@ -115,6 +116,8 @@
 
   const onSend = async () => {
     const start = Date.now()
+    isLoading = true
+    response = null
     let url = request.url
     if (isDynamic) {
       try {
@@ -123,6 +126,7 @@
       }
       catch (error) {
         console.error(error)
+        isLoading = false
         return
       }
     }
@@ -151,35 +155,89 @@
     else if (request.bodyType === 'binary') {
       body = request.body.binary?.[0] || ''
     }
-    await ofetch(url, {
-      method: request.method,
-      body: NO_BODY_METHODS.includes(request.method) ? undefined : body,
-      query: keyValueToObj(request.query),
-      headers: keyValueToObj(request.headers),
-      retry: false,
-      onResponse: async (res) => {
-        const result: TestResponse = {}
-        result.status = res.response.status
-        result.statusText = res.response.statusText
-        result.headers = Object.fromEntries(res.response.headers.entries())
-        const type = result.headers['content-type']?.toLowerCase() || ''
-        result.body = res.response._data
+    const referrer = new URL(window.location.href)
+    if (isPlainObject(config?.validator) && config.validator.refererQuery) {
+      Object.entries(config.validator.refererQuery).forEach(([key, value]) => {
+        referrer.searchParams.append(key, value)
+      })
+    }
+
+    try {
+      const res = await fetchMock(url, {
+        method: request.method,
+        body: NO_BODY_METHODS.includes(request.method) ? undefined : body,
+        query: keyValueToObj(request.query),
+        headers: keyValueToObj(request.headers),
+        referrer: referrer.toString(),
+      })
+      const result: TestResponse = {
+        status: res.status,
+        statusText: res.statusText,
+        headers: Object.fromEntries(res.headers.entries()),
+      }
+      if (res.ok) {
+        const type = result.headers?.['content-type']?.toLowerCase() || ''
         if (type.includes('application/json')) {
           result.type = 'json'
+          result.body = await res.json()
         }
         else if (type.includes('text/')) {
           result.type = 'text'
+          result.body = await res.text()
         }
         else if (type.includes('image/') || type.includes('video/') || type.includes('audio/') || type.includes('application/pdf')) {
           result.type = 'blob'
+          result.body = await res.blob()
         }
         else {
           result.type = 'unknown'
+          result.body = await res.text()
         }
-        result.timestamp = Date.now() - start
-        response = result
-      },
-    })
+      }
+      result.timestamp = Date.now() - start
+      response = result
+    }
+    catch (error) {
+      const result: TestResponse = {
+        timestamp: Date.now() - start,
+      }
+      if (error instanceof Error) {
+        if (error.name === 'AbortError' || error.name === 'DOMException') {
+          result.error = {
+            type: 'abort',
+            message: t('networkError'),
+          }
+        }
+        else if (error.message.includes('timeout')) {
+          result.error = {
+            type: 'timeout',
+            message: t('timeout'),
+          }
+        }
+        else if (error.message.includes('network') || error.message.includes('fetch') || error.cause instanceof TypeError) {
+          result.error = {
+            type: 'network',
+            message: t('networkError'),
+          }
+        }
+        else {
+          result.error = {
+            type: 'unknown',
+            message: error.message || t('unknownError'),
+          }
+        }
+      }
+      else {
+        result.error = {
+          type: 'unknown',
+          message: t('unknownError'),
+        }
+      }
+      response = result
+    }
+    finally {
+      isLoading = false
+    }
   }
 </script>
 
@@ -217,13 +275,14 @@
         />
         <button
           type='button'
-          class='h-10 leading-10 px-4 bg-primary text-white rounded-r-md cursor-pointer'
+          class='h-10 leading-10 px-4 bg-primary text-white rounded-r-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
+          disabled={isLoading}
           onclick={() => onSend()}
-        >{t('send')}</button>
+        >{isLoading ? t('loading') : t('send')}</button>
       </div>
 
       <div class='text-gray-400 dark:text-gray-500'>
-        <span>Request URL:</span>
+        <span>{t('requestUrl')}:</span>
         <span class='text-primary'>{requestURL}</span>
       </div>
 
@@ -238,10 +297,10 @@
           >{tab}</button>
         {/each}
       </div>
-      <KeyValueEditor bind:items={request.params} immutable disableKey class={tabClass('Params')} />
+      <KeyValueEditor bind:items={request.params} immutable disableKey class={tabClass('Param')} />
       <KeyValueEditor bind:items={request.query} class={tabClass('Query')} />
       <RequestBody bind:bodyType={request.bodyType} bind:body={request.body} class={tabClass('Body')} />
-      <KeyValueEditor items={request.headers} class={tabClass('Headers')} />
+      <KeyValueEditor items={request.headers} class={tabClass('Header')} />
       {#if response}
         <ResponseView response={response} />
       {/if}

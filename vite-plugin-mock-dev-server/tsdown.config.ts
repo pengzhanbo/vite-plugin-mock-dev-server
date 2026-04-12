@@ -10,7 +10,6 @@ const tsdownConfig: UserConfig = defineConfig({
   },
   shims: true,
   sourcemap: false,
-  minify: true,
   dts: true,
   format: 'esm',
   fixedExtension: false,

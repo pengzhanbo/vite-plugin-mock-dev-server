@@ -47,7 +47,6 @@
     "eslint": "catalog:dev",
     "ofetch": "catalog:ui",
     "svelte": "catalog:ui",
-    "tailwind-merge": "catalog:ui",
     "tailwindcss": "catalog:ui",
     "tsdown": "catalog:dev",
     "typescript": "catalog:dev",

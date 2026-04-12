@@ -1,6 +1,7 @@
 <script lang='ts'>
   import type { KeyValue } from '../types'
-  import { cn } from '../utils/cn'
+  import { clsx as cn } from 'clsx'
+  import { t } from '../lib/i18n.svelte'
   import IconRemove from './IconRemove.svelte'
 
   let { items = $bindable([]), disableKey = false, valueType = false, immutable = false, class: classValue }: {
@@ -20,8 +21,8 @@
   <table class='mb-4 rounded-md min-w-105'>
     <thead>
       <tr>
-        <th>Key</th>
-        <th>Value</th>
+        <th>{t('key')}</th>
+        <th>{t('value')}</th>
         {#if items.length && !immutable}
           <th></th>
         {/if}
@@ -34,7 +35,7 @@
             <input
               type='text'
               class={cn('px-2 py-1 focus:outline-none m-0 border border-transparent transition-colors focus:border-primary', !valueType && 'w-full')}
-              placeholder='Key'
+              placeholder={t('key')}
               bind:value={item.key}
               disabled={disableKey}
             />
@@ -43,8 +44,8 @@
                 class='px-2 py-1 focus:outline-none m-0 border-l border-divider'
                 bind:value={item.type}
               >
-                <option value='text'>Text</option>
-                <option value='file'>File</option>
+                <option value='text'>{t('text')}</option>
+                <option value='file'>{t('file')}</option>
               </select>
             {/if}
           </td>
@@ -81,6 +82,6 @@
     <button
       class='text-gray-500 dark:text-gray-400 border border-divider cursor-pointer px-4 py-1 rounded-md'
       onclick={() => items = [...items, { key: '', value: '', type: 'text' }]}
-    >+</button>
+    >{t('add')}</button>
   {/if}
 </div>

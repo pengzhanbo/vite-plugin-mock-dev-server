@@ -1,6 +1,6 @@
 <script lang='ts' generics="T">
   import type { Snippet } from 'svelte'
-  import { cn } from '../utils/cn'
+  import { clsx as cn } from 'clsx'
 
   const {
     field,
@@ -17,7 +17,7 @@
 
 {#if field}
   <div class={cn('mb-2', notObject ? 'flex items-center gap-2' : '')}>
-    <p class='font-bold'>{label}:</p>
+    <span class='font-bold'>{label}:</span>
     {#if notObject}
       <code class='text-gray-500 dark:text-gray-400'>{field}</code>
     {:else}

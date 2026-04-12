@@ -1,6 +1,6 @@
 <script lang='ts'>
   import type { ClassValue } from 'clsx'
-  import { cn } from '../utils/cn'
+  import { clsx as cn } from 'clsx'
 
   const props: { code: any, class?: ClassValue } = $props()
 </script>

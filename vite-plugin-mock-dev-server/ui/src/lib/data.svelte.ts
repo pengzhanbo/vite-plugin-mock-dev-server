@@ -1,9 +1,9 @@
 import type { MockItem } from '../types'
-import { ofetch } from '../utils/fetch'
+import { fetchMockApi } from '../utils/fetch'
 import { store } from './store.svelte'
 
 export async function updateData() {
-  const res = await ofetch<MockItem[]>('list')
+  const res = await fetchMockApi<MockItem[]>('list')
   const map: Record<string, MockItem[]> = {}
   for (const item of res) {
     const url = decodeURI(new URL(item.url, 'http://a.com/').pathname)
