@@ -18,9 +18,13 @@ export async function fetchMock(
   return fetch(url, init)
 }
 
-export async function fetchMockApi<T>(input: string, init?: MockFetchOptions): Promise<T> {
+export async function fetchMockApi<T>(input: string, { headers, ...init }: MockFetchOptions = {}): Promise<T> {
   const res = await fetchMock(input, {
     baseURL: normalize(`${import.meta.env.BASE_URL}/.vite-mock/api`),
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers,
+    },
     ...init,
   })
   if (!res.ok) {

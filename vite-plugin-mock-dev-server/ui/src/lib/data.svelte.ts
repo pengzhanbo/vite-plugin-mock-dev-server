@@ -6,7 +6,7 @@ export async function updateData() {
   const res = await fetchMockApi<MockItem[]>('list')
   const map: Record<string, MockItem[]> = {}
   for (const item of res) {
-    const url = decodeURI(new URL(item.url, 'http://a.com/').pathname)
+    const url = decodeURI(new URL(item.url, window.location.href).pathname)
     if (!map[url]) {
       map[url] = []
     }
@@ -19,6 +19,34 @@ export async function updateData() {
   }
 }
 
-export function setupData() {
-  updateData()
+let hash = ''
+export async function setupData() {
+  hash = (await fetchMockApi<{ hash: string }>('hot')).hash
+  await updateData()
+
+  setInterval(async () => {
+    const current = (await fetchMockApi<{ hash: string }>('hot')).hash
+    if (current !== hash) {
+      hash = current
+      await updateData()
+    }
+  }, 5000)
+}
+
+export async function modifyData(
+  filepath: string,
+  hash: string,
+  item: Partial<Pick<MockItem, 'enabled' | 'delay'>> & { errorProbability?: number },
+): Promise<void> {
+  const res = await fetchMockApi<{ success: boolean }>('update', {
+    method: 'POST',
+    body: JSON.stringify({
+      filepath,
+      hash,
+      ...item,
+    }),
+  })
+  if (res.success) {
+    await updateData()
+  }
 }

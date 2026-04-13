@@ -23,7 +23,7 @@ import { isObjectSubset } from '../utils'
 export async function parseRequestBody(
   req: Connect.IncomingMessage,
   logger: Logger,
-  formidableOptions: formidable.Options,
+  formidableOptions: formidable.Options = {},
   bodyParserOptions: BodyParserOptions = {},
 ): Promise<any> {
   const method = req.method!.toUpperCase()

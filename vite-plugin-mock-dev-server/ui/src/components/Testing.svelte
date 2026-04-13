@@ -252,7 +252,7 @@
     onkeydown={onkeydown}
   ></div>
   <div
-    class='fixed w-full max-w-[calc(100vw-40px)] xl:max-w-240 max-h-[calc(100vh-128px)] inset-0 z-40 m-auto bg-background rounded-md flex flex-col drop-shadow-2xl'
+    class='fixed w-full max-w-[calc(100vw-40px)] xl:max-w-240 max-h-[calc(100vh-128px)] inset-0 z-40 m-auto bg-background rounded-md flex flex-col shadow-2xl/20'
   >
     <div class='pl-4 pr-2 h-12 flex items-center justify-between border-b border-divider'>
       <h3>{config.url}</h3>

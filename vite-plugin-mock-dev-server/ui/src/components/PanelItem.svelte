@@ -2,12 +2,14 @@
   import type { MockItem } from '../types'
   import { isArray, toArray } from '@pengzhanbo/utils'
   import { clsx as cn } from 'clsx'
+  import { modifyData } from '../lib/data.svelte'
   import { t } from '../lib/i18n.svelte'
   import { store } from '../lib/store.svelte'
   import { fetchMockApi } from '../utils/fetch'
   import CodeView from './CodeView.svelte'
   import FieldBlock from './FieldBlock.svelte'
   import FieldInline from './FieldInline.svelte'
+  import Switch from './Switch.svelte'
 
   const { config }: { config: MockItem } = $props()
 
@@ -31,6 +33,9 @@
   })
 
   const openTesting = () => store.testing = config
+  const toggleEnabled = () => {
+    modifyData(config.__filepath__, config.__hash__, { enabled: !config.enabled })
+  }
 
 </script>
 
@@ -46,6 +51,7 @@
       <button class=' text-primary cursor-pointer' onclick={openTesting}>[{t('test')}]</button>
     {/if}
     <span class={cn({ 'text-green-500': config.enabled, 'text-red-500': !config.enabled })}>{config.enabled ? t('enabled') : t('disabled')}</span>
+    <Switch checked={config.enabled} onclick={toggleEnabled} />
   </div>
 
   {#if config.validator}

@@ -14,7 +14,7 @@
         <span class='text-sm text-white w-5 h-5 leading-5 text-center rounded-full bg-primary'>{current[1].length}</span>
       {/if}
     </h3>
-    <div class='flex flex-col gap-6 my-6'>
+    <div class='flex flex-col gap-8 my-8'>
       {#each current[1] as item}
         <PanelItem config={item} />
       {/each}

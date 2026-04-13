@@ -39,6 +39,7 @@ export interface MockItem {
     body?: any
   }
   __filepath__: string
+  __hash__: string
 }
 
 export interface KeyValue {

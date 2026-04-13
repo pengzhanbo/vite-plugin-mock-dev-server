@@ -34,7 +34,7 @@
   <div class='w-px h-5 border-r border-divider'></div>
 
   <div class='flex items-center justify-center gap-4'>
-    <select bind:value={store.locale} class='text-black dark:text-gray-300'>
+    <select bind:value={store.locale} class='text-black dark:text-gray-300 bg-gray-50 dark:bg-gray-800 border border-divider rounded-md px-2 py-1 cursor-pointer focus:outline-none transition-colors'>
       <option value='zh-CN'>简体中文</option>
       <option value='en-US'>English</option>
     </select>
