@@ -21,7 +21,7 @@ export interface MockItem {
   headers?: Record<string, string> | '<function>'
   status?: number
   statusText?: string
-  delay?: number | number[]
+  delay?: number | [number, number]
   cookies?: Record<string, string | [string, Record<string, any>]> | '<function>'
   type?: 'text' | 'json' | 'buffer' | string
   body?: any | '<function>' | '<buffer>' | '<stream>'

@@ -13,7 +13,7 @@
   let rangeEnd = $state(0)
 
   function enterEdit() {
-    if (delay === undefined) {
+    if (typeof delay === 'undefined') {
       editMode = 'single'
       singleValue = 0
       rangeStart = 0
@@ -32,12 +32,7 @@
   }
 
   function save() {
-    if (editMode === 'single') {
-      delay = singleValue
-    }
-    else {
-      delay = [rangeStart, rangeEnd]
-    }
+    delay = editMode === 'single' ? singleValue : [rangeStart, rangeEnd]
     isEditing = false
   }
 
@@ -110,13 +105,7 @@
     </div>
   {:else}
     <span class='text-gray-600 dark:text-gray-400'>
-      {#if delay === undefined}
-        -
-      {:else if isArray(delay)}
-        {delay[0]} - {delay[1]} ms
-      {:else}
-        {delay} ms
-      {/if}
+      {typeof delay === 'undefined' ? '-' : isArray(delay) ? `${delay[0]} - ${delay[1]} ms` : `${delay} ms`}
     </span>
     <button
       class='text-sm text-primary cursor-pointer'

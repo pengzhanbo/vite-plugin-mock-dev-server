@@ -1,12 +1,13 @@
 <script lang='ts'>
   import type { MockItem } from '../types'
-  import { isArray, toArray } from '@pengzhanbo/utils'
+  import { toArray } from '@pengzhanbo/utils'
   import { clsx as cn } from 'clsx'
   import { modifyData } from '../lib/data.svelte'
   import { t } from '../lib/i18n.svelte'
   import { store } from '../lib/store.svelte'
   import { fetchMockApi } from '../utils/fetch'
   import CodeView from './CodeView.svelte'
+  import DelayEditor from './DelayEditor.svelte'
   import FieldBlock from './FieldBlock.svelte'
   import FieldInline from './FieldInline.svelte'
   import Switch from './Switch.svelte'
@@ -50,7 +51,7 @@
     {#if config.enabled}
       <button class=' text-primary cursor-pointer' onclick={openTesting}>[{t('test')}]</button>
     {/if}
-    <span class={cn({ 'text-green-500': config.enabled, 'text-red-500': !config.enabled })}>{config.enabled ? t('enabled') : t('disabled')}</span>
+    <span class={cn({ 'text-green-500': config.enabled, 'text-gray-400': !config.enabled })}>{config.enabled ? t('enabled') : t('disabled')}</span>
     <Switch checked={config.enabled} onclick={toggleEnabled} />
   </div>
 
@@ -78,13 +79,11 @@
       {/snippet}
     </FieldInline>
 
-    {#if config.delay}
-      <FieldInline field={config.delay} label='Delay'>
-        {#snippet children(delay)}
-          <span>{isArray(delay) ? delay.join(' - ') : delay} ms</span>
-        {/snippet}
-      </FieldInline>
-    {/if}
+    <FieldInline field={config.delay} label='Delay'>
+      {#snippet children(delay)}
+        <DelayEditor delay={delay} />
+      {/snippet}
+    </FieldInline>
 
     <FieldBlock field={config.headers} label='Headers'>
       {#snippet children(headers)}

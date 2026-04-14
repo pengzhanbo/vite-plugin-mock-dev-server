@@ -83,14 +83,8 @@ export function uiMiddleware(
       (async (req, res) => {
         addHeaders(res)
         const body = await parseRequestBody(req, options.logger)
-        const { filepath, hash, errorProbability, ...item } = body
-        compiler.updateItem(filepath, hash, (mock) => {
-          Object.assign(mock, item)
-          const err = (mock as MockHttpItem).error
-          if (err) {
-            err.probability = errorProbability
-          }
-        })
+        const { filepath, hash, ...item } = body
+        compiler.updateItem(filepath, hash, mock => Object.assign(mock, item))
         res.end(JSON.stringify({ success: true }))
       }) as Connect.NextHandleFunction,
     ],

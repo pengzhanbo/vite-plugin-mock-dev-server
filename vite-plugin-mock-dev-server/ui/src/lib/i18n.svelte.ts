@@ -28,6 +28,12 @@ export const messages: Record<LocaleLanguage, Locale> = {
     file: '文件',
     add: '添加',
     download: '下载',
+    save: '保存',
+    cancel: '取消',
+    remove: '移除',
+    'editor.delay.single': '精确',
+    'editor.delay.range': '范围',
+    'editor.delay.set': '设置',
   },
   'en-US': {
     dynamicPattern: 'Dynamic Pattern',
@@ -55,6 +61,12 @@ export const messages: Record<LocaleLanguage, Locale> = {
     file: 'File',
     add: 'Add',
     download: 'Download',
+    save: 'Save',
+    cancel: 'Cancel',
+    remove: 'Remove',
+    'editor.delay.single': 'Single',
+    'editor.delay.range': 'Range',
+    'editor.delay.set': 'Set',
   },
 }
 

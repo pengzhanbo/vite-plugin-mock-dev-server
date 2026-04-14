@@ -36,7 +36,7 @@ export async function setupData() {
 export async function modifyData(
   filepath: string,
   hash: string,
-  item: Partial<Pick<MockItem, 'enabled' | 'delay'>> & { errorProbability?: number },
+  item: Partial<Pick<MockItem, 'enabled' | 'delay'>>,
 ): Promise<void> {
   const res = await fetchMockApi<{ success: boolean }>('update', {
     method: 'POST',
