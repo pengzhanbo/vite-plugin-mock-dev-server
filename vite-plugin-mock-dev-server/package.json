@@ -77,10 +77,12 @@
     "http-status": "catalog:prod",
     "is-core-module": "catalog:prod",
     "json5": "catalog:prod",
+    "launch-editor": "catalog:prod",
     "local-pkg": "catalog:prod",
     "mime-types": "catalog:prod",
     "path-to-regexp": "catalog:prod",
     "picomatch": "catalog:prod",
+    "sirv": "catalog:prod",
     "tinyglobby": "catalog:prod",
     "ws": "catalog:prod"
   },

@@ -6,6 +6,7 @@ import { toArray } from '@pengzhanbo/utils'
 import { generateMockServer } from '../build'
 import { recoverRequest } from '../mockHttp'
 import { Recorder } from '../recorder'
+import { logUIInfo } from '../ui'
 import { initMockMiddlewares } from './init'
 import { resolvePluginOptions, resolveRecordOptions } from './options'
 
@@ -71,6 +72,8 @@ export function serverPlugin(
   options: MockServerPluginOptions,
 ): Plugin {
   let resolvedOptions!: ResolvedMockServerPluginOptions
+  let resolvedConfig!: ResolvedConfig
+
   return {
     name: 'vite-plugin-mock-dev-server',
     enforce: 'pre',
@@ -108,11 +111,15 @@ export function serverPlugin(
       // This is a hack to prevent Vite from nuking useful logs,
       // pending https://github.com/vitejs/vite/issues/9378
       config.logger.warn('')
+      resolvedConfig = config
     },
 
     configureServer({ middlewares, httpServer, ws }) {
       const middlewareList = initMockMiddlewares(resolvedOptions, httpServer, ws)
-      middlewareList.forEach(middleware => middlewares.use(middleware))
+      middlewareList.forEach(middleware => middlewares.use(...middleware))
+      if (resolvedOptions.ui && httpServer) {
+        logUIInfo(httpServer, resolvedConfig.logger)
+      }
     },
 
     configurePreviewServer({ middlewares, httpServer }) {
@@ -121,7 +128,10 @@ export function serverPlugin(
       // feat: use preview server parameter in preview server hook #11647
       // https://github.com/vitejs/vite/pull/11647
       const middlewareList = initMockMiddlewares(resolvedOptions, httpServer)
-      middlewareList.forEach(middleware => middlewares.use(middleware))
+      middlewareList.forEach(middleware => middlewares.use(...middleware))
+      if (resolvedOptions.ui && httpServer) {
+        logUIInfo(httpServer, resolvedConfig.logger)
+      }
     },
   }
 }

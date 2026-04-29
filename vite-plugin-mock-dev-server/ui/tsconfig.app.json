@@ -1,0 +1,17 @@
+{
+  "extends": "@tsconfig/svelte/tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "target": "ES2023",
+    "moduleDetection": "force",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "paths": {
+      "@plugin-types*": ["../src/types/index.ts"]
+    },
+    "types": ["svelte", "vite/client"],
+    "allowJs": true,
+    "checkJs": true
+  },
+  "include": ["./src/**/*.ts", "./src/**/*.svelte"]
+}

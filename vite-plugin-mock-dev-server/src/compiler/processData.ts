@@ -8,7 +8,7 @@ import {
   sortBy,
   toArray,
 } from '@pengzhanbo/utils'
-import { isObjectSubset, urlParse } from '../utils'
+import { genHash, isObjectSubset, urlParse } from '../utils'
 
 export function processRawData(
   raw: MockRawData,
@@ -16,20 +16,20 @@ export function processRawData(
 ): MockOptions | MockHttpItem | MockWebsocketItem {
   let res: MockOptions | MockHttpItem | MockWebsocketItem
   if (isArray(raw)) {
-    res = raw.map(item => ({ ...item, __filepath__ })) as MockOptions
+    res = raw.map(item => extraItem(item, __filepath__))
   }
   else if ('url' in raw) {
-    res = { ...raw, __filepath__ } as unknown as MockHttpItem
+    res = extraItem(raw as MockHttpItem, __filepath__)
   }
   else {
     res = []
     Object.keys((raw)).forEach((key) => {
       const data = raw[key]
       if (isArray(data)) {
-        (res as MockOptions).push(...data.map(item => ({ ...item, __filepath__ })))
+        (res as MockOptions).push(...data.map(item => extraItem(item, __filepath__)))
       }
       else {
-        (res as MockOptions).push({ ...data, __filepath__ } as unknown as MockHttpItem)
+        (res as MockOptions).push(extraItem(data, __filepath__))
       }
     })
   }
@@ -117,4 +117,12 @@ function keysCount(obj?: object): number {
   if (!obj)
     return 0
   return Object.keys(obj).length
+}
+
+function extraItem(item: MockHttpItem | MockWebsocketItem, __filepath__: string) {
+  return {
+    ...item,
+    __hash__: genHash([item, __filepath__]),
+    __filepath__,
+  } as unknown as MockHttpItem
 }

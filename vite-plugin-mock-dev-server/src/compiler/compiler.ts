@@ -5,7 +5,7 @@ import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
 import EventEmitter from 'node:events'
 import path from 'node:path'
 import process from 'node:process'
-import { promiseParallel } from '@pengzhanbo/utils'
+import { promiseParallel, toArray } from '@pengzhanbo/utils'
 import { watch } from 'chokidar'
 import { loadPackageJSONSync } from 'local-pkg'
 import { glob } from 'tinyglobby'
@@ -24,7 +24,7 @@ export class Compiler extends EventEmitter {
    *
    * Mock 模块缓存
    */
-  private moduleCache: Map<string, MockOptions | MockHttpItem | MockWebsocketItem>
+  moduleCache: Map<string, MockOptions | MockHttpItem | MockWebsocketItem>
     = new Map()
 
   /**
@@ -167,6 +167,28 @@ export class Compiler extends EventEmitter {
   close(): void {
     this.mockWatcher?.close()
     this.depsWatcher?.close()
+  }
+
+  /**
+   * Update mock item
+   *
+   * 更新 Mock 模块
+   *
+   * @param filepath - Path to the mock file / Mock 文件路径
+   * @param hash - Hash of the mock item / Mock 模块的哈希值
+   * @param updater - Function to update the mock item / 更新 Mock 模块的函数
+   */
+  updateItem(filepath: string, hash: string, updater: (item: MockHttpItem | MockWebsocketItem) => void): void {
+    const mod = this.moduleCache.get(filepath)
+    const arr = toArray(mod)
+    if (!mod || arr.length === 0)
+      return
+    const item = arr.find(item => (item as any).__hash__ === hash)
+    if (item) {
+      updater(item)
+      this.updateMockData()
+      this.emit('mock:update-end', normalizePath(filepath))
+    }
   }
 
   /**

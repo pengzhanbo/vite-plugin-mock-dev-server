@@ -9,30 +9,30 @@ packages:
   - vite-plugin-mock-dev-server
 catalogs:
   dev:
-    '@pengzhanbo/eslint-config': ^2.2.0
+    '@pengzhanbo/eslint-config-svelte': ^2.3.0
     '@types/co-body': ^6.1.3
     '@types/cors': ^2.8.19
     '@types/debug': ^4.1.13
-    '@types/formidable': ^3.5.0
+    '@types/formidable': ^3.5.1
     '@types/is-core-module': ^2.2.2
     '@types/mime-types': ^3.0.1
     '@types/mockjs': ^1.0.10
-    '@types/node': ^25.5.0
-    '@types/picomatch': ^4.0.2
+    '@types/node': ^25.6.0
+    '@types/picomatch': ^4.0.3
     '@types/ws': ^8.18.1
     bumpp: ^11.0.1
     conventional-changelog-cli: ^5.0.0
-    esbuild: ^0.27.4
-    eslint: ^10.1.0
+    esbuild: ^0.28.0
+    eslint: ^10.2.0
     mockjs: ^1.1.0
-    rolldown: ^1.0.0-rc.12
-    tsdown: ^0.21.5
+    rolldown: ^1.0.0-rc.15
+    tsdown: ^0.21.7
     typescript: ^6.0.2
-    vite: ^8.0.2
+    vite: ^8.0.8
     vitepress: ^2.0.0-alpha.17
-    vitepress-plugin-group-icons: ^1.7.1
+    vitepress-plugin-group-icons: ^1.7.3
     vitepress-plugin-llms: ^1.12.0
-    vitest: ^4.1.1
+    vitest: ^4.1.4
     zstd-codec: ^0.1.5
   prod:
     '@pengzhanbo/utils': ^3.3.1
@@ -45,12 +45,22 @@ catalogs:
     http-status: ^2.1.0
     is-core-module: ^2.16.1
     json5: ^2.2.3
+    launch-editor: ^2.13.2
     local-pkg: ^1.1.2
     mime-types: ^3.0.2
-    path-to-regexp: ^8.3.0
+    path-to-regexp: ^8.4.2
     picomatch: ^4.0.4
-    tinyglobby: ^0.2.15
+    sirv: ^3.0.2
+    tinyglobby: ^0.2.16
     ws: ^8.20.0
+  ui:
+    '@sveltejs/vite-plugin-svelte': ^7.0.0
+    '@tailwindcss/vite': ^4.2.2
+    '@tsconfig/svelte': ^5.0.8
+    clsx: ^2.1.1
+    svelte: ^5.55.3
+    tailwindcss: ^4.2.2
+
 onlyBuiltDependencies:
   - esbuild
   - unrs-resolver

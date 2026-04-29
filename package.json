@@ -11,8 +11,12 @@
     "url": "git+https://github.com/pengzhanbo/vite-plugin-mock-dev-server"
   },
   "scripts": {
-    "build": "pnpm -F vite-plugin-mock-dev-server build",
-    "dev": "pnpm -F example dev",
+    "build": "pnpm build:js && pnpm build:ui",
+    "build:js": "pnpm -F vite-plugin-mock-dev-server build",
+    "build:ui": "vite build vite-plugin-mock-dev-server/ui",
+    "dev": "pnpm build:ui && pnpm dev:js",
+    "dev:js": "pnpm -F example dev",
+    "dev:ui": "vite build vite-plugin-mock-dev-server/ui --watch",
     "example:build": "pnpm -F example build",
     "docs:build": "pnpm -F docs docs:build",
     "docs:dev": "pnpm -F docs docs:dev",
@@ -24,7 +28,10 @@
     "release": "bumpp package.json {vite-plugin-mock-dev-server,docs,example}/package.json --execute=\"pnpm release:changelog\" --commit --all --push --tag"
   },
   "devDependencies": {
-    "@pengzhanbo/eslint-config": "catalog:dev",
+    "@pengzhanbo/eslint-config-svelte": "catalog:dev",
+    "@sveltejs/vite-plugin-svelte": "catalog:ui",
+    "@tailwindcss/vite": "catalog:ui",
+    "@tsconfig/svelte": "catalog:ui",
     "@types/co-body": "catalog:dev",
     "@types/cors": "catalog:dev",
     "@types/debug": "catalog:dev",
@@ -35,8 +42,11 @@
     "@types/picomatch": "catalog:dev",
     "@types/ws": "catalog:dev",
     "bumpp": "catalog:dev",
+    "clsx": "catalog:ui",
     "conventional-changelog-cli": "catalog:dev",
     "eslint": "catalog:dev",
+    "svelte": "catalog:ui",
+    "tailwindcss": "catalog:ui",
     "tsdown": "catalog:dev",
     "typescript": "catalog:dev",
     "vitest": "catalog:dev"

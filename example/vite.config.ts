@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => ({
         uploadDir: path.join(process.cwd(), '/uploads'),
       },
       build: true,
+      ui: true,
     }),
   ],
   // define 注入的变量， 在 mock文件中也可以使用

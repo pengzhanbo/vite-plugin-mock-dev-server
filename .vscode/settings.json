@@ -6,6 +6,7 @@
     "metafile",
     "middlewares",
     "mockjs",
+    "ofetch",
     "outfile",
     "picocolors",
     "picomatch",
@@ -14,10 +15,27 @@
     "rolldown",
     "tsdown"
   ],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "vue",
+    "html",
+    "markdown",
+    "json",
+    "jsonc",
+    "yaml",
+    "svelte"
+  ],
   "typescript.tsdk": "node_modules/typescript/lib",
   "[typescript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
   },
+  "[svelte]": {
+    "editor.defaultFormatter": "svelte.svelte-vscode"
+  },
+  "tailwindCSS.classFunctions": ["cn"],
   "editor.formatOnPaste": true,
   "editor.formatOnSave": false,
   "markdownlint.config": {

@@ -1,6 +1,8 @@
+import { createHash } from 'node:crypto'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { isString } from '@pengzhanbo/utils'
 import Debug from 'debug'
 
 export function getDirname(importMetaUrl: string): string {
@@ -17,4 +19,10 @@ export function slash(p: string): string {
 }
 export function normalizePath(id: string): string {
   return path.posix.normalize(isWindows ? slash(id) : id)
+}
+
+export function genHash(data: any): string {
+  return createHash('md5')
+    .update(isString(data) ? data : JSON.stringify(data))
+    .digest('hex')
 }
