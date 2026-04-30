@@ -196,7 +196,7 @@ export function createMockMiddleware(
 
       if (error) {
         logger.error(
-          `${ansis.red(`mock error at ${pathname}`)}\n${error}\n  at body (${ansis.underline(filepath)})`,
+          `${ansis.red(`mock error at ${pathname}`)}\n  ${error}\n  at body (${ansis.underline.gray(filepath)})`,
           logLevel,
         )
         provideResponseStatus(response, 500)
@@ -214,7 +214,7 @@ export function createMockMiddleware(
         logger.error(
           `${ansis.red(
             `mock error at ${pathname}`,
-          )}\n${error}\n  at response (${ansis.underline(filepath)})`,
+          )}\n  ${error}\n  at response (${ansis.underline.gray(filepath)})`,
           logLevel,
         )
         provideResponseStatus(response, 500)
