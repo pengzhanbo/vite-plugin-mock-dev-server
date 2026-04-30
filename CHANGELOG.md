@@ -1,3 +1,12 @@
+## [2.1.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.1.1...v2.1.2) (2026-04-30)
+
+
+### Bug Fixes
+
+* fix not emit  reload when mock deps updated, close [#147](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/147) ([#149](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/149)) ([b88a1bf](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/b88a1bfe6d51fa94dfb61ace4156baf780a64fe8))
+
+
+
 ## [2.1.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.1.0...v2.1.1) (2026-03-25)
 
 
