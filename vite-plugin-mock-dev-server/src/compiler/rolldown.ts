@@ -85,7 +85,7 @@ export async function transformWithRolldown(
     })
     return {
       code: result.output[0].code,
-      deps: result.output[0].imports.map(normalizePath),
+      deps: result.output[0].moduleIds.filter(id => !id.endsWith(filename)).map(id => normalizePath(path.relative(cwd, id))),
     }
   }
   catch (e) {

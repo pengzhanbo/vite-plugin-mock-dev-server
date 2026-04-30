@@ -9,6 +9,7 @@ export default defineConfig(({ mode }) => ({
       prefix: '^/api-dev/',
       wsPrefix: ['/socket.io'],
       log: 'debug',
+      reload: true,
       formidableOptions: {
         // 配置上传资源存放目录
         uploadDir: path.join(process.cwd(), '/uploads'),
