@@ -122,7 +122,7 @@ export async function transformWithEsbuild(
       entryPoints: [entryPoint],
       outfile: 'out.js',
       write: false,
-      target: ['node18'],
+      target: ['node20'],
       platform: 'node',
       bundle: true,
       metafile: true,
