@@ -37,6 +37,7 @@ import type {
   MockWebsocketItem,
   WebSocketSetupContext,
 } from '../types'
+import { findFirstThen, objectKeys, remove } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import { WebSocketServer } from 'ws'
 import { Cookies } from '../cookies'
@@ -148,9 +149,7 @@ export function mockWebSocket(
   ) => {
     wss.emit('connection', ws, req)
     ws.on('close', () => {
-      const i = connectionList.findIndex(item => item.ws === ws)
-      if (i !== -1)
-        connectionList.splice(i, 1)
+      findFirstThen(connectionList, item => item.ws === ws, v => remove(connectionList, v))
     })
   }
 
@@ -191,10 +190,11 @@ export function mockWebSocket(
     for (const mockUrl of mockUrlList.values()) {
       for (const mock of compiler.mockData[mockUrl]) {
         if (!mock.ws || (mock as any).__filepath__ !== filepath)
-          return
+          continue
         const wssMap = getWssMap(mockUrl)
         for (const [pathname, wss] of wssMap.entries())
           restartWss(wssMap, wss, mock, pathname, filepath)
+        return
       }
     }
   })
@@ -210,7 +210,7 @@ export function mockWebSocket(
     }
 
     const mockData = compiler.mockData
-    const mockUrl = Object.keys(mockData).find(key => isPathMatch(key, pathname))
+    const mockUrl = objectKeys(mockData).find(key => isPathMatch(key, pathname))
     if (!mockUrl)
       return
 

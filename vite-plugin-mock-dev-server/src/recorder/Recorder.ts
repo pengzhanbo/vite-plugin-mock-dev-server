@@ -2,7 +2,7 @@ import type { IncomingMessage } from 'node:http'
 import type { UserConfig } from 'vite'
 import type { RecordedReq, RecordedRequest, ResolvedRecordOptions } from '../types'
 import { Buffer } from 'node:buffer'
-import fs from 'node:fs'
+import fs, { promises as fsp } from 'node:fs'
 import path from 'node:path'
 import { objectKeys } from '@pengzhanbo/utils'
 import { createRecordMatcher, getFilepath, isSameRecord, processRecordReq, processRecordRes, timeFormatter } from './helper'
@@ -113,8 +113,8 @@ export class Recorder {
       return
 
     const dirname = path.join(options.cwd, options.dir)
-    await fs.promises.mkdir(dirname, { recursive: true })
+    await fsp.mkdir(dirname, { recursive: true })
     if (!fs.existsSync(path.join(dirname, '.gitignore')))
-      await fs.promises.writeFile(path.join(dirname, '.gitignore'), '*\n', 'utf-8')
+      await fsp.writeFile(path.join(dirname, '.gitignore'), '*\n', 'utf-8')
   }
 }

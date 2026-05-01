@@ -1,9 +1,14 @@
+const PATTERN_CACHE = new Map<string, RegExp>()
+
 export function doesProxyContextMatchUrl(
   context: string,
   url: string,
 ): boolean {
-  return (
-    (context[0] === '^' && new RegExp(context).test(url))
-    || url.startsWith(context)
-  )
+  if (context[0] === '^') {
+    let pattern = PATTERN_CACHE.get(context)
+    if (!pattern)
+      PATTERN_CACHE.set(context, pattern = new RegExp(context))
+    return pattern.test(url)
+  }
+  return url.startsWith(context)
 }

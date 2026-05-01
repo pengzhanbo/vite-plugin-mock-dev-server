@@ -127,6 +127,7 @@ export class Compiler extends EventEmitter {
       .then(files => files.map(file => () => this.load(normalizePath(path.join(this.options.dir, file)))))
       .then(loaders => promiseParallel(loaders, 64))
       .then(() => this.updateMockData())
+      .catch(console.error)
 
     if (!watch)
       return

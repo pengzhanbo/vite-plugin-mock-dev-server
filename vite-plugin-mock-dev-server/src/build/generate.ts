@@ -79,7 +79,7 @@ export async function generateMockServer(
       }
       options.logger.info(`${ansis.green('✓')} generate mock server in ${ansis.cyan(outputDir)}`)
       for (const { filename, source } of outputList) {
-        fs.mkdirSync(path.dirname(filename), { recursive: true })
+        await fsp.mkdir(path.dirname(filename), { recursive: true })
         await fsp.writeFile(filename, source, 'utf-8')
         const sourceSize = (source.length / 1024).toFixed(2)
         const name = path.relative(outputDir, filename)

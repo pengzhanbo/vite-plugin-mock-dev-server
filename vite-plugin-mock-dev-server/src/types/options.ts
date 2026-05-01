@@ -282,6 +282,7 @@ export interface MockServerPluginOptions {
    * 可简写为：record: true
    *
    * @default false
+   *
    * @example
    * ```ts
    * // Enable with default settings
@@ -292,7 +293,6 @@ export interface MockServerPluginOptions {
    *   enabled: true,
    *   dir: 'mock/.recordings',
    *   overwrite: true,
-   *   sensitiveFields: ['password', 'token']
    * }
    * ```
    */

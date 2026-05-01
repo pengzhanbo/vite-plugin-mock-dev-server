@@ -116,8 +116,6 @@ export function serverPlugin(
     },
 
     configurePreviewServer({ middlewares, httpServer }) {
-      // viteConfig to be made available as configurePreviewServer
-      // pending...
       // feat: use preview server parameter in preview server hook #11647
       // https://github.com/vitejs/vite/pull/11647
       const middlewareList = initMockMiddlewares(resolvedOptions, httpServer)

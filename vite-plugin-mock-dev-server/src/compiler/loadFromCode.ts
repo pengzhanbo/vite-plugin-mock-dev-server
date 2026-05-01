@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto'
-import fs, { promises as fsp } from 'node:fs'
+import { promises as fsp } from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { attempt, attemptAsync } from '@pengzhanbo/utils'
+import { attemptAsync } from '@pengzhanbo/utils'
 
 interface LoadFromCodeOptions {
   filepath: string
@@ -22,7 +22,7 @@ export async function loadFromCode<T = any>({
   const filepathTmp = `${filepath}.${getHash(code)}${ext}`
   await fsp.writeFile(filepathTmp, code, 'utf8')
   const [, mod] = await attemptAsync(importDefault, String(pathToFileURL(filepathTmp)))
-  attempt(fs.unlinkSync, filepathTmp)
+  await attemptAsync(fsp.unlink, filepathTmp)
   return mod
 }
 

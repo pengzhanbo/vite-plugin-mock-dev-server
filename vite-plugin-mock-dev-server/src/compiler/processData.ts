@@ -5,6 +5,7 @@ import {
   isEmptyObject,
   isFunction,
   isPlainObject,
+  objectKeys,
   sortBy,
   toArray,
 } from '@pengzhanbo/utils'
@@ -23,7 +24,7 @@ export function processRawData(
   }
   else {
     res = []
-    Object.keys((raw)).forEach((key) => {
+    objectKeys((raw)).forEach((key) => {
       const data = raw[key]
       if (isArray(data)) {
         (res as MockOptions).push(...data.map(item => ({ ...item, __filepath__ })))
@@ -89,7 +90,7 @@ export function processMockData(
   // 可能 优先级计算 并不符合预期，导致潜在的问题。是否会出现该问题，且该问题出现的频率为几何，
   // 还需要观察，看看是否有必要处理。
   // 如果有插件使用者在实际使用中反馈了该问题，再做处理。
-  Object.keys(mocks).forEach((key) => {
+  objectKeys(mocks).forEach((key) => {
     mocks[key] = sortByValidator(mocks[key])
   })
   return mocks
@@ -116,5 +117,5 @@ export function sortByValidator(mocks: MockOptions): (MockHttpItem | MockWebsock
 function keysCount(obj?: object): number {
   if (!obj)
     return 0
-  return Object.keys(obj).length
+  return objectKeys(obj).length
 }
