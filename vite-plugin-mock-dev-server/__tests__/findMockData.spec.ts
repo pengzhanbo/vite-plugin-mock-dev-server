@@ -4,16 +4,16 @@
  * findMockData 函数测试
  */
 
-import type { MockOptions } from 'vite-plugin-mock-dev-server/src'
+import type { MockOptions } from 'vite-plugin-mock-dev-server'
 import { describe, expect, it, vi } from 'vitest'
-import { fineMockData } from '../src/mockHttp/matcher'
+import { findMockData } from '../src/mockHttp/matcher'
 
 /**
- * Test suite for fineMockData function
+ * Test suite for findMockData function
  *
- * fineMockData 函数测试套件
+ * findMockData 函数测试套件
  */
-describe('fineMockData', () => {
+describe('findMockData', () => {
   const logger = {
     error: vi.fn(),
   } as any
@@ -23,7 +23,7 @@ describe('fineMockData', () => {
       { url: '/api/users', method: 'GET', body: { data: 'users' } },
       { url: '/api/posts', method: 'POST', body: { data: 'posts' } },
     ]
-    const result = fineMockData(mockList, logger, {
+    const result = findMockData(mockList, logger, {
       pathname: '/api/users',
       method: 'GET',
       request: {
@@ -32,6 +32,7 @@ describe('fineMockData', () => {
         body: {},
         headers: {},
       } as any,
+      activeScene: [],
     })
     expect(result).toEqual(mockList[0])
   })
@@ -40,7 +41,7 @@ describe('fineMockData', () => {
     const mockList = [
       { url: '/api/users', body: { data: 'users' } },
     ]
-    const getResult = fineMockData(mockList, logger, {
+    const getResult = findMockData(mockList, logger, {
       pathname: '/api/users',
       method: 'GET',
       request: {
@@ -49,8 +50,9 @@ describe('fineMockData', () => {
         body: {},
         headers: {},
       } as any,
+      activeScene: [],
     })
-    const postResult = fineMockData(mockList, logger, {
+    const postResult = findMockData(mockList, logger, {
       pathname: '/api/users',
       method: 'POST',
       request: {
@@ -59,6 +61,7 @@ describe('fineMockData', () => {
         body: {},
         headers: {},
       } as any,
+      activeScene: [],
     })
     expect(getResult).toEqual(mockList[0])
     expect(postResult).toEqual(mockList[0])
@@ -68,7 +71,7 @@ describe('fineMockData', () => {
     const mockList: MockOptions = [
       { url: '/api/users', method: ['GET', 'PUT'], body: { data: 'users' } },
     ]
-    const getResult = fineMockData(mockList, logger, {
+    const getResult = findMockData(mockList, logger, {
       pathname: '/api/users',
       method: 'GET',
       request: {
@@ -77,8 +80,9 @@ describe('fineMockData', () => {
         body: {},
         headers: {},
       } as any,
+      activeScene: [],
     })
-    const putResult = fineMockData(mockList, logger, {
+    const putResult = findMockData(mockList, logger, {
       pathname: '/api/users',
       method: 'PUT',
       request: {
@@ -87,6 +91,7 @@ describe('fineMockData', () => {
         body: {},
         headers: {},
       } as any,
+      activeScene: [],
     })
     expect(getResult).toEqual(mockList[0])
     expect(putResult).toEqual(mockList[0])
@@ -96,7 +101,7 @@ describe('fineMockData', () => {
     const mockList: MockOptions = [
       { url: '/api/users', method: 'GET', body: { data: 'users' }, enabled: true },
     ]
-    const result = fineMockData(mockList, logger, {
+    const result = findMockData(mockList, logger, {
       pathname: '/api/users',
       method: 'GET',
       request: {
@@ -105,6 +110,7 @@ describe('fineMockData', () => {
         body: {},
         headers: {},
       } as any,
+      activeScene: [],
     })
     expect(result).toEqual(mockList[0])
   })
@@ -118,7 +124,7 @@ describe('fineMockData', () => {
         body: { data: 'user 123' },
       },
     ]
-    const result = fineMockData(mockList, logger, {
+    const result = findMockData(mockList, logger, {
       pathname: '/api/users',
       method: 'GET',
       request: {
@@ -127,6 +133,7 @@ describe('fineMockData', () => {
         body: {},
         headers: {},
       } as any,
+      activeScene: [],
     })
     expect(result).toEqual(mockList[0])
   })
@@ -140,7 +147,7 @@ describe('fineMockData', () => {
         body: { data: 'user 123' },
       },
     ]
-    const result = fineMockData(mockList, logger, {
+    const result = findMockData(mockList, logger, {
       pathname: '/api/users',
       method: 'GET',
       request: {
@@ -149,6 +156,7 @@ describe('fineMockData', () => {
         body: {},
         headers: {},
       } as any,
+      activeScene: [],
     })
     expect(result).toBeUndefined()
   })
@@ -162,7 +170,7 @@ describe('fineMockData', () => {
         body: { data: 'user 123' },
       },
     ]
-    const result = fineMockData(mockList, logger, {
+    const result = findMockData(mockList, logger, {
       pathname: '/api/users',
       method: 'GET',
       request: {
@@ -171,6 +179,7 @@ describe('fineMockData', () => {
         body: {},
         headers: {},
       } as any,
+      activeScene: [],
     })
     expect(result).toEqual(mockList[0])
   })
@@ -179,7 +188,7 @@ describe('fineMockData', () => {
     const mockList = [
       { url: '/api/ws', ws: true, setup: vi.fn() },
     ] as any
-    const result = fineMockData(mockList, logger, {
+    const result = findMockData(mockList, logger, {
       pathname: '/api/ws',
       method: 'GET',
       request: {
@@ -188,12 +197,13 @@ describe('fineMockData', () => {
         body: {},
         headers: {},
       } as any,
+      activeScene: [],
     })
     expect(result).toBeUndefined()
   })
 
   it('should handle empty mock list', () => {
-    const result = fineMockData([], logger, {
+    const result = findMockData([], logger, {
       pathname: '/api/users',
       method: 'GET',
       request: {
@@ -202,6 +212,7 @@ describe('fineMockData', () => {
         body: {},
         headers: {},
       } as any,
+      activeScene: [],
     })
     expect(result).toBeUndefined()
   })
@@ -213,7 +224,7 @@ describe('fineMockData', () => {
       { url: null },
       {} as any,
     ]
-    const result = fineMockData(mockList, logger, {
+    const result = findMockData(mockList, logger, {
       pathname: '/api/users',
       method: 'GET',
       request: {
@@ -222,6 +233,7 @@ describe('fineMockData', () => {
         body: {},
         headers: {},
       } as any,
+      activeScene: [],
     })
     expect(result).toBeUndefined()
   })
