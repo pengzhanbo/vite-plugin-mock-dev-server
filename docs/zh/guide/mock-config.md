@@ -29,6 +29,7 @@ export default defineMock({
 | [delay](../api/mock-http-item#delay) | `number \| [number, number]` | 否 | `0` | 响应延迟 |
 | [cookies](../api/mock-http-item#cookies) | `ResponseCookies \| Function` | 否 | - | 响应 Cookies |
 | [validator](../api/mock-http-item#validator) | `Validator \| Function` | 否 | - | 请求验证器 |
+| [scene](../api/mock-http-item#scene) | `string \| string[]` | 否 | - | 场景标识，用于过滤 |
 | [error](../api/mock-http-item#error) | `MockErrorConfig` | 否 | - | 错误模拟配置 |
 
 ## 多个配置

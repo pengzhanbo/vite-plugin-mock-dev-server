@@ -26,9 +26,6 @@
 <br>
 <br>
 
-> [!IMPORTANT]
-> 插件已适配 `vite@7.x` 以上版本，现在会根据 `vite` 版本自动选择 `esbuild`/`rolldown`编译 mock 文件。
-
 ## 特性
 
 - ⚡️ 轻量，灵活，快速
@@ -257,6 +254,16 @@ export default defineMock({
 - **详情：**
 
   mock资源热更新时，仅更新了数据内容，但是默认不重新刷新页面。当你希望每次修改mock文件都刷新页面时，可以打开此选项。
+
+### activeScene
+
+- **类型：** `string | string[]`
+- **默认值：** `''`
+- **详情：**
+
+  当前激活的场景，用于过滤 mock。
+
+  只有 [`scene`](#optionsscene) 与此有交集的 mock（或未配置 `scene` 的 mock）才会被考虑匹配。可通过 `X-Mock-Scene` 请求头按请求覆盖。
 
 ### cors
 
@@ -489,6 +496,17 @@ export default defineMock({
 
   是否启动对该接口的mock，在多数场景下，我们仅需要对部分接口进行 mock，
   而不是对所有配置了mock的请求进行全量mock，所以是否能够配置是否启用很重要
+
+### options.scene
+
+- **类型：** `string | string[]`
+- **默认值：** `''`
+- **详情：**
+
+  该 mock 的场景标识。
+
+  未配置时，该 mock 为全场景通用，不受 [activeScene](#activescene) 限制。
+  配置后，只有 `scene` 中任意一项与 [activeScene](#activescene) 中任意一项匹配时，该 mock 才会激活。
 
 ### options.method
 
@@ -823,7 +841,8 @@ export default defineConfig({
 
 查看更多示例： [example](/example/)
 
-**示例：** 命中 `/api/test` 请求，并返回一个 数据为空的响应体内容
+<details>
+<summary>命中 <code>/api/test</code> 请求，并返回一个 数据为空的响应体内容</summary>
 
 ```ts
 export default defineMock({
@@ -831,7 +850,9 @@ export default defineMock({
 })
 ```
 
-**示例：** 命中 `/api/test` 请求，并返回一个固定内容数据
+</details>
+<details>
+<summary>命中 <code>/api/test</code> 请求，并返回一个固定内容数据</summary>
 
 ```ts
 export default defineMock({
@@ -847,7 +868,10 @@ export default defineMock({
 })
 ```
 
-**示例：** 限定只允许 `GET` 请求
+</details>
+
+<details>
+<summary>限定只允许 <code>GET</code> 请求</summary>
 
 ```ts
 export default defineMock({
@@ -856,7 +880,10 @@ export default defineMock({
 })
 ```
 
-**示例：**  在返回的响应头中，添加自定义 header 和 cookie
+</details>
+
+<details>
+<summary>在返回的响应头中，添加自定义 header 和 cookie</summary>
 
 ```ts
 export default defineMock({
@@ -878,7 +905,10 @@ export default defineMock({
 })
 ```
 
-**示例：**  定义多个相同url请求mock，并使用验证器匹配生效规则
+</details>
+
+<details>
+<summary>定义多个相同url请求mock，并使用验证器匹配生效规则</summary>
 
 ```ts
 export default defineMock([
@@ -912,7 +942,10 @@ export default defineMock([
 ])
 ```
 
-**示例：**  延迟接口响应：
+</details>
+
+<details>
+<summary>延迟接口响应</summary>
 
 ```ts
 export default defineMock({
@@ -921,7 +954,10 @@ export default defineMock({
 })
 ```
 
-**示例：**  使接口请求失败
+</details>
+
+<details>
+<summary>使接口请求失败</summary>
 
 ```ts
 export default defineMock({
@@ -931,7 +967,10 @@ export default defineMock({
 })
 ```
 
-**示例：** 动态路由匹配
+</details>
+
+<details>
+<summary>动态路由匹配</summary>
 
 ```ts
 export default defineMock({
@@ -944,7 +983,10 @@ export default defineMock({
 
 路由中的 `userId`将会解析到 `request.params` 对象中.
 
-**示例：** 使用 buffer 响应数据
+</details>
+
+<details>
+<summary>使用 buffer 响应数据</summary>
 
 ```ts
 import { Buffer } from 'node:buffer'
@@ -968,7 +1010,10 @@ export default defineMock({
 })
 ```
 
-**示例：** 响应文件类型
+</details>
+
+<details>
+<summary>响应文件类型</summary>
 
 模拟文件下载，传入文件读取流
 
@@ -987,7 +1032,10 @@ export default defineMock({
 <a href="/api/download" download="my-app.dmg">下载文件</a>
 ```
 
-**示例：** 使用 `mockjs` 生成响应数据:
+</details>
+
+<details>
+<summary>使用 <code>mockjs</code> 生成响应数据</summary>
 
 ```ts
 import Mock from 'mockjs'
@@ -1004,7 +1052,10 @@ export default defineMock({
 
 请先安装 `mockjs`
 
-**示例：** 使用 `response` 自定义响应
+</details>
+
+<details>
+<summary>使用 <code>response</code> 自定义响应</summary>
 
 ```ts
 export default defineMock({
@@ -1024,7 +1075,10 @@ export default defineMock({
 })
 ```
 
-**示例：** 使用 json / json5
+</details>
+
+<details>
+<summary>使用 json / json5</summary>
 
 ```json
 {
@@ -1035,7 +1089,10 @@ export default defineMock({
 }
 ```
 
-**示例：** multipart, 文件上传.
+</details>
+
+<details>
+<summary>multipart, 文件上传</summary>
 
 通过 [`formidable`](https://www.npmjs.com/package/formidable#readme) 支持。
 
@@ -1071,7 +1128,10 @@ export default defineMock({
 })
 ```
 
-**示例：** Graphql
+</details>
+
+<details>
+<summary>Graphql</summary>
 
 ```ts
 import { buildSchema, graphql } from 'graphql'
@@ -1101,7 +1161,10 @@ fetch('/api/graphql', {
 })
 ```
 
-**示例：** WebSocket Mock
+</details>
+
+<details>
+<summary>WebSocket Mock</summary>
 
 ```ts
 // ws.mock.ts
@@ -1146,7 +1209,10 @@ ws.addEventListener('message', (raw) => {
 })
 ```
 
-**示例：** EventSource Mock
+</details>
+
+<details>
+<summary>EventSource Mock</summary>
 
 ```ts
 // sse.mock.ts
@@ -1179,6 +1245,8 @@ es.addEventListener('count', (e) => {
   console.log(e.data)
 })
 ```
+
+</details>
 
 ## 独立部署的小型mock服务
 

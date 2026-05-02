@@ -124,6 +124,7 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: '请求生命周期', link: 'request-lifecycle' },
         { text: '路径匹配规则', link: 'path-matching' },
+        { text: '场景模拟', link: 'scene' },
         { text: '请求录制与回放', link: 'record-and-replay' },
         { text: '目录文件管理', link: 'file-management' },
       ],
@@ -184,6 +185,7 @@ function sidebarExamples(): DefaultTheme.SidebarItem[] {
     { text: '请求错误模拟', link: 'error-simulation' },
     { text: 'CRUD 完整示例', link: 'crud' },
     { text: '认证授权示例', link: 'auth' },
+    { text: '场景模拟', link: 'scene' },
     { text: '真实场景示例', link: 'real-world' },
   ]
 }

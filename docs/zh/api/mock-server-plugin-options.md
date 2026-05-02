@@ -23,6 +23,7 @@ interface MockServerPluginOptions {
   record?: boolean | RecordOption
   replay?: boolean
   priority?: MockMatchPriority
+  activeScene?: string | string[]
 }
 ```
 
@@ -244,6 +245,25 @@ mockDevServerPlugin({
     serverPort: 3000,
     dist: 'mock-server'
   }
+})
+```
+
+### activeScene
+
+- **类型**: `string | string[]`
+- **默认值**: `[]`
+- **描述**: 当前激活的场景，用于过滤 mock
+
+只有 `scene` 与此有交集的 mock（或未配置 `scene` 的 mock）才会被考虑匹配。
+可通过 `X-Mock-Scene` 请求头按请求覆盖。
+
+```ts
+mockDevServerPlugin({
+  activeScene: 'test' // 仅激活 scene 为 'test' 的 mock
+})
+
+mockDevServerPlugin({
+  activeScene: ['dev', 'test'] // 激活 scene 为 'dev' 或 'test' 的 mock
 })
 ```
 

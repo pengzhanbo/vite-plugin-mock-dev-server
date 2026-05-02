@@ -1,116 +1,121 @@
 import { get, post } from './request'
 
-async function fileExtension() {
-  await get('/api/json')
-  await get('/api/json5')
-  await get('/api/es-module-js')
-  await get('/api/typescript')
-  await get('/api/common-js')
-  await get('/api/javascript')
+function fileExtension() {
+  get('/api/json')
+  get('/api/json5')
+  get('/api/es-module-js')
+  get('/api/typescript')
+  get('/api/common-js')
+  get('/api/javascript')
 }
 
-async function allowMethod() {
-  await get('/api/only-get-method')
-  await post('/api/only-get-method')
-  await get('/api/allow-get-and-post')
-  await post('/api/allow-get-and-post')
+function allowMethod() {
+  get('/api/only-get-method')
+  post('/api/only-get-method')
+  get('/api/allow-get-and-post')
+  post('/api/allow-get-and-post')
 }
 
-async function apiDev() {
-  await get('/api-dev/list/get')
+function apiDev() {
+  get('/api-dev/list/get')
 }
 
-async function buffer() {
-  await post('/api/buffer/buffer-type')
-  await post('/api/buffer/buffer-body')
+function buffer() {
+  post('/api/buffer/buffer-type')
+  post('/api/buffer/buffer-body')
 }
 
-async function cookie() {
-  await post('/api/login')
-  await post('/api/check-login')
-  await post('/api/logout')
-  await post('/api/check-login')
+function cookie() {
+  post('/api/login')
+  post('/api/check-login')
+  post('/api/logout')
+  post('/api/check-login')
 }
 
-async function delay() {
-  await get('/api/delay')
-  await get('/api/delay-and-fail')
+function delay() {
+  get('/api/delay')
+  get('/api/delay-and-fail')
 }
 
-async function customHeader() {
-  await get('/api/custom-header')
-  await get('/api/custom-header-fn')
+function customHeader() {
+  get('/api/custom-header')
+  get('/api/custom-header-fn')
 }
 
-async function customResponse() {
-  await get('/api/custom-response?a=1&b=2')
-  await post('/api/custom-response-skip?skip=1', { skip: 1, aa: 222 })
-  await get('/api/custom-response-skip')
+function customResponse() {
+  get('/api/custom-response?a=1&b=2')
+  post('/api/custom-response-skip?skip=1', { skip: 1, aa: 222 })
+  get('/api/custom-response-skip')
 }
 
-async function dynamicMatchUrl() {
-  await get('/api/author/10001')
-  await get('/api/author/10002')
-  await get('/api/author/10003')
+function dynamicMatchUrl() {
+  get('/api/author/10001')
+  get('/api/author/10002')
+  get('/api/author/10003')
 }
 
-async function fail() {
-  await get('/api/fail')
+function fail() {
+  get('/api/fail')
 }
 
-async function mockjs() {
-  await get('/api/mockjs')
+function mockjs() {
+  get('/api/mockjs')
 }
 
-async function otherMock() {
-  await post('/api/post/list', { page: 1 })
-  await post('/api/post/delete/1')
-  await post('/api/post/list', { page: 1 })
-  await get('/api/user/list')
-  await get('/api/user/mark2022')
+function otherMock() {
+  post('/api/post/list', { page: 1 })
+  post('/api/post/delete/1')
+  post('/api/post/list', { page: 1 })
+  get('/api/user/list')
+  get('/api/user/mark2022')
 }
 
-async function validatorBody() {
-  await post('/api/post-update', { shouldUpdate: true })
-  await post('/api/post-update', { shouldUpdate: false })
+function validatorBody() {
+  post('/api/post-update', { shouldUpdate: true })
+  post('/api/post-update', { shouldUpdate: false })
 }
 
-async function validatorParams() {
-  await get('/api/post/1001')
-  await get('/api/post/1002')
-  await get('/api/post/1003')
+function validatorParams() {
+  get('/api/post/1001')
+  get('/api/post/1002')
+  get('/api/post/1003')
 }
 
-async function validatorQuery() {
-  await get('/api/post?id=1000')
-  await get('/api/post?id=1001&other=1')
-  await get('/api/post?id=1002')
-  await get('/api/post?id=1003&other=1')
+function validatorQuery() {
+  get('/api/post?id=1000')
+  get('/api/post?id=1001&other=1')
+  get('/api/post?id=1002')
+  get('/api/post?id=1003&other=1')
 }
 
-async function validatorRequest() {
-  await get('/api/validator-check-cookie')
-  await post('/api/validator-body-include', { ids: [] })
+function validatorRequest() {
+  get('/api/validator-check-cookie')
+  post('/api/validator-body-include', { ids: [] })
 }
 
-async function bootstrap() {
-  await fileExtension()
-  await allowMethod()
-  await apiDev()
-  await buffer()
-  await cookie()
-  await customHeader()
-  await customResponse()
-  await dynamicMatchUrl()
-  await fail()
-  await mockjs()
-  await validatorBody()
-  await validatorParams()
-  await validatorQuery()
-  await validatorRequest()
+function scene() {
+  get('/api/scene')
+}
 
-  await otherMock()
-  await delay()
+function httpMock() {
+  scene()
+  fileExtension()
+  allowMethod()
+  apiDev()
+  buffer()
+  cookie()
+  customHeader()
+  customResponse()
+  dynamicMatchUrl()
+  fail()
+  mockjs()
+  validatorBody()
+  validatorParams()
+  validatorQuery()
+  validatorRequest()
+
+  otherMock()
+  delay()
 }
 
 function webSocketMock() {
@@ -142,6 +147,6 @@ function eventSourceMock() {
   })
 }
 
-bootstrap()
+httpMock()
 webSocketMock()
 eventSourceMock()

@@ -275,6 +275,18 @@ export interface MockServerPluginOptions {
   priority?: MockMatchPriority
 
   /**
+   * Active scenario(s) for filtering mocks.
+   * Only mocks whose `scene` intersects with this value (or have no `scene` configured)
+   * will be considered for matching.
+   * Can be overridden per-request via the `X-Mock-Scene` header.
+   *
+   * 当前激活的场景，用于过滤 mock。
+   * 只有 `scene` 与此有交集的 mock（或未配置 `scene` 的 mock）才会被考虑匹配。
+   * 可通过 `X-Mock-Scene` 请求头按请求覆盖。
+   */
+  activeScene?: string | string[]
+
+  /**
    * Record and replay configuration
    * Can be abbreviated as: record: true
    *

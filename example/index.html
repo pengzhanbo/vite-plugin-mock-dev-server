@@ -6,13 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mock Server Example</title>
     <style>
-    .app { max-width: 1200px; margin: 0 auto; padding-bottom: 48px; }
-    .container * { margin: 0; padding: 0;}
-    .container { margin: 10px 20px; padding: 10px 20px; border-bottom: solid 1px #ccc; color: #333; }
-    .container p { line-height: 1.7; }
-    .container p b { padding-right: 20px; }
-    .container pre { margin-left: 100px; padding:10px 0 10px 20px; border-left: solid 1px #ccc; }
-    .container pre, .container code {font-size: 1.1em; line-height: 1.7;}
+    .app { max-width: 1024px; margin: 0 auto; padding-bottom: 48px; }
+    .container * { margin: 0; padding: 0; box-sizing: border-box;}
+    .container { margin: 10px 20px; padding: 10px 0; border-bottom: solid 1px #ccc; color: #333; }
+    .container p { line-height: 1.7; display: flex; align-items: center; justify-content: flex-start; gap: 20px; }
+    .container .url { flex: 1; font-weight: bold; }
+    .container .method { display: inline-block; background-color: #0099CC; color: #fff; padding: 4px 6px; border-radius: 4px; line-height: 1; }
+    .container .status { display: inline-block; background-color: #e1e1e1; color: #666; padding: 4px 6px; border-radius: 4px; line-height: 1; }
+    .container pre { padding:12px; margin: 16px auto; background-color: #f1f2f3; border-radius: 8px; width: 100%; max-height: 400px; overflow: auto; }
+    .container pre, .container code {font-size: 1.1em; line-height: 1.6;}
   </style>
   </head>
   <body>

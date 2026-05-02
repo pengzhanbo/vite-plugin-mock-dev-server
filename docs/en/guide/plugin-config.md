@@ -39,6 +39,7 @@ export default defineConfig({
 | [build](../api/mock-server-plugin-options#build) | `boolean \| ServerBuildOption` | `false` | Build standalone service |
 | [record](../api/mock-server-plugin-options#record) | `boolean \| RecordOption` | `false` | Request recording configuration |
 | [replay](../api/mock-server-plugin-options#replay) | `boolean \| ReplayOption` | `false` | Request playback configuration |
+| [activeScene](../api/mock-server-plugin-options#activescene) | `string \| string[]` | `[]` | Active scene for filtering mocks |
 | [priority](../api/mock-server-plugin-options#priority) | `MockMatchPriority` | - | Matching priority configuration |
 
 ## Detailed Documentation

@@ -15,7 +15,7 @@ import { viteDefine } from './define'
 import { createLogger } from './logger'
 
 export type ResolvedMockServerPluginOptions = Required<
-  Omit<MockServerPluginOptions, 'build' | 'cors' | 'wsPrefix' | 'prefix' | 'record'>
+  Omit<MockServerPluginOptions, 'build' | 'cors' | 'wsPrefix' | 'prefix' | 'record' | 'activeScene'>
 > & {
   context: string
   logger: Logger
@@ -23,6 +23,7 @@ export type ResolvedMockServerPluginOptions = Required<
   define: Record<string, any>
   proxies: string[]
   wsProxies: string[]
+  activeScene: string[]
   build: false | ServerBuildOption
   cors: false | CorsOptions
   record: ResolvedRecordOptions
@@ -43,6 +44,7 @@ export function resolvePluginOptions({
   cookiesOptions = {},
   bodyParserOptions = {},
   priority = {},
+  activeScene = [],
   record = false,
   replay,
 }: MockServerPluginOptions, config: ResolvedConfig): ResolvedMockServerPluginOptions {
@@ -114,6 +116,7 @@ export function resolvePluginOptions({
       : false,
     proxies,
     wsProxies,
+    activeScene: toArray(activeScene),
     logger,
     alias,
     define: viteDefine(config),

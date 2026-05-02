@@ -97,20 +97,23 @@ export function processMockData(
 }
 
 export function sortByValidator(mocks: MockOptions): (MockHttpItem | MockWebsocketItem)[] {
+  // 优先级排序，数字越小，优先级越高，越优先被匹配
   return sortBy(mocks, (item) => {
     if (item.ws === true)
       return 0
+    const baseWeight = toArray(item.scene).length > 0 ? 0 : 1
+
     const { validator } = item
     // fix: #28
     if (!validator || isEmptyObject(validator))
-      return 2
+      return 2 + baseWeight
     if (isFunction(validator))
-      return 0
+      return 0 + baseWeight
     const count = Object.keys(validator).reduce(
       (prev, key) => prev + keysCount(validator[key as keyof typeof validator]),
       0,
     )
-    return 1 / count
+    return (1 / count) + baseWeight
   })
 }
 

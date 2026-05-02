@@ -37,12 +37,12 @@ import type {
   MockWebsocketItem,
   WebSocketSetupContext,
 } from '../types'
-import { findFirstThen, objectKeys, remove } from '@pengzhanbo/utils'
+import { findFirstThen, objectKeys, remove, toArray } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import { WebSocketServer } from 'ws'
 import { Cookies } from '../cookies'
 import { parseRequestParams } from '../mockHttp'
-import { doesProxyContextMatchUrl, isPathMatch, urlParse } from '../utils'
+import { doesProxyContextMatchUrl, isPathMatch, matchScene, urlParse } from '../utils'
 
 type PoolMap = Map<string, WSSMap>
 type WSSMap = Map<string, WebSocketServer>
@@ -70,6 +70,7 @@ interface WSSContext {
  * @param options.wsProxies - WebSocket proxy prefixes / WebSocket 代理前缀
  * @param options.cookiesOptions - Cookies options / Cookies 配置项
  * @param options.logger - Logger instance / 日志实例
+ * @param options.activeScene - Active scene / 当前场景
  */
 export function mockWebSocket(
   compiler: Compiler,
@@ -78,6 +79,7 @@ export function mockWebSocket(
     wsProxies: proxies,
     cookiesOptions,
     logger,
+    activeScene,
   }: ResolvedMockServerPluginOptions,
 ): void {
   // Hot update file mapping
@@ -199,6 +201,7 @@ export function mockWebSocket(
     }
   })
 
+  const effectActiveScene = toArray(activeScene)
   server?.on('upgrade', (req, socket, head) => {
     const { pathname, query } = urlParse(req.url!)
     if (
@@ -215,7 +218,7 @@ export function mockWebSocket(
       return
 
     const mock = mockData[mockUrl].find((mock) => {
-      return mock.url && mock.ws && isPathMatch(mock.url, pathname)
+      return mock.url && mock.ws && matchScene(effectActiveScene, mock.scene) && isPathMatch(mock.url, pathname)
     }) as MockWebsocketItem
 
     if (!mock)

@@ -8,13 +8,13 @@ import type {
   MockRequest,
   MockResponse,
 } from '../types'
-import { attemptAsync, isFunction, timestamp } from '@pengzhanbo/utils'
+import { attemptAsync, isFunction, timestamp, toArray } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import { Cookies } from '../cookies'
 import { recordRequestWithRawReq, replayRecordedRequest } from '../recorder'
 import { doesProxyContextMatchUrl, urlParse } from '../utils'
 import { createCors } from './cors'
-import { fineMockData } from './matcher'
+import { findMockData } from './matcher'
 import { matchingWeight } from './matchingWeight'
 import {
   parseRequestBody,
@@ -30,7 +30,7 @@ import {
   sendResponseData,
 } from './response'
 
-export interface CreateMockMiddlewareOptions extends Pick<ResolvedMockServerPluginOptions, 'formidableOptions' | 'cookiesOptions' | 'bodyParserOptions' | 'priority' | 'record' | 'replay'> {
+export interface CreateMockMiddlewareOptions extends Pick<ResolvedMockServerPluginOptions, 'formidableOptions' | 'cookiesOptions' | 'bodyParserOptions' | 'priority' | 'record' | 'replay' | 'activeScene'> {
   proxies: string[]
   logger: Logger
   cors: false | CorsOptions
@@ -52,6 +52,7 @@ export interface CreateMockMiddlewareOptions extends Pick<ResolvedMockServerPlug
  * @param options.cors - CORS options / CORS 配置项
  * @param options.record - Record options / 录制配置项
  * @param options.replay - Replay options / 回放配置项
+ * @param options.activeScene - Active scene / 活动场景
  *
  * @returns Connect middleware function / Connect 中间件函数
  */
@@ -67,6 +68,7 @@ export function createMockMiddleware(
     cors: corsOptions,
     record,
     replay,
+    activeScene,
   }: CreateMockMiddlewareOptions,
 ): Connect.NextHandleFunction {
   const cors = createCors(corsOptions)
@@ -112,9 +114,16 @@ export function createMockMiddleware(
       getCookie: cookies.get.bind(cookies),
     }
 
+    // Resolve effective active scenario: X-Mock-Scene header overrides config
+    // X-Mock-Scene 头部覆盖配置
+    const headerScene = req.headers['x-mock-scene']
+    const effectiveScene: string[] = headerScene
+      ? toArray(headerScene).map(item => item.split(',').map(s => s.trim())).flat().filter(Boolean)
+      : activeScene
+
     // 查找匹配的mock，仅找出首个匹配的配置项后立即结束
     for (const mockUrl of mockUrls) {
-      mock = fineMockData(mockData[mockUrl], logger, { pathname, method, request: extraReq })
+      mock = findMockData(mockData[mockUrl], logger, { pathname, method, request: extraReq, activeScene: effectiveScene })
       if (mock) {
         _mockUrl = mockUrl
         break

@@ -3,7 +3,7 @@
 <br>
 <br>
 <p align="center">
- <b>Vite Plugin for API mock dev server.</b>
+<b>Vite Plugin for API mock dev server.</b>
 </p>
 
 <br>
@@ -24,9 +24,6 @@
 </p>
 <br>
 <br>
-
-> [!IMPORTANT]
-> The plugin has been adapted for `vite@7.x` and above versions. It will now automatically choose `esbuild`/`rolldown` to compile mock files based on the `vite` version.
 
 ## Features
 
@@ -258,6 +255,16 @@ export default defineMock({
 
   When the mock resource is hot updated, only the data content is updated, but the page is not refreshed by default. If you want to refresh the page every time you modify the mock file, you can open this option.
 
+### activeScene
+
+- **Type:** `string | string[]`
+- **Default:** `''`
+- **Details:**
+
+  Active scenario(s) for filtering mocks.
+
+  Only mocks whose [`scene`](#optionsscene) intersects with this value (or have no `scene` configured) will be considered for matching. Can be overridden per-request via the `X-Mock-Scene` header.
+
 ### cors
 
 - **Type:** `boolean | CorsOptions`
@@ -486,6 +493,16 @@ export default defineMock({
 
   Whether to enable mock for this interface. In most scenarios, we only need to mock some interfaces instead of all requests that have been configured with mock.
   Therefore, it is important to be able to configure whether to enable it or not.
+
+### options.scene
+
+- **Type:** `string | string[]`
+- **Default:** `''`
+- **Details:**
+
+  Scenario identifier for this mock.
+
+  When not configured, the mock is universal and always matches regardless of active scenario.When configured, the mock only matches when at least one of its scenarios matches one of the active scenarios.
 
 ### options.method
 
@@ -826,7 +843,8 @@ export default defineConfig({
 
 See more examples： [example](/example/)
 
-**exp:** Match `/api/test`, And returns a response body content with empty data
+<details>
+<summary>Match <code>/api/test</code>, And returns a response body content with empty data</summary>
 
 ``` ts
 export default defineMock({
@@ -834,7 +852,10 @@ export default defineMock({
 })
 ```
 
-**exp:** Match `/api/test` , And returns a static content data
+</details>
+
+<details>
+<summary>Match <code>/api/test</code> , And returns a static content data</summary>
 
 ``` ts
 export default defineMock({
@@ -843,7 +864,10 @@ export default defineMock({
 })
 ```
 
-**exp:** Only Support `GET` Method
+</details>
+
+<details>
+<summary>Only Support <code>GET</code> Method</summary>
 
 ``` ts
 export default defineMock({
@@ -852,7 +876,10 @@ export default defineMock({
 })
 ```
 
-**exp:** In the response header, add a custom header and cookie
+</details>
+
+<details>
+<summary>In the response header, add a custom header and cookie</summary>
 
 ``` ts
 export default defineMock({
@@ -874,7 +901,10 @@ export default defineMock({
 })
 ```
 
-**exp:** Define multiple mock requests for the same URL and match valid rules with validators
+</details>
+
+<details>
+<summary>Define multiple mock requests for the same URL and match valid rules with validators</summary>
 
 ``` ts
 export default defineMock([
@@ -909,7 +939,10 @@ export default defineMock([
 ])
 ```
 
-**exp:** Response Delay
+</details>
+
+<details>
+<summary>Response Delay</summary>
 
 ``` ts
 export default defineMock({
@@ -918,7 +951,10 @@ export default defineMock({
 })
 ```
 
-**exp:** The interface request failed
+</details>
+
+<details>
+<summary>The interface request failed</summary>
 
 ``` ts
 export default defineMock({
@@ -928,7 +964,10 @@ export default defineMock({
 })
 ```
 
-**exp:** Dynamic route matching
+</details>
+
+<details>
+<summary>Dynamic route matching</summary>
 
 ``` ts
 export default defineMock({
@@ -941,7 +980,10 @@ export default defineMock({
 
 The `userId` in the route will be resolved into the `request.params` object.
 
-**exp:** Use the buffer to respond data
+</details>
+
+<details>
+<summary>Use the buffer to respond data</summary>
 
 ```ts
 import { Buffer } from 'node:buffer'
@@ -966,7 +1008,10 @@ export default defineMock({
 })
 ```
 
-**exp:** Response file type
+</details>
+
+<details>
+<summary>Response file type</summary>
 
 Simulate file download, and pass in the file reading stream.
 
@@ -985,7 +1030,10 @@ export default defineMock({
 <a href="/api/download" download="my-app.dmg">Download File</a>
 ```
 
-**exp:** Use `mockjs`:
+</details>
+
+<details>
+<summary>Use <code>mockjs</code></summary>
 
 ``` ts
 import Mock from 'mockjs'
@@ -1002,7 +1050,11 @@ export default defineMock({
 
 You need install `mockjs`
 
-**exp:** Use `response` to customize the response
+</details>
+
+<details>
+
+<summary>Use <code>response</code> to customize the response</summary>
 
 ``` ts
 export default defineMock({
@@ -1022,7 +1074,10 @@ export default defineMock({
 })
 ```
 
-**exp:** Use json / json5
+</details>
+
+<details>
+<summary>Use json / json5</summary>
 
 ``` json
 {
@@ -1033,7 +1088,10 @@ export default defineMock({
 }
 ```
 
-**exp:** multipart, upload files.
+</details>
+
+<details>
+<summary>multipart, upload files.</summary>
 
 use [`formidable`](https://www.npmjs.com/package/formidable#readme) to support.
 
@@ -1069,7 +1127,10 @@ export default defineMock({
 })
 ```
 
-**exp:** Graphql
+</details>
+
+<details>
+<summary>Graphql</summary>
 
 ``` ts
 import { buildSchema, graphql } from 'graphql'
@@ -1099,7 +1160,10 @@ fetch('/api/graphql', {
 })
 ```
 
-**exp:** WebSocket Mock
+</details>
+
+<details>
+<summary>WebSocket Mock</summary>
 
 ``` ts
 // ws.mock.ts
@@ -1144,7 +1208,10 @@ ws.addEventListener('message', (raw) => {
 })
 ```
 
-**exp：** EventSource Mock
+</details>
+
+<details>
+<summary>EventSource Mock</summary>
 
 ```ts
 // sse.mock.ts
@@ -1177,6 +1244,8 @@ es.addEventListener('count', (e) => {
   console.log(e.data)
 })
 ```
+
+</details>
 
 ## Mock Services
 

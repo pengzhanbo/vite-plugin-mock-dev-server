@@ -29,6 +29,7 @@ export default defineMock({
 | [delay](../api/mock-http-item#delay) | `number \| [number, number]` | No | `0` | Response delay |
 | [cookies](../api/mock-http-item#cookies) | `ResponseCookies \| Function` | No | - | Response Cookies |
 | [validator](../api/mock-http-item#validator) | `Validator \| Function` | No | - | Request validator |
+| [scene](../api/mock-http-item#scene) | `string \| string[]` | No | - | Scene identifier for filtering |
 | [error](../api/mock-http-item#error) | `MockErrorConfig` | No | - | Error simulation configuration |
 
 ## Multiple Configurations

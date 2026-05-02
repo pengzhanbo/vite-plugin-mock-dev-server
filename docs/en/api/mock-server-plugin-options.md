@@ -21,6 +21,7 @@ interface MockServerPluginOptions {
   bodyParserOptions?: BodyParserOptions
   build?: boolean | ServerBuildOption
   priority?: MockMatchPriority
+  activeScene?: string | string[]
 }
 ```
 
@@ -237,6 +238,25 @@ mockDevServerPlugin({
     serverPort: 3000,
     dist: 'mock-server'
   }
+})
+```
+
+### activeScene
+
+- **Type**: `string | string[]`
+- **Default**: `[]`
+- **Description**: Active scene(s) for filtering mocks
+
+Only mocks whose `scene` intersects with this value (or have no `scene` configured) will be considered for matching.
+Can be overridden per-request via the `X-Mock-Scene` request header.
+
+```ts
+mockDevServerPlugin({
+  activeScene: 'test' // Only activate mocks with scene: 'test'
+})
+
+mockDevServerPlugin({
+  activeScene: ['dev', 'test'] // Activate mocks matching 'dev' or 'test'
 })
 ```
 

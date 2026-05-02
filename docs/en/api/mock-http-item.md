@@ -18,6 +18,7 @@ interface MockHttpItem extends MockBaseItem {
   validator?: Validator | ValidatorFn
   error?: MockErrorConfig
   ws?: false
+  scene?: string | string[]
 }
 ```
 
@@ -279,6 +280,33 @@ export default defineMock([
   {
     url: '/api/data',
     body: { public: 'data' }
+  }
+])
+```
+
+### scene
+
+- **Type**: `string | string[]`
+- **Description**: Scene identifier for filtering this mock
+
+When not configured, the mock is universal and always matches regardless of active scenario.
+When configured, the mock only matches when at least one of its scenes matches one of the active scenes configured via `activeScene` option or `X-Mock-Scene` header.
+
+```ts
+export default defineMock([
+  {
+    url: '/api/scene',
+    body: { scene: 'default' }
+  },
+  {
+    url: '/api/scene',
+    scene: 'test',
+    body: { scene: 'test data' }
+  },
+  {
+    url: '/api/scene',
+    scene: ['dev', 'staging'],
+    body: { scene: 'dev or staging data' }
   }
 ])
 ```

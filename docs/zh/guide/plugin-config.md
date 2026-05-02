@@ -39,6 +39,7 @@ export default defineConfig({
 | [build](../api/mock-server-plugin-options#build) | `boolean \| ServerBuildOption` | `false` | 构建独立服务 |
 | [record](../api/mock-server-plugin-options#record) | `boolean \| RecordOption` | `false` | 请求录制配置 |
 | [replay](../api/mock-server-plugin-options#replay) | `boolean \| ReplayOption` | `false` | 请求回放配置 |
+| [activeScene](../api/mock-server-plugin-options#activescene) | `string \| string[]` | `[]` | 激活场景，用于过滤 mock |
 | [priority](../api/mock-server-plugin-options#priority) | `MockMatchPriority` | - | 匹配优先级配置 |
 
 ## 详细文档

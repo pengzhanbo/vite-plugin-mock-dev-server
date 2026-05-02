@@ -18,6 +18,7 @@ interface MockHttpItem extends MockBaseItem {
   validator?: Validator | ValidatorFn
   error?: MockErrorConfig
   ws?: false
+  scene?: string | string[]
 }
 ```
 
@@ -279,6 +280,33 @@ export default defineMock([
   {
     url: '/api/data',
     body: { public: 'data' }
+  }
+])
+```
+
+### scene
+
+- **类型**: `string | string[]`
+- **描述**: 该 mock 的场景标识，用于过滤
+
+未配置时，该 mock 为全场景通用，不受 `activeScene` 限制。
+配置后，只有 `scene` 中任意一项与 `activeScene` 中任意一项匹配时，该 mock 才会激活。
+
+```ts
+export default defineMock([
+  {
+    url: '/api/scene',
+    body: { scene: 'default' }
+  },
+  {
+    url: '/api/scene',
+    scene: 'test',
+    body: { scene: 'test data' }
+  },
+  {
+    url: '/api/scene',
+    scene: ['dev', 'staging'],
+    body: { scene: 'dev or staging data' }
   }
 ])
 ```

@@ -124,6 +124,7 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: 'Request Lifecycle', link: 'request-lifecycle' },
         { text: 'Path Matching Rules', link: 'path-matching' },
+        { text: 'Scene Mock', link: 'scene' },
         { text: 'Directory File Management', link: 'file-management' },
       ],
     },
@@ -184,6 +185,7 @@ function sidebarExamples(): DefaultTheme.SidebarItem[] {
     { text: 'Request Error Simulation', link: 'error-simulation' },
     { text: 'CRUD Complete Example', link: 'crud' },
     { text: 'Authentication Example', link: 'auth' },
+    { text: 'Scene Mock', link: 'scene' },
     { text: 'Real-world Example', link: 'real-world' },
   ]
 }
