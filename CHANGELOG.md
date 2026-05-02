@@ -1,3 +1,18 @@
+# [2.2.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.1.2...v2.2.0) (2026-05-02)
+
+
+### Features
+
+* add support for mock scene ([3d03a59](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/3d03a596b1f48d52619dcb4688a2a5c1256a7f96))
+* drop node18 support ([0252b0f](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/0252b0f6a6080b2da8801dfc362d4a54e0ac64e3))
+
+
+### Performance Improvements
+
+* improve performance ([2056a21](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/2056a21ebe6020d15e84808a7c0db370c13d4bf4))
+
+
+
 ## [2.1.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.1.1...v2.1.2) (2026-04-30)
 
 
