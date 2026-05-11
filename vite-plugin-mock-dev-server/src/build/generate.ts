@@ -89,15 +89,12 @@ export async function generateMockServer(
     }
     else {
       for (const { filename, source } of outputList) {
-        ctx.emitFile({
-          type: 'asset',
-          fileName: filename,
-          source,
-        })
+        ctx.emitFile({ type: 'asset', fileName: filename, source })
       }
     }
   }
   catch (e) {
+    options.logger.error(`Failed to generate mock server`)
     console.error(e)
   }
 }

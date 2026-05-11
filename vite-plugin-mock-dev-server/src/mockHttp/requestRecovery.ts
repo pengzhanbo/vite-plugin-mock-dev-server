@@ -15,7 +15,7 @@
  */
 import type { Connect, UserConfig } from 'vite'
 import { Buffer } from 'node:buffer'
-import { objectKeys } from '@pengzhanbo/utils'
+import { isString, objectKeys } from '@pengzhanbo/utils'
 
 const cache = new WeakMap<Connect.IncomingMessage, Buffer>()
 
@@ -53,7 +53,7 @@ export function recoverRequest(config: UserConfig): void {
 
   objectKeys(proxies).forEach((key) => {
     const target = proxies[key]
-    const options = typeof target === 'string' ? { target } : target
+    const options = isString(target) ? { target } : target
     if (options.ws)
       return
 

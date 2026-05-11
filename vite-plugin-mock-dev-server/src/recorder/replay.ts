@@ -33,7 +33,7 @@ export async function replayRecordedRequest(
   let matched: RecordedRequest | undefined
   // 如果未设置 status，优先使用 200 状态码，否则返回第一个记录
   if (options.status.length === 0) {
-    matched = matchedList.find(item => item.res.status === 200) || records[0]
+    matched = matchedList.find(item => item.res.status === 200) || matchedList[0]
   }
   // 返回第一个匹配的状态码记录
   else {

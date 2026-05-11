@@ -1,4 +1,6 @@
-const PATTERN_CACHE = new Map<string, RegExp>()
+import { LRUCache } from '@pengzhanbo/utils'
+
+const PATTERN_CACHE = new LRUCache<string, RegExp>({ maxSize: 100 })
 
 export function doesProxyContextMatchUrl(
   context: string,
