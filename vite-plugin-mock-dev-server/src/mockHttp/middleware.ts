@@ -8,7 +8,7 @@ import type {
   MockRequest,
   MockResponse,
 } from '../types'
-import { attemptAsync, isFunction, timestamp, toArray } from '@pengzhanbo/utils'
+import { attemptAsync, isFunction, isNil, timestamp, toArray } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import { Cookies } from '../cookies'
 import { recordRequestWithRawReq, replayRecordedRequest } from '../recorder'
@@ -108,7 +108,7 @@ export function createMockMiddleware(
     const method = req.method!.toUpperCase()
     const extraReq: Omit<ExtraRequest, 'params'> = {
       query,
-      refererQuery: urlParse(req.headers.referer || '').query,
+      refererQuery: req.headers.referer ? urlParse(req.headers.referer).query : {},
       body: await parseRequestBody(req, logger, formidableOptions, bodyParserOptions),
       headers: req.headers,
       getCookie: cookies.get.bind(cookies),
@@ -196,7 +196,7 @@ export function createMockMiddleware(
         .join(', ')} ]\n`,
     )
 
-    if (body) {
+    if (!isNil(body)) {
       const [error] = await attemptAsync(async () => {
         const content = isFunction(body) ? await body(request) : body
         await responseRealDelay(startTime, delay)
