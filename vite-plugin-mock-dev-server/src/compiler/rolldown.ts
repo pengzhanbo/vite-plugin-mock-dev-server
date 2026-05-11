@@ -3,6 +3,7 @@ import type { CompilerOptions, TransformResult } from './types'
 import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
+import ansis from 'ansis'
 import JSON5 from 'json5'
 import { normalizePath } from '../utils'
 import { aliasMatches } from './esbuild'
@@ -44,7 +45,7 @@ async function rolldown() {
 
 export async function transformWithRolldown(
   entryPoint: string,
-  { isESM = true, define, alias, cwd = process.cwd() }: CompilerOptions,
+  { isESM = true, define, alias, cwd = process.cwd(), logger }: CompilerOptions,
 ): Promise<TransformResult> {
   const filepath = path.resolve(cwd, entryPoint)
   const filename = path.basename(entryPoint)
@@ -89,6 +90,7 @@ export async function transformWithRolldown(
     }
   }
   catch (e) {
+    logger.error(`Failed to transform ${ansis.yellow.underline(filepath)}`)
     console.error(e)
   }
   return { code: '', deps: [] }

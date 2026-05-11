@@ -1,4 +1,5 @@
 import type { Alias } from 'vite'
+import type { Logger } from '../core'
 import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
 
 export interface CompilerOptions {
@@ -6,6 +7,7 @@ export interface CompilerOptions {
   define: Record<string, string>
   alias: Alias[]
   cwd?: string
+  logger: Logger
 }
 
 export interface TransformResult {

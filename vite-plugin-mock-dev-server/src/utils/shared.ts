@@ -1,6 +1,9 @@
+import { Buffer } from 'node:buffer'
+import { createHash } from 'node:crypto'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { isPrimitive } from '@pengzhanbo/utils'
 import Debug from 'debug'
 
 export function getDirname(importMetaUrl: string): string {
@@ -17,4 +20,14 @@ export function slash(p: string): string {
 }
 export function normalizePath(id: string): string {
   return path.posix.normalize(isWindows ? slash(id) : id)
+}
+
+export function getHash(str: unknown): string {
+  if (isPrimitive(str)) {
+    str = String(str)
+  }
+  else {
+    str = JSON.stringify(str)
+  }
+  return createHash('md5').update(Buffer.from(str as string)).digest('hex')
 }

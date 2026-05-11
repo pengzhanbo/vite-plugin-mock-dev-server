@@ -116,7 +116,7 @@ export class Compiler extends EventEmitter {
     const { include, exclude } = this.options
     const { pattern, ignore, isMatch } = createMatcher(include, exclude)
 
-    glob(pattern, { ignore, cwd: path.join(this.cwd, this.options.dir) })
+    glob(pattern, { ignore, cwd: normalizePath(path.join(this.cwd, this.options.dir)) })
     /**
      * 控制 文件编译 并发 数量。
      * 当使用 Promise.all 时，可能在一些比较大型的项目中，过多的 mock 文件
@@ -127,7 +127,7 @@ export class Compiler extends EventEmitter {
       .then(files => files.map(file => () => this.load(normalizePath(path.join(this.options.dir, file)))))
       .then(loaders => promiseParallel(loaders, 64))
       .then(() => this.updateMockData())
-      .catch(console.error)
+      .catch(this.options.logger.error)
 
     if (!watch)
       return
@@ -182,12 +182,13 @@ export class Compiler extends EventEmitter {
       return
 
     try {
-      const { define, alias } = this.options
+      const { define, alias, logger } = this.options
       const { data, deps } = await compile(filepath, {
         cwd: this.cwd,
         isESM: this.isESM,
         define,
         alias,
+        logger,
       })
       this.moduleCache.set(filepath, processRawData(data, filepath))
       this.updateModuleDeps(filepath, deps)

@@ -5,6 +5,7 @@ import fsp from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
+import ansis from 'ansis'
 import JSON5 from 'json5'
 import { normalizePath } from '../utils'
 
@@ -69,9 +70,6 @@ function aliasPlugin(alias: Alias[]): Plugin {
         if (!matchedEntry)
           return null
 
-        // 插件内部 对 alias 的支持并不完善，还缺少对 `customResolver` 的支持
-        // 但是在 esbuild 的插件实现中，暂时不能很好的实现对 `customResolver` 的参数兼容
-        // 这里作为 待优化的 问题
         const { find, replacement } = matchedEntry
 
         const result = await build.resolve(id.replace(find, replacement), {
@@ -111,7 +109,7 @@ async function esbuild(): Promise<NonNullable<typeof _build>> {
 
 export async function transformWithEsbuild(
   entryPoint: string,
-  { isESM = true, define, alias, cwd = process.cwd() }: CompilerOptions,
+  { isESM = true, define, alias, cwd = process.cwd(), logger }: CompilerOptions,
 ): Promise<TransformResult> {
   const filepath = path.resolve(cwd, entryPoint)
   const filename = path.basename(entryPoint)
@@ -148,6 +146,7 @@ export async function transformWithEsbuild(
     }
   }
   catch (e) {
+    logger.error(`Failed to transform ${ansis.yellow.underline(filepath)}`)
     console.error(e)
   }
   return { code: '', deps: [] }

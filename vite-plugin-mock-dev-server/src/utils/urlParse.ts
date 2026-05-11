@@ -1,5 +1,6 @@
 import type { ParsedUrlQuery } from 'node:querystring'
 import { parse as queryParse } from 'node:querystring'
+import ansis from 'ansis'
 
 /**
  * Parse URL into pathname and query
@@ -26,8 +27,14 @@ export function urlParse(input: string): {
    */
   query: ParsedUrlQuery
 } {
-  const url = new URL(input, 'http://example.com')
-  const pathname = decodeURIComponent(url.pathname)
-  const query = queryParse(url.search.replace(/^\?/, ''))
-  return { pathname, query }
+  try {
+    const url = new URL(input, 'http://example.com')
+    const pathname = decodeURIComponent(url.pathname)
+    const query = queryParse(url.search.replace(/^\?/, ''))
+    return { pathname, query }
+  }
+  catch {
+    console.error(`${ansis.red('[vite:mock]')} Failed to parse URL, input: ${ansis.yellow.underline(input)}`)
+    return { pathname: '', query: {} }
+  }
 }
