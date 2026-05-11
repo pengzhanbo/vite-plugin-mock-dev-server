@@ -1,3 +1,17 @@
+## [2.2.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.2.0...v2.2.1) (2026-05-11)
+
+
+### Bug Fixes
+
+* reasonable body not properly handled ([7e43f38](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/7e43f3828652dac88b6c02aeec2c7c2c42ed70ce))
+
+
+### Features
+
+* ensure temp files are cleared ([f1d6925](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/f1d69252ae8a95e2b45dd4ed83daa8f49da81a72))
+
+
+
 # [2.2.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.1.2...v2.2.0) (2026-05-02)
 
 
