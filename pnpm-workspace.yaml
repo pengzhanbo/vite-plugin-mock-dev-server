@@ -1,3 +1,30 @@
+minimumReleaseAgeExclude:
+  - '@rolldown/binding-android-arm64@1.0.2'
+  - '@rolldown/binding-darwin-arm64@1.0.2'
+  - '@rolldown/binding-darwin-x64@1.0.2'
+  - '@rolldown/binding-freebsd-x64@1.0.2'
+  - '@rolldown/binding-linux-arm-gnueabihf@1.0.2'
+  - '@rolldown/binding-linux-arm64-gnu@1.0.2'
+  - '@rolldown/binding-linux-arm64-musl@1.0.2'
+  - '@rolldown/binding-linux-ppc64-gnu@1.0.2'
+  - '@rolldown/binding-linux-s390x-gnu@1.0.2'
+  - '@rolldown/binding-linux-x64-gnu@1.0.2'
+  - '@rolldown/binding-linux-x64-musl@1.0.2'
+  - '@rolldown/binding-openharmony-arm64@1.0.2'
+  - '@rolldown/binding-wasm32-wasi@1.0.2'
+  - '@rolldown/binding-win32-arm64-msvc@1.0.2'
+  - '@rolldown/binding-win32-x64-msvc@1.0.2'
+  - '@vitest/expect@4.1.7'
+  - '@vitest/mocker@4.1.7'
+  - '@vitest/pretty-format@4.1.7'
+  - '@vitest/runner@4.1.7'
+  - '@vitest/snapshot@4.1.7'
+  - '@vitest/spy@4.1.7'
+  - '@vitest/utils@4.1.7'
+  - local-pkg@1.2.0
+  - rolldown@1.0.2
+  - vitest@4.1.7
+
 shamefullyHoist: true
 shellEmulator: true
 trustPolicy: no-downgrade
@@ -22,26 +49,27 @@ catalogs:
     '@types/is-core-module': ^2.2.2
     '@types/mime-types': ^3.0.1
     '@types/mockjs': ^1.0.10
-    '@types/node': ^25.6.2
+    '@types/node': ^25.9.1
     '@types/picomatch': ^4.0.3
     '@types/ws': ^8.18.1
     bumpp: ^11.1.0
-    conventional-changelog-cli: ^5.0.0
+    conventional-changelog: ^7.2.0
+    conventional-changelog-angular: ^8.3.1
     esbuild: ^0.28.0
-    eslint: ^10.3.0
+    eslint: ^10.4.0
     mockjs: ^1.1.0
-    rolldown: ^1.0.0
+    rolldown: ^1.0.2
     tsdown: ^0.22.0
     typescript: ^6.0.3
-    vite: ^8.0.11
+    vite: ^8.0.13
     vitepress: ^2.0.0-alpha.17
     vitepress-plugin-group-icons: ^1.7.5
     vitepress-plugin-llms: ^1.12.2
-    vitest: ^4.1.5
+    vitest: ^4.1.7
     zstd-codec: ^0.1.5
   prod:
     '@pengzhanbo/utils': ^3.7.2
-    ansis: ^4.2.0
+    ansis: ^4.3.0
     chokidar: ^5.0.0
     co-body: ^6.2.0
     cors: ^2.8.6
@@ -50,12 +78,12 @@ catalogs:
     http-status: ^2.1.0
     is-core-module: ^2.16.2
     json5: ^2.2.3
-    local-pkg: ^1.1.2
+    local-pkg: ^1.2.0
     mime-types: ^3.0.2
     path-to-regexp: ^8.4.2
     picomatch: ^4.0.4
     tinyglobby: ^0.2.16
-    ws: ^8.20.0
+    ws: ^8.20.1
 
 allowBuilds:
   esbuild: true
