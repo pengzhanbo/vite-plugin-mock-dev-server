@@ -13,8 +13,9 @@
  * 导致当接口不需要被 mock，继而由 vite http-proxy 转发时，请求流无法继续。
  * 为此，我们在请求流中记录请求数据，当当前请求无法继续时，可以从备份中恢复请求流
  */
+
+import type { Buffer } from 'node:buffer'
 import type { Connect, UserConfig } from 'vite'
-import { Buffer } from 'node:buffer'
 import { isString, objectKeys } from '@pengzhanbo/utils'
 
 const cache = new WeakMap<Connect.IncomingMessage, Buffer>()
@@ -30,24 +31,6 @@ const cache = new WeakMap<Connect.IncomingMessage, Buffer>()
 export function cacheRequestBody(req: Connect.IncomingMessage, body?: Buffer): void {
   if (body?.byteLength)
     cache.set(req, body)
-}
-
-/**
- * Collect request data
- *
- * 备份请求数据
- *
- * @param req - Incoming message / 入站消息
- */
-export function collectRequest(req: Connect.IncomingMessage): void {
-  let chunks: Buffer[] | null = []
-  req.addListener('data', (chunk) => {
-    chunks?.push(Buffer.from(chunk))
-  })
-  req.addListener('end', () => {
-    chunks?.length && cache.set(req, Buffer.concat(chunks!))
-    chunks = null
-  })
 }
 
 /**

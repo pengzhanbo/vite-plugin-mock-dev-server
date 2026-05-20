@@ -7,14 +7,14 @@ import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 import ansis from 'ansis'
 import JSON5 from 'json5'
-import { normalizePath } from '../utils'
+import { isPackageExists, normalizePath } from '../utils'
 
 const externalizeDeps: Plugin = {
   name: 'externalize-deps',
   setup(build) {
     build.onResolve({ filter: /.*/ }, ({ path: id }) => {
       if (id[0] !== '.' && !path.isAbsolute(id))
-        return { external: true }
+        return { external: isPackageExists(id) }
     })
   },
 }

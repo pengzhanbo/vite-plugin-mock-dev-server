@@ -1,3 +1,4 @@
+import type { Logger } from '../core'
 import fs, { promises as fsp } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
@@ -10,6 +11,7 @@ interface LoadFromCodeOptions {
   code: string
   isESM: boolean
   cwd: string
+  logger: Logger
 }
 
 /**
@@ -25,14 +27,19 @@ export async function loadFromCode<T = any>({
   code,
   isESM,
   cwd,
+  logger,
 }: LoadFromCodeOptions): Promise<T | { [key: string]: T }> {
   filepath = path.resolve(cwd, filepath)
   const ext = isESM ? '.mjs' : '.cjs'
   const filepathTmp = `${filepath}.${getHash(code)}${ext}`
   await fsp.writeFile(filepathTmp, code, 'utf8')
   TEMP_FILES.add(filepathTmp)
-  const [, mod] = await attemptAsync(importDefault, String(pathToFileURL(filepathTmp)))
+  const [error, mod] = await attemptAsync<any>(importDefault, String(pathToFileURL(filepathTmp)))
   await attemptAsync(unlink, filepathTmp)
+  if (error) {
+    logger.error(`Failed to load mock configuration from code:`)
+    console.error(error)
+  }
   return mod
 }
 

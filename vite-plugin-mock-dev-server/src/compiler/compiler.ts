@@ -115,19 +115,7 @@ export class Compiler extends EventEmitter {
   run(watch?: boolean): void {
     const { include, exclude } = this.options
     const { pattern, ignore, isMatch } = createMatcher(include, exclude)
-
-    glob(pattern, { ignore, cwd: normalizePath(path.join(this.cwd, this.options.dir)) })
-    /**
-     * 控制 文件编译 并发 数量。
-     * 当使用 Promise.all 时，可能在一些比较大型的项目中，过多的 mock 文件
-     * 可能导致实例化过多的 esbuild 实例而导致带来过多的内存开销，导致额外的
-     * 性能开销，从而影响编译速度。
-     * 实测在控制并发数的前提下，总编译时间 差异不大，但内存开销更小更加稳定。
-     */
-      .then(files => files.map(file => () => this.load(normalizePath(path.join(this.options.dir, file)))))
-      .then(loaders => promiseParallel(loaders, 64))
-      .then(() => this.updateMockData())
-      .catch(this.options.logger.error)
+    this.loadAll(pattern, ignore)
 
     if (!watch)
       return
@@ -168,6 +156,29 @@ export class Compiler extends EventEmitter {
   close(): void {
     this.mockWatcher?.close()
     this.depsWatcher?.close()
+  }
+
+  /**
+   * Load and compile all mock files
+   *
+   * 加载并编译所有 Mock 文件
+   *
+   * @param pattern - Glob pattern to match mock files / 匹配 Mock 文件的 glob 模式
+   * @param ignore - Glob pattern to ignore files / 忽略文件的 glob 模式
+   */
+  private loadAll(pattern: string[], ignore: string[]) {
+    glob(pattern, { ignore, cwd: normalizePath(path.join(this.cwd, this.options.dir)) })
+      /**
+       * 控制 文件编译 并发 数量。
+       * 当使用 Promise.all 时，可能在一些比较大型的项目中，过多的 mock 文件
+       * 可能导致实例化过多的 编译实例而带来过多的内存开销，导致额外的
+       * 性能开销，从而影响编译速度。
+       * 实测在控制并发数的前提下，总编译时间 差异不大，但内存开销更小更加稳定。
+       */
+      .then(files => files.map(file => () => this.load(normalizePath(path.join(this.options.dir, file)))))
+      .then(loaders => promiseParallel(loaders, 64))
+      .then(() => this.updateMockData())
+      .catch(this.options.logger.error)
   }
 
   /**

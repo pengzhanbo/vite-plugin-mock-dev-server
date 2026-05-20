@@ -44,6 +44,7 @@ export async function compile(
     code,
     isESM,
     cwd: options.cwd || process.cwd(),
+    logger: options.logger,
   })) || {}
 
   return { data, deps }

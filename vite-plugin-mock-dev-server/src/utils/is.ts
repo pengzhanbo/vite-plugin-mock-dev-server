@@ -1,5 +1,7 @@
 import type { Readable, Stream } from 'node:stream'
-import { hasOwn } from '@pengzhanbo/utils'
+import { createRequire } from 'node:module'
+import process from 'node:process'
+import { LRUCache } from '@pengzhanbo/utils'
 
 export function isStream(stream: unknown): stream is Stream {
   return stream !== null
@@ -14,26 +16,28 @@ export function isReadableStream(stream: unknown): stream is Readable {
     && typeof (stream as any)._readableState === 'object'
 }
 
-const PACKAGE_CACHE: Record<string, boolean> = {}
+const PACKAGE_CACHE = new LRUCache<string, boolean>({ maxSize: 1024 })
+const require = createRequire(process.cwd())
 
-export async function isPackageExists(mod: string): Promise<boolean> {
-  if (hasOwn(PACKAGE_CACHE, mod)) {
-    return PACKAGE_CACHE[mod]
+export function isPackageExists(mod: string): boolean {
+  if (PACKAGE_CACHE.has(mod)) {
+    return PACKAGE_CACHE.get(mod)!
   }
+
+  let isExists = false
   try {
     // @ts-expect-error fallback for node
     if (import.meta.resolve) {
-      PACKAGE_CACHE[mod] = !!import.meta.resolve(mod)
+      isExists = !!import.meta.resolve(mod)
     }
     else {
-      await import(mod)
-      PACKAGE_CACHE[mod] = true
+      require.resolve(mod)
+      isExists = true
     }
-    return PACKAGE_CACHE[mod]
   }
   catch {}
-  PACKAGE_CACHE[mod] = false
-  return false
+  PACKAGE_CACHE.set(mod, isExists)
+  return isExists
 }
 
 /**

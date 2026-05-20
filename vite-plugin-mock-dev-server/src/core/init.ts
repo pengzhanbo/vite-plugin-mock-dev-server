@@ -29,8 +29,6 @@ export function initMockMiddlewares(
    */
   const compiler = new Compiler(options)
 
-  compiler.run(!!server)
-
   /**
    * 监听 mock 文件是否发生变更，如何配置了 reload 为 true，
    * 当发生变更时，通知当前页面进行重新加载
@@ -66,6 +64,8 @@ export function initMockMiddlewares(
      */
     createMockMiddleware(compiler, options),
   )
+
+  compiler.run(!!server)
 
   return middlewares
 }
