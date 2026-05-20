@@ -20,6 +20,19 @@ import { isString, objectKeys } from '@pengzhanbo/utils'
 const cache = new WeakMap<Connect.IncomingMessage, Buffer>()
 
 /**
+ * Cache request body
+ *
+ * 缓存请求体数据
+ *
+ * @param req - Incoming message / 入站消息
+ * @param body - Raw request body / 原始请求体
+ */
+export function cacheRequestBody(req: Connect.IncomingMessage, body?: Buffer): void {
+  if (body?.byteLength)
+    cache.set(req, body)
+}
+
+/**
  * Collect request data
  *
  * 备份请求数据

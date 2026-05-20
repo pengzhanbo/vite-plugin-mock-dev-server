@@ -6,6 +6,7 @@
 import type { Connect } from 'vite'
 import type { Compiler } from '../src/compiler'
 import type { MockHttpItem, MockOptions } from '../src/types'
+import { Buffer } from 'node:buffer'
 import { describe, expect, it, vi } from 'vitest'
 import { createMockMiddleware } from '../src/mockHttp/middleware'
 
@@ -71,6 +72,65 @@ function createMockRequest(options: {
       listeners[event]?.forEach(cb => cb(...args))
       return true
     },
+    removeListener() { return this },
+    removeAllListeners() { return this },
+  } as unknown as Connect.IncomingMessage
+}
+
+function createEagerMultipartRequest(options: {
+  url: string
+  method: string
+  headers: Record<string, string>
+  body: Buffer
+}): Connect.IncomingMessage {
+  const listeners: Record<string, Listener[]> = {}
+  let drained = false
+  let ended = false
+
+  function emit(event: string, ...args: any[]) {
+    listeners[event]?.forEach(cb => cb(...args))
+  }
+
+  function drain() {
+    if (drained)
+      return
+
+    drained = true
+    emit('data', options.body)
+    ended = true
+    emit('end')
+  }
+
+  return {
+    url: options.url,
+    method: options.method,
+    headers: options.headers,
+    socket: { encrypted: false },
+    connection: { encrypted: false },
+    addListener(event: string, callback: Listener) {
+      if (!listeners[event])
+        listeners[event] = []
+      listeners[event].push(callback)
+
+      if (event === 'data')
+        drain()
+      else if (event === 'end' && ended)
+        callback()
+
+      return this
+    },
+    on(event: string, callback: Listener) {
+      return (this as any).addListener(event, callback)
+    },
+    once(event: string, callback: Listener) {
+      return (this as any).addListener(event, callback)
+    },
+    emit(event: string, ...args: any[]) {
+      emit(event, ...args)
+      return true
+    },
+    pause() { return this },
+    resume() { return this },
     removeListener() { return this },
     removeAllListeners() { return this },
   } as unknown as Connect.IncomingMessage
@@ -221,6 +281,56 @@ describe('mockMiddleware', () => {
 
     expect(res.statusCode).toBe(201)
     expect(JSON.parse(res.data)).toEqual({ success: true })
+  })
+
+  it('should parse multipart body when request recovery collects the stream', async () => {
+    const boundary = '----mock-dev-server-test-boundary'
+    const rawBody = Buffer.from([
+      `--${boundary}`,
+      'Content-Disposition: form-data; name="file"; filename="test.txt"',
+      'Content-Type: text/plain',
+      '',
+      'hello',
+      `--${boundary}--`,
+      '',
+    ].join('\r\n'))
+
+    const mockItem: MockHttpItem = {
+      url: '/api/upload',
+      method: 'POST',
+      body: request => ({ hasFile: Boolean(request.body?.file) }),
+      status: 200,
+      __filepath__: 'test.mock.ts',
+    } as MockHttpItem
+
+    const compiler = createMockCompiler({
+      '/api/upload': [mockItem],
+    })
+
+    const middleware = createMockMiddleware(compiler, {
+      proxies: ['/api'],
+      logger: mockLogger as any,
+      cors: false,
+      record: { enabled: false },
+      replay: false,
+    } as any)
+
+    const req = createEagerMultipartRequest({
+      url: '/api/upload',
+      method: 'POST',
+      headers: {
+        'content-type': `multipart/form-data; boundary=${boundary}`,
+        'content-length': String(rawBody.byteLength),
+      },
+      body: rawBody,
+    })
+    const res = createMockResponse()
+    const next = vi.fn()
+
+    await middleware(req, res, next)
+
+    expect(next).not.toHaveBeenCalled()
+    expect(JSON.parse(res.data)).toEqual({ hasFile: true })
   })
 
   it('should handle URL with query parameters', async () => {

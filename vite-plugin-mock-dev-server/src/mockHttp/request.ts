@@ -2,6 +2,8 @@ import type { MatchFunction } from 'path-to-regexp'
 import type { Connect } from 'vite'
 import type { Logger } from '../core'
 import type { BodyParserOptions, ExtraRequest, MockRequest } from '../types'
+import { Buffer } from 'node:buffer'
+import { PassThrough } from 'node:stream'
 import { isEmptyObject } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import bodyParser from 'co-body'
@@ -60,6 +62,78 @@ export async function parseRequestBody(
     logger.error(e)
   }
   return undefined
+}
+
+export interface ParsedRequestBody {
+  body: any
+  rawBody?: Buffer
+}
+
+/**
+ * Parse request body and collect raw body
+ *
+ * 解析请求体并收集原始请求体
+ *
+ * @param req - Incoming message object / 入站消息对象
+ * @param logger - Logger instance / 日志实例
+ * @param formidableOptions - Formidable options for multipart form data / 用于 multipart 表单数据的 Formidable 配置项
+ * @param bodyParserOptions - Body parser options / 请求体解析配置项
+ * @returns Parsed request body and raw request body / 解析后的请求体和原始请求体
+ */
+export async function parseRequestBodyWithRaw(
+  req: Connect.IncomingMessage,
+  logger: Logger,
+  formidableOptions: formidable.Options,
+  bodyParserOptions: BodyParserOptions = {},
+): Promise<ParsedRequestBody> {
+  const method = req.method!.toUpperCase()
+  if (['HEAD', 'OPTIONS'].includes(method))
+    return { body: undefined }
+
+  const contentType = req.headers['content-type']
+  const contentLength = req.headers['content-length']
+  const transferEncoding = req.headers['transfer-encoding']
+  if (!contentType && !contentLength && !transferEncoding)
+    return { body: undefined }
+
+  const rawBody = await readRequestBody(req)
+  if (!rawBody.byteLength)
+    return { body: undefined, rawBody }
+
+  const body = await parseRequestBody(
+    createRequestStream(req, rawBody),
+    logger,
+    formidableOptions,
+    bodyParserOptions,
+  )
+
+  return { body, rawBody }
+}
+
+function readRequestBody(req: Connect.IncomingMessage): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = []
+
+    req.on('error', reject)
+    req.on('end', () => {
+      resolve(chunks.length ? Buffer.concat(chunks) : Buffer.alloc(0))
+    })
+    req.on('data', (chunk) => {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+    })
+  })
+}
+
+function createRequestStream(req: Connect.IncomingMessage, rawBody: Buffer): Connect.IncomingMessage {
+  const stream = new PassThrough()
+  Object.assign(stream, {
+    headers: req.headers,
+    method: req.method,
+    url: req.url,
+    socket: req.socket,
+  })
+  stream.end(rawBody)
+  return stream as unknown as Connect.IncomingMessage
 }
 
 /**

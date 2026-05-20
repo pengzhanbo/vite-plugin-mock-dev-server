@@ -17,11 +17,11 @@ import { createCors } from './cors'
 import { findMockData } from './matcher'
 import { matchingWeight } from './matchingWeight'
 import {
-  parseRequestBody,
+  parseRequestBodyWithRaw,
   parseRequestParams,
   requestLog,
 } from './request'
-import { collectRequest } from './requestRecovery'
+import { cacheRequestBody } from './requestRecovery'
 import {
   provideResponseCookies,
   provideResponseHeaders,
@@ -96,11 +96,9 @@ export function createMockMiddleware(
       return next()
     }
 
-    // #52 由于请求流被消费，vite http-proxy 无法获取已消费的请求，导致请求流无法继续
-    // 记录请求流中被消费的数据，形成备份，当当前请求无法继续时，可以从备份中恢复请求流
-    collectRequest(req)
-
     const cookies = new Cookies(req, res, cookiesOptions)
+    const { body: parsedBody, rawBody } = await parseRequestBodyWithRaw(req, logger, formidableOptions, bodyParserOptions)
+    cacheRequestBody(req, rawBody)
 
     let mock: MockHttpItem | undefined
     let _mockUrl: string | undefined
@@ -109,7 +107,7 @@ export function createMockMiddleware(
     const extraReq: Omit<ExtraRequest, 'params'> = {
       query,
       refererQuery: req.headers.referer ? urlParse(req.headers.referer).query : {},
-      body: await parseRequestBody(req, logger, formidableOptions, bodyParserOptions),
+      body: parsedBody,
       headers: req.headers,
       getCookie: cookies.get.bind(cookies),
     }
