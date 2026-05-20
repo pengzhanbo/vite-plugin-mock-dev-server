@@ -1,3 +1,15 @@
+# [2.3.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.2.1...v2.3.0) (2026-05-20)
+
+
+### Bug Fixes
+
+* avoid consuming request stream before body parsing ([#150](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/150)) ([83bba99](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/83bba99dd38247045136d0a66a5544b6f4a640a7))
+
+
+### Features
+
+* support tsconfig `compilerOptions.paths`, close [#151](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/151) ([#154](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/154)) ([15c0b77](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/15c0b77f59e76a2fe154f7287d1a9be31f695c39))
+
 ## [2.2.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.2.0...v2.2.1) (2026-05-11)
 
 
