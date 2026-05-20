@@ -5,7 +5,7 @@ import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 import ansis from 'ansis'
 import JSON5 from 'json5'
-import { normalizePath } from '../utils'
+import { isPackageExists, normalizePath } from '../utils'
 import { aliasMatches } from './esbuild'
 
 const renamePlugin: Plugin = {
@@ -63,6 +63,7 @@ export async function transformWithRolldown(
         file: 'out.js',
       },
       platform: 'node',
+      tsconfig: true,
       transform: {
         define: {
           ...define,
@@ -75,7 +76,7 @@ export async function transformWithRolldown(
         if (isAlias(id))
           return false
         if (id[0] !== '.' && !path.isAbsolute(id) && id !== 'vite-plugin-mock-dev-server')
-          return true
+          return isPackageExists(id)
       },
       plugins: [aliasPlugin({ entries: alias }), renamePlugin, json5Plugin],
       onLog(level, log, defaultHandler) {
