@@ -85,6 +85,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "YILS-LIN",
+      "name": "YILS",
+      "avatar_url": "https://avatars.githubusercontent.com/u/62397373?v=4",
+      "profile": "https://yils.blog/",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
