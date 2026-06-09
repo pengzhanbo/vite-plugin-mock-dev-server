@@ -26,6 +26,7 @@
   "devDependencies": {
     "@pengzhanbo/eslint-config": "catalog:dev",
     "@types/co-body": "catalog:dev",
+    "@types/cookies": "catalog:dev",
     "@types/cors": "catalog:dev",
     "@types/formidable": "catalog:dev",
     "@types/mime-types": "catalog:dev",

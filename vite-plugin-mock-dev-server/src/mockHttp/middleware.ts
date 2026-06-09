@@ -10,7 +10,7 @@ import type {
 } from '../types'
 import { attemptAsync, isFunction, isNil, timestamp, toArray } from '@pengzhanbo/utils'
 import ansis from 'ansis'
-import { Cookies } from '../cookies'
+import Cookies from 'cookies'
 import { recordRequestWithRawReq, replayRecordedRequest } from '../recorder'
 import { doesProxyContextMatchUrl, urlParse } from '../utils'
 import { createCors } from './cors'
