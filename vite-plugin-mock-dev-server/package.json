@@ -10,6 +10,9 @@
     "type": "git",
     "url": "git+https://github.com/pengzhanbo/vite-plugin-mock-dev-server"
   },
+  "bugs": {
+    "url": "https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues"
+  },
   "keywords": [
     "vite",
     "plugin",
