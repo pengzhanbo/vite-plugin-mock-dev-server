@@ -134,20 +134,27 @@ export async function transformWithEsbuild(
       plugins: [aliasPlugin(alias), renamePlugin, externalizeDeps, jsonLoader, json5Loader],
       absWorkingDir: cwd,
     })
-    const deps: Set<string> = new Set()
+    const externalDeps: Set<string> = new Set()
+    const internalDeps: Set<string> = new Set()
     const inputs = result.metafile?.inputs || {}
     Object.keys(inputs).forEach(key =>
-      inputs[key].imports.forEach(dep => deps.add(normalizePath(dep.path))),
+      inputs[key].imports.forEach((dep) => {
+        if (dep.external)
+          externalDeps.add(normalizePath(dep.path))
+        else
+          internalDeps.add(normalizePath(dep.path))
+      }),
     )
 
     return {
       code: result.outputFiles[0].text,
-      deps: Array.from(deps),
+      externalDeps: Array.from(externalDeps),
+      internalDeps: Array.from(internalDeps),
     }
   }
   catch (e) {
     logger.error(`Failed to transform ${ansis.yellow.underline(filepath)}`)
     console.error(e)
   }
-  return { code: '', deps: [] }
+  return { code: '', externalDeps: [], internalDeps: [] }
 }

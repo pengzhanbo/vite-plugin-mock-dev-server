@@ -85,14 +85,18 @@ export async function transformWithRolldown(
         defaultHandler(level, log)
       },
     })
+
     return {
       code: result.output[0].code,
-      deps: result.output[0].moduleIds.filter(id => !id.endsWith(filename)).map(id => normalizePath(path.relative(cwd, id))),
+      internalDeps: result.output[0].moduleIds
+        .filter(id => !id.endsWith(filename))
+        .map(id => normalizePath(path.relative(cwd, id))),
+      externalDeps: [...result.output[0].imports, ...result.output[0].dynamicImports],
     }
   }
   catch (e) {
     logger.error(`Failed to transform ${ansis.yellow.underline(filepath)}`)
     console.error(e)
   }
-  return { code: '', deps: [] }
+  return { code: '', internalDeps: [], externalDeps: [] }
 }

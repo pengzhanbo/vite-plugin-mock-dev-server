@@ -8,9 +8,9 @@ import { transformWithRolldown } from './rolldown'
 let bundler: 'esbuild' | 'rolldown' | 'none' | undefined
 
 export async function transform(entryPoint: string, options: CompilerOptions): Promise<TransformResult> {
-  bundler ??= await isPackageExists('rolldown')
+  bundler ??= isPackageExists('rolldown')
     ? 'rolldown'
-    : await isPackageExists('esbuild')
+    : isPackageExists('esbuild')
       ? 'esbuild'
       : 'none'
 
@@ -35,7 +35,7 @@ export async function compile(
   else
     isESM = options.isESM || false
 
-  const { code, deps } = await transform(filepath, {
+  const { code, externalDeps, internalDeps } = await transform(filepath, {
     ...options,
     isESM,
   })
@@ -47,5 +47,5 @@ export async function compile(
     logger: options.logger,
   })) || {}
 
-  return { data, deps }
+  return { data, externalDeps, internalDeps }
 }

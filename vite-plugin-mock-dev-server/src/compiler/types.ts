@@ -12,12 +12,14 @@ export interface CompilerOptions {
 
 export interface TransformResult {
   code: string
-  deps: string[]
+  externalDeps: string[]
+  internalDeps: string[]
 }
 
 export interface CompilerResult {
   data: MockRawData
-  deps: string[]
+  externalDeps: string[]
+  internalDeps: string[]
 }
 
 export type MockRawData = MockOptions | MockHttpItem | MockWebsocketItem | Record<string, MockOptions | MockHttpItem | MockWebsocketItem>

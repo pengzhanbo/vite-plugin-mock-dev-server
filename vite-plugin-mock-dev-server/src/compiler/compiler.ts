@@ -194,7 +194,7 @@ export class Compiler extends EventEmitter {
 
     try {
       const { define, alias, logger } = this.options
-      const { data, deps } = await compile(filepath, {
+      const { data, internalDeps } = await compile(filepath, {
         cwd: this.cwd,
         isESM: this.isESM,
         define,
@@ -202,7 +202,7 @@ export class Compiler extends EventEmitter {
         logger,
       })
       this.moduleCache.set(filepath, processRawData(data, filepath))
-      this.updateModuleDeps(filepath, deps)
+      this.updateModuleDeps(filepath, internalDeps)
     }
     catch (e) {
       console.error(e)

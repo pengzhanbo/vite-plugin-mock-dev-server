@@ -38,8 +38,8 @@ export async function generateMockServer(
   const mockEntry = path.join(cwd, `mock-data-${Date.now()}.js`)
   await fsp.writeFile(mockEntry, content, 'utf-8')
 
-  const { code, deps } = await transform(mockEntry, options)
-  const mockDeps = getMockDependencies(deps, options.alias)
+  const { code, externalDeps } = await transform(mockEntry, options)
+  const mockDeps = getMockDependencies(externalDeps, options.alias)
   await fsp.unlink(mockEntry)
 
   const outputList = [
