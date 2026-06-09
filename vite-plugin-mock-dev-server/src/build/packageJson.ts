@@ -1,5 +1,5 @@
 import type { ResolvedMockServerPluginOptions } from '../core/options'
-import isCore from 'is-core-module'
+import { isBuiltin } from 'node:module'
 import { getPackageInfoSync } from 'local-pkg'
 import { name as __PACKAGE_NAME__, version as __PACKAGE_VERSION__ } from '../../package.json'
 import { aliasMatches } from '../compiler'
@@ -14,6 +14,7 @@ export function getMockDependencies(
   const list = new Set<string>()
   const excludeDeps = [__PACKAGE_NAME__, 'connect', 'cors']
   const isAlias = (p: string) => alias.find(({ find }) => aliasMatches(find, p))
+
   deps.forEach((dep) => {
     const name = normalizePackageName(dep)
     if (
@@ -22,7 +23,7 @@ export function getMockDependencies(
       // 排除 别名配置的模块
       || isAlias(name)
       // 排除 node 内置模块
-      || isCore(name)
+      || isBuiltin(name)
     ) {
       return
     }
@@ -55,7 +56,7 @@ export function generatePackageJson(pkg: any, mockDeps: string[]): string {
     dependencies: {
       connect: '^3.7.0',
       [__PACKAGE_NAME__]: `^${__PACKAGE_VERSION__}`,
-      cors: '^2.8.5',
+      cors: '^2.8.6',
     } as Record<string, string>,
     pnpm: { peerDependencyRules: { ignoreMissing: ['vite'] } },
   }

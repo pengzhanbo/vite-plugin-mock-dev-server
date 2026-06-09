@@ -44,7 +44,7 @@
     "dist"
   ],
   "engines": {
-    "node": "^20 || >=22"
+    "node": "^20.19.0 || >=22"
   },
   "scripts": {
     "build": "tsdown"
@@ -72,13 +72,12 @@
     "chokidar": "catalog:prod",
     "co-body": "catalog:prod",
     "cors": "catalog:prod",
-    "debug": "catalog:prod",
     "formidable": "catalog:prod",
     "http-status": "catalog:prod",
-    "is-core-module": "catalog:prod",
     "json5": "catalog:prod",
     "local-pkg": "catalog:prod",
     "mime-types": "catalog:prod",
+    "obug": "catalog:prod",
     "path-to-regexp": "catalog:prod",
     "picomatch": "catalog:prod",
     "tinyglobby": "catalog:prod",

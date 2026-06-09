@@ -1,16 +1,17 @@
+import type { Debugger } from 'obug'
 import { Buffer } from 'node:buffer'
 import { createHash } from 'node:crypto'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { isPrimitive } from '@pengzhanbo/utils'
-import Debug from 'debug'
+import { createDebug } from 'obug'
 
 export function getDirname(importMetaUrl: string): string {
   return path.dirname(fileURLToPath(importMetaUrl))
 }
 
-export const debug: Debug.Debugger = Debug('vite:mock-dev-server')
+export const debug: Debugger = createDebug('vite:mock', { useColors: true })
 
 const windowsSlashRE = /\\/g
 const isWindows = os.platform() === 'win32'
