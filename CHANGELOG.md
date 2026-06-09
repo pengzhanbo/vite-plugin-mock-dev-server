@@ -1,3 +1,10 @@
+# [2.4.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.3.0...v2.4.0) (2026-06-09)
+
+
+### Bug Fixes
+
+* fix compiling output external deps in `rolldown` mode ([40bf3c7](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/40bf3c764cad690c511b7cdcd04a72b67887747d))
+
 # [2.3.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.2.1...v2.3.0) (2026-05-20)
 
 
