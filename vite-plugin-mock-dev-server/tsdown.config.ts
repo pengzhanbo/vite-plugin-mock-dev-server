@@ -8,6 +8,7 @@ const tsdownConfig: UserConfig = defineConfig({
     server: 'src/server.ts',
     helper: 'src/helpers/index.ts',
   },
+  clean: true,
   shims: true,
   sourcemap: false,
   minify: true,

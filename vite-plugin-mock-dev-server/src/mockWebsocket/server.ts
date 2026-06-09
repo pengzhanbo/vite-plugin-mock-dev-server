@@ -39,8 +39,8 @@ import type {
 } from '../types'
 import { findFirstThen, objectKeys, remove, toArray } from '@pengzhanbo/utils'
 import ansis from 'ansis'
+import Cookies from 'cookies'
 import { WebSocketServer } from 'ws'
-import { Cookies } from '../cookies'
 import { parseRequestParams } from '../mockHttp'
 import { doesProxyContextMatchUrl, isPathMatch, matchScene, urlParse } from '../utils'
 
