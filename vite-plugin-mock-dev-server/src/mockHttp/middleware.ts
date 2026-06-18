@@ -157,7 +157,12 @@ export function createMockMiddleware(
     const response = res as MockResponse
 
     // provide request 往请求实例中注入额外的请求信息
-    Object.assign(request, extraReq)
+    Object.assign(request, {
+      query: extraReq.query,
+      refererQuery: extraReq.refererQuery,
+      body: extraReq.body,
+      getCookie: extraReq.getCookie,
+    })
     request.params = parseRequestParams(mock.url, pathname)
 
     // provide response
