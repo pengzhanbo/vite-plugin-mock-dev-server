@@ -8,7 +8,7 @@ import type {
   MockRequest,
   MockResponse,
 } from '../types'
-import { attemptAsync, isFunction, isNil, timestamp, toArray } from '@pengzhanbo/utils'
+import { attemptAsync, isFunction, isNil, omit, timestamp, toArray } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import Cookies from 'cookies'
 import { recordRequestWithRawReq, replayRecordedRequest } from '../recorder'
@@ -157,12 +157,7 @@ export function createMockMiddleware(
     const response = res as MockResponse
 
     // provide request 往请求实例中注入额外的请求信息
-    Object.assign(request, {
-      query: extraReq.query,
-      refererQuery: extraReq.refererQuery,
-      body: extraReq.body,
-      getCookie: extraReq.getCookie,
-    })
+    Object.assign(request, omit(extraReq, ['headers']))
     request.params = parseRequestParams(mock.url, pathname)
 
     // provide response
