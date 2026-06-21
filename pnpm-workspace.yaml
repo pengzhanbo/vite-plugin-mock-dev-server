@@ -1,5 +1,3 @@
-minimumReleaseAgeExclude:
-  - '@pengzhanbo/eslint-config@2.6.1'
 shamefullyHoist: true
 shellEmulator: true
 trustPolicy: no-downgrade
@@ -12,7 +10,7 @@ packages:
   - vite-plugin-mock-dev-server
 
 overrides:
-  esbuild: ^0.28.0
+  esbuild: ^0.28.1
 
 catalogs:
   dev:
@@ -23,23 +21,23 @@ catalogs:
     '@types/formidable': ^3.5.1
     '@types/mime-types': ^3.0.1
     '@types/mockjs': ^1.0.10
-    '@types/node': ^25.9.2
+    '@types/node': ^26.0.0
     '@types/picomatch': ^4.0.3
     '@types/ws': ^8.18.1
     bumpp: ^11.1.0
     conventional-changelog: ^7.2.0
     conventional-changelog-angular: ^8.3.1
-    esbuild: ^0.28.0
-    eslint: ^10.4.1
+    esbuild: ^0.28.1
+    eslint: ^10.5.0
     mockjs: ^1.1.0
-    rolldown: ^1.1.0
-    tsdown: ^0.22.2
+    rolldown: ^1.1.2
+    tsdown: ^0.22.3
     typescript: ^6.0.3
     vite: ^8.0.16
     vitepress: ^2.0.0-alpha.17
     vitepress-plugin-group-icons: ^1.7.5
     vitepress-plugin-llms: ^1.13.1
-    vitest: ^4.1.8
+    vitest: ^4.1.9
     zstd-codec: ^0.1.5
   prod:
     '@pengzhanbo/utils': ^3.7.3
@@ -53,7 +51,7 @@ catalogs:
     json5: ^2.2.3
     local-pkg: ^1.2.1
     mime-types: ^3.0.2
-    obug: ^2.1.2
+    obug: ^2.1.3
     path-to-regexp: ^8.4.2
     picomatch: ^4.0.4
     tinyglobby: ^0.2.17
