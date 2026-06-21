@@ -95,6 +95,15 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "jbleijenbergh",
+      "name": "jbleijenbergh",
+      "avatar_url": "https://avatars.githubusercontent.com/u/352080?v=4",
+      "profile": "https://github.com/jbleijenbergh",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
