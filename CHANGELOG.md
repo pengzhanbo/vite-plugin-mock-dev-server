@@ -1,3 +1,15 @@
+## [2.4.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.4.0...v2.4.1) (2026-06-21)
+
+
+### Bug Fixes
+
+* fix incorrectly merge `req.headers` data into `request` ([#158](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/158)) ([b89b0d2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/b89b0d2c29ae210138efb5e667c2c2cc1593932b))
+
+
+### Features
+
+* add npm bugs metadata to `package.json` ([#156](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/156)) ([1c76e97](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/1c76e9750259be8036fe48b6dc535ac6a313535e))
+
 # [2.4.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.3.0...v2.4.0) (2026-06-09)
 
 
