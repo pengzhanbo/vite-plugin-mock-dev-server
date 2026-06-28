@@ -10,7 +10,10 @@
   },
   "devDependencies": {
     "vitepress": "catalog:dev",
+    "vitepress-plugin-file-tree": "catalog:dev",
     "vitepress-plugin-group-icons": "catalog:dev",
-    "vitepress-plugin-llms": "catalog:dev"
+    "vitepress-plugin-llms": "catalog:dev",
+    "vitepress-plugin-npm-to": "catalog:dev",
+    "vitepress-tuck": "catalog:dev"
   }
 }

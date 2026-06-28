@@ -1,37 +1,28 @@
 import type { DefaultTheme, UserConfig } from 'vitepress'
-import process from 'node:process'
-import { defineConfig } from 'vitepress'
-import {
-  groupIconMdPlugin,
-  groupIconVitePlugin,
-} from 'vitepress-plugin-group-icons'
-import llmstxt from 'vitepress-plugin-llms'
-
-const prod = !!process.env.NETLIFY
+import fileTree from 'vitepress-plugin-file-tree'
+import npmTo from 'vitepress-plugin-npm-to'
+import { defineConfig } from 'vitepress-tuck'
+import groupIcons from './plugins/group-icons'
+import llmstxt from './plugins/llmstxt'
 
 const vitepressConfig: UserConfig<DefaultTheme.Config> = defineConfig({
+  plugins: [
+    npmTo(['npm', 'pnpm', 'yarn', 'deno', 'bun']),
+    fileTree(),
+    groupIcons(),
+    llmstxt(),
+  ],
   title: 'Mock-Dev-Server',
   lastUpdated: true,
   cleanUrls: true,
   metaChunk: true,
 
-  rewrites: {
-    'en/:rest*': ':rest*',
-  },
+  rewrites: { 'en/:rest*': ':rest*' },
 
   markdown: {
     theme: { light: 'github-light', dark: 'github-dark' },
     headers: { level: [2, 3] },
-    codeTransformers: [
-      {
-        postprocess(code) {
-          return code.replace(/\[!!code/g, '[!code')
-        },
-      },
-    ],
-    config(md) {
-      md.use(groupIconMdPlugin)
-    },
+    codeTransformers: [{ postprocess: code => code.replace(/\[!!code/g, '[!code') }],
   },
   head: [
     ['link', { rel: 'icon', type: 'image/svg', href: '/logo.png' }],
@@ -42,22 +33,10 @@ const vitepressConfig: UserConfig<DefaultTheme.Config> = defineConfig({
   themeConfig: {
     logo: '/logo.png',
     socialLinks: [
-      {
-        icon: 'github',
-        link: 'https://github.com/pengzhanbo/vite-plugin-mock-dev-server',
-      },
+      { icon: 'github', link: 'https://github.com/pengzhanbo/vite-plugin-mock-dev-server' },
     ],
     search: { provider: 'local' },
     outline: [2, 3],
-  },
-  vite: {
-    plugins: [
-      groupIconVitePlugin() as any,
-      prod && llmstxt({
-        workDir: 'en',
-        ignoreFiles: ['index.md'],
-      }),
-    ],
   },
   locales: {
     root: { label: 'English' },

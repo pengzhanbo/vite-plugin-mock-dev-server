@@ -24,11 +24,11 @@ fetch('/api/upload', {
 })
 ```
 
-In this plugin, the `formidable` library is used to parse and handle requests with `content-type` set to `multipart/form-data`.
+In this plugin, requests with `content-type` set to `multipart/form-data` are parsed and handled using [`formidable`](https://www.npmjs.com/package/formidable).
 
 In the data fields of form submissions, such as the form field `files`, it is parsed as an object of type `formidable.File`, which can be used to obtain information about the uploaded resource files.
 
-If the `multiple` attribute is declared, the corresponding field is parsed as an array of `formidable.File`.
+If the `multiple` attribute is declared, the corresponding field is parsed as an array of `formidable.File[]`.
 
 ::: code-group
 

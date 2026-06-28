@@ -16,17 +16,19 @@ For example, in an e-commerce project, the backend provides:
 
 Correspondingly, our `mock` directory should also be divided into directories based on the service names:
 
-```sh
-./mock
-├── goods
-├── search
-├── order
-└── payment
+```tree
+.
+└── mock
+    ├── goods/
+    ├── search/
+    ├── order/
+    └── payment/
 ```
 
 For interfaces under a single service, it is recommended to manage them in separate files.
 
-```sh
+```tree
+.
 ├── goods
 │   ├── list.mock.ts
 │   └── detail.mock.ts
@@ -92,11 +94,12 @@ Please rest assured, the plugin also handles the export of named variables in th
 
 If you need to differentiate more than 3 request bodies for the same API and if they are all written in the same file, it may result in a very long file, making it difficult to manage and understand. In this scenario, it is recommended to further refine the directory structure by using the interface name as the directory and the keywords of the input parameters as the file names:
 
-```sh
-./mock
-├── goods
-    ├── list.mock.ts
-    └── detail
-        ├── apple.mock.ts
-        └── banana.mock.ts
+```tree
+.
+└── mock
+    └── goods
+        ├── list.mock.ts
+        └── detail
+            ├── apple.mock.ts
+            └── banana.mock.ts
 ```

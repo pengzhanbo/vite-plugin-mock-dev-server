@@ -14,11 +14,12 @@
 
 建议在 `/mock` 目录中，新建 `/mock/shared` 目录，用于保存 工具函数以及数据内容。
 
-```sh
-./mock
-└── shared
-    ├── database  # 数据
-    └── utils # 工具函数
+```tree
+.
+└── mock
+    └── shared
+        ├── database/  # 数据
+        └── utils/ # 工具函数
 ```
 
 比如，提供一个 返回数据的包装函数，和一个 用户数据文件

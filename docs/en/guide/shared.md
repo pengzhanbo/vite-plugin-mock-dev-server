@@ -12,11 +12,12 @@ Sometimes, different mock configuration files need to use utility functions or u
 
 It is recommended to create a `/mock/shared` directory in the `/mock` directory to store utility functions and data content.
 
-```sh
-./mock
-└── shared
-    ├── database
-    └── utils
+```tree
+.
+└── mock
+    └── shared
+        ├── database/  # data
+        └── utils/ # utility functions
 ```
 
 For example, provide a wrapper function that returns data and a user data file.

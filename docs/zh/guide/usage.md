@@ -8,26 +8,10 @@
 
 </div>
 
-::: code-group
+::: npm-to
 
-``` sh [pnpm]
-pnpm add -D vite-plugin-mock-dev-server
-```
-
-``` sh [npm]
+``` sh
 npm i -D vite-plugin-mock-dev-server
-```
-
-``` sh [yarn]
-yarn add -D vite-plugin-mock-dev-server
-```
-
-``` sh [deno]
-deno add -D vite-plugin-mock-dev-server
-```
-
-``` sh [bun]
-bun add -D vite-plugin-mock-dev-server
 ```
 
 :::
@@ -77,10 +61,10 @@ export default defineConfig({
 
 在你的项目根目录下， 添加 `/mock` 目录，`mock` 目录将用于统一保存并管理所有的 **mock配置文件**。
 
-```sh
+```tree
 .
-├── mock  # [!code ++]
-├── src
+├── ++ mock/
+├── src/
 └── package.json
 ```
 
@@ -109,11 +93,11 @@ export default defineConfig({
 
 现在，让我们创建一个 mock 配置文件：
 
-```sh {3}
+```tree
 .
 ├── mock
-│   └── api.mock.ts # mock配置文件  # [!code ++]
-├── src
+│   └── ++ api.mock.ts # mock配置文件 
+├── src/
 └── package.json
 ```
 

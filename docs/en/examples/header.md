@@ -1,4 +1,6 @@
-# Custom Headers
+# Custom Response Headers
+
+Custom response headers
 
 Example, simulate adding JWT, Authorization Header
 

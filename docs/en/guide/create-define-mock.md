@@ -1,6 +1,6 @@
 # createDefineMock(transformer)
 
-Pass in a transformation function to create a custom `defineMock` helper function. Implement preprocessing of mock configurations.
+Create a custom `defineMock` function for preprocessing Mock configurations.
 
 ## Usage
 
@@ -20,10 +20,21 @@ export default definePostMock({
 })
 ```
 
-## Types
+## Parameters
 
-```ts
-function createDefineMock(
-  transformer: (mock: MockOptionsItem) => MockOptionsItem | void
-): typeof defineMock
-```
+### transformer
+
+- **Type**: `(mock: MockHttpItem | MockWebsocketItem) => MockHttpItem | MockWebsocketItem | void`
+- **Required**: Yes
+
+Preprocessing function that receives a Mock configuration object. You can modify and return it, or return a new configuration object.
+
+## Use Cases
+
+1. **Unified path prefix**: Avoid repeating the same prefix in each configuration
+2. **Unified response headers**: Add unified response headers to all Mocks
+3. **Unified delay**: Add unified response delay to all Mocks
+
+## More Details
+
+See [API Reference - createDefineMock](../api/create-define-mock) for complete type definitions and more examples.

@@ -17,17 +17,19 @@
 
 相对应的，我们的 `mock`目录，也应根据 服务名 来划分目录：
 
-```sh
-./mock
-├── goods
-├── search
-├── order
-└── payment
+```tree
+.
+└── mock
+    ├── goods/
+    ├── search/
+    ├── order/
+    └── payment/
 ```
 
 对于单服务下的接口，推荐采用 一个接口一个文件的形式进行管理：
 
-```sh
+```tree
+.
 ├── goods
 │   ├── list.mock.ts
 │   └── detail.mock.ts
@@ -96,11 +98,12 @@ export const bananaGoods = defineMock({
 反而不容易直观的进行管理，在这种场景下，建议再进一步的细化目录，使用以接口名作为目录，
 以入参的关键词作为文件名：
 
-```sh
-./mock
-├── goods
-    ├── list.mock.ts
-    └── detail
-        ├── apple.mock.ts
-        └── banana.mock.ts
+```tree
+.
+└── mock
+    └── goods
+        ├── list.mock.ts
+        └── detail
+            ├── apple.mock.ts
+            └── banana.mock.ts
 ```

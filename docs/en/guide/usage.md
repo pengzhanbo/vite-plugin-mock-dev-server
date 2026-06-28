@@ -1,7 +1,5 @@
 # Usage
 
-This section will guide you through the process of using this plugin in your project.
-
 ## Step1: Install Plugin
 
 <div class="tip custom-block" style="padding-top: 8px">
@@ -10,26 +8,10 @@ It is recommended to use [pnpm](https://pnpm.io/) as the package manager
 
 </div>
 
-::: code-group
+::: npm-to
 
-``` sh [pnpm]
-pnpm add -D vite-plugin-mock-dev-server
-```
-
-``` sh [npm]
+``` sh
 npm i -D vite-plugin-mock-dev-server
-```
-
-``` sh [yarn]
-yarn add -D vite-plugin-mock-dev-server
-```
-
-``` sh [deno]
-deno add -D vite-plugin-mock-dev-server
-```
-
-``` sh [bun]
-bun add -D vite-plugin-mock-dev-server
 ```
 
 :::
@@ -79,10 +61,10 @@ export default defineConfig({
 
 Add a `/mock` directory in your project root. The `mock` directory will be used to centrally save and manage all **mock configuration files**.
 
-```sh
+```tree
 .
-├── mock  # [!code ++]
-├── src
+├── ++ mock/
+├── src/
 └── package.json
 ```
 
@@ -111,11 +93,11 @@ The plugin determines the project's default module type based on the `type` fiel
 
 Now, let's create a mock configuration file:
 
-```sh {3}
+```tree
 .
 ├── mock
-│   └── api.mock.ts # mock configuration file  # [!code ++]
-├── src
+│   └── ++ api.mock.ts # mock configuration file
+├── src/
 └── package.json
 ```
 

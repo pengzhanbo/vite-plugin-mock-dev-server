@@ -4,8 +4,6 @@ Create a `Server-sent events` write stream to support mocking `EventSource`.
 
 ## Usage
 
-::: code-group
-
 ``` ts [*.mock.ts]
 import { createSSEStream, defineMock } from 'vite-plugin-mock-dev-server'
 
@@ -18,8 +16,6 @@ export default defineMock({
   }
 })
 ```
-
-:::
 
 ## Types
 

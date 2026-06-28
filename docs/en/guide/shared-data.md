@@ -17,7 +17,7 @@ const posts = [
 - `/api/post/update/:id` Update a post
 - `/api/post/list` Get a list of all posts
 
-I expect that after calling the delete and update post APIs, the get all posts API should return the modified content.
+It is expected that after calling the delete and update post APIs, calling the get all posts API again should return the modified content.
 
 If the data operations are relatively simple, we can write the data and mock request configuration in the same `*.mock.ts` file.
 
@@ -113,7 +113,7 @@ They all have their own scopes, which means that operations on `data` in differe
 
 ## Solution
 
-### Usage `defineMockData`
+### Using `defineMockData`
 
 To address this, the plugin provides a `defineMockData(key, initialData)` function to solve this type of issue.
 

@@ -3,7 +3,7 @@
 Generate mock data using the `mockjs` library.
 
 ::: tip
-You need to manually install the `mockjs` library .
+You need to manually install the `mockjs` library.
 
 ```sh
 pnpm add -D mockjs
