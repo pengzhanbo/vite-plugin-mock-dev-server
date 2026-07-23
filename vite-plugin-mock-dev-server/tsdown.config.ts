@@ -1,4 +1,6 @@
 import type { UserConfig } from 'tsdown'
+import fs from 'node:fs/promises'
+import parse from 'js-tokens'
 import { defineConfig } from 'tsdown'
 
 const tsdownConfig: UserConfig = defineConfig({
@@ -11,10 +13,28 @@ const tsdownConfig: UserConfig = defineConfig({
   clean: true,
   shims: true,
   sourcemap: false,
-  minify: true,
   dts: true,
   format: 'esm',
   fixedExtension: false,
+  async onSuccess(config) {
+    for await (const file of fs.glob('*.js', { cwd: config.outDir })) {
+      const filepath = `${config.outDir}/${file}`
+      const code = await fs.readFile(filepath, 'utf-8')
+      await fs.writeFile(filepath, strip(code))
+    }
+  },
 })
+
+function strip(code: string): string {
+  let result = ''
+  const tokens = parse(code)
+  for (const token of tokens) {
+    if (token.type === 'MultiLineComment' || token.type === 'SingleLineComment') {
+      continue
+    }
+    result += token.value
+  }
+  return result
+}
 
 export default tsdownConfig
