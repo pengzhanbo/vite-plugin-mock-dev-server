@@ -89,7 +89,7 @@ export async function transformWithRolldown(
     return {
       code: result.output[0].code,
       internalDeps: result.output[0].moduleIds
-        .filter(id => !id.endsWith(filename))
+        .filter(id => !id.endsWith(filename) && !id.startsWith('\0'))
         .map(id => normalizePath(path.relative(cwd, id))),
       externalDeps: [...result.output[0].imports, ...result.output[0].dynamicImports],
     }
