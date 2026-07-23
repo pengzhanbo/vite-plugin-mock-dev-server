@@ -3,7 +3,7 @@
   "type": "module",
   "version": "2.4.1",
   "private": true,
-  "packageManager": "pnpm@11.9.0",
+  "packageManager": "pnpm@11.15.1",
   "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
   "license": "MIT",
   "repository": {
@@ -37,6 +37,7 @@
     "conventional-changelog": "catalog:dev",
     "conventional-changelog-angular": "catalog:dev",
     "eslint": "catalog:dev",
+    "js-tokens": "catalog:dev",
     "tsdown": "catalog:dev",
     "typescript": "catalog:dev",
     "vitest": "catalog:dev"

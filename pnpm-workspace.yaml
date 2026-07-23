@@ -19,36 +19,37 @@ overrides:
 
 catalogs:
   dev:
-    '@pengzhanbo/eslint-config': ^2.6.1
+    '@pengzhanbo/eslint-config': ^2.7.0
     '@types/co-body': ^6.1.3
     '@types/cookies': ^0.9.2
     '@types/cors': ^2.8.19
     '@types/formidable': ^3.5.1
     '@types/mime-types': ^3.0.1
     '@types/mockjs': ^1.0.10
-    '@types/node': ^26.0.1
+    '@types/node': ^26.1.1
     '@types/picomatch': ^4.0.3
     '@types/ws': ^8.18.1
-    bumpp: ^11.1.0
-    conventional-changelog: ^8.0.0
-    conventional-changelog-angular: ^9.0.0
+    bumpp: ^12.0.0
+    conventional-changelog: ^8.1.0
+    conventional-changelog-angular: ^9.2.1
     esbuild: ^0.28.1
-    eslint: ^10.6.0
+    eslint: ^10.7.0
+    js-tokens: ^10.0.0
     mockjs: ^1.1.0
-    rolldown: ^1.1.3
-    tsdown: ^0.22.3
+    rolldown: ^1.2.0
+    tsdown: ^0.22.13
     typescript: ^6.0.3
-    vite: ^8.1.0
-    vitepress: ^2.0.0-alpha.17
-    vitepress-plugin-file-tree: ^0.7.0
+    vite: ^8.1.5
+    vitepress: ^2.0.0-alpha.18
+    vitepress-plugin-file-tree: ^0.11.0
     vitepress-plugin-group-icons: ^1.7.5
-    vitepress-plugin-llms: ^1.13.2
-    vitepress-plugin-npm-to: ^0.7.0
-    vitepress-tuck: ^0.7.0
-    vitest: ^4.1.9
+    vitepress-plugin-llms: ^1.13.3
+    vitepress-plugin-npm-to: ^0.11.0
+    vitepress-tuck: ^0.11.0
+    vitest: ^4.1.10
     zstd-codec: ^0.1.5
   prod:
-    '@pengzhanbo/utils': ^3.7.3
+    '@pengzhanbo/utils': ^3.7.4
     ansis: ^4.3.1
     chokidar: ^5.0.0
     co-body: ^6.2.0
@@ -59,11 +60,11 @@ catalogs:
     json5: ^2.2.3
     local-pkg: ^1.2.1
     mime-types: ^3.0.2
-    obug: ^2.1.3
+    obug: ^2.1.4
     path-to-regexp: ^8.4.2
-    picomatch: ^4.0.4
+    picomatch: ^4.0.5
     tinyglobby: ^0.2.17
-    ws: ^8.21.0
+    ws: ^8.21.1
 
 allowBuilds:
   esbuild: true
