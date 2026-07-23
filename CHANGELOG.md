@@ -1,3 +1,9 @@
+## [2.4.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.4.1...v2.4.2) (2026-07-23)
+
+### Bug Fixes
+
+* fix virtual module being mistakenly identified as internal module, close [#161](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/161) ([#162](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/162)) ([baa9bc1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/baa9bc12a9a1509d4abc7faa84b53e3cbdbdc76f))
+
 ## [2.4.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.4.0...v2.4.1) (2026-06-21)
 
 
