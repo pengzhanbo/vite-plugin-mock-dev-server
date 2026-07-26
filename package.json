@@ -3,7 +3,6 @@
   "type": "module",
   "version": "2.4.2",
   "private": true,
-  "packageManager": "pnpm@11.15.1",
   "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
   "license": "MIT",
   "repository": {
@@ -41,5 +40,17 @@
     "tsdown": "catalog:dev",
     "typescript": "catalog:dev",
     "vitest": "catalog:dev"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.17.0",
+      "onFail": "download"
+    },
+    "runtime": {
+      "name": "node",
+      "version": "^20.19.0 || ^22.11.0 || ^24.11.0 || >=26",
+      "onFail": "error"
+    }
   }
 }
