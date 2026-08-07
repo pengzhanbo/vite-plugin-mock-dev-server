@@ -34,7 +34,7 @@
 // 请求信息会自动解析到 request 对象
 export default defineMock({
   url: '/api/users',
-  body: request => ({
+  body: (request) => ({
     // request 包含以下信息：
     method: request.method, // 'GET'
     url: request.url, // '/api/users?page=1'
@@ -42,8 +42,8 @@ export default defineMock({
     headers: request.headers, // { 'content-type': 'application/json' }
     body: request.body, // POST/PUT 请求体
     params: request.params, // 路由参数
-    getCookie: request.getCookie // 获取 Cookie 的方法
-  })
+    getCookie: request.getCookie, // 获取 Cookie 的方法
+  }),
 })
 ```
 
@@ -61,7 +61,7 @@ export default defineMock({
 
    ```ts
    mockDevServerPlugin({
-     prefix: ['/api', '/mock'] // 只处理这些前缀的请求
+     prefix: ['/api', '/mock'], // 只处理这些前缀的请求
    })
    ```
 
@@ -70,7 +70,7 @@ export default defineMock({
    ```ts
    export default defineMock({
      url: '/api/users/:id', // 匹配 /api/users/123
-     body: ({ params }) => ({ id: params.id })
+     body: ({ params }) => ({ id: params.id }),
    })
    ```
 
@@ -80,7 +80,7 @@ export default defineMock({
    export default defineMock({
      url: '/api/users',
      method: ['GET', 'POST'], // 只匹配 GET 和 POST
-     body: { list: [] }
+     body: { list: [] },
    })
    ```
 
@@ -99,7 +99,7 @@ export default defineMock({
 export default defineMock({
   url: '/api/search',
   validator: { query: { type: 'user' } },
-  body: { result: 'users' }
+  body: { result: 'users' },
 })
 
 // 2. 函数验证 - 自定义逻辑
@@ -108,7 +108,7 @@ export default defineMock({
   validator: (request) => {
     return request.headers['x-role'] === 'admin'
   },
-  body: { sensitive: 'data' }
+  body: { sensitive: 'data' },
 })
 ```
 
@@ -128,7 +128,7 @@ export default defineMock({
   url: '/api/static',
   status: 200,
   headers: { 'x-custom': 'value' },
-  body: { message: 'ok' }
+  body: { message: 'ok' },
 })
 
 // 2. 动态响应
@@ -136,8 +136,8 @@ export default defineMock({
   url: '/api/dynamic',
   body: ({ query, params }) => ({
     page: query.page,
-    id: params.id
-  })
+    id: params.id,
+  }),
 })
 
 // 3. 自定义响应
@@ -147,7 +147,7 @@ export default defineMock({
     res.statusCode = 201
     res.setHeader('Content-Type', 'application/json')
     res.end(JSON.stringify({ custom: true }))
-  }
+  },
 })
 ```
 
@@ -194,7 +194,7 @@ export default defineMock({
     onCleanup(() => {
       console.log('Cleaning up WebSocket server')
     })
-  }
+  },
 })
 ```
 
@@ -211,7 +211,7 @@ export default defineMock({
 
 ```ts
 mockDevServerPlugin({
-  reload: false // 默认 false，热更新不刷新页面
+  reload: false, // 默认 false，热更新不刷新页面
 })
 ```
 
@@ -227,7 +227,7 @@ const users = defineMockData('users', [])
 
 export default defineMock({
   url: '/api/users',
-  body: () => users.value // 热更新后数据仍然存在
+  body: () => users.value, // 热更新后数据仍然存在
 })
 ```
 
@@ -237,7 +237,7 @@ export default defineMock({
 
 ```ts
 mockDevServerPlugin({
-  log: 'debug'
+  log: 'debug',
 })
 ```
 
@@ -251,9 +251,9 @@ export default defineMock({
       method: request.method,
       url: request.url,
       query: request.query,
-      body: request.body
+      body: request.body,
     })
     return { debug: true }
-  }
+  },
 })
 ```

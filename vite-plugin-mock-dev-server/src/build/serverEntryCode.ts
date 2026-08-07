@@ -1,5 +1,5 @@
-import type { ResolvedMockServerPluginOptions } from '../core/options'
-import type { ServerBuildOption } from '../types'
+import type { ResolvedMockServerPluginOptions } from '../core/options.js'
+import type { ServerBuildOption } from '../types/index.js'
 
 export function generatorServerEntryCode({
   proxies,
@@ -11,7 +11,7 @@ export function generatorServerEntryCode({
   cors,
   record,
   replay,
-}: ResolvedMockServerPluginOptions) {
+}: ResolvedMockServerPluginOptions): string {
   const { serverPort, log } = build as ServerBuildOption
   // 生成的 entry code 有一个 潜在的问题：
   // formidableOptions 配置在 `vite.config.ts` 中，`formidableOptions` 配置项

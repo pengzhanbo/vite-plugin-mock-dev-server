@@ -56,14 +56,13 @@ export default defineMock([
     error: {
       probability: 0.5,
       status: 200,
-      body: (request) => {
+      body: (request) =>
         // 根据请求参数动态生成错误响应
-        return {
+        ({
           code: 500,
-          msg: `Error for request: ${request.query.id || 'unknown'}`,
+          msg: `Error for request: ${request.query.id ?? 'unknown'}`,
           result: null,
-        }
-      },
+        }),
     },
   },
 ])

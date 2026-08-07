@@ -33,8 +33,8 @@ import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 export default defineConfig({
   plugins: [
     // Make sure the plugin is added
-    mockDevServerPlugin()
-  ]
+    mockDevServerPlugin(),
+  ],
 })
 ```
 
@@ -55,7 +55,7 @@ If using a custom directory:
 
 ```ts
 mockDevServerPlugin({
-  dir: 'my-mock-folder' // Ensure the directory exists
+  dir: 'my-mock-folder', // Ensure the directory exists
 })
 ```
 
@@ -88,7 +88,7 @@ Enable debug logs to see file watching status:
 
 ```ts
 mockDevServerPlugin({
-  log: 'debug'
+  log: 'debug',
 })
 ```
 
@@ -99,7 +99,7 @@ Ensure the modified file is within the configured `include` range:
 ```ts
 mockDevServerPlugin({
   include: ['**/*.mock.ts'], // Ensure your file matches this pattern
-  exclude: ['**/node_modules/**', '**/*.test.mock.ts'] // Ensure it's not excluded
+  exclude: ['**/node_modules/**', '**/*.test.mock.ts'], // Ensure it's not excluded
 })
 ```
 
@@ -109,7 +109,7 @@ If hot reload still doesn't work, enable forced refresh:
 
 ```ts
 mockDevServerPlugin({
-  reload: true // Refresh page after modifying Mock files
+  reload: true, // Refresh page after modifying Mock files
 })
 ```
 
@@ -125,7 +125,7 @@ Request path does not match Mock configuration.
 
 ```ts
 mockDevServerPlugin({
-  log: 'debug'
+  log: 'debug',
 })
 ```
 
@@ -144,7 +144,7 @@ Common mistakes:
 ```ts
 // ❌ Error: Missing leading slash
 export default defineMock({
-  url: 'api/users' // Should be '/api/users'
+  url: 'api/users', // Should be '/api/users'
 })
 
 // ❌ Error: Trailing slash inconsistency
@@ -164,7 +164,7 @@ If using `prefix` configuration, ensure the request path starts with the prefix:
 
 ```ts
 mockDevServerPlugin({
-  prefix: ['/api'] // Only intercept requests starting with /api
+  prefix: ['/api'], // Only intercept requests starting with /api
 })
 
 // ✅ Will be intercepted
@@ -186,7 +186,7 @@ WebSocket connection cannot be established or disconnects immediately.
 
 ```ts
 mockDevServerPlugin({
-  wsPrefix: ['/ws', '/socket.io'] // WebSocket path prefixes
+  wsPrefix: ['/ws', '/socket.io'], // WebSocket path prefixes
 })
 ```
 
@@ -198,14 +198,14 @@ export default defineConfig({
   server: {
     proxy: {
       // ❌ Error: WebSocket paths should not be configured here
-      '/ws': 'http://localhost:8080'
-    }
+      '/ws': 'http://localhost:8080',
+    },
   },
   plugins: [
     mockDevServerPlugin({
-      wsPrefix: ['/ws'] // Should only be configured here
-    })
-  ]
+      wsPrefix: ['/ws'], // Should only be configured here
+    }),
+  ],
 })
 ```
 
@@ -234,11 +234,14 @@ export default defineMock({
   url: '/api/login',
   cookies: {
     // ✅ Correct: Set Cookie
-    session: ['abc123', {
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours, in milliseconds
-    }]
-  }
+    session: [
+      'abc123',
+      {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours, in milliseconds
+      },
+    ],
+  },
 })
 ```
 
@@ -254,7 +257,7 @@ If frontend and Mock service are cross-origin, configure CORS:
 
 ```ts
 mockDevServerPlugin({
-  cors: true // Or detailed configuration
+  cors: true, // Or detailed configuration
 })
 ```
 
@@ -272,8 +275,8 @@ Uploading files returns 413 or cannot parse files.
 mockDevServerPlugin({
   formidableOptions: {
     maxFileSize: 10 * 1024 * 1024, // 10MB, default is 5MB
-    maxFieldsSize: 10 * 1024 * 1024
-  }
+    maxFieldsSize: 10 * 1024 * 1024,
+  },
 })
 ```
 
@@ -285,8 +288,8 @@ import path from 'node:path'
 mockDevServerPlugin({
   formidableOptions: {
     uploadDir: path.join(process.cwd(), 'uploads'), // Ensure directory exists
-    keepExtensions: true // Keep file extensions
-  }
+    keepExtensions: true, // Keep file extensions
+  },
 })
 ```
 
@@ -313,9 +316,9 @@ Cannot get request body data or data format is incorrect.
 fetch('/api/users', {
   method: 'POST',
   headers: {
-    'Content-Type': 'application/json' // Must be set
+    'Content-Type': 'application/json', // Must be set
   },
-  body: JSON.stringify({ name: 'John' })
+  body: JSON.stringify({ name: 'John' }),
 })
 ```
 
@@ -326,8 +329,8 @@ mockDevServerPlugin({
   bodyParserOptions: {
     jsonLimit: '10mb', // JSON request body size limit
     formLimit: '10mb', // Form request body size limit
-    textLimit: '10mb' // Text request body size limit
-  }
+    textLimit: '10mb', // Text request body size limit
+  },
 })
 ```
 
@@ -340,7 +343,7 @@ export default defineMock({
   body: (request) => {
     console.log('Request body:', request.body) // For debugging
     return { received: request.body }
-  }
+  },
 })
 ```
 
@@ -356,12 +359,12 @@ Mock API and real backend API conflict when both exist.
 
 ```ts
 mockDevServerPlugin({
-  prefix: ['/api/mock'] // Mock API uses /api/mock prefix
+  prefix: ['/api/mock'], // Mock API uses /api/mock prefix
 })
 
 // Mock configuration
 export default defineMock({
-  url: '/api/mock/users'
+  url: '/api/mock/users',
 })
 
 // Real API uses /api
@@ -379,10 +382,10 @@ export default defineConfig({
       // Requests not matched by Mock are forwarded to backend
       '^/api': {
         target: 'http://localhost:8080',
-        changeOrigin: true
-      }
-    }
-  }
+        changeOrigin: true,
+      },
+    },
+  },
 })
 ```
 
@@ -396,9 +399,7 @@ VITE_USE_MOCK = true
 const useMock = process.env.VITE_USE_MOCK === 'true'
 
 export default defineConfig({
-  plugins: [
-    useMock && mockDevServerPlugin()
-  ].filter(Boolean)
+  plugins: [useMock && mockDevServerPlugin()].filter(Boolean),
 })
 ```
 
@@ -408,7 +409,7 @@ export default defineConfig({
 
 ```ts
 mockDevServerPlugin({
-  log: 'debug' // 'debug' | 'info' | 'warn' | 'error' | 'silent'
+  log: 'debug', // 'debug' | 'info' | 'warn' | 'error' | 'silent'
 })
 ```
 
@@ -427,15 +428,15 @@ View in browser console or terminal:
 ```ts
 export default defineMock({
   url: '/api/debug',
-  body: request => ({
+  body: (request) => ({
     // View complete request information
     method: request.method,
     url: request.url,
     query: request.query,
     body: request.body,
     headers: request.headers,
-    cookies: request.getCookie('session')
-  })
+    cookies: request.getCookie('session'),
+  }),
 })
 ```
 

@@ -1,12 +1,19 @@
 import type { IncomingMessage } from 'node:http'
 import type { UserConfig } from 'vite'
-import type { RecordedReq, RecordedRequest, ResolvedRecordOptions } from '../types'
+import type { RecordedReq, RecordedRequest, ResolvedRecordOptions } from '../types/index.js'
 import { Buffer } from 'node:buffer'
 import fs, { promises as fsp } from 'node:fs'
 import path from 'node:path'
 import { objectKeys } from '@pengzhanbo/utils'
-import { createRecordMatcher, getFilepath, isSameRecord, processRecordReq, processRecordRes, timeFormatter } from './helper'
-import { originalReqCache, readRecordStorage, writeRecordStorage } from './storage'
+import {
+  createRecordMatcher,
+  getFilepath,
+  isSameRecord,
+  processRecordReq,
+  processRecordRes,
+  timeFormatter,
+} from './helper.js'
+import { originalReqCache, readRecordStorage, writeRecordStorage } from './storage.js'
 
 /**
  * 请求记录器
@@ -22,18 +29,20 @@ export class Recorder {
 
   setup(config: UserConfig): void {
     const options = this.options
-    if (!config.server || !options.enabled)
+    if (!config.server || !options.enabled) {
       return
+    }
 
     const recordRequest = this.record.bind(this)
-    const proxies = config.server.proxy || {}
+    const proxies = config.server.proxy ?? {}
     // 从 http-proxy 记录请求
     objectKeys(proxies).forEach((key) => {
       const target = proxies[key]
-      const proxy = typeof target === 'string' ? { target } : target
-      if (proxy.ws)
+      const proxyOptions = typeof target === 'string' ? { target } : target
+      if (proxyOptions.ws) {
         return
-      const { configure, ...rest } = proxy
+      }
+      const { configure, ...rest } = proxyOptions
       proxies[key] = {
         ...rest,
         configure(proxy, _) {
@@ -42,9 +51,9 @@ export class Recorder {
           proxy.on('proxyRes', (proxyRes, req) => {
             // Capture response body
             let chunks: Buffer[] | null = []
-            proxyRes.on('data', chunk => chunk && chunks!.push(chunk))
-            proxyRes.on('end', () => {
-              recordRequest(req, proxyRes, Buffer.concat(chunks!))
+            proxyRes.on('data', (chunk) => chunk && chunks!.push(chunk))
+            proxyRes.on('end', async () => {
+              await recordRequest(req, proxyRes, Buffer.concat(chunks!))
               chunks = null
             })
           })
@@ -52,35 +61,39 @@ export class Recorder {
       }
     })
     // 添加 .gitignore 文件
-    this.addGitignore()
+    void this.addGitignore()
   }
 
   private async record(req: IncomingMessage, res: IncomingMessage, resBody: Buffer): Promise<void> {
-    if (!originalReqCache.has(req))
+    if (!originalReqCache.has(req)) {
       return
+    }
 
     const { body, pathname, timestamp } = originalReqCache.get(req)!
     originalReqCache.delete(req)
 
-    if (!pathname)
+    if (!pathname) {
       return
+    }
 
     const recordReq = processRecordReq(req, pathname, body)
 
-    if (!this.filter(recordReq))
+    if (!this.filter(recordReq)) {
       return
+    }
 
     const { cwd, dir, status, expires, overwrite } = this.options
     // 过滤 status 配置项中未包含的状态码
-    if (status.length !== 0 && !status.includes(res.statusCode || 200))
+    if (status.length !== 0 && !status.includes(res.statusCode ?? 200)) {
       return
+    }
 
     const record: RecordedRequest = {
       meta: {
         timestamp,
         filepath: '',
         createAt: timeFormatter.format(timestamp),
-        referer: req.headers.referer || 'unknown',
+        referer: req.headers.referer ?? 'unknown',
       },
       req: recordReq,
       res: await processRecordRes(res, resBody),
@@ -89,11 +102,13 @@ export class Recorder {
     record.meta.filepath = filepath
 
     const absoluteFilepath = path.join(cwd, filepath)
-    const records = (await readRecordStorage(absoluteFilepath)).filter(item =>
-      timestamp - item.meta.timestamp <= expires,
+    const records = (await readRecordStorage(absoluteFilepath)).filter(
+      (item) => timestamp - item.meta.timestamp <= expires,
     )
 
-    const index = records.findIndex(item => isSameRecord(item.req, record.req) && item.res.status === record.res.status)
+    const index = records.findIndex(
+      (item) => isSameRecord(item.req, record.req) && item.res.status === record.res.status,
+    )
 
     if (index === -1) {
       records.push(record)
@@ -109,12 +124,14 @@ export class Recorder {
   private async addGitignore(): Promise<void> {
     const options = this.options
 
-    if (!options.gitignore)
+    if (!options.gitignore) {
       return
+    }
 
     const dirname = path.join(options.cwd, options.dir)
     await fsp.mkdir(dirname, { recursive: true })
-    if (!fs.existsSync(path.join(dirname, '.gitignore')))
+    if (!fs.existsSync(path.join(dirname, '.gitignore'))) {
       await fsp.writeFile(path.join(dirname, '.gitignore'), '*\n', 'utf-8')
+    }
   }
 }

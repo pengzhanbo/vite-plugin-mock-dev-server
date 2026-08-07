@@ -134,9 +134,9 @@ import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 export default defineConfig({
   plugins: [
     mockDevServerPlugin({
-      record: true
-    })
-  ]
+      record: true,
+    }),
+  ],
 })
 ```
 
@@ -163,22 +163,23 @@ export default defineConfig({
         overwrite: true, // Overwrite existing recording data
         expires: 0, // Recording data expiration time (seconds)
         status: [], // Status codes to record
-        filter: { // Request filter configuration
+        filter: {
+          // Request filter configuration
           mode: 'glob',
           include: ['/api/**'],
-          exclude: ['/api/auth/**']
+          exclude: ['/api/auth/**'],
         },
-        gitignore: true // Add .gitignore
+        gitignore: true, // Add .gitignore
       },
       // Replay configuration (optional, defaults to enabled)
-      replay: true
-    })
+      replay: true,
+    }),
   ],
   server: {
     proxy: {
-      '/api': 'http://localhost:8080'
-    }
-  }
+      '/api': 'http://localhost:8080',
+    },
+  },
 })
 ```
 
@@ -232,10 +233,10 @@ export default defineConfig({
 export default {
   record: {
     filter: (req) => {
-    // Only record GET requests
+      // Only record GET requests
       return req.method === 'GET'
-    }
-  }
+    },
+  },
 }
 ```
 
@@ -247,9 +248,9 @@ export default {
     filter: {
       mode: 'glob', // or 'path-to-regexp'
       include: ['/api/**'], // Included paths
-      exclude: ['/api/auth/**'] // Excluded paths
-    }
-  }
+      exclude: ['/api/auth/**'], // Excluded paths
+    },
+  },
 }
 ```
 
@@ -442,14 +443,14 @@ export default defineConfig({
   plugins: [
     mockDevServerPlugin({
       prefix: ['/api'],
-      record: true // Enable record and replay with one click
-    })
+      record: true, // Enable record and replay with one click
+    }),
   ],
   server: {
     proxy: {
-      '/api': 'http://localhost:8080'
-    }
-  }
+      '/api': 'http://localhost:8080',
+    },
+  },
 })
 ```
 
@@ -467,10 +468,10 @@ export default defineConfig({
       record: {
         enabled: true,
         status: [200, 201], // Only record successful responses
-        overwrite: true
-      }
-    })
-  ]
+        overwrite: true,
+      },
+    }),
+  ],
 })
 ```
 
@@ -490,11 +491,11 @@ export default defineConfig({
         filter: {
           mode: 'glob',
           include: ['/api/users/**', '/api/orders/**'], // Only record user and order APIs
-          exclude: ['/api/users/sensitive/**'] // Exclude sensitive APIs
-        }
-      }
-    })
-  ]
+          exclude: ['/api/users/sensitive/**'], // Exclude sensitive APIs
+        },
+      },
+    }),
+  ],
 })
 ```
 
@@ -514,11 +515,11 @@ export default defineConfig({
         filter: {
           mode: 'path-to-regexp',
           include: ['/api/:resource/:id'], // Match /api/users/123
-          exclude: ['/api/auth/:action'] // Exclude auth-related
-        }
-      }
-    })
-  ]
+          exclude: ['/api/auth/:action'], // Exclude auth-related
+        },
+      },
+    }),
+  ],
 })
 ```
 
@@ -538,10 +539,10 @@ export default defineConfig({
         filter: (req) => {
           // Only record GET requests and paths not containing sensitive
           return req.method === 'GET' && !req.pathname.includes('sensitive')
-        }
-      }
-    })
-  ]
+        },
+      },
+    }),
+  ],
 })
 ```
 
@@ -559,10 +560,10 @@ export default defineConfig({
       record: {
         enabled: true,
         expires: 86400, // Recording data expires after 24 hours
-        overwrite: true
-      }
-    })
-  ]
+        overwrite: true,
+      },
+    }),
+  ],
 })
 ```
 
@@ -578,9 +579,9 @@ export default defineConfig({
     mockDevServerPlugin({
       prefix: ['/api'],
       record: { enabled: false }, // Do not record new data
-      replay: true // But use existing recorded data
-    })
-  ]
+      replay: true, // But use existing recorded data
+    }),
+  ],
 })
 ```
 
@@ -599,10 +600,10 @@ export default defineConfig({
         enabled: true,
         dir: 'recordings/api', // Custom storage directory
         overwrite: false, // Do not overwrite existing recordings
-        gitignore: false // Do not auto-generate .gitignore
-      }
-    })
-  ]
+        gitignore: false, // Do not auto-generate .gitignore
+      },
+    }),
+  ],
 })
 ```
 
@@ -641,8 +642,8 @@ To commit recording data to version control:
 export default {
   record: {
     enabled: true,
-    gitignore: false // Do not auto-generate .gitignore
-  }
+    gitignore: false, // Do not auto-generate .gitignore
+  },
 }
 ```
 
@@ -678,8 +679,8 @@ export default {
     filter: (req) => {
       console.log('Recording request:', req.pathname)
       return true // Temporarily return true for testing
-    }
-  }
+    },
+  },
 }
 ```
 
@@ -706,8 +707,8 @@ Or set expiration to 1 second in config and re-record:
 export default {
   record: {
     enabled: true,
-    expires: 1 // Expires after 1 second
-  }
+    expires: 1, // Expires after 1 second
+  },
 }
 ```
 
@@ -732,7 +733,7 @@ Mock Data Priority > Recorded Data > Proxy Forward
 // If there's a matching config in mock file
 export default defineMock({
   url: '/api/users',
-  body: { list: [] } // Mock data takes priority
+  body: { list: [] }, // Mock data takes priority
 })
 
 // Even with recorded data, the above Mock config will be used
@@ -746,14 +747,14 @@ Recording feature depends on Vite's `server.proxy` configuration:
 export default defineConfig({
   plugins: [
     mockDevServerPlugin({
-      record: true
-    })
+      record: true,
+    }),
   ],
   server: {
     proxy: {
-      '/api': 'http://localhost:8080' // Recording intercepts this proxy
-    }
-  }
+      '/api': 'http://localhost:8080', // Recording intercepts this proxy
+    },
+  },
 })
 ```
 
@@ -765,7 +766,7 @@ Optionally include recording files when building standalone mock service:
 mockDevServerPlugin({
   record: { enabled: true },
   build: {
-    includeRecord: true // Include recording files in build output
-  }
+    includeRecord: true, // Include recording files in build output
+  },
 })
 ```

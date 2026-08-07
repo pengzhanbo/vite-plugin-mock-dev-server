@@ -43,7 +43,7 @@ See the [documentation](https://vite-plugin-mock-dev-server.netlify.app/en/) for
 
 ## Install
 
-``` sh
+```sh
 # npm
 npm i -D vite-plugin-mock-dev-server
 # yarn
@@ -56,22 +56,20 @@ pnpm add -D vite-plugin-mock-dev-server
 
 `vite.config.ts`
 
-``` ts
+```ts
 import { defineConfig } from 'vite'
 import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
 
 export default defineConfig({
-  plugins: [
-    mockDevServerPlugin(/* plugin options */),
-  ],
+  plugins: [mockDevServerPlugin(/* plugin options */)],
   // The fields defined here can also be used in mock.
   define: {},
   server: {
     // plugin will read `server.proxy`
     proxy: {
-      '^/api': { target: 'http://example.com' }
-    }
-  }
+      '^/api': { target: 'http://example.com' },
+    },
+  },
 })
 ```
 
@@ -85,12 +83,12 @@ By default, write mock data in the `mock` directory of your project's root direc
 
 `mock/**/*.mock.ts` :
 
-``` ts
+```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
   url: '/api/test',
-  body: { a: 1, b: 2 }
+  body: { a: 1, b: 2 },
 })
 ```
 

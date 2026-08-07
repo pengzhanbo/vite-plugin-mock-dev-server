@@ -225,7 +225,7 @@ pnpm lint -- --fix
 
 示例：
 
-```typescript
+````typescript
 /**
  * Define mock data that can be shared across multiple mock files
  *
@@ -240,7 +240,7 @@ pnpm lint -- --fix
  * ```
  */
 export function defineMockData<T>(key: string, initialData: T): MockData<T>
-```
+````
 
 ## 提交规范
 

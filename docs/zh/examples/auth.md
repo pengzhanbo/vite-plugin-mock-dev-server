@@ -5,6 +5,7 @@
 ## 场景描述
 
 实现完整的认证流程：
+
 - 用户登录（验证用户名密码，返回 JWT Token）
 - Token 刷新（使用 Refresh Token 获取新的 Access Token）
 - 用户登出（清除 Token）
@@ -48,7 +49,7 @@ const users: User[] = [
     password: 'admin123', // 实际应使用 bcrypt 等哈希
     email: 'admin@example.com',
     roles: ['admin', 'user'],
-    permissions: ['read', 'write', 'delete', 'manage']
+    permissions: ['read', 'write', 'delete', 'manage'],
   },
   {
     id: 2,
@@ -56,7 +57,7 @@ const users: User[] = [
     password: 'user123',
     email: 'user@example.com',
     roles: ['user'],
-    permissions: ['read']
+    permissions: ['read'],
   },
   {
     id: 3,
@@ -64,8 +65,8 @@ const users: User[] = [
     password: 'editor123',
     email: 'editor@example.com',
     roles: ['editor', 'user'],
-    permissions: ['read', 'write']
-  }
+    permissions: ['read', 'write'],
+  },
 ]
 
 export const userDatabase = defineMockData<User[]>('users', users)
@@ -78,14 +79,17 @@ const JWT_SECRET = 'your-secret-key-change-in-production'
 const REFRESH_SECRET = 'your-refresh-secret-key'
 
 // 简单的 JWT 实现（实际项目应使用 jsonwebtoken 库）
-export function generateToken(payload: Omit<TokenPayload, 'iat' | 'exp'>, type: 'access' | 'refresh' = 'access'): string {
+export function generateToken(
+  payload: Omit<TokenPayload, 'iat' | 'exp'>,
+  type: 'access' | 'refresh' = 'access',
+): string {
   const now = Math.floor(Date.now() / 1000)
   const expiresIn = type === 'access' ? 3600 : 7 * 24 * 3600 // 1小时 / 7天
 
   const tokenPayload: TokenPayload = {
     ...payload,
     iat: now,
-    exp: now + expiresIn
+    exp: now + expiresIn,
   }
 
   // 简化实现：Base64 编码（实际应使用 JWT 签名）
@@ -98,8 +102,7 @@ export function generateToken(payload: Omit<TokenPayload, 'iat' | 'exp'>, type: 
 export function verifyToken(token: string): TokenPayload | null {
   try {
     const payload = tokenStore.value.get(token)
-    if (!payload)
-      return null
+    if (!payload) return null
 
     const now = Math.floor(Date.now() / 1000)
     if (payload.exp < now) {
@@ -108,8 +111,7 @@ export function verifyToken(token: string): TokenPayload | null {
     }
 
     return payload
-  }
-  catch {
+  } catch {
     return null
   }
 }
@@ -119,13 +121,11 @@ export function revokeToken(token: string): void {
 }
 
 export function findUser(username: string, password: string): User | undefined {
-  return userDatabase.value.find(
-    u => u.username === username && u.password === password
-  )
+  return userDatabase.value.find((u) => u.username === username && u.password === password)
 }
 
 export function findUserById(id: number): User | undefined {
-  return userDatabase.value.find(u => u.id === id)
+  return userDatabase.value.find((u) => u.id === id)
 }
 ```
 
@@ -133,13 +133,7 @@ export function findUserById(id: number): User | undefined {
 
 ```ts [mock/auth.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
-import {
-  findUser,
-  findUserById,
-  generateToken,
-  revokeToken,
-  verifyToken
-} from './data/auth'
+import { findUser, findUserById, generateToken, revokeToken, verifyToken } from './data/auth'
 
 // 认证中间件
 function authMiddleware(req: any, res: any, next: any) {
@@ -174,7 +168,7 @@ function requirePermission(...permissions: string[]) {
       return
     }
 
-    const hasPermission = permissions.every(p => user.permissions.includes(p))
+    const hasPermission = permissions.every((p) => user.permissions.includes(p))
     if (!hasPermission) {
       res.statusCode = 403
       res.end(JSON.stringify({ message: '权限不足' }))
@@ -189,7 +183,7 @@ function requirePermission(...permissions: string[]) {
 function requireRole(...roles: string[]) {
   return (req: any, res: any, next: any) => {
     const userRoles = req.user.roles || []
-    const hasRole = roles.some(r => userRoles.includes(r))
+    const hasRole = roles.some((r) => userRoles.includes(r))
 
     if (!hasRole) {
       res.statusCode = 403
@@ -213,7 +207,7 @@ export default defineMock([
       if (!username || !password) {
         return {
           status: 400,
-          body: { message: '用户名和密码不能为空' }
+          body: { message: '用户名和密码不能为空' },
         }
       }
 
@@ -221,14 +215,14 @@ export default defineMock([
       if (!user) {
         return {
           status: 401,
-          body: { message: '用户名或密码错误' }
+          body: { message: '用户名或密码错误' },
         }
       }
 
       const tokenPayload = {
         userId: user.id,
         username: user.username,
-        roles: user.roles
+        roles: user.roles,
       }
 
       const accessToken = generateToken(tokenPayload, 'access')
@@ -245,12 +239,12 @@ export default defineMock([
               id: user.id,
               username: user.username,
               email: user.email,
-              roles: user.roles
-            }
-          }
-        }
+              roles: user.roles,
+            },
+          },
+        },
       }
-    }
+    },
   },
 
   // ========== 刷新 Token ==========
@@ -263,7 +257,7 @@ export default defineMock([
       if (!refreshToken) {
         return {
           status: 400,
-          body: { message: '请提供刷新令牌' }
+          body: { message: '请提供刷新令牌' },
         }
       }
 
@@ -271,7 +265,7 @@ export default defineMock([
       if (!payload) {
         return {
           status: 401,
-          body: { message: '刷新令牌无效或已过期' }
+          body: { message: '刷新令牌无效或已过期' },
         }
       }
 
@@ -282,7 +276,7 @@ export default defineMock([
       const tokenPayload = {
         userId: payload.userId,
         username: payload.username,
-        roles: payload.roles
+        roles: payload.roles,
       }
 
       const newAccessToken = generateToken(tokenPayload, 'access')
@@ -294,11 +288,11 @@ export default defineMock([
           data: {
             accessToken: newAccessToken,
             refreshToken: newRefreshToken,
-            expiresIn: 3600
-          }
-        }
+            expiresIn: 3600,
+          },
+        },
       }
-    }
+    },
   },
 
   // ========== 登出 ==========
@@ -312,9 +306,9 @@ export default defineMock([
       }
 
       return {
-        body: { message: '登出成功' }
+        body: { message: '登出成功' },
       }
-    }
+    },
   },
 
   // ========== 获取当前用户信息 ==========
@@ -330,17 +324,19 @@ export default defineMock([
           return
         }
 
-        res.end(JSON.stringify({
-          data: {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            roles: user.roles,
-            permissions: user.permissions
-          }
-        }))
+        res.end(
+          JSON.stringify({
+            data: {
+              id: user.id,
+              username: user.username,
+              email: user.email,
+              roles: user.roles,
+              permissions: user.permissions,
+            },
+          }),
+        )
       })
-    }
+    },
   },
 
   // ========== 管理员接口示例 ==========
@@ -350,17 +346,17 @@ export default defineMock([
     response: (req, res, next) => {
       authMiddleware(req, res, () => {
         requireRole('admin')(req, res, () => {
-          const users = userDatabase.value.map(u => ({
+          const users = userDatabase.value.map((u) => ({
             id: u.id,
             username: u.username,
             email: u.email,
-            roles: u.roles
+            roles: u.roles,
           }))
 
           res.end(JSON.stringify({ data: users }))
         })
       })
-    }
+    },
   },
 
   // ========== 需要写权限的接口 ==========
@@ -371,13 +367,15 @@ export default defineMock([
       authMiddleware(req, res, () => {
         requirePermission('write')(req, res, () => {
           // 处理创建文章逻辑
-          res.end(JSON.stringify({
-            message: '文章创建成功',
-            data: { id: Date.now(), author: req.user.username }
-          }))
+          res.end(
+            JSON.stringify({
+              message: '文章创建成功',
+              data: { id: Date.now(), author: req.user.username },
+            }),
+          )
         })
       })
-    }
+    },
   },
 
   // ========== 公开接口 ==========
@@ -386,9 +384,9 @@ export default defineMock([
     method: 'GET',
     body: {
       message: '这是公开信息，无需认证',
-      timestamp: Date.now()
-    }
-  }
+      timestamp: Date.now(),
+    },
+  },
 ])
 ```
 
@@ -399,7 +397,7 @@ import axios from 'axios'
 
 // 创建 axios 实例
 const apiClient = axios.create({
-  baseURL: '/api'
+  baseURL: '/api',
 })
 
 // 请求拦截器：添加 Token
@@ -411,12 +409,12 @@ apiClient.interceptors.request.use(
     }
     return config
   },
-  error => Promise.reject(error)
+  (error) => Promise.reject(error),
 )
 
 // 响应拦截器：处理 Token 过期
 apiClient.interceptors.response.use(
-  response => response,
+  (response) => response,
   async (error) => {
     const originalRequest = error.config
 
@@ -432,8 +430,7 @@ apiClient.interceptors.response.use(
 
         originalRequest.headers.Authorization = `Bearer ${data.data.accessToken}`
         return apiClient(originalRequest)
-      }
-      catch (refreshError) {
+      } catch (refreshError) {
         // 刷新失败，清除 Token 并跳转登录
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
@@ -443,7 +440,7 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error)
-  }
+  },
 )
 
 // 登录
@@ -479,17 +476,8 @@ export function createPost(data: any) {
   <div class="login-page">
     <form @submit.prevent="handleLogin">
       <h2>登录</h2>
-      <input
-        v-model="form.username"
-        placeholder="用户名"
-        required
-      />
-      <input
-        v-model="form.password"
-        type="password"
-        placeholder="密码"
-        required
-      />
+      <input v-model="form.username" placeholder="用户名" required />
+      <input v-model="form.password" type="password" placeholder="密码" required />
       <button type="submit" :disabled="loading">
         {{ loading ? '登录中...' : '登录' }}
       </button>
@@ -509,7 +497,7 @@ const error = ref('')
 
 const form = reactive({
   username: '',
-  password: ''
+  password: '',
 })
 
 async function handleLogin() {
@@ -570,7 +558,7 @@ onMounted(async () => {
   try {
     const [{ data: userData }, { data: usersData }] = await Promise.all([
       getCurrentUser(),
-      getAdminUsers()
+      getAdminUsers(),
     ])
     user.value = userData.data
     users.value = usersData.data

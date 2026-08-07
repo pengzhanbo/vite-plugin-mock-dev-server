@@ -15,7 +15,7 @@
 ```ts
 export default defineMock({
   url: '/api/users', // 只匹配 /api/users
-  body: { list: [] }
+  body: { list: [] },
 })
 ```
 
@@ -34,8 +34,8 @@ export default defineMock({
 export default defineMock({
   url: '/api/users/:id',
   body: ({ params }) => ({
-    userId: params.id // 获取捕获的参数
-  })
+    userId: params.id, // 获取捕获的参数
+  }),
 })
 ```
 
@@ -55,8 +55,8 @@ export default defineMock({
   url: '/api/users/:userId/posts/:postId',
   body: ({ params }) => ({
     userId: params.userId,
-    postId: params.postId
-  })
+    postId: params.postId,
+  }),
 })
 ```
 
@@ -78,14 +78,14 @@ export default defineMock({
       return { type: 'single', id: params.id }
     }
     return { type: 'list', users: [] }
-  }
+  },
 })
 ```
 
-| 请求 URL         | 是否匹配  | params 值       |
-| ---------------- | --------- | --------------- |
-| `/api/users`     | ✅ 匹配   | `{}`            |
-| `/api/users/123` | ✅ 匹配   | `{ id: '123' }` |
+| 请求 URL         | 是否匹配 | params 值       |
+| ---------------- | -------- | --------------- |
+| `/api/users`     | ✅ 匹配  | `{}`            |
+| `/api/users/123` | ✅ 匹配  | `{ id: '123' }` |
 
 ### 通配符匹配
 
@@ -95,8 +95,8 @@ export default defineMock({
 export default defineMock({
   url: '/api/files/*path',
   body: ({ params }) => ({
-    path: params.path // 数组形式
-  })
+    path: params.path, // 数组形式
+  }),
 })
 ```
 
@@ -112,8 +112,8 @@ export default defineMock({
 export default defineMock({
   url: '/api/files{/*path}',
   body: ({ params }) => ({
-    path: params.path || [] // 可能是 undefined 或数组
-  })
+    path: params.path || [], // 可能是 undefined 或数组
+  }),
 })
 ```
 
@@ -132,8 +132,8 @@ export default defineMock({
 export default defineMock({
   url: '/api/proxy/*path',
   body: ({ params }) => ({
-    proxiedPath: params.path?.join('/') // 使用数组方法访问
-  })
+    proxiedPath: params.path?.join('/'), // 使用数组方法访问
+  }),
 })
 ```
 
@@ -151,8 +151,8 @@ mockDevServerPlugin({
   prefix: [
     '/api', // 字符串前缀
     '^/api/v\\d+/.*', // 正则：匹配 /api/v1/, /api/v2/ 等
-    '^/graphql$' // 正则：精确匹配 /graphql
-  ]
+    '^/graphql$', // 正则：精确匹配 /graphql
+  ],
 })
 ```
 
@@ -172,16 +172,16 @@ mockDevServerPlugin({
 export default defineMock([
   {
     url: '/api/users', // 优先级 1：静态路径
-    body: 'all users'
+    body: 'all users',
   },
   {
     url: '/api/users/:id', // 优先级 2：一个动态参数
-    body: 'single user'
+    body: 'single user',
   },
   {
     url: '/api/:resource/:id', // 优先级 3：两个动态参数
-    body: 'generic resource'
-  }
+    body: 'generic resource',
+  },
 ])
 ```
 
@@ -202,16 +202,16 @@ mockDevServerPlugin({
     global: [
       '/api/users/admin', // 最高优先级
       '/api/users/:id',
-      '/api/:resource/:id'
+      '/api/:resource/:id',
     ],
     // 特殊优先级规则
     special: {
       '/api/:a/:b/c': {
         rules: ['/api/a/:b/:c'], // 当与这些规则冲突时
-        when: ['/api/a/b/c'] // 在这些场景下
-      }
-    }
-  }
+        when: ['/api/a/b/c'], // 在这些场景下
+      },
+    },
+  },
 })
 ```
 
@@ -225,34 +225,34 @@ export default defineMock([
   {
     url: '/api/users',
     method: 'GET',
-    body: { users: [] }
+    body: { users: [] },
   },
   {
     url: '/api/users',
     method: 'POST',
-    body: ({ body }) => ({ id: Date.now(), ...body })
+    body: ({ body }) => ({ id: Date.now(), ...body }),
   },
   // 单个资源操作
   {
     url: '/api/users/:id',
     method: 'GET',
-    body: ({ params }) => ({ id: params.id })
+    body: ({ params }) => ({ id: params.id }),
   },
   {
     url: '/api/users/:id',
     method: 'PUT',
-    body: ({ params, body }) => ({ id: params.id, ...body })
+    body: ({ params, body }) => ({ id: params.id, ...body }),
   },
   {
     url: '/api/users/:id',
     method: 'DELETE',
-    status: 204
+    status: 204,
   },
   // 嵌套资源
   {
     url: '/api/users/:userId/posts',
-    body: ({ params }) => ({ userId: params.userId, posts: [] })
-  }
+    body: ({ params }) => ({ userId: params.userId, posts: [] }),
+  },
 ])
 ```
 
@@ -264,16 +264,16 @@ export default defineMock([
     url: '/api/files/:type(images|documents|videos)/:name',
     body: ({ params }) => ({
       type: params.type,
-      filename: params.name
-    })
+      filename: params.name,
+    }),
   },
   {
     url: '/api/download/*path',
     response: (req, res) => {
       const filePath = req.params.path?.join('/')
       // 处理文件下载...
-    }
-  }
+    },
+  },
 ])
 ```
 
@@ -282,19 +282,19 @@ export default defineMock([
 ```ts
 mockDevServerPlugin({
   prefix: [
-    '^/api/v\\d+/.*' // 匹配所有版本化的 API
-  ]
+    '^/api/v\\d+/.*', // 匹配所有版本化的 API
+  ],
 })
 
 export default defineMock([
   {
     url: '/api/v1/users',
-    body: { version: 'v1', users: [] }
+    body: { version: 'v1', users: [] },
   },
   {
     url: '/api/v2/users',
-    body: { version: 'v2', users: [], meta: {} }
-  }
+    body: { version: 'v2', users: [], meta: {} },
+  },
 ])
 ```
 
@@ -321,7 +321,7 @@ path-to-regexp v8.x 与旧版本相比有以下破坏性变更：
 
 ```ts
 mockDevServerPlugin({
-  log: 'debug' // 启用详细日志
+  log: 'debug', // 启用详细日志
 })
 ```
 

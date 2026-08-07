@@ -35,7 +35,7 @@ When the browser initiates a request, the plugin processes it according to the f
 // Request information is automatically parsed into the request object
 export default defineMock({
   url: '/api/users',
-  body: request => ({
+  body: (request) => ({
     // request contains the following information:
     method: request.method, // 'GET'
     url: request.url, // '/api/users?page=1'
@@ -43,8 +43,8 @@ export default defineMock({
     headers: request.headers, // { 'content-type': 'application/json' }
     body: request.body, // POST/PUT request body
     params: request.params, // Route parameters
-    getCookie: request.getCookie // Method to get Cookie
-  })
+    getCookie: request.getCookie, // Method to get Cookie
+  }),
 })
 ```
 
@@ -62,7 +62,7 @@ export default defineMock({
 
    ```ts
    mockDevServerPlugin({
-     prefix: ['/api', '/mock'] // Only process requests with these prefixes
+     prefix: ['/api', '/mock'], // Only process requests with these prefixes
    })
    ```
 
@@ -71,7 +71,7 @@ export default defineMock({
    ```ts
    export default defineMock({
      url: '/api/users/:id', // Matches /api/users/123
-     body: ({ params }) => ({ id: params.id })
+     body: ({ params }) => ({ id: params.id }),
    })
    ```
 
@@ -81,7 +81,7 @@ export default defineMock({
    export default defineMock({
      url: '/api/users',
      method: ['GET', 'POST'], // Only matches GET and POST
-     body: { list: [] }
+     body: { list: [] },
    })
    ```
 
@@ -100,7 +100,7 @@ export default defineMock({
 export default defineMock({
   url: '/api/search',
   validator: { query: { type: 'user' } },
-  body: { result: 'users' }
+  body: { result: 'users' },
 })
 
 // 2. Function validation - custom logic
@@ -109,7 +109,7 @@ export default defineMock({
   validator: (request) => {
     return request.headers['x-role'] === 'admin'
   },
-  body: { sensitive: 'data' }
+  body: { sensitive: 'data' },
 })
 ```
 
@@ -129,7 +129,7 @@ export default defineMock({
   url: '/api/static',
   status: 200,
   headers: { 'x-custom': 'value' },
-  body: { message: 'ok' }
+  body: { message: 'ok' },
 })
 
 // 2. Dynamic response
@@ -137,8 +137,8 @@ export default defineMock({
   url: '/api/dynamic',
   body: ({ query, params }) => ({
     page: query.page,
-    id: params.id
-  })
+    id: params.id,
+  }),
 })
 
 // 3. Custom response
@@ -148,7 +148,7 @@ export default defineMock({
     res.statusCode = 201
     res.setHeader('Content-Type', 'application/json')
     res.end(JSON.stringify({ custom: true }))
-  }
+  },
 })
 ```
 
@@ -196,7 +196,7 @@ export default defineMock({
     onCleanup(() => {
       console.log('Cleaning up WebSocket server')
     })
-  }
+  },
 })
 ```
 
@@ -213,7 +213,7 @@ When Mock files are modified:
 
 ```ts
 mockDevServerPlugin({
-  reload: false // Default false, hot reload does not refresh page
+  reload: false, // Default false, hot reload does not refresh page
 })
 ```
 
@@ -229,7 +229,7 @@ const users = defineMockData('users', [])
 
 export default defineMock({
   url: '/api/users',
-  body: () => users.value // Data persists after hot reload
+  body: () => users.value, // Data persists after hot reload
 })
 ```
 
@@ -239,7 +239,7 @@ export default defineMock({
 
 ```ts
 mockDevServerPlugin({
-  log: 'debug'
+  log: 'debug',
 })
 ```
 
@@ -253,9 +253,9 @@ export default defineMock({
       method: request.method,
       url: request.url,
       query: request.query,
-      body: request.body
+      body: request.body,
     })
     return { debug: true }
-  }
+  },
 })
 ```

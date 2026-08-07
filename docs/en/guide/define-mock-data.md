@@ -15,12 +15,12 @@ Each mock file has its own scope, which means that even if multiple `*.mock.*` f
 ```ts
 type defineMockData<T> = (
   key: string, // unique key
-  initialData: T // initial data
+  initialData: T, // initial data
 ) => MockData<T>
 
 type MockData<T> = [
   () => T, // getter
-  (val: T | ((val: T) => void | T)) => void // setter
+  (val: T | ((val: T) => void | T)) => void, // setter
 ] & { value: T }
 ```
 
@@ -40,9 +40,9 @@ export const posts = defineMockData('posts', [
 The data encapsulated by `defineMockData` provides two different styles of data reading and writing support through the plugin, satisfying the usage habits of different developers.
 
 - `posts.value`: Use `Object.defineProperty` to define read and write data.
-- `[getter, setter] = posts`:  Deconstruct to a tuple containing `setter/getter` methods.
+- `[getter, setter] = posts`: Deconstruct to a tuple containing `setter/getter` methods.
 
-`*.mock.ts`  (`.value`)
+`*.mock.ts` (`.value`)
 ::: code-group
 
 ```ts [post-list.mock.ts]
@@ -51,7 +51,7 @@ import { posts } from './data'
 
 export default defineMock({
   url: '/api/post/list',
-  body: () => posts.value
+  body: () => posts.value,
 })
 ```
 
@@ -63,15 +63,15 @@ export default defineMock({
   url: '/api/post/delete/:id',
   body: (params) => {
     const id = params.id
-    posts.value = posts.value.filter(post => post.id !== id)
+    posts.value = posts.value.filter((post) => post.id !== id)
     return { success: true }
-  }
+  },
 })
 ```
 
 :::
 
-`*.mock.ts`  (`[getter, setter]`)
+`*.mock.ts` (`[getter, setter]`)
 ::: code-group
 
 ```ts [post-list.mock.ts]
@@ -83,7 +83,7 @@ export default defineMock({
   body: () => {
     const [getPost] = posts
     return getPost()
-  }
+  },
 })
 ```
 
@@ -97,10 +97,10 @@ export default defineMock({
     const id = params.id
     const [, setPosts] = posts
 
-    setPosts(posts => posts.filter(post => post.id !== id))
+    setPosts((posts) => posts.filter((post) => post.id !== id))
 
     return { success: true }
-  }
+  },
 })
 ```
 

@@ -15,16 +15,16 @@ The simplest matching method requires an exact URL match:
 ```ts
 export default defineMock({
   url: '/api/users', // Only matches /api/users
-  body: { list: [] }
+  body: { list: [] },
 })
 ```
 
-| Request URL      | Match Result                    |
-| ---------------- | ------------------------------- |
-| `/api/users`     | ✅ Match                        |
+| Request URL      | Match Result                      |
+| ---------------- | --------------------------------- |
+| `/api/users`     | ✅ Match                          |
 | `/api/users/`    | ❌ No match (note trailing slash) |
-| `/api/users/123` | ❌ No match                     |
-| `/API/users`     | ❌ No match (case-sensitive)    |
+| `/api/users/123` | ❌ No match                       |
+| `/API/users`     | ❌ No match (case-sensitive)      |
 
 ### Dynamic Parameter Matching
 
@@ -34,17 +34,17 @@ Use `:paramName` syntax to capture dynamic parts of the URL:
 export default defineMock({
   url: '/api/users/:id',
   body: ({ params }) => ({
-    userId: params.id // Get captured parameter
-  })
+    userId: params.id, // Get captured parameter
+  }),
 })
 ```
 
-| Request URL        | Match Result | params Value    |
-| ------------------ | ------------ | --------------- |
-| `/api/users/123`   | ✅ Match     | `{ id: '123' }` |
-| `/api/users/abc`   | ✅ Match     | `{ id: 'abc' }` |
-| `/api/users`       | ❌ No match  | -               |
-| `/api/users/123/posts` | ❌ No match | -            |
+| Request URL            | Match Result | params Value    |
+| ---------------------- | ------------ | --------------- |
+| `/api/users/123`       | ✅ Match     | `{ id: '123' }` |
+| `/api/users/abc`       | ✅ Match     | `{ id: 'abc' }` |
+| `/api/users`           | ❌ No match  | -               |
+| `/api/users/123/posts` | ❌ No match  | -               |
 
 ### Multiple Dynamic Parameters
 
@@ -55,14 +55,14 @@ export default defineMock({
   url: '/api/users/:userId/posts/:postId',
   body: ({ params }) => ({
     userId: params.userId,
-    postId: params.postId
-  })
+    postId: params.postId,
+  }),
 })
 ```
 
-| Request URL              | params Value                      |
-| ------------------------ | --------------------------------- |
-| `/api/users/1/posts/100` | `{ userId: '1', postId: '100' }`  |
+| Request URL              | params Value                     |
+| ------------------------ | -------------------------------- |
+| `/api/users/1/posts/100` | `{ userId: '1', postId: '100' }` |
 
 ## Advanced Matching Rules
 
@@ -78,7 +78,7 @@ export default defineMock({
       return { type: 'single', id: params.id }
     }
     return { type: 'list', users: [] }
-  }
+  },
 })
 ```
 
@@ -95,15 +95,15 @@ Use `*name` syntax to match one or more path segments:
 export default defineMock({
   url: '/api/files/*path',
   body: ({ params }) => ({
-    path: params.path // Array format
-  })
+    path: params.path, // Array format
+  }),
 })
 ```
 
-| Request URL                  | params.path            |
-| ---------------------------- | ---------------------- |
-| `/api/files/docs`            | `['docs']`             |
-| `/api/files/docs/guide.md`   | `['docs', 'guide.md']` |
+| Request URL                | params.path            |
+| -------------------------- | ---------------------- |
+| `/api/files/docs`          | `['docs']`             |
+| `/api/files/docs/guide.md` | `['docs', 'guide.md']` |
 
 ::: tip Zero or More Matches
 To match zero or more path segments, wrap the wildcard with an optional group:
@@ -112,15 +112,15 @@ To match zero or more path segments, wrap the wildcard with an optional group:
 export default defineMock({
   url: '/api/files{/*path}',
   body: ({ params }) => ({
-    path: params.path || [] // May be undefined or array
-  })
+    path: params.path || [], // May be undefined or array
+  }),
 })
 ```
 
-| Request URL      | params.path |
-| ---------------- | ----------- |
-| `/api/files`     | `undefined` |
-| `/api/files/docs`| `['docs']`  |
+| Request URL       | params.path |
+| ----------------- | ----------- |
+| `/api/files`      | `undefined` |
+| `/api/files/docs` | `['docs']`  |
 
 :::
 
@@ -132,8 +132,8 @@ Use wildcards to match any path:
 export default defineMock({
   url: '/api/proxy/*path',
   body: ({ params }) => ({
-    proxiedPath: params.path?.join('/') // Access using array method
-  })
+    proxiedPath: params.path?.join('/'), // Access using array method
+  }),
 })
 ```
 
@@ -151,8 +151,8 @@ mockDevServerPlugin({
   prefix: [
     '/api', // String prefix
     '^/api/v\\d+/.*', // Regex: matches /api/v1/, /api/v2/, etc.
-    '^/graphql$' // Regex: exact match /graphql
-  ]
+    '^/graphql$', // Regex: exact match /graphql
+  ],
 })
 ```
 
@@ -172,24 +172,24 @@ When multiple Mock configurations match the same request, the plugin determines 
 export default defineMock([
   {
     url: '/api/users', // Priority 1: static path
-    body: 'all users'
+    body: 'all users',
   },
   {
     url: '/api/users/:id', // Priority 2: one dynamic parameter
-    body: 'single user'
+    body: 'single user',
   },
   {
     url: '/api/:resource/:id', // Priority 3: two dynamic parameters
-    body: 'generic resource'
-  }
+    body: 'generic resource',
+  },
 ])
 ```
 
-| Request URL      | Matched Configuration    |
-| ---------------- | ------------------------ |
-| `/api/users`     | `/api/users`             |
-| `/api/users/123` | `/api/users/:id`         |
-| `/api/posts/123` | `/api/:resource/:id`     |
+| Request URL      | Matched Configuration |
+| ---------------- | --------------------- |
+| `/api/users`     | `/api/users`          |
+| `/api/users/123` | `/api/users/:id`      |
+| `/api/posts/123` | `/api/:resource/:id`  |
 
 ### Custom Priority
 
@@ -202,16 +202,16 @@ mockDevServerPlugin({
     global: [
       '/api/users/admin', // Highest priority
       '/api/users/:id',
-      '/api/:resource/:id'
+      '/api/:resource/:id',
     ],
     // Special priority rules
     special: {
       '/api/:a/:b/c': {
         rules: ['/api/a/:b/:c'], // When conflicting with these rules
-        when: ['/api/a/b/c'] // In these scenarios
-      }
-    }
-  }
+        when: ['/api/a/b/c'], // In these scenarios
+      },
+    },
+  },
 })
 ```
 
@@ -225,34 +225,34 @@ export default defineMock([
   {
     url: '/api/users',
     method: 'GET',
-    body: { users: [] }
+    body: { users: [] },
   },
   {
     url: '/api/users',
     method: 'POST',
-    body: ({ body }) => ({ id: Date.now(), ...body })
+    body: ({ body }) => ({ id: Date.now(), ...body }),
   },
   // Single resource operations
   {
     url: '/api/users/:id',
     method: 'GET',
-    body: ({ params }) => ({ id: params.id })
+    body: ({ params }) => ({ id: params.id }),
   },
   {
     url: '/api/users/:id',
     method: 'PUT',
-    body: ({ params, body }) => ({ id: params.id, ...body })
+    body: ({ params, body }) => ({ id: params.id, ...body }),
   },
   {
     url: '/api/users/:id',
     method: 'DELETE',
-    status: 204
+    status: 204,
   },
   // Nested resources
   {
     url: '/api/users/:userId/posts',
-    body: ({ params }) => ({ userId: params.userId, posts: [] })
-  }
+    body: ({ params }) => ({ userId: params.userId, posts: [] }),
+  },
 ])
 ```
 
@@ -264,16 +264,16 @@ export default defineMock([
     url: '/api/files/:type(images|documents|videos)/:name',
     body: ({ params }) => ({
       type: params.type,
-      filename: params.name
-    })
+      filename: params.name,
+    }),
   },
   {
     url: '/api/download/*path',
     response: (req, res) => {
       const filePath = req.params.path?.join('/')
       // Handle file download...
-    }
-  }
+    },
+  },
 ])
 ```
 
@@ -282,19 +282,19 @@ export default defineMock([
 ```ts
 mockDevServerPlugin({
   prefix: [
-    '^/api/v\\d+/.*' // Match all versioned APIs
-  ]
+    '^/api/v\\d+/.*', // Match all versioned APIs
+  ],
 })
 
 export default defineMock([
   {
     url: '/api/v1/users',
-    body: { version: 'v1', users: [] }
+    body: { version: 'v1', users: [] },
   },
   {
     url: '/api/v2/users',
-    body: { version: 'v2', users: [], meta: {} }
-  }
+    body: { version: 'v2', users: [], meta: {} },
+  },
 ])
 ```
 
@@ -308,12 +308,12 @@ export default defineMock([
 
 path-to-regexp v8.x has the following breaking changes compared to older versions:
 
-| Old Version Syntax | v8.x Syntax   | Description                           |
-| ------------------ | ------------- | ------------------------------------- |
-| `:param?`          | `{/:param}`   | Optional parameters use curly braces  |
-| `:param*`          | `{/*param}`   | Zero or more use optional group + wildcard |
-| `:param+`          | `/*param`     | One or more use wildcard              |
-| `(.*)`             | `/*param`     | Wildcard uses named parameter form    |
+| Old Version Syntax | v8.x Syntax | Description                                |
+| ------------------ | ----------- | ------------------------------------------ |
+| `:param?`          | `{/:param}` | Optional parameters use curly braces       |
+| `:param*`          | `{/*param}` | Zero or more use optional group + wildcard |
+| `:param+`          | `/*param`   | One or more use wildcard                   |
+| `(.*)`             | `/*param`   | Wildcard uses named parameter form         |
 
 ## Debugging Tips
 
@@ -321,7 +321,7 @@ Enable debug logging to view the matching process:
 
 ```ts
 mockDevServerPlugin({
-  log: 'debug' // Enable detailed logs
+  log: 'debug', // Enable detailed logs
 })
 ```
 

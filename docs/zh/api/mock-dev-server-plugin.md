@@ -5,9 +5,7 @@
 ## 函数签名
 
 ```ts
-function mockDevServerPlugin(
-  options?: MockServerPluginOptions
-): Plugin[]
+function mockDevServerPlugin(options?: MockServerPluginOptions): Plugin[]
 ```
 
 ## 参数
@@ -32,9 +30,7 @@ import { defineConfig } from 'vite'
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 
 export default defineConfig({
-  plugins: [
-    mockDevServerPlugin()
-  ]
+  plugins: [mockDevServerPlugin()],
 })
 ```
 
@@ -62,9 +58,9 @@ export default defineConfig({
       // 热更新时刷新页面
       reload: false,
       // CORS 配置
-      cors: true
-    })
-  ]
+      cors: true,
+    }),
+  ],
 })
 ```
 
@@ -77,18 +73,18 @@ import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 export default defineConfig({
   plugins: [
     mockDevServerPlugin({
-      prefix: ['/api']
-    })
+      prefix: ['/api'],
+    }),
   ],
   server: {
     proxy: {
       // 未匹配到 mock 的请求将代理到目标服务器
       '^/api': {
         target: 'http://localhost:8080',
-        changeOrigin: true
-      }
-    }
-  }
+        changeOrigin: true,
+      },
+    },
+  },
 })
 ```
 

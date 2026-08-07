@@ -36,7 +36,7 @@ import { posts } from './data'
 
 export default defineMock({
   url: '/api/post/list',
-  body: () => posts.value
+  body: () => posts.value,
 })
 ```
 
@@ -48,9 +48,9 @@ export default defineMock({
   url: '/api/post/delete/:id',
   body: (params) => {
     const id = params.id
-    posts.value = posts.value.filter(post => post.id !== id)
+    posts.value = posts.value.filter((post) => post.id !== id)
     return { success: true }
-  }
+  },
 })
 ```
 
@@ -65,7 +65,7 @@ export default defineMock({
   body: () => {
     const [getPost] = posts
     return getPost()
-  }
+  },
 })
 ```
 
@@ -78,9 +78,9 @@ export default defineMock({
   body: (params) => {
     const id = params.id
     const [, setPosts] = posts
-    setPosts(posts => posts.filter(post => post.id !== id))
+    setPosts((posts) => posts.filter((post) => post.id !== id))
     return { success: true }
-  }
+  },
 })
 ```
 

@@ -1,26 +1,32 @@
 {
   "name": "vite-plugin-mock-dev-server",
-  "type": "module",
   "version": "2.4.2",
   "description": "Vite Plugin for API mock dev server.",
-  "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
-  "license": "MIT",
+  "keywords": [
+    "development",
+    "mock",
+    "mock-server",
+    "plugin",
+    "vite",
+    "vite-plugin"
+  ],
   "homepage": "https://vite-plugin-mock-dev-server.netlify.app",
+  "bugs": {
+    "url": "https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues"
+  },
+  "license": "MIT",
+  "author": "pengzhanbo <q942450674@outlook.com> (https://github.com/pengzhanbo)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pengzhanbo/vite-plugin-mock-dev-server"
   },
-  "bugs": {
-    "url": "https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues"
-  },
-  "keywords": [
-    "vite",
-    "plugin",
-    "vite-plugin",
-    "mock",
-    "mock-server",
-    "development"
+  "files": [
+    "dist"
   ],
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -40,34 +46,12 @@
     },
     "./package.json": "./package.json"
   },
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "engines": {
-    "node": "^20.19.0 || >=22"
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "build": "tsdown"
-  },
-  "peerDependencies": {
-    "esbuild": ">=0.21.0",
-    "rolldown": ">=1.0.0-beta.1",
-    "vite": ">=5.0.0",
-    "zstd-codec": ">=0.1.5"
-  },
-  "peerDependenciesMeta": {
-    "esbuild": {
-      "optional": true
-    },
-    "rolldown": {
-      "optional": true
-    },
-    "zstd-codec": {
-      "optional": true
-    }
   },
   "dependencies": {
     "@pengzhanbo/utils": "catalog:prod",
@@ -93,8 +77,24 @@
     "vite": "catalog:dev",
     "zstd-codec": "catalog:dev"
   },
-  "publishConfig": {
-    "access": "public",
-    "provenance": true
+  "peerDependencies": {
+    "esbuild": ">=0.21.0",
+    "rolldown": ">=1.0.0-beta.1",
+    "vite": ">=5.0.0",
+    "zstd-codec": ">=0.1.5"
+  },
+  "peerDependenciesMeta": {
+    "esbuild": {
+      "optional": true
+    },
+    "rolldown": {
+      "optional": true
+    },
+    "zstd-codec": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22"
   }
 }

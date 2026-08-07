@@ -1,7 +1,7 @@
 import type { FSWatcher } from 'chokidar'
 import type { Matcher } from 'picomatch'
-import type { ResolvedMockServerPluginOptions } from '../core'
-import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
+import type { ResolvedMockServerPluginOptions } from '../core/options.js'
+import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types/index.js'
 import EventEmitter from 'node:events'
 import path from 'node:path'
 import process from 'node:process'
@@ -9,9 +9,9 @@ import { promiseParallel } from '@pengzhanbo/utils'
 import { watch } from 'chokidar'
 import { loadPackageJSONSync } from 'local-pkg'
 import { glob } from 'tinyglobby'
-import { createMatcher, debug, normalizePath } from '../utils'
-import { compile } from './compile'
-import { processMockData, processRawData } from './processData'
+import { createMatcher, debug, normalizePath } from '../utils/index.js'
+import { compile } from './compile.js'
+import { processMockData, processRawData } from './processData.js'
 
 /**
  * Mock file loading and compilation, converting to Mock data
@@ -24,8 +24,7 @@ export class Compiler extends EventEmitter {
    *
    * Mock 模块缓存
    */
-  private moduleCache: Map<string, MockOptions | MockHttpItem | MockWebsocketItem>
-    = new Map()
+  private moduleCache: Map<string, MockOptions | MockHttpItem | MockWebsocketItem> = new Map()
 
   /**
    * Dependencies mapping for mock modules
@@ -90,8 +89,7 @@ export class Compiler extends EventEmitter {
     try {
       const pkg = loadPackageJSONSync(this.cwd)
       this.isESM = pkg?.type === 'module'
-    }
-    catch {}
+    } catch {}
   }
 
   /**
@@ -110,15 +108,16 @@ export class Compiler extends EventEmitter {
    *
    * 运行编译器
    *
-   * @param watch - Whether to watch for file changes / 是否监视文件变化
+   * @param isWatch - Whether to watch for file changes / 是否监视文件变化
    */
-  run(watch?: boolean): void {
+  run(isWatch?: boolean): void {
     const { include, exclude } = this.options
     const { pattern, ignore, isMatch } = createMatcher(include, exclude)
     this.loadAll(pattern, ignore)
 
-    if (!watch)
+    if (!isWatch) {
       return
+    }
 
     this.watchMockEntry(isMatch)
     this.watchDeps()
@@ -126,11 +125,13 @@ export class Compiler extends EventEmitter {
     let timer: NodeJS.Immediate | null = null
 
     this.on('mock:update', async (filepath: string) => {
-      if (!isMatch(filepath))
+      if (!isMatch(filepath)) {
         return
+      }
       await this.load(filepath)
-      if (timer)
+      if (timer) {
         clearImmediate(timer)
+      }
 
       timer = setImmediate(() => {
         this.updateMockData()
@@ -138,9 +139,11 @@ export class Compiler extends EventEmitter {
         timer = null
       })
     })
-    this.on('mock:unlink', async (filepath: string) => {
-      if (!isMatch(filepath))
+
+    this.on('mock:unlink', (filepath: string) => {
+      if (!isMatch(filepath)) {
         return
+      }
       filepath = normalizePath(path.join(this.options.dir, filepath))
       this.moduleCache.delete(filepath)
       this.updateMockData()
@@ -154,8 +157,8 @@ export class Compiler extends EventEmitter {
    * 关闭编译器和监视器
    */
   close(): void {
-    this.mockWatcher?.close()
-    this.depsWatcher?.close()
+    void this.mockWatcher?.close()
+    void this.depsWatcher?.close()
   }
 
   /**
@@ -166,7 +169,7 @@ export class Compiler extends EventEmitter {
    * @param pattern - Glob pattern to match mock files / 匹配 Mock 文件的 glob 模式
    * @param ignore - Glob pattern to ignore files / 忽略文件的 glob 模式
    */
-  private loadAll(pattern: string[], ignore: string[]) {
+  private loadAll(pattern: string[], ignore: string[]): void {
     glob(pattern, { ignore, cwd: normalizePath(path.join(this.cwd, this.options.dir)) })
       /**
        * 控制 文件编译 并发 数量。
@@ -175,8 +178,10 @@ export class Compiler extends EventEmitter {
        * 性能开销，从而影响编译速度。
        * 实测在控制并发数的前提下，总编译时间 差异不大，但内存开销更小更加稳定。
        */
-      .then(files => files.map(file => () => this.load(normalizePath(path.join(this.options.dir, file)))))
-      .then(loaders => promiseParallel(loaders, 64))
+      .then((files) =>
+        files.map((file) => () => this.load(normalizePath(path.join(this.options.dir, file)))),
+      )
+      .then((loaders) => promiseParallel(loaders, 64))
       .then(() => this.updateMockData())
       .catch(this.options.logger.error)
   }
@@ -188,9 +193,10 @@ export class Compiler extends EventEmitter {
    *
    * @param filepath - Path to the mock file / Mock 文件路径
    */
-  private async load(filepath?: string) {
-    if (!filepath)
+  private async load(filepath?: string): Promise<void> {
+    if (!filepath) {
       return
+    }
 
     try {
       const { define, alias, logger } = this.options
@@ -203,8 +209,7 @@ export class Compiler extends EventEmitter {
       })
       this.moduleCache.set(filepath, processRawData(data, filepath))
       this.updateModuleDeps(filepath, internalDeps)
-    }
-    catch (e) {
+    } catch (e) {
       console.error(e)
     }
   }
@@ -214,7 +219,7 @@ export class Compiler extends EventEmitter {
    *
    * 从模块缓存更新 Mock 数据
    */
-  private updateMockData() {
+  private updateMockData(): void {
     this._mockData = processMockData(this.moduleCache)
   }
 
@@ -226,10 +231,11 @@ export class Compiler extends EventEmitter {
    * @param filepath - Path to the mock file / Mock 文件路径
    * @param deps - Dependencies of the mock file / Mock 文件的依赖
    */
-  private updateModuleDeps(filepath: string, deps: string[]) {
+  private updateModuleDeps(filepath: string, deps: string[]): void {
     for (const dep of deps) {
-      if (!this.moduleDeps.has(dep))
+      if (!this.moduleDeps.has(dep)) {
         this.moduleDeps.set(dep, new Set())
+      }
 
       const cur = this.moduleDeps.get(dep)!
       cur.add(filepath)
@@ -245,29 +251,30 @@ export class Compiler extends EventEmitter {
    * @param isMatch - Function to check if a file matches the include/exclude pattern / 检查文件是否匹配包含/排除模式的函数
    */
   watchMockEntry(isMatch: Matcher): void {
-    const watcher = this.mockWatcher = watch(this.options.dir, {
+    const watcher = (this.mockWatcher = watch(this.options.dir, {
       ignoreInitial: true,
       cwd: this.cwd,
       ignored: (filepath, stats) => {
-        if (filepath.includes('node_modules'))
+        if (filepath.includes('node_modules')) {
           return true
+        }
         // Normalize path for cross-platform compatibility (Windows)
         // 规范化路径以确保跨平台兼容性（Windows）
         return !!stats?.isFile() && !isMatch(normalizePath(filepath))
       },
-    })
+    }))
 
-    watcher.on('add', async (filepath: string) => {
+    watcher.on('add', (filepath: string) => {
       filepath = normalizePath(filepath)
       this.emit('mock:update', filepath)
       debug('watcher:add', filepath)
     })
-    watcher.on('change', async (filepath: string) => {
+    watcher.on('change', (filepath: string) => {
       filepath = normalizePath(filepath)
       this.emit('mock:update', filepath)
       debug('watcher:change', filepath)
     })
-    watcher.on('unlink', async (filepath: string) => {
+    watcher.on('unlink', (filepath: string) => {
       filepath = normalizePath(filepath)
       this.emit('mock:unlink', filepath)
       debug('watcher:unlink', filepath)
@@ -281,14 +288,14 @@ export class Compiler extends EventEmitter {
    */
   watchDeps(): void {
     let oldDeps: string[] = [...this.moduleDeps.keys()]
-    const watcher = this.depsWatcher = watch([...oldDeps], {
+    const watcher = (this.depsWatcher = watch([...oldDeps], {
       ignoreInitial: true,
       cwd: this.cwd,
-    })
+    }))
     watcher.on('change', (filepath) => {
       filepath = normalizePath(filepath)
       const mockFiles = this.moduleDeps.get(filepath)
-      mockFiles?.forEach(file => this.emit('mock:update', file))
+      mockFiles?.forEach((file) => this.emit('mock:update', file))
     })
     watcher.on('unlink', (filepath) => {
       filepath = normalizePath(filepath)
@@ -297,10 +304,11 @@ export class Compiler extends EventEmitter {
 
     this.on('update:deps', () => {
       const deps: string[] = [...this.moduleDeps.keys()]
-      const exactDeps = deps.filter(dep => !oldDeps.includes(dep))
+      const exactDeps = deps.filter((dep) => !oldDeps.includes(dep))
       oldDeps = deps
-      if (exactDeps.length > 0)
+      if (exactDeps.length > 0) {
         watcher.add(exactDeps)
+      }
     })
   }
 }

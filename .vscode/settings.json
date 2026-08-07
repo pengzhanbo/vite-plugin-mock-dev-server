@@ -14,12 +14,21 @@
     "rolldown",
     "tsdown"
   ],
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "[typescript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+  "oxc.typeAware": true,
+  "oxc.unusedDisableDirectives": "deny",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.oxc": "explicit",
+    "source.organizeImports": "never" // let oxfmt handle import organization
   },
-  "editor.formatOnPaste": true,
-  "editor.formatOnSave": false,
+  "[json]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
   "markdownlint.config": {
     "no-inline-html": false
   }

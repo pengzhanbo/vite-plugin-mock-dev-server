@@ -1,13 +1,13 @@
 import type { Plugin, ResolvedConfig } from 'vite'
-import type { MockServerPluginOptions } from '../types'
-import type { ResolvedMockServerPluginOptions } from './options'
+import type { MockServerPluginOptions } from '../types/index.js'
+import type { ResolvedMockServerPluginOptions } from './options.js'
 import process from 'node:process'
 import { toArray } from '@pengzhanbo/utils'
-import { generateMockServer } from '../build'
-import { recoverRequest } from '../mockHttp'
-import { Recorder } from '../recorder'
-import { initMockMiddlewares } from './init'
-import { resolvePluginOptions, resolveRecordOptions } from './options'
+import { generateMockServer } from '../build/index.js'
+import { recoverRequest } from '../mockHttp/index.js'
+import { Recorder } from '../recorder/index.js'
+import { initMockMiddlewares } from './init.js'
+import { resolvePluginOptions, resolveRecordOptions } from './options.js'
 
 /**
  * Create mock dev server plugin
@@ -18,12 +18,14 @@ import { resolvePluginOptions, resolveRecordOptions } from './options'
  * @returns Array of Vite plugin objects / Vite 插件对象数组
  */
 export function mockDevServerPlugin(options: MockServerPluginOptions = {}): Plugin[] {
-  if (options.enabled === false)
+  if (options.enabled === false) {
     return []
+  }
 
   const plugins: Plugin[] = [serverPlugin(options)]
-  if (options.build)
+  if (options.build) {
     plugins.push(buildPlugin(options))
+  }
 
   return plugins
 }
@@ -36,9 +38,7 @@ export function mockDevServerPlugin(options: MockServerPluginOptions = {}): Plug
  * @param options - Plugin options / 插件配置项
  * @returns Vite plugin object / Vite 插件对象
  */
-export function buildPlugin(
-  options: MockServerPluginOptions,
-): Plugin {
+export function buildPlugin(options: MockServerPluginOptions): Plugin {
   let viteConfig = {} as ResolvedConfig
   let resolvedOptions!: ResolvedMockServerPluginOptions
   return {
@@ -51,8 +51,9 @@ export function buildPlugin(
       config.logger.warn('')
     },
     async buildEnd(error) {
-      if (error || viteConfig.command !== 'build')
+      if (error || viteConfig.command !== 'build') {
         return
+      }
 
       await generateMockServer(this, resolvedOptions)
     },
@@ -67,9 +68,7 @@ export function buildPlugin(
  * @param options - Plugin options / 插件配置项
  * @returns Vite plugin object / Vite 插件对象
  */
-export function serverPlugin(
-  options: MockServerPluginOptions,
-): Plugin {
+export function serverPlugin(options: MockServerPluginOptions): Plugin {
   let resolvedOptions!: ResolvedMockServerPluginOptions
   return {
     name: 'vite-plugin-mock-dev-server',
@@ -85,8 +84,9 @@ export function serverPlugin(
       if (wsPrefix.length && config.server?.proxy) {
         const proxy: ResolvedConfig['server']['proxy'] = {}
         Object.keys(config.server.proxy).forEach((key) => {
-          if (!wsPrefix.includes(key))
+          if (!wsPrefix.includes(key)) {
             proxy[key] = config.server!.proxy![key]!
+          }
         })
         config.server.proxy = proxy
       }
@@ -96,7 +96,11 @@ export function serverPlugin(
 
       // 初始化请求录制
       const { cwd, dir } = options
-      const recordOptions = resolveRecordOptions(cwd || process.cwd(), dir || 'mock', options.record)
+      const recordOptions = resolveRecordOptions(
+        cwd ?? process.cwd(),
+        dir ?? 'mock',
+        options.record,
+      )
       if (recordOptions.enabled) {
         const recorder = new Recorder(recordOptions)
         recorder.setup(config)
@@ -112,14 +116,14 @@ export function serverPlugin(
 
     configureServer({ middlewares, httpServer, ws }) {
       const middlewareList = initMockMiddlewares(resolvedOptions, httpServer, ws)
-      middlewareList.forEach(middleware => middlewares.use(middleware))
+      middlewareList.forEach((middleware) => middlewares.use(middleware))
     },
 
     configurePreviewServer({ middlewares, httpServer }) {
       // feat: use preview server parameter in preview server hook #11647
       // https://github.com/vitejs/vite/pull/11647
       const middlewareList = initMockMiddlewares(resolvedOptions, httpServer)
-      middlewareList.forEach(middleware => middlewares.use(middleware))
+      middlewareList.forEach((middleware) => middlewares.use(middleware))
     },
   }
 }

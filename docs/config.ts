@@ -1,10 +1,11 @@
 import type { DefaultTheme } from 'vitepress'
 import { defineAdditionalConfig } from 'vitepress'
-import { version } from '../package.json'
+import { version } from '../package.json' with { type: 'json' }
 
 export default defineAdditionalConfig({
   lang: 'en-US',
-  description: 'Inject mock-dev-server into the Vite development environment, simulating requests and data responses.',
+  description:
+    'Inject mock-dev-server into the Vite development environment, simulating requests and data responses.',
 
   themeConfig: {
     nav: nav(),
@@ -103,7 +104,10 @@ function nav(): DefaultTheme.NavItem[] {
     {
       text: `v${version}`,
       items: [
-        { text: 'Changelog', link: 'https://github.com/pengzhanbo/vite-plugin-mock-dev-server/blob/main/CHANGELOG.md' },
+        {
+          text: 'Changelog',
+          link: 'https://github.com/pengzhanbo/vite-plugin-mock-dev-server/blob/main/CHANGELOG.md',
+        },
       ],
     },
   ]
@@ -159,9 +163,7 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
     },
     {
       text: 'Troubleshooting',
-      items: [
-        { text: 'FAQ', link: 'troubleshooting/' },
-      ],
+      items: [{ text: 'FAQ', link: 'troubleshooting/' }],
     },
   ]
 }
@@ -194,9 +196,7 @@ function sidebarApi(): DefaultTheme.SidebarItem[] {
   return [
     {
       text: 'Overview',
-      items: [
-        { text: 'API Reference', link: 'index' },
-      ],
+      items: [{ text: 'API Reference', link: 'index' }],
     },
     {
       text: 'Helper Functions',

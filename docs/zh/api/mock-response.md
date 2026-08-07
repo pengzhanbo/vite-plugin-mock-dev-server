@@ -6,11 +6,7 @@
 
 ```ts
 type MockResponse = http.ServerResponse<http.IncomingMessage> & {
-  setCookie: (
-    name: string,
-    value?: string | null,
-    options?: SetCookieOption
-  ) => void
+  setCookie: (name: string, value?: string | null, options?: SetCookieOption) => void
 }
 ```
 
@@ -54,12 +50,12 @@ export default defineMock({
     // 设置 Cookie
     res.setCookie('session', 'abc123', {
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000 // 24小时
+      maxAge: 24 * 60 * 60 * 1000, // 24小时
     })
 
     // 发送响应
     res.end(JSON.stringify({ success: true }))
-  }
+  },
 })
 ```
 
@@ -72,7 +68,7 @@ export default defineMock([
   // 简单响应 - 使用 body
   {
     url: '/api/simple',
-    body: { message: 'Hello' }
+    body: { message: 'Hello' },
   },
 
   // 复杂响应 - 使用 response
@@ -96,8 +92,8 @@ export default defineMock([
       res.write('Line 1\n')
       res.write('Line 2\n')
       res.end('Line 3')
-    }
-  }
+    },
+  },
 ])
 ```
 
@@ -118,16 +114,16 @@ export default defineMock({
       httpOnly: true, // 禁止 JS 访问
       secure: true, // 仅 HTTPS
       sameSite: 'strict', // SameSite 策略
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7天
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7天
     })
 
     // 签名 Cookie（需要配置 keys）
     res.setCookie('user-id', '12345', {
-      signed: true
+      signed: true,
     })
 
     res.end(JSON.stringify({ success: true }))
-  }
+  },
 })
 ```
 
@@ -143,7 +139,7 @@ export default defineMock({
     res.setCookie('user-id', null)
 
     res.end(JSON.stringify({ message: 'Logged out' }))
-  }
+  },
 })
 ```
 
@@ -158,11 +154,11 @@ export default defineMock({
     res.setCookie('session', generateNewSession(), {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
-      overwrite: true // 覆盖同名 Cookie
+      overwrite: true, // 覆盖同名 Cookie
     })
 
     res.end(JSON.stringify({ refreshed: true }))
-  }
+  },
 })
 ```
 
@@ -182,15 +178,12 @@ export default defineMock({
 
     // 设置下载头
     res.setHeader('Content-Type', 'application/octet-stream')
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="${params.filename}"`
-    )
+    res.setHeader('Content-Disposition', `attachment; filename="${params.filename}"`)
 
     // 流式传输文件
     const stream = createReadStream(filePath)
     stream.pipe(res)
-  }
+  },
 })
 ```
 
@@ -203,7 +196,7 @@ export default defineMock({
     res.statusCode = 302
     res.setHeader('Location', '/api/new-endpoint')
     res.end()
-  }
+  },
 })
 ```
 
@@ -230,7 +223,7 @@ export default defineMock({
     req.on('close', () => {
       clearInterval(interval)
     })
-  }
+  },
 })
 ```
 
@@ -258,7 +251,7 @@ export default defineMock({
     // 默认 JSON
     res.setHeader('Content-Type', 'application/json')
     res.end(JSON.stringify({ message: 'Hello' }))
-  }
+  },
 })
 ```
 

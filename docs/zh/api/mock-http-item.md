@@ -49,7 +49,7 @@ export default defineMock({
 ```ts
 export default defineMock({
   url: '/api/test',
-  enabled: false // 临时禁用
+  enabled: false, // 临时禁用
 })
 ```
 
@@ -65,13 +65,13 @@ type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'TRACE' | '
 // 仅 GET
 export default defineMock({
   url: '/api/users',
-  method: 'GET'
+  method: 'GET',
 })
 
 // GET 或 POST
 export default defineMock({
   url: '/api/users',
-  method: ['GET', 'POST']
+  method: ['GET', 'POST'],
 })
 ```
 
@@ -86,7 +86,7 @@ export default defineMock({
 ```ts
 export default defineMock({
   url: '/api/not-found',
-  status: 404
+  status: 404,
 })
 ```
 
@@ -100,7 +100,7 @@ export default defineMock({
 export default defineMock({
   url: '/api/error',
   status: 500,
-  statusText: 'Internal Server Error'
+  statusText: 'Internal Server Error',
 })
 ```
 
@@ -114,16 +114,16 @@ export default defineMock({
   url: '/api/custom',
   headers: {
     'X-Custom-Header': 'value',
-    'X-Request-ID': '12345'
-  }
+    'X-Request-ID': '12345',
+  },
 })
 
 // 动态响应头
 export default defineMock({
   url: '/api/dynamic-header',
-  headers: request => ({
-    'X-User-Agent': request.headers['user-agent']
-  })
+  headers: (request) => ({
+    'X-User-Agent': request.headers['user-agent'],
+  }),
 })
 ```
 
@@ -137,13 +137,13 @@ export default defineMock({
 export default defineMock({
   url: '/api/text',
   type: 'text',
-  body: 'Plain text response'
+  body: 'Plain text response',
 })
 
 export default defineMock({
   url: '/api/file',
   type: 'application.pdf', // 自动解析为 application/pdf
-  body: pdfBuffer
+  body: pdfBuffer,
 })
 ```
 
@@ -158,7 +158,7 @@ type ResponseBody = string | object | any[] | number | Buffer | Readable | null
 // 静态数据
 export default defineMock({
   url: '/api/user',
-  body: { id: 1, name: 'John' }
+  body: { id: 1, name: 'John' },
 })
 
 // 动态数据
@@ -166,8 +166,8 @@ export default defineMock({
   url: '/api/user/:id',
   body: ({ params }) => ({
     id: params.id,
-    name: `User ${params.id}`
-  })
+    name: `User ${params.id}`,
+  }),
 })
 
 // 异步数据
@@ -176,7 +176,7 @@ export default defineMock({
   body: async ({ query }) => {
     const data = await fetchExternalData(query.id)
     return data
-  }
+  },
 })
 ```
 
@@ -200,12 +200,14 @@ export default defineMock({
 
     // 发送响应
     res.statusCode = 200
-    res.end(JSON.stringify({
-      message: 'Custom response',
-      query,
-      params
-    }))
-  }
+    res.end(
+      JSON.stringify({
+        message: 'Custom response',
+        query,
+        params,
+      }),
+    )
+  },
 })
 ```
 
@@ -220,13 +222,13 @@ export default defineMock({
 ```ts
 export default defineMock({
   url: '/api/slow',
-  delay: 2000 // 延迟 2 秒
+  delay: 2000, // 延迟 2 秒
 })
 
 // 随机延迟 1-3 秒
 export default defineMock({
   url: '/api/random-delay',
-  delay: [1000, 3000]
+  delay: [1000, 3000],
 })
 ```
 
@@ -243,8 +245,8 @@ export default defineMock({
   url: '/api/login',
   cookies: {
     session: 'abc123',
-    user: ['john', { path: '/', httpOnly: true }]
-  }
+    user: ['john', { path: '/', httpOnly: true }],
+  },
 })
 ```
 
@@ -261,26 +263,26 @@ export default defineMock([
   {
     url: '/api/search',
     validator: { query: { type: 'user' } },
-    body: { users: [] }
+    body: { users: [] },
   },
   {
     url: '/api/search',
     validator: { query: { type: 'post' } },
-    body: { posts: [] }
-  }
+    body: { posts: [] },
+  },
 ])
 
 // 函数形式验证
 export default defineMock([
   {
     url: '/api/data',
-    validator: request => request.headers['x-role'] === 'admin',
-    body: { sensitive: 'data' }
+    validator: (request) => request.headers['x-role'] === 'admin',
+    body: { sensitive: 'data' },
   },
   {
     url: '/api/data',
-    body: { public: 'data' }
-  }
+    body: { public: 'data' },
+  },
 ])
 ```
 
@@ -296,18 +298,18 @@ export default defineMock([
 export default defineMock([
   {
     url: '/api/scene',
-    body: { scene: 'default' }
+    body: { scene: 'default' },
   },
   {
     url: '/api/scene',
     scene: 'test',
-    body: { scene: 'test data' }
+    body: { scene: 'test data' },
   },
   {
     url: '/api/scene',
     scene: ['dev', 'staging'],
-    body: { scene: 'dev or staging data' }
-  }
+    body: { scene: 'dev or staging data' },
+  },
 ])
 ```
 
@@ -329,8 +331,8 @@ export default defineMock({
   error: {
     probability: 0.3, // 30% 概率返回错误
     status: 503,
-    statusText: 'Service Unavailable'
-  }
+    statusText: 'Service Unavailable',
+  },
 })
 ```
 
@@ -346,8 +348,8 @@ export default defineMock([
     method: 'GET',
     body: [
       { id: 1, name: 'John' },
-      { id: 2, name: 'Jane' }
-    ]
+      { id: 2, name: 'Jane' },
+    ],
   },
 
   // 带延迟的 POST 接口
@@ -358,8 +360,8 @@ export default defineMock([
     body: ({ body }) => ({
       id: Date.now(),
       ...body,
-      createdAt: new Date().toISOString()
-    })
+      createdAt: new Date().toISOString(),
+    }),
   },
 
   // 动态路由
@@ -369,8 +371,8 @@ export default defineMock([
     validator: { params: { id: /^\d+$/ } },
     body: ({ params }) => ({
       id: Number(params.id),
-      name: `User ${params.id}`
-    })
+      name: `User ${params.id}`,
+    }),
   },
 
   // 带 Cookie 的登录接口
@@ -378,12 +380,12 @@ export default defineMock([
     url: '/api/login',
     method: 'POST',
     cookies: {
-      'auth-token': ['jwt-token-here', { httpOnly: true, maxAge: 86400000 }]
+      'auth-token': ['jwt-token-here', { httpOnly: true, maxAge: 86400000 }],
     },
     body: ({ body }) => ({
       success: true,
-      user: { id: 1, email: body.email }
-    })
+      user: { id: 1, email: body.email },
+    }),
   },
 
   // 自定义响应
@@ -393,7 +395,7 @@ export default defineMock([
       res.setHeader('Content-Disposition', 'attachment; filename="data.json"')
       res.setHeader('Content-Type', 'application/json')
       res.end(JSON.stringify({ data: 'content' }))
-    }
-  }
+    },
+  },
 ])
 ```

@@ -4,15 +4,15 @@
  * 高级集成测试
  */
 import { describe, expect, it } from 'vitest'
-import { matchingWeight } from '../src/mockHttp/matchingWeight'
-import { parseRequestParams, requestValidate } from '../src/mockHttp/request'
+import { matchingWeight } from '../src/mockHttp/matchingWeight.js'
+import { parseRequestParams, requestValidate } from '../src/mockHttp/request.js'
 import {
   createMatcher,
   doesProxyContextMatchUrl,
   isObjectSubset,
   isPathMatch,
   urlParse,
-} from '../src/utils'
+} from '../src/utils/index.js'
 
 /**
  * Test suite for complex URL parsing scenarios
@@ -122,9 +122,7 @@ describe('advanced integration: complex object validation', () => {
       ],
     }
     const target = {
-      items: [
-        { id: 2, name: 'Item 2' },
-      ],
+      items: [{ id: 2, name: 'Item 2' }],
     }
     expect(isObjectSubset(source, target)).toBe(true)
   })
@@ -206,12 +204,7 @@ describe('advanced integration: complex matching weight', () => {
   })
 
   it('should handle global priority with complex rules', () => {
-    const rules = [
-      '/api/:a/:b/:c',
-      '/api/:a/b/:c',
-      '/api/a/:b/:c',
-      '/api/a/b/:c',
-    ]
+    const rules = ['/api/:a/:b/:c', '/api/:a/b/:c', '/api/a/:b/:c', '/api/a/b/:c']
     const priority = {
       global: ['/api/a/:b/:c', '/api/:a/b/:c'],
     }
@@ -240,10 +233,7 @@ describe('advanced integration: file matching', () => {
   })
 
   it('should handle negation patterns in include', () => {
-    const matcher = createMatcher(
-      ['**/*.mock.ts', '!**/legacy/**'],
-      [],
-    )
+    const matcher = createMatcher(['**/*.mock.ts', '!**/legacy/**'], [])
 
     expect(matcher.isMatch('user.mock.ts')).toBe(true)
     expect(matcher.isMatch('legacy/user.mock.ts')).toBe(false)

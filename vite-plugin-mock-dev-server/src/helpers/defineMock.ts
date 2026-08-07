@@ -1,4 +1,4 @@
-import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
+import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types/index.js'
 import { isArray } from '@pengzhanbo/utils'
 
 /**
@@ -54,6 +54,8 @@ export function defineMock(
  *
  * 返回一个自定义的 defineMock 函数，用于支持对 mock config 的预处理。
  * @param transformer preprocessing function
+ * @returns - 自定义的 defineMock 函数
+ *
  * @example
  * ```ts
  * const definePostMock = createDefineMock((mock) => {
@@ -66,16 +68,16 @@ export function defineMock(
  * ```
  */
 export function createDefineMock(
-  transformer: (
-    mock: MockHttpItem | MockWebsocketItem,
-  ) => MockHttpItem | MockWebsocketItem | void,
+  transformer: (mock: MockHttpItem | MockWebsocketItem) => MockHttpItem | MockWebsocketItem | void,
 ): typeof defineMock {
-  const define = (config: MockOptions | MockHttpItem | MockWebsocketItem) => {
-    if (isArray(config))
-      config = config.map(item => transformer(item) || item)
-
-    else
+  const define = (
+    config: MockOptions | MockHttpItem | MockWebsocketItem,
+  ): MockOptions | MockHttpItem | MockWebsocketItem => {
+    if (isArray(config)) {
+      config = config.map((item) => transformer(item) || item)
+    } else {
       config = transformer(config) || config
+    }
 
     return config
   }

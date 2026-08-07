@@ -5,10 +5,7 @@
 ## 函数签名
 
 ```ts
-function createSSEStream(
-  req: IncomingMessage,
-  res: ServerResponse
-): SSEStream
+function createSSEStream(req: IncomingMessage, res: ServerResponse): SSEStream
 ```
 
 ## 参数
@@ -71,7 +68,7 @@ export default defineMock({
     // 发送初始消息
     sse.write({
       event: 'connected',
-      data: { message: 'Connected to event stream' }
+      data: { message: 'Connected to event stream' },
     })
 
     // 定时发送消息
@@ -81,7 +78,7 @@ export default defineMock({
       sse.write({
         event: 'message',
         id: String(count),
-        data: { count, timestamp: Date.now() }
+        data: { count, timestamp: Date.now() },
       })
 
       // 发送 10 条后结束
@@ -95,7 +92,7 @@ export default defineMock({
     req.on('close', () => {
       clearInterval(timer)
     })
-  }
+  },
 })
 ```
 
@@ -112,7 +109,7 @@ export default defineMock({
       { type: 'info', message: 'Welcome!' },
       { type: 'success', message: 'Data synced' },
       { type: 'warning', message: 'Low storage' },
-      { type: 'error', message: 'Connection lost' }
+      { type: 'error', message: 'Connection lost' },
     ]
 
     let index = 0
@@ -120,11 +117,10 @@ export default defineMock({
       if (index < notifications.length) {
         sse.write({
           event: 'notification',
-          data: notifications[index++]
+          data: notifications[index++],
         })
         setTimeout(sendNotification, 2000)
-      }
-      else {
+      } else {
         sse.end()
       }
     }
@@ -134,7 +130,7 @@ export default defineMock({
     req.on('close', () => {
       index = notifications.length // 停止发送
     })
-  }
+  },
 })
 ```
 
@@ -153,12 +149,12 @@ export default defineMock({
       const metrics = {
         cpu: Math.random() * 100,
         memory: Math.random() * 100,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       }
 
       sse.write({
         event: 'metrics',
-        data: metrics
+        data: metrics,
       })
     }
 
@@ -175,7 +171,7 @@ export default defineMock({
     req.on('close', () => {
       clearInterval(interval)
     })
-  }
+  },
 })
 ```
 
@@ -193,7 +189,7 @@ export default defineMock({
     sse.write({
       event: 'config',
       retry: 5000,
-      data: { message: 'Retry interval set to 5s' }
+      data: { message: 'Retry interval set to 5s' },
     })
 
     // 发送事件
@@ -202,14 +198,14 @@ export default defineMock({
       sse.write({
         event: 'update',
         id: String(++count),
-        data: { count }
+        data: { count },
       })
     }, 3000)
 
     req.on('close', () => {
       clearInterval(timer)
     })
-  }
+  },
 })
 ```
 
@@ -226,14 +222,14 @@ export default defineMock({
     // 用户加入
     sse.write({
       event: 'user-joined',
-      data: { user: 'Alice', time: Date.now() }
+      data: { user: 'Alice', time: Date.now() },
     })
 
     // 发送消息
     setTimeout(() => {
       sse.write({
         event: 'message',
-        data: { user: 'Alice', text: 'Hello!' }
+        data: { user: 'Alice', text: 'Hello!' },
       })
     }, 1000)
 
@@ -241,11 +237,11 @@ export default defineMock({
     setTimeout(() => {
       sse.write({
         event: 'user-left',
-        data: { user: 'Alice', time: Date.now() }
+        data: { user: 'Alice', time: Date.now() },
       })
       sse.end()
     }, 5000)
-  }
+  },
 })
 ```
 

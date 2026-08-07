@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite'
-import type { ResolvedMockServerPluginOptions } from '../core/options'
-import type { ServerBuildOption } from '../types'
+import type { ResolvedMockServerPluginOptions } from '../core/options.js'
+import type { ServerBuildOption } from '../types/index.js'
 import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
@@ -9,15 +9,12 @@ import { toArray } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import { loadPackageJSON } from 'local-pkg'
 import { glob } from 'tinyglobby'
-import { transform } from '../compiler'
-import { generateMockEntryCode } from './mockEntryCode'
-import { generatePackageJson, getMockDependencies } from './packageJson'
-import { generatorServerEntryCode } from './serverEntryCode'
+import { transform } from '../compiler/index.js'
+import { generateMockEntryCode } from './mockEntryCode.js'
+import { generatePackageJson, getMockDependencies } from './packageJson.js'
+import { generatorServerEntryCode } from './serverEntryCode.js'
 
-type PluginContext<T = Plugin['buildEnd']> = T extends (
-  this: infer R,
-  ...args: any[]
-) => void
+type PluginContext<T = Plugin['buildEnd']> = T extends (this: infer R, ...args: any[]) => void
   ? R
   : never
 
@@ -31,7 +28,7 @@ export async function generateMockServer(
   const dir = options.dir
   const buildOptions = options.build as Required<ServerBuildOption>
 
-  const pkg = await loadPackageJSON(options.context) || {}
+  const pkg = (await loadPackageJSON(options.context)) ?? {}
   const outputDir = buildOptions.dist
 
   const content = await generateMockEntryCode(cwd, dir, include, exclude)
@@ -74,8 +71,9 @@ export async function generateMockServer(
   try {
     if (path.isAbsolute(outputDir)) {
       for (const { filename } of outputList) {
-        if (fs.existsSync(filename))
+        if (fs.existsSync(filename)) {
           await fsp.rm(filename)
+        }
       }
       options.logger.info(`${ansis.green('✓')} generate mock server in ${ansis.cyan(outputDir)}`)
       for (const { filename, source } of outputList) {
@@ -86,14 +84,12 @@ export async function generateMockServer(
         const space = name.length < 30 ? ' '.repeat(30 - name.length) : ''
         options.logger.info(`  ${ansis.green(name)}${space}${ansis.bold.dim(`${sourceSize} kB`)}`)
       }
-    }
-    else {
+    } else {
       for (const { filename, source } of outputList) {
         ctx.emitFile({ type: 'asset', fileName: filename, source })
       }
     }
-  }
-  catch (e) {
+  } catch (e) {
     options.logger.error(`Failed to generate mock server`)
     console.error(e)
   }

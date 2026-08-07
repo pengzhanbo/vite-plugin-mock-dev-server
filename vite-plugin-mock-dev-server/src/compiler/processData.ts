@@ -1,5 +1,5 @@
-import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
-import type { MockRawData } from './types'
+import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types/index.js'
+import type { MockRawData } from './types.js'
 import {
   isArray,
   isEmptyObject,
@@ -9,7 +9,7 @@ import {
   sortBy,
   toArray,
 } from '@pengzhanbo/utils'
-import { isObjectSubset, urlParse } from '../utils'
+import { isObjectSubset, urlParse } from '../utils/index.js'
 
 export function processRawData(
   raw: MockRawData,
@@ -17,20 +17,17 @@ export function processRawData(
 ): MockOptions | MockHttpItem | MockWebsocketItem {
   let res: MockOptions | MockHttpItem | MockWebsocketItem
   if (isArray(raw)) {
-    res = raw.map(item => ({ ...item, __filepath__ })) as MockOptions
-  }
-  else if ('url' in raw) {
+    res = raw.map((item) => ({ ...item, __filepath__ }))
+  } else if ('url' in raw) {
     res = { ...raw, __filepath__ } as unknown as MockHttpItem
-  }
-  else {
+  } else {
     res = []
-    objectKeys((raw)).forEach((key) => {
+    objectKeys(raw).forEach((key) => {
       const data = raw[key]
       if (isArray(data)) {
-        (res as MockOptions).push(...data.map(item => ({ ...item, __filepath__ })))
-      }
-      else {
-        (res as MockOptions).push({ ...data, __filepath__ } as unknown as MockHttpItem)
+        ;(res as MockOptions).push(...data.map((item) => ({ ...item, __filepath__ })))
+      } else {
+        ;(res as MockOptions).push({ ...data, __filepath__ } as unknown as MockHttpItem)
       }
     })
   }
@@ -44,39 +41,38 @@ export function processMockData(
 ): Record<string, MockOptions> {
   const list: MockOptions = []
   for (const [, handle] of mockList.entries()) {
-    if (handle)
+    if (handle) {
       list.push(...toArray(handle))
+    }
   }
 
   const mocks: Record<string, MockOptions> = {}
 
   list
-    .filter(mock => isPlainObject(mock) && mock.enabled !== false && mock.url)
+    .filter((mock) => isPlainObject(mock) && mock.enabled !== false && mock.url)
     .forEach((mock) => {
       const { pathname, query } = urlParse(mock.url)
-      const list = (mocks[pathname!] ??= [])
+      const res = (mocks[pathname] ??= [])
 
-      const current = { ...mock, url: pathname! }
+      const current = { ...mock, url: pathname }
       if (current.ws !== true) {
         const validator = current.validator
         if (!isEmptyObject(query)) {
           if (isFunction(validator)) {
-            current.validator = function (request) {
+            current.validator = function validate(request) {
               return isObjectSubset(request.query, query) && validator(request)
             }
-          }
-          else if (validator) {
+          } else if (validator) {
             current.validator = { ...validator }
             current.validator.query = current.validator.query
               ? { ...query, ...current.validator.query }
               : query
-          }
-          else {
+          } else {
             current.validator = { query }
           }
         }
       }
-      list.push(current)
+      res.push(current)
     })
 
   // 对具有相同路径匹配规则的配置项进行排序。
@@ -99,26 +95,30 @@ export function processMockData(
 export function sortByValidator(mocks: MockOptions): (MockHttpItem | MockWebsocketItem)[] {
   // 优先级排序，数字越小，优先级越高，越优先被匹配
   return sortBy(mocks, (item) => {
-    if (item.ws === true)
+    if (item.ws === true) {
       return 0
+    }
     const baseWeight = toArray(item.scene).length > 0 ? 0 : 1
 
     const { validator } = item
     // fix: #28
-    if (!validator || isEmptyObject(validator))
+    if (!validator || isEmptyObject(validator)) {
       return 2 + baseWeight
-    if (isFunction(validator))
+    }
+    if (isFunction(validator)) {
       return 0 + baseWeight
+    }
     const count = Object.keys(validator).reduce(
       (prev, key) => prev + keysCount(validator[key as keyof typeof validator]),
       0,
     )
-    return (1 / count) + baseWeight
+    return 1 / count + baseWeight
   })
 }
 
 function keysCount(obj?: object): number {
-  if (!obj)
+  if (!obj) {
     return 0
+  }
   return objectKeys(obj).length
 }

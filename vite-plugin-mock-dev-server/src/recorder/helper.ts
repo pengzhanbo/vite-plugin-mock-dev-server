@@ -1,5 +1,5 @@
 import type { IncomingMessage } from 'node:http'
-import type { RecordedReq, RecordedRes, ResolvedRecordOptions } from '../types'
+import type { RecordedReq, RecordedRes, ResolvedRecordOptions } from '../types/index.js'
 import { Buffer } from 'node:buffer'
 import path from 'node:path'
 import {
@@ -11,9 +11,9 @@ import {
   objectKeys,
   toArray,
 } from '@pengzhanbo/utils'
-import { createMatcher, isPathMatch, isTextContent, urlParse } from '../utils'
-import { FILTERED_RESPONSE_HEADERS } from './constants'
-import { decompressBody } from './decompress'
+import { createMatcher, isPathMatch, isTextContent, urlParse } from '../utils/index.js'
+import { FILTERED_RESPONSE_HEADERS } from './constants.js'
+import { decompressBody } from './decompress.js'
 
 export const timeFormatter: Intl.DateTimeFormat = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -33,18 +33,23 @@ export const timeFormatter: Intl.DateTimeFormat = new Intl.DateTimeFormat('en-US
  * @param body 请求体
  * @returns 处理后的请求记录
  */
-export function processRecordReq(req: IncomingMessage, pathname: string, body: unknown): RecordedReq {
+export function processRecordReq(
+  req: IncomingMessage,
+  pathname: string,
+  body: unknown,
+): RecordedReq {
   const { query } = urlParse(req.url!)
   const method = req.method!.toUpperCase()
-  let bodyType = (req.headers['content-type'] || '').split(';')[0].trim()
+  let bodyType = (req.headers['content-type'] ?? '').split(';')[0].trim()
   // 过滤 multipart/form-data 中的文件字段
   if (bodyType.startsWith('multipart/form-data') && isPlainObject(body)) {
     body = { ...body }
     objectKeys(body as Record<string, unknown>).forEach((key) => {
       const value = (body as Record<string, unknown>)[key]
       // 过滤 multipart/form-data 中的文件字段
-      if (isPlainObject(value) && hasOwn(value, 'filepath') && hasOwn(value, 'mimetype'))
+      if (isPlainObject(value) && hasOwn(value, 'filepath') && hasOwn(value, 'mimetype')) {
         delete (body as Record<string, unknown>)[key]
+      }
     })
   }
 
@@ -64,8 +69,8 @@ export function processRecordReq(req: IncomingMessage, pathname: string, body: u
  * @returns 处理后的响应记录
  */
 export async function processRecordRes(res: IncomingMessage, body: Buffer): Promise<RecordedRes> {
-  const status = res.statusCode || 200
-  const statusText = res.statusMessage || 'OK'
+  const status = res.statusCode ?? 200
+  const statusText = res.statusMessage ?? 'OK'
   const headers: Record<string, string> = {}
   for (const [key, value] of Object.entries(res.headers)) {
     const lowerKey = key.toLowerCase()
@@ -75,7 +80,10 @@ export async function processRecordRes(res: IncomingMessage, body: Buffer): Prom
   }
   const isText = isTextContent(headers['content-type'] || '')
   if (isText) {
-    const { body: decodedBody, encoding } = await decompressBody(body, headers['content-encoding'] || '')
+    const { body: decodedBody, encoding } = await decompressBody(
+      body,
+      headers['content-encoding'] || '',
+    )
     body = Buffer.from(decodedBody)
     headers['content-encoding'] = encoding
   }
@@ -91,27 +99,32 @@ export async function processRecordRes(res: IncomingMessage, body: Buffer): Prom
  */
 export function isSameRecord(prev: RecordedReq, current: RecordedReq): boolean {
   // 路径名或方法不同，认为不是同一个请求
-  if (prev.pathname !== current.pathname || prev.method !== current.method)
+  if (prev.pathname !== current.pathname || prev.method !== current.method) {
     return false
+  }
 
   // 请求体类型不同， 或者请求体类型为 buffer，认为不是同一个请求
-  if (prev.bodyType !== current.bodyType)
+  if (prev.bodyType !== current.bodyType) {
     return false
+  }
 
   // 查询参数不同，认为不是同一个请求
-  if (!deepEqual(prev.query, current.query))
+  if (!deepEqual(prev.query, current.query)) {
     return false
+  }
 
   if (current.bodyType === 'buffer' && prev.bodyType === 'buffer') {
     const currentBody = Buffer.from(current.body as string)
     const prevBody = Buffer.from(prev.body as string)
-    if (currentBody.length !== prevBody.length || !currentBody.equals(prevBody))
+    if (currentBody.length !== prevBody.length || !currentBody.equals(prevBody)) {
       return false
+    }
   }
 
   // 请求体不同，认为不是同一个请求
-  if (!deepEqual(prev.body, current.body))
+  if (!deepEqual(prev.body, current.body)) {
     return false
+  }
 
   return true
 }
@@ -122,9 +135,12 @@ export function isSameRecord(prev: RecordedReq, current: RecordedReq): boolean {
  * @param filter 记录过滤选项
  * @returns 请求匹配函数
  */
-export function createRecordMatcher(filter: ResolvedRecordOptions['filter']): (req: RecordedReq) => boolean {
-  if (isFunction(filter))
+export function createRecordMatcher(
+  filter: ResolvedRecordOptions['filter'],
+): (req: RecordedReq) => boolean {
+  if (isFunction(filter)) {
     return filter
+  }
 
   const { mode = 'glob' } = filter
   const include = toArray(filter.include)
@@ -132,13 +148,12 @@ export function createRecordMatcher(filter: ResolvedRecordOptions['filter']): (r
 
   if (mode === 'glob') {
     const { isMatch } = createMatcher(include, exclude)
-    return req => isMatch(req.pathname)
+    return (req) => isMatch(req.pathname)
   }
 
-  return (req) => {
-    return include.some(pattern => isPathMatch(pattern, req.pathname))
-      && exclude.every(pattern => !isPathMatch(pattern, req.pathname))
-  }
+  return (req) =>
+    include.some((pattern) => isPathMatch(pattern, req.pathname)) &&
+    exclude.every((pattern) => !isPathMatch(pattern, req.pathname))
 }
 
 /**

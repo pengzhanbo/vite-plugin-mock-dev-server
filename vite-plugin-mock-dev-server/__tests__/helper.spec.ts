@@ -4,9 +4,9 @@
  * 辅助函数测试
  */
 
-import type { MockHttpItem, MockWebsocketItem } from '../src/types'
+import type { MockHttpItem, MockWebsocketItem } from '../src/types/index.js'
 import { describe, expect, it, vi } from 'vitest'
-import { createDefineMock, defineMock } from '../src/helpers'
+import { createDefineMock, defineMock } from '../src/helpers/index.js'
 
 /**
  * Test suite for defineMock function
@@ -93,12 +93,9 @@ describe('createDefineMock', () => {
       if (mock.ws) {
         return mock
       }
-      if (!mock.method) {
-        mock.method = ['GET', 'POST']
-      }
-      if (!mock.headers) {
-        mock.headers = { 'X-Custom': 'test' }
-      }
+
+      mock.method ??= ['GET', 'POST']
+      mock.headers ??= { 'X-Custom': 'test' }
     })
     const config: MockHttpItem = {
       url: '/api/users',

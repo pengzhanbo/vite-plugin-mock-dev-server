@@ -41,8 +41,8 @@ export default defineMock({
   body: {
     id: 1,
     name: 'John Doe',
-    email: 'john@example.com'
-  }
+    email: 'john@example.com',
+  },
 })
 ```
 
@@ -59,9 +59,9 @@ export default defineMock({
       id: params.id,
       name: `User ${params.id}`,
       timestamp: Date.now(),
-      filter: query.filter
+      filter: query.filter,
     }
-  }
+  },
 })
 ```
 
@@ -76,8 +76,8 @@ export default defineMock([
     method: 'GET',
     body: [
       { id: 1, name: 'John' },
-      { id: 2, name: 'Jane' }
-    ]
+      { id: 2, name: 'Jane' },
+    ],
   },
   {
     url: '/api/users',
@@ -85,15 +85,15 @@ export default defineMock([
     body: ({ body }) => {
       return {
         id: Date.now(),
-        ...body
+        ...body,
       }
-    }
+    },
   },
   {
     url: '/api/users/:id',
     method: 'DELETE',
-    status: 204
-  }
+    status: 204,
+  },
 ])
 ```
 
@@ -126,7 +126,7 @@ export default defineMock({
     })
 
     onCleanup(() => clients.clear())
-  }
+  },
 })
 ```
 
@@ -139,18 +139,18 @@ export default defineMock([
   {
     url: '/api/search',
     validator: { query: { type: 'user' } },
-    body: { result: 'user search result' }
+    body: { result: 'user search result' },
   },
   {
     url: '/api/search',
     validator: { query: { type: 'post' } },
-    body: { result: 'post search result' }
+    body: { result: 'post search result' },
   },
   {
     url: '/api/search',
-    validator: request => request.query.type === 'comment',
-    body: { result: 'comment search result' }
-  }
+    validator: (request) => request.query.type === 'comment',
+    body: { result: 'comment search result' },
+  },
 ])
 ```
 
@@ -165,6 +165,6 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 const config = defineMock({
   url: '/api/test',
   // Complete type hints here
-  body: { message: 'hello' }
+  body: { message: 'hello' },
 })
 ```

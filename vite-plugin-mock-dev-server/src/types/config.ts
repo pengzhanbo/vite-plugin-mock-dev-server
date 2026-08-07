@@ -1,7 +1,7 @@
-import type { MockHttpItem } from './httpConfig'
-import type { MockWebsocketItem } from './wsConfig'
+import type { MockHttpItem } from './httpConfig.js'
+import type { MockWebsocketItem } from './wsConfig.js'
 
-export * from './httpConfig'
-export * from './wsConfig'
+export type * from './httpConfig.js'
+export type * from './wsConfig.js'
 
 export type MockOptions = (MockHttpItem | MockWebsocketItem)[]

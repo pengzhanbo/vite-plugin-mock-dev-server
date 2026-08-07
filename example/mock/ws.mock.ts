@@ -9,7 +9,7 @@ export default defineMock({
       // req.query
       // req.params
       // req.getCookie
-      ws.on('message', (raw) => {
+      ws.on('message', (raw: string) => {
         const message = JSON.parse(String(raw))
 
         // eslint-disable-next-line no-console

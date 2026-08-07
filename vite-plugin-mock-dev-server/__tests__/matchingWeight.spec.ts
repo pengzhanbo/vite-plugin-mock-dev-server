@@ -4,7 +4,7 @@
  * 匹配权重功能测试
  */
 import { describe, expect, it } from 'vitest'
-import { matchingWeight } from '../src/mockHttp/matchingWeight'
+import { matchingWeight } from '../src/mockHttp/matchingWeight.js'
 
 /**
  * Test suite for matching weight
@@ -80,17 +80,9 @@ describe('matching weight', () => {
       '/api/*rest',
       '/api{/*rest}',
     ],
-    '/api/a': [
-      '/api/a',
-      '/api/:a',
-      '/api{/:a}',
-      '/api/:a{/:b/:c}',
-      '/api/*rest',
-      '/api{/*rest}',
-    ],
+    '/api/a': ['/api/a', '/api/:a', '/api{/:a}', '/api/:a{/:b/:c}', '/api/*rest', '/api{/*rest}'],
     '/api/e/e/e/e': ['/api/*rest/:d', '/api/*rest', '/api{/*rest}'],
     '/api': ['/api{/:a}', '/api{/*rest}'],
-
   }
 
   /**
@@ -99,12 +91,12 @@ describe('matching weight', () => {
    * 测试每个 URL 的预期匹配结果
    */
   it.each(
-    Object.keys(expects).map(url => ({
+    Object.keys(expects).map((url) => ({
       rules,
       url,
       expected: expects[url],
     })),
-  )('$url', ({ rules, url, expected }) => {
-    expect(matchingWeight(rules, url, {})).toEqual(expected)
+  )('$url', ({ rules: testRules, url, expected }) => {
+    expect(matchingWeight(testRules, url, {})).toEqual(expected)
   })
 })

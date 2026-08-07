@@ -3,9 +3,9 @@
  *
  * 编译器模块测试
  */
-import type { MockOptions } from '../src/types'
+import type { MockOptions } from '../src/types/index.js'
 import { describe, expect, it, vi } from 'vitest'
-import { processMockData, processRawData, sortByValidator } from '../src/compiler/processData'
+import { processMockData, processRawData, sortByValidator } from '../src/compiler/processData.js'
 
 describe('processRawData', () => {
   it('should process array data', () => {
@@ -31,9 +31,7 @@ describe('processRawData', () => {
 
   it('should process object with nested arrays', () => {
     const raw: any = {
-      users: [
-        { url: '/api/users', method: 'GET', body: { id: 1 } },
-      ],
+      users: [{ url: '/api/users', method: 'GET', body: { id: 1 } }],
       posts: { url: '/api/posts', method: 'POST', body: { title: 'Test' } },
     }
     const result = processRawData(raw, 'test.mock.ts')
@@ -80,10 +78,13 @@ describe('processRawData', () => {
 describe('processMockData', () => {
   it('should group mocks by pathname', () => {
     const mockList = new Map<string, MockOptions>([
-      ['file1.mock.ts', [
-        { url: '/api/users', method: 'GET', body: {} },
-        { url: '/api/posts', method: 'GET', body: {} },
-      ] as MockOptions],
+      [
+        'file1.mock.ts',
+        [
+          { url: '/api/users', method: 'GET', body: {} },
+          { url: '/api/posts', method: 'GET', body: {} },
+        ] as MockOptions,
+      ],
     ])
 
     const result = processMockData(mockList)
@@ -96,10 +97,13 @@ describe('processMockData', () => {
 
   it('should filter out disabled mocks', () => {
     const mockList = new Map<string, MockOptions>([
-      ['file1.mock.ts', [
-        { url: '/api/users', method: 'GET', body: {}, enabled: true },
-        { url: '/api/posts', method: 'GET', body: {}, enabled: false },
-      ] as MockOptions],
+      [
+        'file1.mock.ts',
+        [
+          { url: '/api/users', method: 'GET', body: {}, enabled: true },
+          { url: '/api/posts', method: 'GET', body: {}, enabled: false },
+        ] as MockOptions,
+      ],
     ])
 
     const result = processMockData(mockList)
@@ -110,10 +114,13 @@ describe('processMockData', () => {
 
   it('should filter out mocks without url', () => {
     const mockList = new Map<string, MockOptions>([
-      ['file1.mock.ts', [
-        { url: '/api/users', method: 'GET', body: {} },
-        { method: 'GET', body: {} },
-      ] as MockOptions],
+      [
+        'file1.mock.ts',
+        [
+          { url: '/api/users', method: 'GET', body: {} },
+          { method: 'GET', body: {} },
+        ] as MockOptions,
+      ],
     ])
 
     const result = processMockData(mockList)
@@ -124,9 +131,7 @@ describe('processMockData', () => {
 
   it('should merge query parameters into validator', () => {
     const mockList = new Map<string, MockOptions>([
-      ['file1.mock.ts', [
-        { url: '/api/users?id=123', method: 'GET', body: {} },
-      ] as MockOptions],
+      ['file1.mock.ts', [{ url: '/api/users?id=123', method: 'GET', body: {} }] as MockOptions],
     ])
 
     const result = processMockData(mockList)
@@ -137,9 +142,17 @@ describe('processMockData', () => {
 
   it('should merge query with existing validator', () => {
     const mockList = new Map<string, MockOptions>([
-      ['file1.mock.ts', [
-        { url: '/api/users?id=123', method: 'GET', body: {}, validator: { body: { name: 'test' } } },
-      ] as MockOptions],
+      [
+        'file1.mock.ts',
+        [
+          {
+            url: '/api/users?id=123',
+            method: 'GET',
+            body: {},
+            validator: { body: { name: 'test' } },
+          },
+        ] as MockOptions,
+      ],
     ])
 
     const result = processMockData(mockList)
@@ -164,9 +177,7 @@ describe('processMockData', () => {
 
   it('should handle websocket mocks', () => {
     const mockList = new Map<string, MockOptions>([
-      ['file1.mock.ts', [
-        { url: '/ws/connect', ws: true, setup: vi.fn() },
-      ] as unknown as MockOptions],
+      ['file1.mock.ts', [{ url: '/ws/connect', ws: true, setup: vi.fn() }]],
     ])
 
     const result = processMockData(mockList)
@@ -184,9 +195,7 @@ describe('processMockData', () => {
     const mockList = new Map<string, any>([
       ['file1.mock.ts', null],
       ['file2.mock.ts', undefined],
-      ['file3.mock.ts', [
-        { url: '/api/users', method: 'GET', body: {} },
-      ]],
+      ['file3.mock.ts', [{ url: '/api/users', method: 'GET', body: {} }]],
     ])
 
     const result = processMockData(mockList)
@@ -222,7 +231,12 @@ describe('sortByValidator', () => {
   it('should sort object validators by key count', () => {
     const mocks: MockOptions = [
       { url: '/api/users', method: 'GET', body: {}, validator: { query: { id: '1' } } },
-      { url: '/api/users', method: 'GET', body: {}, validator: { query: { id: '1', name: 'test' } } },
+      {
+        url: '/api/users',
+        method: 'GET',
+        body: {},
+        validator: { query: { id: '1', name: 'test' } },
+      },
     ] as MockOptions
 
     const result = sortByValidator(mocks)
@@ -254,8 +268,8 @@ describe('sortByValidator', () => {
 
     // Both ws and function validator have priority 0, so they could be in any order at the start
     const firstTwo = result.slice(0, 2)
-    expect(firstTwo.some(item => item.ws === true)).toBe(true)
-    expect(firstTwo.some(item => typeof (item as any).validator === 'function')).toBe(true)
+    expect(firstTwo.some((item) => item.ws === true)).toBe(true)
+    expect(firstTwo.some((item) => typeof (item as any).validator === 'function')).toBe(true)
     expect((result[2] as any).validator).toHaveProperty('query')
     expect(result[3]).not.toHaveProperty('validator')
   })

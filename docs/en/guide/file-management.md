@@ -58,15 +58,15 @@ export default defineMock([
     validator: {
       query: { page: 1 },
     },
-    body: { page: 1, result: [] }
+    body: { page: 1, result: [] },
   },
   {
     url: 'api/goods/list',
     validator: {
       query: { page: 2 },
     },
-    body: { page: 2, result: [] }
-  }
+    body: { page: 2, result: [] },
+  },
 ])
 ```
 
@@ -76,17 +76,17 @@ Alternatively, if the array format does not allow developers to clearly differen
 export const appleGoods = defineMock({
   url: 'api/goods/detail',
   validator: {
-    query: { id: 'apple' }
+    query: { id: 'apple' },
   },
-  body: { goodsName: 'apple' }
+  body: { goodsName: 'apple' },
 })
 
 export const bananaGoods = defineMock({
   url: 'api/goods/detail',
   validator: {
-    query: { id: 'banana' }
+    query: { id: 'banana' },
   },
-  body: { goodsName: 'banana' }
+  body: { goodsName: 'banana' },
 })
 ```
 

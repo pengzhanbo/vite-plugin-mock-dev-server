@@ -30,19 +30,19 @@
 
 如以下配置：
 
-``` ts
+```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
   url: '/api/demo',
   validator: {
     refererQuery: {
-      a: 1
-    }
+      a: 1,
+    },
   },
   body: {
-    message: 'request from "http://example.com/?a=1"'
-  }
+    message: 'request from "http://example.com/?a=1"',
+  },
 })
 ```
 

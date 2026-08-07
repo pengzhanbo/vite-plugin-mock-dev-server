@@ -5,6 +5,7 @@ This example demonstrates how to implement a JWT-based authentication and author
 ## Scenario Description
 
 Implement a complete authentication flow:
+
 - User login (verify username and password, return JWT Token)
 - Token refresh (use Refresh Token to get a new Access Token)
 - User logout (clear Token)
@@ -48,7 +49,7 @@ const users: User[] = [
     password: 'admin123', // Should use bcrypt for hashing in production
     email: 'admin@example.com',
     roles: ['admin', 'user'],
-    permissions: ['read', 'write', 'delete', 'manage']
+    permissions: ['read', 'write', 'delete', 'manage'],
   },
   {
     id: 2,
@@ -56,7 +57,7 @@ const users: User[] = [
     password: 'user123',
     email: 'user@example.com',
     roles: ['user'],
-    permissions: ['read']
+    permissions: ['read'],
   },
   {
     id: 3,
@@ -64,8 +65,8 @@ const users: User[] = [
     password: 'editor123',
     email: 'editor@example.com',
     roles: ['editor', 'user'],
-    permissions: ['read', 'write']
-  }
+    permissions: ['read', 'write'],
+  },
 ]
 
 export const userDatabase = defineMockData<User[]>('users', users)
@@ -78,14 +79,17 @@ const JWT_SECRET = 'your-secret-key-change-in-production'
 const REFRESH_SECRET = 'your-refresh-secret-key'
 
 // Simple JWT implementation (should use jsonwebtoken library in production)
-export function generateToken(payload: Omit<TokenPayload, 'iat' | 'exp'>, type: 'access' | 'refresh' = 'access'): string {
+export function generateToken(
+  payload: Omit<TokenPayload, 'iat' | 'exp'>,
+  type: 'access' | 'refresh' = 'access',
+): string {
   const now = Math.floor(Date.now() / 1000)
   const expiresIn = type === 'access' ? 3600 : 7 * 24 * 3600 // 1 hour / 7 days
 
   const tokenPayload: TokenPayload = {
     ...payload,
     iat: now,
-    exp: now + expiresIn
+    exp: now + expiresIn,
   }
 
   // Simplified implementation: Base64 encoding (should use JWT signing in production)
@@ -98,8 +102,7 @@ export function generateToken(payload: Omit<TokenPayload, 'iat' | 'exp'>, type: 
 export function verifyToken(token: string): TokenPayload | null {
   try {
     const payload = tokenStore.value.get(token)
-    if (!payload)
-      return null
+    if (!payload) return null
 
     const now = Math.floor(Date.now() / 1000)
     if (payload.exp < now) {
@@ -108,8 +111,7 @@ export function verifyToken(token: string): TokenPayload | null {
     }
 
     return payload
-  }
-  catch {
+  } catch {
     return null
   }
 }
@@ -119,13 +121,11 @@ export function revokeToken(token: string): void {
 }
 
 export function findUser(username: string, password: string): User | undefined {
-  return userDatabase.value.find(
-    u => u.username === username && u.password === password
-  )
+  return userDatabase.value.find((u) => u.username === username && u.password === password)
 }
 
 export function findUserById(id: number): User | undefined {
-  return userDatabase.value.find(u => u.id === id)
+  return userDatabase.value.find((u) => u.id === id)
 }
 ```
 
@@ -133,13 +133,7 @@ export function findUserById(id: number): User | undefined {
 
 ```ts [mock/auth.mock.ts]
 import { defineMock } from 'vite-plugin-mock-dev-server'
-import {
-  findUser,
-  findUserById,
-  generateToken,
-  revokeToken,
-  verifyToken
-} from './data/auth'
+import { findUser, findUserById, generateToken, revokeToken, verifyToken } from './data/auth'
 
 // Authentication middleware
 function authMiddleware(req: any, res: any, next: any) {
@@ -174,7 +168,7 @@ function requirePermission(...permissions: string[]) {
       return
     }
 
-    const hasPermission = permissions.every(p => user.permissions.includes(p))
+    const hasPermission = permissions.every((p) => user.permissions.includes(p))
     if (!hasPermission) {
       res.statusCode = 403
       res.end(JSON.stringify({ message: 'Insufficient permissions' }))
@@ -189,7 +183,7 @@ function requirePermission(...permissions: string[]) {
 function requireRole(...roles: string[]) {
   return (req: any, res: any, next: any) => {
     const userRoles = req.user.roles || []
-    const hasRole = roles.some(r => userRoles.includes(r))
+    const hasRole = roles.some((r) => userRoles.includes(r))
 
     if (!hasRole) {
       res.statusCode = 403
@@ -213,7 +207,7 @@ export default defineMock([
       if (!username || !password) {
         return {
           status: 400,
-          body: { message: 'Username and password are required' }
+          body: { message: 'Username and password are required' },
         }
       }
 
@@ -221,14 +215,14 @@ export default defineMock([
       if (!user) {
         return {
           status: 401,
-          body: { message: 'Invalid username or password' }
+          body: { message: 'Invalid username or password' },
         }
       }
 
       const tokenPayload = {
         userId: user.id,
         username: user.username,
-        roles: user.roles
+        roles: user.roles,
       }
 
       const accessToken = generateToken(tokenPayload, 'access')
@@ -245,12 +239,12 @@ export default defineMock([
               id: user.id,
               username: user.username,
               email: user.email,
-              roles: user.roles
-            }
-          }
-        }
+              roles: user.roles,
+            },
+          },
+        },
       }
-    }
+    },
   },
 
   // ========== Refresh Token ==========
@@ -263,7 +257,7 @@ export default defineMock([
       if (!refreshToken) {
         return {
           status: 400,
-          body: { message: 'Please provide refresh token' }
+          body: { message: 'Please provide refresh token' },
         }
       }
 
@@ -271,7 +265,7 @@ export default defineMock([
       if (!payload) {
         return {
           status: 401,
-          body: { message: 'Refresh token is invalid or expired' }
+          body: { message: 'Refresh token is invalid or expired' },
         }
       }
 
@@ -282,7 +276,7 @@ export default defineMock([
       const tokenPayload = {
         userId: payload.userId,
         username: payload.username,
-        roles: payload.roles
+        roles: payload.roles,
       }
 
       const newAccessToken = generateToken(tokenPayload, 'access')
@@ -294,11 +288,11 @@ export default defineMock([
           data: {
             accessToken: newAccessToken,
             refreshToken: newRefreshToken,
-            expiresIn: 3600
-          }
-        }
+            expiresIn: 3600,
+          },
+        },
       }
-    }
+    },
   },
 
   // ========== Logout ==========
@@ -312,9 +306,9 @@ export default defineMock([
       }
 
       return {
-        body: { message: 'Logout successful' }
+        body: { message: 'Logout successful' },
       }
-    }
+    },
   },
 
   // ========== Get Current User ==========
@@ -330,17 +324,19 @@ export default defineMock([
           return
         }
 
-        res.end(JSON.stringify({
-          data: {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            roles: user.roles,
-            permissions: user.permissions
-          }
-        }))
+        res.end(
+          JSON.stringify({
+            data: {
+              id: user.id,
+              username: user.username,
+              email: user.email,
+              roles: user.roles,
+              permissions: user.permissions,
+            },
+          }),
+        )
       })
-    }
+    },
   },
 
   // ========== Admin Endpoint Example ==========
@@ -350,17 +346,17 @@ export default defineMock([
     response: (req, res, next) => {
       authMiddleware(req, res, () => {
         requireRole('admin')(req, res, () => {
-          const users = userDatabase.value.map(u => ({
+          const users = userDatabase.value.map((u) => ({
             id: u.id,
             username: u.username,
             email: u.email,
-            roles: u.roles
+            roles: u.roles,
           }))
 
           res.end(JSON.stringify({ data: users }))
         })
       })
-    }
+    },
   },
 
   // ========== Write Permission Required Endpoint ==========
@@ -371,13 +367,15 @@ export default defineMock([
       authMiddleware(req, res, () => {
         requirePermission('write')(req, res, () => {
           // Process create post logic
-          res.end(JSON.stringify({
-            message: 'Post created successfully',
-            data: { id: Date.now(), author: req.user.username }
-          }))
+          res.end(
+            JSON.stringify({
+              message: 'Post created successfully',
+              data: { id: Date.now(), author: req.user.username },
+            }),
+          )
         })
       })
-    }
+    },
   },
 
   // ========== Public Endpoint ==========
@@ -386,9 +384,9 @@ export default defineMock([
     method: 'GET',
     body: {
       message: 'This is public information, no authentication required',
-      timestamp: Date.now()
-    }
-  }
+      timestamp: Date.now(),
+    },
+  },
 ])
 ```
 
@@ -399,7 +397,7 @@ import axios from 'axios'
 
 // Create axios instance
 const apiClient = axios.create({
-  baseURL: '/api'
+  baseURL: '/api',
 })
 
 // Request interceptor: Add Token
@@ -411,12 +409,12 @@ apiClient.interceptors.request.use(
     }
     return config
   },
-  error => Promise.reject(error)
+  (error) => Promise.reject(error),
 )
 
 // Response interceptor: Handle Token expiration
 apiClient.interceptors.response.use(
-  response => response,
+  (response) => response,
   async (error) => {
     const originalRequest = error.config
 
@@ -432,8 +430,7 @@ apiClient.interceptors.response.use(
 
         originalRequest.headers.Authorization = `Bearer ${data.data.accessToken}`
         return apiClient(originalRequest)
-      }
-      catch (refreshError) {
+      } catch (refreshError) {
         // Refresh failed, clear Token and redirect to login
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
@@ -443,7 +440,7 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error)
-  }
+  },
 )
 
 // Login
@@ -479,17 +476,8 @@ export function createPost(data: any) {
   <div class="login-page">
     <form @submit.prevent="handleLogin">
       <h2>Login</h2>
-      <input
-        v-model="form.username"
-        placeholder="Username"
-        required
-      />
-      <input
-        v-model="form.password"
-        type="password"
-        placeholder="Password"
-        required
-      />
+      <input v-model="form.username" placeholder="Username" required />
+      <input v-model="form.password" type="password" placeholder="Password" required />
       <button type="submit" :disabled="loading">
         {{ loading ? 'Logging in...' : 'Login' }}
       </button>
@@ -509,7 +497,7 @@ const error = ref('')
 
 const form = reactive({
   username: '',
-  password: ''
+  password: '',
 })
 
 async function handleLogin() {
@@ -570,7 +558,7 @@ onMounted(async () => {
   try {
     const [{ data: userData }, { data: usersData }] = await Promise.all([
       getCurrentUser(),
-      getAdminUsers()
+      getAdminUsers(),
     ])
     user.value = userData.data
     users.value = usersData.data

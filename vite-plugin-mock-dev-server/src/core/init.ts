@@ -1,10 +1,10 @@
 import type { Server } from 'node:http'
 import type { Http2SecureServer } from 'node:http2'
 import type { Connect, WebSocketServer } from 'vite'
-import type { ResolvedMockServerPluginOptions } from './options'
-import { Compiler } from '../compiler'
-import { createMockMiddleware } from '../mockHttp'
-import { mockWebSocket } from '../mockWebsocket'
+import type { ResolvedMockServerPluginOptions } from './options.js'
+import { Compiler } from '../compiler/index.js'
+import { createMockMiddleware } from '../mockHttp/index.js'
+import { mockWebSocket } from '../mockWebsocket/index.js'
 
 /**
  * Initialize mock middlewares
@@ -34,8 +34,9 @@ export function initMockMiddlewares(
    * 当发生变更时，通知当前页面进行重新加载
    */
   compiler.on('mock:update-end', () => {
-    if (options.reload)
+    if (options.reload) {
       ws?.send({ type: 'full-reload' })
+    }
   })
 
   server?.on('close', () => compiler.close())

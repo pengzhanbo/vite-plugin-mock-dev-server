@@ -15,8 +15,8 @@ const definePostMock = createDefineMock((mock) => {
 export default definePostMock({
   url: 'list', // The path will be concatenated as /api/post/list
   body: {
-    list: []
-  }
+    list: [],
+  },
 })
 ```
 

@@ -6,7 +6,7 @@
 import type { Connect, UserConfig } from 'vite'
 import { Buffer } from 'node:buffer'
 import { describe, expect, it, vi } from 'vitest'
-import { cacheRequestBody, recoverRequest } from '../src/mockHttp/requestRecovery'
+import { cacheRequestBody, recoverRequest } from '../src/mockHttp/requestRecovery.js'
 
 describe('requestRecovery', () => {
   it('should write cached raw body to proxy request', () => {

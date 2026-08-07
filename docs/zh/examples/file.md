@@ -6,14 +6,14 @@
 <form action="/api/upload" method="post" enctype="multipart/form-data">
   <p>
     <span>file: </span>
-    <input type="file" name="files" multiple="multiple">
+    <input type="file" name="files" multiple="multiple" />
   </p>
   <p>
     <span>name:</span>
-    <input type="text" name="name" value="mark">
+    <input type="text" name="name" value="mark" />
   </p>
   <p>
-    <input type="submit" value="submit">
+    <input type="submit" value="submit" />
   </p>
 </form>
 ```
@@ -47,7 +47,7 @@ export default defineMock({
   url: '/api/download',
   // 当你不确定类型，可传入文件名由插件内部进行解析
   type: 'my-app.dmg',
-  body: () => createReadStream('./my-app.dmg')
+  body: () => createReadStream('./my-app.dmg'),
 })
 ```
 

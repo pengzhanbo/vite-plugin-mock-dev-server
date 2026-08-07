@@ -5,6 +5,7 @@
 ## 场景描述
 
 实现一个用户管理 API，包含以下功能：
+
 - 获取用户列表（支持分页、搜索、排序）
 - 获取单个用户详情
 - 创建用户
@@ -42,7 +43,7 @@ const initialUsers: User[] = [
     role: 'admin',
     status: 'active',
     createdAt: '2024-01-15T08:00:00Z',
-    updatedAt: '2024-01-15T08:00:00Z'
+    updatedAt: '2024-01-15T08:00:00Z',
   },
   {
     id: 2,
@@ -51,7 +52,7 @@ const initialUsers: User[] = [
     role: 'user',
     status: 'active',
     createdAt: '2024-01-16T09:30:00Z',
-    updatedAt: '2024-01-16T09:30:00Z'
+    updatedAt: '2024-01-16T09:30:00Z',
   },
   {
     id: 3,
@@ -60,8 +61,8 @@ const initialUsers: User[] = [
     role: 'user',
     status: 'inactive',
     createdAt: '2024-01-17T10:00:00Z',
-    updatedAt: '2024-01-18T14:20:00Z'
-  }
+    updatedAt: '2024-01-18T14:20:00Z',
+  },
 ]
 
 // 创建共享数据
@@ -96,20 +97,20 @@ export default defineMock([
       // 搜索过滤
       if (query.keyword) {
         const keyword = String(query.keyword).toLowerCase()
-        result = result.filter(user =>
-          user.name.toLowerCase().includes(keyword)
-          || user.email.toLowerCase().includes(keyword)
+        result = result.filter(
+          (user) =>
+            user.name.toLowerCase().includes(keyword) || user.email.toLowerCase().includes(keyword),
         )
       }
 
       // 角色过滤
       if (query.role) {
-        result = result.filter(user => user.role === query.role)
+        result = result.filter((user) => user.role === query.role)
       }
 
       // 状态过滤
       if (query.status) {
-        result = result.filter(user => user.status === query.status)
+        result = result.filter((user) => user.status === query.status)
       }
 
       // 排序
@@ -138,10 +139,10 @@ export default defineMock([
           page,
           pageSize,
           total,
-          totalPages: Math.ceil(total / pageSize)
-        }
+          totalPages: Math.ceil(total / pageSize),
+        },
       }
-    }
+    },
   },
 
   // ========== 获取单个用户 ==========
@@ -150,17 +151,17 @@ export default defineMock([
     method: 'GET',
     body: ({ params }) => {
       const id = Number(params.id)
-      const user = users.value.find(u => u.id === id)
+      const user = users.value.find((u) => u.id === id)
 
       if (!user) {
         return {
           status: 404,
-          body: { message: '用户不存在' }
+          body: { message: '用户不存在' },
         }
       }
 
       return { data: user }
-    }
+    },
   },
 
   // ========== 创建用户 ==========
@@ -173,16 +174,16 @@ export default defineMock([
       if (!body.name || !body.email) {
         return {
           status: 400,
-          body: { message: '姓名和邮箱不能为空' }
+          body: { message: '姓名和邮箱不能为空' },
         }
       }
 
       // 检查邮箱是否已存在
-      const exists = users.value.some(u => u.email === body.email)
+      const exists = users.value.some((u) => u.email === body.email)
       if (exists) {
         return {
           status: 409,
-          body: { message: '邮箱已存在' }
+          body: { message: '邮箱已存在' },
         }
       }
 
@@ -194,7 +195,7 @@ export default defineMock([
         role: body.role || 'user',
         status: body.status || 'active',
         createdAt: now,
-        updatedAt: now
+        updatedAt: now,
       }
 
       // 添加到数据列表
@@ -202,9 +203,9 @@ export default defineMock([
 
       return {
         status: 201,
-        body: { data: newUser, message: '创建成功' }
+        body: { data: newUser, message: '创建成功' },
       }
-    }
+    },
   },
 
   // ========== 更新用户 ==========
@@ -214,24 +215,22 @@ export default defineMock([
     delay: 500,
     body: ({ params, body }) => {
       const id = Number(params.id)
-      const index = users.value.findIndex(u => u.id === id)
+      const index = users.value.findIndex((u) => u.id === id)
 
       if (index === -1) {
         return {
           status: 404,
-          body: { message: '用户不存在' }
+          body: { message: '用户不存在' },
         }
       }
 
       // 检查邮箱是否与其他用户冲突
       if (body.email) {
-        const exists = users.value.some(
-          (u, i) => i !== index && u.email === body.email
-        )
+        const exists = users.value.some((u, i) => i !== index && u.email === body.email)
         if (exists) {
           return {
             status: 409,
-            body: { message: '邮箱已被其他用户使用' }
+            body: { message: '邮箱已被其他用户使用' },
           }
         }
       }
@@ -241,15 +240,15 @@ export default defineMock([
         ...users.value[index],
         ...body,
         id, // ID 不可修改
-        updatedAt: getCurrentTime()
+        updatedAt: getCurrentTime(),
       }
 
-      users.value = users.value.map(u => u.id === id ? updatedUser : u)
+      users.value = users.value.map((u) => (u.id === id ? updatedUser : u))
 
       return {
-        body: { data: updatedUser, message: '更新成功' }
+        body: { data: updatedUser, message: '更新成功' },
       }
-    }
+    },
   },
 
   // ========== 删除用户 ==========
@@ -258,22 +257,22 @@ export default defineMock([
     method: 'DELETE',
     body: ({ params }) => {
       const id = Number(params.id)
-      const index = users.value.findIndex(u => u.id === id)
+      const index = users.value.findIndex((u) => u.id === id)
 
       if (index === -1) {
         return {
           status: 404,
-          body: { message: '用户不存在' }
+          body: { message: '用户不存在' },
         }
       }
 
       // 删除用户
-      users.value = users.value.filter(u => u.id !== id)
+      users.value = users.value.filter((u) => u.id !== id)
 
       return {
-        status: 204
+        status: 204,
       }
-    }
+    },
   },
 
   // ========== 批量删除用户 ==========
@@ -286,21 +285,21 @@ export default defineMock([
       if (!Array.isArray(ids) || ids.length === 0) {
         return {
           status: 400,
-          body: { message: '请提供要删除的用户ID列表' }
+          body: { message: '请提供要删除的用户ID列表' },
         }
       }
 
       const beforeCount = users.value.length
-      users.value = users.value.filter(u => !ids.includes(u.id))
+      users.value = users.value.filter((u) => !ids.includes(u.id))
       const deletedCount = beforeCount - users.value.length
 
       return {
         body: {
           message: `成功删除 ${deletedCount} 个用户`,
-          deletedCount
-        }
+          deletedCount,
+        },
       }
-    }
+    },
   },
 
   // ========== 更新用户状态 ==========
@@ -314,31 +313,29 @@ export default defineMock([
       if (!['active', 'inactive'].includes(status)) {
         return {
           status: 400,
-          body: { message: '无效的状态值' }
+          body: { message: '无效的状态值' },
         }
       }
 
-      const index = users.value.findIndex(u => u.id === id)
+      const index = users.value.findIndex((u) => u.id === id)
       if (index === -1) {
         return {
           status: 404,
-          body: { message: '用户不存在' }
+          body: { message: '用户不存在' },
         }
       }
 
-      users.value = users.value.map(u =>
-        u.id === id
-          ? { ...u, status, updatedAt: getCurrentTime() }
-          : u
+      users.value = users.value.map((u) =>
+        u.id === id ? { ...u, status, updatedAt: getCurrentTime() } : u,
       )
 
       return {
         body: {
-          message: `用户已${status === 'active' ? '启用' : '禁用'}`
-        }
+          message: `用户已${status === 'active' ? '启用' : '禁用'}`,
+        },
       }
-    }
-  }
+    },
+  },
 ])
 ```
 
@@ -389,12 +386,12 @@ export function getUser(id: number) {
 
 // 创建用户
 export function createUser(data: Partial<User>) {
-  return axios.post<{ data: User, message: string }>('/api/users', data)
+  return axios.post<{ data: User; message: string }>('/api/users', data)
 }
 
 // 更新用户
 export function updateUser(id: number, data: Partial<User>) {
-  return axios.put<{ data: User, message: string }>(`/api/users/${id}`, data)
+  return axios.put<{ data: User; message: string }>(`/api/users/${id}`, data)
 }
 
 // 删除用户
@@ -464,10 +461,7 @@ export function updateUserStatus(id: number, status: 'active' | 'inactive') {
 
     <!-- 分页 -->
     <div class="pagination">
-      <button
-        :disabled="pagination.page <= 1"
-        @click="changePage(pagination.page - 1)"
-      >
+      <button :disabled="pagination.page <= 1" @click="changePage(pagination.page - 1)">
         上一页
       </button>
       <span>{{ pagination.page }} / {{ pagination.totalPages }}</span>
@@ -491,19 +485,19 @@ const pagination = reactive({
   page: 1,
   pageSize: 10,
   total: 0,
-  totalPages: 0
+  totalPages: 0,
 })
 const filters = reactive({
   keyword: '',
   role: '',
-  status: ''
+  status: '',
 })
 
 async function fetchUsers() {
   const params: UserListParams = {
     page: pagination.page,
     pageSize: pagination.pageSize,
-    ...filters
+    ...filters,
   }
 
   const { data } = await getUsers(params)

@@ -4,10 +4,7 @@
  * 请求处理函数测试
  */
 import { describe, expect, it } from 'vitest'
-import {
-  parseRequestParams,
-  requestValidate,
-} from '../src/mockHttp/request'
+import { parseRequestParams, requestValidate } from '../src/mockHttp/request.js'
 
 /**
  * Test suite for parseRequestParams function
@@ -82,21 +79,27 @@ describe('requestValidate', () => {
   })
 
   it('should validate matching headers', () => {
-    expect(requestValidate(baseRequest, { headers: { 'content-type': 'application/json' } })).toBe(true)
+    expect(requestValidate(baseRequest, { headers: { 'content-type': 'application/json' } })).toBe(
+      true,
+    )
   })
 
   it('should validate multiple conditions', () => {
-    expect(requestValidate(baseRequest, {
-      query: { id: '123' },
-      params: { userId: '456' },
-    })).toBe(true)
+    expect(
+      requestValidate(baseRequest, {
+        query: { id: '123' },
+        params: { userId: '456' },
+      }),
+    ).toBe(true)
   })
 
   it('should fail if any condition fails', () => {
-    expect(requestValidate(baseRequest, {
-      query: { id: '123' },
-      params: { userId: '789' },
-    })).toBe(false)
+    expect(
+      requestValidate(baseRequest, {
+        query: { id: '123' },
+        params: { userId: '789' },
+      }),
+    ).toBe(false)
   })
 
   it('should validate with deep object comparison', () => {
@@ -109,8 +112,10 @@ describe('requestValidate', () => {
       },
     } as any
 
-    expect(requestValidate(request, {
-      body: { user: { name: 'test' } },
-    })).toBe(true)
+    expect(
+      requestValidate(request, {
+        body: { user: { name: 'test' } },
+      }),
+    ).toBe(true)
   })
 })

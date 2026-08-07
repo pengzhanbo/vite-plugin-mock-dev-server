@@ -15,8 +15,8 @@ const definePostMock = createDefineMock((mock) => {
 export default definePostMock({
   url: 'list', // 路径会拼接为 /api/post/list
   body: {
-    list: []
-  }
+    list: [],
+  },
 })
 ```
 

@@ -4,7 +4,7 @@ export default defineMock([
   {
     url: '/api/custom-response',
     response(req, res) {
-      const { query = {} } = req
+      const { query } = req
       res.setHeader('Content-Type', 'application/json')
       res.statusCode = 200
       res.end(
@@ -18,11 +18,11 @@ export default defineMock([
   {
     url: '/api/custom-response-skip',
     response(req, res, next) {
-      if (req.query.skip === '1')
+      if (req.query.skip === '1') {
         next()
-
-      else
+      } else {
         res.end('')
+      }
     },
   },
 ])

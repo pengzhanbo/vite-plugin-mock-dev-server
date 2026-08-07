@@ -45,27 +45,27 @@ The plugin supports checking if the body configured in the validator is a subset
 
 ::: code-group
 
-``` ts [api.mock.ts]
+```ts [api.mock.ts]
 export default defineMock({
   url: '/mock/validator-body',
   validator: {
     body: {
       a: [1, 2], // The items in the array must all be in the 'a' of the request body
-      b: { c: 1 }
-    }
+      b: { c: 1 },
+    },
   },
-  body: ''
+  body: '',
 })
 ```
 
-``` ts [fetch.ts]
+```ts [fetch.ts]
 await fetch('/mock/validator-body', {
   method: 'POST',
   body: JSON.stringify({
     a: [1, 2, 3, 4],
     b: { c: 1, d: 2 },
     c: 1,
-  })
+  }),
 })
 ```
 

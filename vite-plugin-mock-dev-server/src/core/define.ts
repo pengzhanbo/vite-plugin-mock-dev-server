@@ -18,7 +18,7 @@ import process from 'node:process'
 export function viteDefine(config: ResolvedConfig): Record<string, string> {
   const processNodeEnv: Record<string, string> = {}
 
-  const nodeEnv = process.env.NODE_ENV || config.mode
+  const nodeEnv = process.env.NODE_ENV ?? config.mode
   Object.assign(processNodeEnv, {
     'process.env.NODE_ENV': JSON.stringify(nodeEnv),
     'global.process.env.NODE_ENV': JSON.stringify(nodeEnv),
@@ -35,14 +35,15 @@ export function viteDefine(config: ResolvedConfig): Record<string, string> {
     if (typeof val === 'string') {
       if (canJsonParse(val)) {
         userDefine[key] = val
-        if (isMetaEnv)
+        if (isMetaEnv) {
           userDefineEnv[key.slice(16)] = val
+        }
       }
-    }
-    else {
+    } else {
       userDefine[key] = handleDefineValue(val)
-      if (isMetaEnv)
+      if (isMetaEnv) {
         userDefineEnv[key.slice(16)] = val
+      }
     }
   }
 
@@ -79,6 +80,9 @@ export function viteDefine(config: ResolvedConfig): Record<string, string> {
  * Like `JSON.stringify` but keeps raw string values as a literal
  * in the generated code. For example: `"window"` would refer to
  * the global `window` object directly.
+ *
+ * @param define - The define object to serialize.
+ * @returns The serialized define object.
  */
 export function serializeDefine(define: Record<string, any>): string {
   let res = `{`
@@ -87,17 +91,20 @@ export function serializeDefine(define: Record<string, any>): string {
     const key = keys[i]
     const val = define[key]
     res += `${JSON.stringify(key)}: ${handleDefineValue(val)}`
-    if (i !== keys.length - 1)
+    if (i !== keys.length - 1) {
       res += `, `
+    }
   }
   return `${res}}`
 }
 
 function handleDefineValue(value: any): string {
-  if (typeof value === 'undefined')
+  if (typeof value === 'undefined') {
     return 'undefined'
-  if (typeof value === 'string')
+  }
+  if (typeof value === 'string') {
     return value
+  }
   return JSON.stringify(value)
 }
 
@@ -105,8 +112,7 @@ function canJsonParse(value: any): boolean {
   try {
     JSON.parse(value)
     return true
-  }
-  catch {
+  } catch {
     return false
   }
 }

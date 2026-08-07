@@ -22,9 +22,9 @@ export default defineConfig({
       // HTTP Mock path prefix
       prefix: ['/api'],
       // WebSocket Mock path prefix
-      wsPrefix: ['/ws', '/socket.io']
-    })
-  ]
+      wsPrefix: ['/ws', '/socket.io'],
+    }),
+  ],
 })
 ```
 
@@ -48,10 +48,12 @@ export default defineMock({
       console.log('Client connected:', req.url)
 
       // Send welcome message
-      ws.send(JSON.stringify({
-        type: 'system',
-        message: 'Welcome to chat!'
-      }))
+      ws.send(
+        JSON.stringify({
+          type: 'system',
+          message: 'Welcome to chat!',
+        }),
+      )
 
       // Listen for messages
       ws.on('message', (data) => {
@@ -61,10 +63,12 @@ export default defineMock({
         // Broadcast to all clients
         wss.clients.forEach((client) => {
           if (client.readyState === 1) {
-            client.send(JSON.stringify({
-              type: 'message',
-              data: message
-            }))
+            client.send(
+              JSON.stringify({
+                type: 'message',
+                data: message,
+              }),
+            )
           }
         })
       })
@@ -74,7 +78,7 @@ export default defineMock({
         console.log('Client disconnected')
       })
     })
-  }
+  },
 })
 ```
 
@@ -90,7 +94,7 @@ export default defineMock({
   ws: true, // Enable WebSocket
   setup(wss, options) {
     // WebSocket server logic
-  }
+  },
 })
 ```
 
@@ -103,6 +107,7 @@ function setup(wss, options): void
 ```
 
 Parameter descriptions:
+
 - `wss`: WebSocketServer - WebSocket server instance
 - `options`: Contains the `onCleanup` cleanup callback registration function
 
@@ -110,11 +115,11 @@ Parameter descriptions:
 
 WebSocket server instance, providing the following features:
 
-| Property/Method | Type | Description |
-|-----------------|------|-------------|
-| `clients` | `Set<WebSocket>` | All connected clients |
-| `on(event, callback)` | `Function` | Listen for events |
-| `emit(event, data)` | `Function` | Emit events |
+| Property/Method       | Type             | Description           |
+| --------------------- | ---------------- | --------------------- |
+| `clients`             | `Set<WebSocket>` | All connected clients |
+| `on(event, callback)` | `Function`       | Listen for events     |
+| `emit(event, data)`   | `Function`       | Emit events           |
 
 #### `options.onCleanup`
 
@@ -139,7 +144,7 @@ export default defineMock({
       clearInterval(interval)
       console.log('Cleanup WebSocket resources')
     })
-  }
+  },
 })
 ```
 
@@ -173,8 +178,7 @@ ws.on('message', (data, isBinary) => {
   if (isBinary) {
     // Process binary data
     console.log('Binary data received:', data)
-  }
-  else {
+  } else {
     // Process text data
     const text = data.toString()
     console.log('Text message:', text)
@@ -221,8 +225,10 @@ interface ChatMessage {
 const chatHistory = defineMockData<ChatMessage[]>('chat-history', [])
 
 // Store online users
-const onlineUsers = defineMockData<Map<string, { username: string, joinTime: number }>>
-('online-users', new Map())
+const onlineUsers = defineMockData<Map<string, { username: string; joinTime: number }>>(
+  'online-users',
+  new Map(),
+)
 
 export default defineMock({
   url: '/ws/chat-room',
@@ -250,34 +256,35 @@ export default defineMock({
               userId = message.userId
               onlineUsers.value.set(userId, {
                 username: message.username,
-                joinTime: Date.now()
+                joinTime: Date.now(),
               })
 
               // Send history
-              ws.send(JSON.stringify({
-                type: 'history',
-                data: chatHistory.value.slice(-50) // Last 50 messages
-              }))
+              ws.send(
+                JSON.stringify({
+                  type: 'history',
+                  data: chatHistory.value.slice(-50), // Last 50 messages
+                }),
+              )
 
               // Broadcast user joined
               broadcast({
                 type: 'user-joined',
                 userId,
                 username: message.username,
-                onlineCount: onlineUsers.value.size
+                onlineCount: onlineUsers.value.size,
               })
               break
 
             case 'message': {
-              if (!userId)
-                return
+              if (!userId) return
 
               const chatMessage: ChatMessage = {
                 id: generateId(),
                 userId,
                 username: message.username,
                 content: message.content,
-                timestamp: Date.now()
+                timestamp: Date.now(),
               }
 
               // Save to history
@@ -286,26 +293,30 @@ export default defineMock({
               // Broadcast message
               broadcast({
                 type: 'new-message',
-                data: chatMessage
+                data: chatMessage,
               })
               break
             }
 
             case 'typing': {
-              broadcast({
-                type: 'user-typing',
-                userId,
-                username: message.username
-              }, ws)
+              broadcast(
+                {
+                  type: 'user-typing',
+                  userId,
+                  username: message.username,
+                },
+                ws,
+              )
               break
             }
           }
-        }
-        catch (error) {
-          ws.send(JSON.stringify({
-            type: 'error',
-            message: 'Invalid message format'
-          }))
+        } catch (error) {
+          ws.send(
+            JSON.stringify({
+              type: 'error',
+              message: 'Invalid message format',
+            }),
+          )
         }
       })
 
@@ -318,7 +329,7 @@ export default defineMock({
             type: 'user-left',
             userId,
             username: user?.username,
-            onlineCount: onlineUsers.value.size
+            onlineCount: onlineUsers.value.size,
           })
         }
       })
@@ -328,7 +339,7 @@ export default defineMock({
     onCleanup(() => {
       onlineUsers.value.clear()
     })
-  }
+  },
 })
 
 function generateId(): string {
@@ -350,7 +361,7 @@ export default defineMock({
       cpu: Math.random() * 100,
       memory: Math.random() * 100,
       network: Math.random() * 1000,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     })
 
     // Push data periodically
@@ -358,7 +369,7 @@ export default defineMock({
       const data = generateMetrics()
       const message = JSON.stringify({
         type: 'metrics',
-        data
+        data,
       })
 
       wss.clients.forEach((client) => {
@@ -370,16 +381,18 @@ export default defineMock({
 
     wss.on('connection', (ws) => {
       // Send current data immediately
-      ws.send(JSON.stringify({
-        type: 'metrics',
-        data: generateMetrics()
-      }))
+      ws.send(
+        JSON.stringify({
+          type: 'metrics',
+          data: generateMetrics(),
+        }),
+      )
     })
 
     onCleanup(() => {
       clearInterval(interval)
     })
-  }
+  },
 })
 ```
 
@@ -408,11 +421,13 @@ export default defineMock({
       const docId = req.url?.split('/').pop()
 
       // Send current document content
-      ws.send(JSON.stringify({
-        type: 'init',
-        content: documentContent.value,
-        docId
-      }))
+      ws.send(
+        JSON.stringify({
+          type: 'init',
+          content: documentContent.value,
+          docId,
+        }),
+      )
 
       ws.on('message', (data) => {
         const message = JSON.parse(data.toString())
@@ -424,7 +439,7 @@ export default defineMock({
             type: message.operation.type,
             position: message.operation.position,
             content: message.operation.content,
-            timestamp: Date.now()
+            timestamp: Date.now(),
           }
 
           // Apply operation
@@ -434,10 +449,12 @@ export default defineMock({
           // Broadcast to other clients
           wss.clients.forEach((client) => {
             if (client !== ws && client.readyState === 1) {
-              client.send(JSON.stringify({
-                type: 'operation',
-                data: op
-              }))
+              client.send(
+                JSON.stringify({
+                  type: 'operation',
+                  data: op,
+                }),
+              )
             }
           })
         }
@@ -447,22 +464,18 @@ export default defineMock({
     function applyOperation(op: Operation) {
       const content = documentContent.value
       if (op.type === 'insert' && op.content) {
-        documentContent.value
-          = content.slice(0, op.position)
-            + op.content
-            + content.slice(op.position)
-      }
-      else if (op.type === 'delete') {
-        documentContent.value
-          = content.slice(0, op.position)
-            + content.slice(op.position + (op.content?.length || 1))
+        documentContent.value =
+          content.slice(0, op.position) + op.content + content.slice(op.position)
+      } else if (op.type === 'delete') {
+        documentContent.value =
+          content.slice(0, op.position) + content.slice(op.position + (op.content?.length || 1))
       }
     }
 
     function generateId(): string {
       return Date.now().toString(36) + Math.random().toString(36).substr(2)
     }
-  }
+  },
 })
 ```
 
@@ -478,11 +491,13 @@ ws.onopen = () => {
   console.log('Connected')
 
   // Send join message
-  ws.send(JSON.stringify({
-    type: 'join',
-    userId: 'user-123',
-    username: 'John'
-  }))
+  ws.send(
+    JSON.stringify({
+      type: 'join',
+      userId: 'user-123',
+      username: 'John',
+    }),
+  )
 }
 
 // Receive message
@@ -509,11 +524,13 @@ ws.onclose = () => {
 
 // Send message
 function sendMessage(content: string) {
-  ws.send(JSON.stringify({
-    type: 'message',
-    username: 'John',
-    content
-  }))
+  ws.send(
+    JSON.stringify({
+      type: 'message',
+      username: 'John',
+      content,
+    }),
+  )
 }
 ```
 
@@ -525,7 +542,7 @@ If using the Socket.io client:
 import { io } from 'socket.io-client'
 
 const socket = io('ws://localhost:5173', {
-  path: '/ws/chat'
+  path: '/ws/chat',
 })
 
 socket.on('connect', () => {
@@ -538,7 +555,7 @@ socket.on('new-message', (data) => {
 
 socket.emit('message', {
   username: 'John',
-  content: 'Hello!'
+  content: 'Hello!',
 })
 ```
 
@@ -548,7 +565,7 @@ socket.emit('message', {
 
 ```ts
 mockDevServerPlugin({
-  log: 'debug'
+  log: 'debug',
 })
 ```
 
@@ -587,6 +604,7 @@ wscat -c ws://localhost:5173/ws/chat
 ### Q: WebSocket connection failed?
 
 Check the following:
+
 1. Is the `wsPrefix` configuration correct?
 2. Ensure the same path is not configured in `vite.config.ts`'s `proxy`
 3. Use `ws://` or `wss://` protocol, not `http://`
@@ -595,7 +613,8 @@ Check the following:
 
 ```ts
 wss.clients.forEach((client) => {
-  if (client.readyState === 1) { // Ensure connection is open
+  if (client.readyState === 1) {
+    // Ensure connection is open
     client.send(message)
   }
 })

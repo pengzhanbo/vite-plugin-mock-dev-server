@@ -4,16 +4,16 @@ import process from 'node:process'
 import { LRUCache } from '@pengzhanbo/utils'
 
 export function isStream(stream: unknown): stream is Stream {
-  return stream !== null
-    && typeof stream === 'object'
-    && typeof (stream as any).pipe === 'function'
+  return stream != null && typeof stream === 'object' && typeof (stream as any).pipe === 'function'
 }
 
 export function isReadableStream(stream: unknown): stream is Readable {
-  return isStream(stream)
-    && (stream as any).readable !== false
-    && typeof (stream as any)._read === 'function'
-    && typeof (stream as any)._readableState === 'object'
+  return (
+    isStream(stream) &&
+    (stream as any).readable !== false &&
+    typeof (stream as any)._read === 'function' &&
+    typeof (stream as any)._readableState === 'object'
+  )
 }
 
 const PACKAGE_CACHE = new LRUCache<string, boolean>({ maxSize: 1024 })
@@ -29,13 +29,11 @@ export function isPackageExists(mod: string): boolean {
     // @ts-expect-error fallback for node
     if (import.meta.resolve) {
       isExists = !!import.meta.resolve(mod)
-    }
-    else {
+    } else {
       require.resolve(mod)
       isExists = true
     }
-  }
-  catch {}
+  } catch {}
   PACKAGE_CACHE.set(mod, isExists)
   return isExists
 }
@@ -47,5 +45,5 @@ export function isPackageExists(mod: string): boolean {
  * @returns 是否为文本类型
  */
 export function isTextContent(contentType: string): boolean {
-  return ['text', 'json', 'xml'].some(type => contentType.includes(type))
+  return ['text', 'json', 'xml'].some((type) => contentType.includes(type))
 }

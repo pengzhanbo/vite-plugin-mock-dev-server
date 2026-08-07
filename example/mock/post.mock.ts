@@ -1,5 +1,5 @@
-import post from './data/post'
-import { defineAPIMock } from './shared'
+import post from './data/post.js'
+import { defineAPIMock } from './shared.js'
 
 /**
  * 定义单个接口

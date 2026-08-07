@@ -1,5 +1,5 @@
 import type { WebSocketServer } from 'ws'
-import type { MockBaseItem } from './basicConfig'
+import type { MockBaseItem } from './basicConfig.js'
 
 export interface MockWebsocketItem extends MockBaseItem {
   ws: true

@@ -24,7 +24,7 @@ For example, provide a wrapper function that returns data and a user data file.
 
 ::: code-group
 
-``` ts [shared/utils/dataWrap.ts]
+```ts [shared/utils/dataWrap.ts]
 export function successWrap(data) {
   return {
     code: 0,
@@ -43,7 +43,7 @@ export const userMap = {
   John: {
     name: 'John',
     age: 21,
-  }
+  },
 }
 ```
 
@@ -57,7 +57,7 @@ export default defineMock({
   body({ query }) {
     const { name } = query
     return successWrap(userMap[name])
-  }
+  },
 })
 ```
 

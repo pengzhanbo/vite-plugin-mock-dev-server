@@ -2,28 +2,13 @@ import type { Buffer } from 'node:buffer'
 import type http from 'node:http'
 import type { Readable } from 'node:stream'
 import type { Connect } from 'vite'
-import type { GetCookieOption, SetCookieOption } from './cookies'
+import type { GetCookieOption, SetCookieOption } from './cookies.js'
 
-export type Method
-  = | 'GET'
-    | 'POST'
-    | 'PUT'
-    | 'DELETE'
-    | 'PATCH'
-    | 'HEAD'
-    | 'TRACE'
-    | 'OPTIONS'
+export type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'TRACE' | 'OPTIONS'
 
 export type Headers = http.IncomingHttpHeaders
 
-export type ResponseBody
-  = | Record<string, any>
-    | any[]
-    | string
-    | number
-    | Readable
-    | Buffer
-    | null
+export type ResponseBody = Record<string, any> | any[] | string | number | Readable | Buffer | null
 
 /**
  * 扩展 request，添加额外的属性和方法
@@ -69,7 +54,7 @@ export interface ExtraRequest {
 
 export type MockRequest = Connect.IncomingMessage & ExtraRequest
 
-export type MockResponse = http.ServerResponse<http.IncomingMessage> & {
+export type MockResponse = http.ServerResponse & {
   /**
    * Set cookie in response
    *

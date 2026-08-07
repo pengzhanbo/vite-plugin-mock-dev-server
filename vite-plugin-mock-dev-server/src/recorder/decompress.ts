@@ -2,12 +2,7 @@ import type { LiteralUnion } from '@pengzhanbo/utils'
 import type { ZstdStreaming } from 'zstd-codec'
 import zlib from 'node:zlib'
 
-type SUPPORT_ENCODING
-  = | 'identity'
-    | 'gzip' | 'x-gzip'
-    | 'deflate' | 'x-deflate'
-    | 'br'
-    | 'zstd'
+type SUPPORT_ENCODING = 'identity' | 'gzip' | 'x-gzip' | 'deflate' | 'x-deflate' | 'br' | 'zstd'
 
 /**
  * Decode response body according to encoding
@@ -21,7 +16,7 @@ type SUPPORT_ENCODING
 export async function decompressBody(
   rawBody: Uint8Array,
   encoding: LiteralUnion<SUPPORT_ENCODING>,
-): Promise<{ body: Uint8Array, encoding: LiteralUnion<SUPPORT_ENCODING> }> {
+): Promise<{ body: Uint8Array; encoding: LiteralUnion<SUPPORT_ENCODING> }> {
   try {
     switch (encoding.toLowerCase()) {
       case 'gzip':
@@ -34,9 +29,9 @@ export async function decompressBody(
         return { body: await brotli(rawBody), encoding: 'identity' }
       case 'zstd':
         return { body: await zstd(rawBody), encoding: 'identity' }
+      // no default
     }
-  }
-  catch {}
+  } catch {}
   return { body: rawBody, encoding }
 }
 
@@ -55,17 +50,18 @@ async function zstd(rawBody: Uint8Array): Promise<Uint8Array> {
   if (zlib.zstdDecompress) {
     return new Promise((resolve, reject) => {
       zlib.zstdDecompress(rawBody, (err, data) => {
+        // oxlint-disable-next-line promise/no-multiple-resolved
         err ? reject(err) : resolve(data)
       })
     })
   }
   if (!zstdStreaming) {
     const { ZstdCodec } = await import('zstd-codec')
-    zstdStreaming = await (new Promise((resolve) => {
+    zstdStreaming = await new Promise((resolve) => {
       ZstdCodec.run((binding) => {
         resolve(new binding.Streaming())
       })
-    }))
+    })
   }
 
   return zstdStreaming!.decompress(rawBody, rawBody.length)
@@ -82,6 +78,7 @@ async function zstd(rawBody: Uint8Array): Promise<Uint8Array> {
 async function brotli(rawBody: Uint8Array): Promise<Uint8Array> {
   return new Promise((resolve, reject) => {
     zlib.brotliDecompress(rawBody, (err, data) => {
+      // oxlint-disable-next-line promise/no-multiple-resolved
       err ? reject(err) : resolve(data)
     })
   })
@@ -90,6 +87,7 @@ async function brotli(rawBody: Uint8Array): Promise<Uint8Array> {
 async function gunzip(rawBody: Uint8Array): Promise<Uint8Array> {
   return new Promise((resolve, reject) => {
     zlib.gunzip(rawBody, (err, data) => {
+      // oxlint-disable-next-line promise/no-multiple-resolved
       err ? reject(err) : resolve(data)
     })
   })
@@ -98,6 +96,7 @@ async function gunzip(rawBody: Uint8Array): Promise<Uint8Array> {
 async function deflate(rawBody: Uint8Array): Promise<Uint8Array> {
   return new Promise((resolve, reject) => {
     zlib.inflate(rawBody, (err, data) => {
+      // oxlint-disable-next-line promise/no-multiple-resolved
       err ? reject(err) : resolve(data)
     })
   })

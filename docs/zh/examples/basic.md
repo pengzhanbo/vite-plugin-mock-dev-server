@@ -12,7 +12,7 @@ export default defineMock({
   body: {
     name: 'Mark',
     age: 18,
-  }
+  },
 })
 ```
 
@@ -39,7 +39,7 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
   url: '/api/test',
-  enabled: false
+  enabled: false,
 })
 ```
 

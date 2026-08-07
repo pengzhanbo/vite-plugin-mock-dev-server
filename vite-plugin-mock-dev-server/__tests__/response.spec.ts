@@ -8,7 +8,7 @@ import {
   getHTTPStatusText,
   provideResponseStatus,
   responseRealDelay,
-} from '../src/mockHttp/response'
+} from '../src/mockHttp/response.js'
 
 /**
  * Test suite for getHTTPStatusText function

@@ -16,7 +16,7 @@ function defineMockData<T = any>(
   initialData: T,
   options?: {
     persistOnHMR?: boolean // 是否在 HMR 时保持初始数据
-  }
+  },
 ): MockData<T>
 ```
 
@@ -56,7 +56,7 @@ function defineMockData<T = any>(
 ```ts
 type MockData<T> = readonly [
   () => T, // getter 函数
-  (val: T | ((val: T) => T | void)) => void // setter 函数
+  (val: T | ((val: T) => T | void)) => void, // setter 函数
 ] & {
   value: T // 可直接访问的属性
 }
@@ -72,13 +72,13 @@ import { defineMockData } from 'vite-plugin-mock-dev-server'
 // 定义共享的用户数据
 export const users = defineMockData('users', [
   { id: 1, name: 'John', email: 'john@example.com' },
-  { id: 2, name: 'Jane', email: 'jane@example.com' }
+  { id: 2, name: 'Jane', email: 'jane@example.com' },
 ])
 
 // 定义共享的文章数据
 export const posts = defineMockData('posts', [
   { id: 1, title: 'Hello World', authorId: 1 },
-  { id: 2, title: 'Getting Started', authorId: 2 }
+  { id: 2, title: 'Getting Started', authorId: 2 },
 ])
 ```
 
@@ -91,15 +91,15 @@ export default defineMock([
   {
     url: '/api/users',
     method: 'GET',
-    body: () => users.value
+    body: () => users.value,
   },
   // 获取单个用户
   {
     url: '/api/users/:id',
     method: 'GET',
     body: ({ params }) => {
-      return users.value.find(u => u.id === Number(params.id))
-    }
+      return users.value.find((u) => u.id === Number(params.id))
+    },
   },
   // 创建用户
   {
@@ -108,12 +108,12 @@ export default defineMock([
     body: ({ body }) => {
       const newUser = {
         id: Date.now(),
-        ...body
+        ...body,
       }
       // 使用 setter 更新数据
       users.value = [...users.value, newUser]
       return newUser
-    }
+    },
   },
   // 删除用户
   {
@@ -122,10 +122,10 @@ export default defineMock([
     body: ({ params }) => {
       const id = Number(params.id)
       // 使用 setter 函数形式更新
-      users[1](prev => prev.filter(u => u.id !== id))
+      users[1]((prev) => prev.filter((u) => u.id !== id))
       return { success: true }
-    }
-  }
+    },
+  },
 ])
 ```
 
@@ -141,20 +141,20 @@ export default defineMock([
     url: '/api/counter',
     method: 'GET',
     body: () => ({
-      count: counter[0]().count // 使用 getter 函数
-    })
+      count: counter[0]().count, // 使用 getter 函数
+    }),
   },
   {
     url: '/api/counter/increment',
     method: 'POST',
     body: () => {
       // 使用 setter 函数
-      counter[1](prev => ({
-        count: prev.count + 1
+      counter[1]((prev) => ({
+        count: prev.count + 1,
       }))
       return { count: counter[0]().count }
-    }
-  }
+    },
+  },
 ])
 ```
 
@@ -174,7 +174,7 @@ const todos = defineMockData<Todo[]>(
   'todos',
   [
     { id: 1, text: 'Learn Vite', completed: false, createdAt: Date.now() },
-    { id: 2, text: 'Build Mock API', completed: true, createdAt: Date.now() }
+    { id: 2, text: 'Build Mock API', completed: true, createdAt: Date.now() },
   ],
   { persistOnHMR: true }, // 热更新时确保数据不被重置，保留已有的数据状态
 )
@@ -190,18 +190,16 @@ export default defineMock([
       // 按完成状态筛选
       if (query.completed !== undefined) {
         const isCompleted = query.completed === 'true'
-        result = result.filter(t => t.completed === isCompleted)
+        result = result.filter((t) => t.completed === isCompleted)
       }
 
       // 按关键词搜索
       if (query.q) {
-        result = result.filter(t =>
-          t.text.toLowerCase().includes(String(query.q).toLowerCase())
-        )
+        result = result.filter((t) => t.text.toLowerCase().includes(String(query.q).toLowerCase()))
       }
 
       return result
-    }
+    },
   },
   // 创建待办
   {
@@ -212,11 +210,11 @@ export default defineMock([
         id: Date.now(),
         text: body.text,
         completed: false,
-        createdAt: Date.now()
+        createdAt: Date.now(),
       }
       todos.value = [newTodo, ...todos.value]
       return newTodo
-    }
+    },
   },
   // 切换完成状态
   {
@@ -224,24 +222,20 @@ export default defineMock([
     method: 'PATCH',
     body: ({ params }) => {
       const id = Number(params.id)
-      todos[1](prev =>
-        prev.map(t =>
-          t.id === id ? { ...t, completed: !t.completed } : t
-        )
-      )
-      return todos.value.find(t => t.id === id)
-    }
+      todos[1]((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)))
+      return todos.value.find((t) => t.id === id)
+    },
   },
   // 批量删除已完成
   {
     url: '/api/todos/clear-completed',
     method: 'DELETE',
     body: () => {
-      const completedCount = todos.value.filter(t => t.completed).length
-      todos[1](prev => prev.filter(t => !t.completed))
+      const completedCount = todos.value.filter((t) => t.completed).length
+      todos[1]((prev) => prev.filter((t) => !t.completed))
       return { deleted: completedCount }
-    }
-  }
+    },
+  },
 ])
 ```
 
@@ -272,6 +266,6 @@ await db.read()
 
 export default defineMock({
   url: '/api/posts',
-  body: () => db.data.posts
+  body: () => db.data.posts,
 })
 ```

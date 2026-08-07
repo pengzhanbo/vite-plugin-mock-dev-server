@@ -1,10 +1,8 @@
-import type { SetCookieOption } from './cookies'
-import type { Headers, MockRequest, ResponseBody } from './http'
-import type { LogLevel } from './options'
+import type { SetCookieOption } from './cookies.js'
+import type { Headers, MockRequest, ResponseBody } from './http.js'
+import type { LogLevel } from './options.js'
 
-export type ResponseBodyFn = (
-  request: MockRequest,
-) => ResponseBody | Promise<ResponseBody>
+export type ResponseBodyFn = (request: MockRequest) => ResponseBody | Promise<ResponseBody>
 
 export type ResponseHeaderFn = (request: MockRequest) => Headers | Promise<Headers>
 
@@ -12,9 +10,7 @@ export type CookieValue = string | [string, SetCookieOption]
 
 export type ResponseCookies = Record<string, CookieValue>
 
-export type ResponseCookiesFn = (
-  request: MockRequest,
-) => ResponseCookies | Promise<ResponseCookies>
+export type ResponseCookiesFn = (request: MockRequest) => ResponseCookies | Promise<ResponseCookies>
 
 export interface MockBaseItem {
   /**

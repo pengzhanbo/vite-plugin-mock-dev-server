@@ -71,12 +71,12 @@ export default defineMock([
 ```ts
 // 为此请求激活 'admin' 场景
 fetch('/api/user', {
-  headers: { 'X-Mock-Scene': 'admin' }
+  headers: { 'X-Mock-Scene': 'admin' },
 })
 
 // 激活多个场景
 fetch('/api/user', {
-  headers: { 'X-Mock-Scene': 'admin,demo' }
+  headers: { 'X-Mock-Scene': 'admin,demo' },
 })
 ```
 

@@ -1,12 +1,12 @@
 import type { Plugin } from 'rolldown'
-import type { CompilerOptions, TransformResult } from './types'
+import type { CompilerOptions, TransformResult } from './types.js'
 import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 import ansis from 'ansis'
 import JSON5 from 'json5'
-import { isPackageExists, normalizePath } from '../utils'
-import { aliasMatches } from './esbuild'
+import { isPackageExists, normalizePath } from '../utils/index.js'
+import { aliasMatches } from './esbuild.js'
 
 const renamePlugin: Plugin = {
   name: 'vite-mock:rename-plugin',
@@ -24,9 +24,7 @@ const json5Plugin: Plugin = {
   name: 'vite-mock:json5-plugin',
   transform: {
     filter: { id: /\.json5$/ },
-    handler: (code) => {
-      return { code: `export default ${JSON5.stringify(JSON5.parse(code))}` }
-    },
+    handler: (code) => ({ code: `export default ${JSON5.stringify(JSON5.parse(code))}` }),
   },
 }
 
@@ -35,8 +33,8 @@ let _rolldown: null | {
   aliasPlugin: typeof import('rolldown/experimental').viteAliasPlugin
 } = null
 
-async function rolldown() {
-  _rolldown ||= {
+async function rolldown(): Promise<NonNullable<typeof _rolldown>> {
+  _rolldown ??= {
     build: (await import('rolldown')).build,
     aliasPlugin: (await import('rolldown/experimental')).viteAliasPlugin,
   }
@@ -50,7 +48,7 @@ export async function transformWithRolldown(
   const filepath = path.resolve(cwd, entryPoint)
   const filename = path.basename(entryPoint)
   const dirname = path.dirname(filepath)
-  const isAlias = (p: string) => !!alias.find(({ find }) => aliasMatches(find, p))
+  const isAlias = (p: string): boolean => !!alias.find(({ find }) => aliasMatches(find, p))
   try {
     const { build, aliasPlugin } = await rolldown()
     const result = await build({
@@ -69,19 +67,22 @@ export async function transformWithRolldown(
           ...define,
           __dirname: JSON.stringify(dirname),
           __filename: JSON.stringify(filename),
-          ...isESM ? {} : { 'import.meta.url': JSON.stringify(pathToFileURL(filepath)) },
+          ...(isESM ? {} : { 'import.meta.url': JSON.stringify(pathToFileURL(filepath)) }),
         },
       },
       external(id) {
-        if (isAlias(id))
+        if (isAlias(id)) {
           return false
-        if (id[0] !== '.' && !path.isAbsolute(id) && id !== 'vite-plugin-mock-dev-server')
+        }
+        if (id[0] !== '.' && !path.isAbsolute(id) && id !== 'vite-plugin-mock-dev-server') {
           return isPackageExists(id)
+        }
       },
       plugins: [aliasPlugin({ entries: alias }), renamePlugin, json5Plugin],
       onLog(level, log, defaultHandler) {
-        if (log.code === 'PLUGIN_TIMINGS' && log.message.includes('vite-mock'))
+        if (log.code === 'PLUGIN_TIMINGS' && log.message.includes('vite-mock')) {
           return
+        }
         defaultHandler(level, log)
       },
     })
@@ -89,12 +90,11 @@ export async function transformWithRolldown(
     return {
       code: result.output[0].code,
       internalDeps: result.output[0].moduleIds
-        .filter(id => !id.endsWith(filename) && !id.startsWith('\0'))
-        .map(id => normalizePath(path.relative(cwd, id))),
+        .filter((id) => !id.endsWith(filename) && !id.startsWith('\0'))
+        .map((id) => normalizePath(path.relative(cwd, id))),
       externalDeps: [...result.output[0].imports, ...result.output[0].dynamicImports],
     }
-  }
-  catch (e) {
+  } catch (e) {
     logger.error(`Failed to transform ${ansis.yellow.underline(filepath)}`)
     console.error(e)
   }

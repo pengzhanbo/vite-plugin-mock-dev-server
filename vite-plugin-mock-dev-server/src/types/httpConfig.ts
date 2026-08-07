@@ -1,3 +1,4 @@
+import type { LiteralUnion } from '@pengzhanbo/utils'
 import type { Connect } from 'vite'
 import type {
   MockBaseItem,
@@ -5,7 +6,7 @@ import type {
   ResponseCookies,
   ResponseCookiesFn,
   ResponseHeaderFn,
-} from './basicConfig'
+} from './basicConfig.js'
 import type {
   ExtraRequest,
   Headers,
@@ -13,7 +14,7 @@ import type {
   MockRequest,
   MockResponse,
   ResponseBody,
-} from './http'
+} from './http.js'
 
 export interface MockErrorConfig {
   /**
@@ -145,7 +146,7 @@ export interface MockHttpItem extends MockBaseItem {
    * music.mp4
    * ```
    */
-  type?: 'text' | 'json' | 'buffer' | string
+  type?: LiteralUnion<'text' | 'json' | 'buffer'>
   /**
    * Configure response body data content
    *
@@ -231,9 +232,7 @@ export interface MockHttpItem extends MockBaseItem {
    * }
    * ```
    */
-  validator?:
-    | Partial<Omit<ExtraRequest, 'getCookie'>>
-    | ((request: ExtraRequest) => boolean)
+  validator?: Partial<Omit<ExtraRequest, 'getCookie'>> | ((request: ExtraRequest) => boolean)
 
   /**
    * Configure error simulation

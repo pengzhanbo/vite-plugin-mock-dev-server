@@ -29,8 +29,9 @@ const cache = new WeakMap<Connect.IncomingMessage, Buffer>()
  * @param body - Raw request body / 原始请求体
  */
 export function cacheRequestBody(req: Connect.IncomingMessage, body?: Buffer): void {
-  if (body?.byteLength)
+  if (body?.byteLength) {
     cache.set(req, body)
+  }
 }
 
 /**
@@ -42,23 +43,25 @@ export function cacheRequestBody(req: Connect.IncomingMessage, body?: Buffer): v
  * @param config - Vite user config / Vite 用户配置
  */
 export function recoverRequest(config: UserConfig): void {
-  if (!config.server)
+  if (!config.server) {
     return
+  }
 
-  const proxies = config.server.proxy || {}
+  const proxies = config.server.proxy ?? {}
 
   objectKeys(proxies).forEach((key) => {
     const target = proxies[key]
     const options = isString(target) ? { target } : target
-    if (options.ws)
+    if (options.ws) {
       return
+    }
 
     const { configure, ...rest } = options
 
     proxies[key] = {
       ...rest,
-      configure(proxy, options) {
-        configure?.(proxy, options)
+      configure(proxy, _options) {
+        configure?.(proxy, _options)
 
         proxy.on('proxyReq', (proxyReq, req) => {
           const buffer = cache.get(req)
@@ -68,11 +71,13 @@ export function recoverRequest(config: UserConfig): void {
              * Using http-proxy's agent configuration will write to the proxy request stream in advance
              * https://github.com/http-party/node-http-proxy/issues/1287
              */
-            if (!proxyReq.headersSent)
+            if (!proxyReq.headersSent) {
               proxyReq.setHeader('Content-Length', buffer.byteLength)
+            }
 
-            if (!proxyReq.writableEnded)
+            if (!proxyReq.writableEnded) {
               proxyReq.write(buffer)
+            }
           }
         })
       },

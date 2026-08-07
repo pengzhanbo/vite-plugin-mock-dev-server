@@ -1,11 +1,19 @@
-import type { Logger } from '../core'
-import type { MockHttpItem, MockRequest, MockResponse, ResponseBody } from '../types'
+import type { Logger } from '../core/index.js'
+import type { MockHttpItem, MockRequest, MockResponse, ResponseBody } from '../types/index.js'
 import { Buffer } from 'node:buffer'
-import { attemptAsync, isArray, isFunction, objectKeys, random, sleep, timestamp } from '@pengzhanbo/utils'
+import {
+  attemptAsync,
+  isArray,
+  isFunction,
+  objectKeys,
+  random,
+  sleep,
+  timestamp,
+} from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import HTTP_STATUS from 'http-status'
 import * as mime from 'mime-types'
-import { isReadableStream } from '../utils'
+import { isReadableStream } from '../utils/index.js'
 
 /**
  * Get HTTP status text by status code
@@ -16,7 +24,7 @@ import { isReadableStream } from '../utils'
  * @returns HTTP status text / HTTP 状态文本
  */
 export function getHTTPStatusText(status: number): string {
-  return HTTP_STATUS[status as keyof typeof HTTP_STATUS] as string || 'Unknown'
+  return (HTTP_STATUS[status as keyof typeof HTTP_STATUS] as string) || 'Unknown'
 }
 
 /**
@@ -34,7 +42,7 @@ export function provideResponseStatus(
   statusText?: string,
 ): void {
   response.statusCode = status
-  response.statusMessage = statusText || getHTTPStatusText(status)
+  response.statusMessage = statusText ?? getHTTPStatusText(status)
 }
 
 /**
@@ -55,23 +63,25 @@ export async function provideResponseHeaders(
 ): Promise<void> {
   const { headers, type = 'json' } = mock
   const filepath = (mock as any).__filepath__ as string
-  const contentType
-    = mime.contentType(type) || mime.contentType(mime.lookup(type) || '')
+  const contentType = mime.contentType(type) || mime.contentType(mime.lookup(type) || '')
 
-  if (contentType)
+  if (contentType) {
     res.setHeader('Content-Type', contentType)
+  }
 
   res.setHeader('Cache-Control', 'no-cache,max-age=0')
   res.setHeader('X-Mock-Power-By', 'vite-plugin-mock-dev-server')
 
-  if (filepath)
+  if (filepath) {
     res.setHeader('X-File-Path', filepath)
+  }
 
-  if (!headers)
+  if (!headers) {
     return
+  }
 
   const [error, data] = await attemptAsync(async () =>
-    isFunction(headers) ? await headers(req) : headers,
+    isFunction(headers) ? headers(req) : headers,
   )
   if (error) {
     logger.error(
@@ -80,7 +90,7 @@ export async function provideResponseHeaders(
     )
     return
   }
-  objectKeys(data).forEach(key => res.setHeader(key, data[key]!))
+  objectKeys(data).forEach((key) => res.setHeader(key, data[key]!))
 }
 
 /**
@@ -100,11 +110,12 @@ export async function provideResponseCookies(
   logger: Logger,
 ): Promise<void> {
   const { cookies } = mock
-  if (!cookies)
+  if (!cookies) {
     return
+  }
 
   const [error, data] = await attemptAsync(async () =>
-    isFunction(cookies) ? await cookies(req) : cookies,
+    isFunction(cookies) ? cookies(req) : cookies,
   )
   if (error) {
     const filepath = (mock as any).__filepath__ as string
@@ -114,11 +125,12 @@ export async function provideResponseCookies(
     )
     return
   }
-  objectKeys(data).forEach((key) => {
-    const cookie = data[key]
-    const [value, options] = isArray(cookie) ? cookie : [cookie]
-    res.setCookie(key, value, options)
-  })
+  data &&
+    objectKeys(data).forEach((key) => {
+      const cookie = data[key]
+      const [value, options] = isArray(cookie) ? cookie : [cookie]
+      res.setCookie(key, value, options)
+    })
 }
 
 /**
@@ -133,11 +145,9 @@ export async function provideResponseCookies(
 export function sendResponseData(res: MockResponse, raw: ResponseBody, type: string): void {
   if (isReadableStream(raw)) {
     raw.pipe(res)
-  }
-  else if (Buffer.isBuffer(raw)) {
+  } else if (Buffer.isBuffer(raw)) {
     res.end(type === 'text' || type === 'json' ? raw.toString('utf-8') : raw)
-  }
-  else {
+  } else {
     const content = typeof raw === 'string' ? raw : JSON.stringify(raw)
     res.end(type === 'buffer' ? Buffer.from(content) : content)
   }
@@ -151,11 +161,14 @@ export function sendResponseData(res: MockResponse, raw: ResponseBody, type: str
  * @param startTime - Request start time / 请求开始时间
  * @param delay - Delay configuration / 延迟配置
  */
-export async function responseRealDelay(startTime: number, delay?: MockHttpItem['delay']): Promise<void> {
+export async function responseRealDelay(
+  startTime: number,
+  delay?: MockHttpItem['delay'],
+): Promise<void> {
   if (
-    !delay
-    || (typeof delay === 'number' && delay <= 0)
-    || (isArray(delay) && delay.length !== 2)
+    !delay ||
+    (typeof delay === 'number' && delay <= 0) ||
+    (isArray(delay) && delay.length !== 2)
   ) {
     return
   }
@@ -163,10 +176,10 @@ export async function responseRealDelay(startTime: number, delay?: MockHttpItem[
   if (isArray(delay)) {
     const [min, max] = delay
     realDelay = random(min, max)
-  }
-  else {
+  } else {
     realDelay = delay - (timestamp() - startTime)
   }
-  if (realDelay > 0)
+  if (realDelay > 0) {
     await sleep(realDelay)
+  }
 }

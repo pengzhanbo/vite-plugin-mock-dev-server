@@ -225,7 +225,7 @@ All public APIs must include JSDoc comments in the following format:
 
 Example:
 
-```typescript
+````typescript
 /**
  * Define mock data that can be shared across multiple mock files
  *
@@ -240,7 +240,7 @@ Example:
  * ```
  */
 export function defineMockData<T>(key: string, initialData: T): MockData<T>
-```
+````
 
 ## Commit Convention
 

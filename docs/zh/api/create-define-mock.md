@@ -6,9 +6,7 @@
 
 ```ts
 function createDefineMock(
-  transformer: (
-    mock: MockHttpItem | MockWebsocketItem
-  ) => MockHttpItem | MockWebsocketItem | void
+  transformer: (mock: MockHttpItem | MockWebsocketItem) => MockHttpItem | MockWebsocketItem | void,
 ): typeof defineMock
 ```
 
@@ -50,7 +48,7 @@ import { defineApiMock } from './defineApiMock'
 // 实际匹配的 URL 是 /api/users
 export default defineApiMock({
   url: '/users',
-  body: [{ id: 1, name: 'John' }]
+  body: [{ id: 1, name: 'John' }],
 })
 ```
 
@@ -62,7 +60,7 @@ import { createDefineMock } from 'vite-plugin-mock-dev-server'
 export const defineAuthMock = createDefineMock((mock) => {
   mock.headers = {
     ...mock.headers,
-    'X-Auth-Required': 'true'
+    'X-Auth-Required': 'true',
   }
 })
 ```
@@ -72,7 +70,7 @@ import { defineAuthMock } from './defineAuthMock'
 
 export default defineAuthMock({
   url: '/api/profile',
-  body: { name: 'John', role: 'admin' }
+  body: { name: 'John', role: 'admin' },
 })
 ```
 
@@ -105,7 +103,7 @@ export const defineStandardMock = createDefineMock((mock) => {
   // 添加默认响应头
   mock.headers = {
     'Content-Type': 'application/json',
-    ...mock.headers
+    ...mock.headers,
   }
 })
 ```
@@ -122,7 +120,7 @@ export const defineEnvMock = createDefineMock((mock) => {
   if (isDev) {
     mock.headers = {
       ...mock.headers,
-      'X-Debug': 'true'
+      'X-Debug': 'true',
     }
   }
 })
@@ -137,8 +135,12 @@ export const defineEnvMock = createDefineMock((mock) => {
 
 ```ts
 // 链式调用示例
-const defineMockA = createDefineMock((mock) => { /* ... */ })
-const defineMockB = createDefineMock((mock) => { /* ... */ })
+const defineMockA = createDefineMock((mock) => {
+  /* ... */
+})
+const defineMockB = createDefineMock((mock) => {
+  /* ... */
+})
 
 // 组合使用
 const config = defineMockB(defineMockA({ url: '/test' }))

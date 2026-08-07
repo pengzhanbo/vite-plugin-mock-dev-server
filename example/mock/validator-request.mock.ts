@@ -14,7 +14,7 @@ export default defineMock([
   {
     url: '/api/validator-body-include',
     validator(request) {
-      const ids = request.body.ids || []
+      const ids = request.body.ids ?? []
       return !ids.includes('1001')
     },
     body: {

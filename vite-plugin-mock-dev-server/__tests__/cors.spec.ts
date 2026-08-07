@@ -4,7 +4,7 @@
  * CORS 模块测试
  */
 import { describe, expect, it, vi } from 'vitest'
-import { createCors } from '../src/mockHttp/cors'
+import { createCors } from '../src/mockHttp/cors.js'
 
 describe('createCors', () => {
   it('should return undefined when corsOptions is false', () => {
@@ -120,8 +120,7 @@ describe('createCors', () => {
       origin: (origin, callback) => {
         if (!origin || origin === 'http://allowed.com') {
           callback(null, true)
-        }
-        else {
+        } else {
           callback(new Error('Not allowed'))
         }
       },

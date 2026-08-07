@@ -5,7 +5,7 @@ import { definePlugin } from 'vitepress-tuck'
 
 const isProd = process.env.NODE_ENV === 'production'
 
-export default definePlugin(() => ({
+export const llmsPlugin: () => VitepressPlugin = definePlugin(() => ({
   name: 'vitepress-plugin-llms',
   markdown: {
     config(md) {
@@ -13,13 +13,11 @@ export default definePlugin(() => ({
     },
   },
   vite: {
-    plugins: [
-      isProd && llmstxt(),
-    ],
+    plugins: [isProd && llmstxt()],
     ssr: {
-      noExternal: [
-        'vitepress-plugin-llms',
-      ],
+      noExternal: ['vitepress-plugin-llms'],
     },
   },
-})) as () => VitepressPlugin
+}))
+
+export default llmsPlugin

@@ -6,25 +6,29 @@ interface User {
   username: string
   age: number
 }
-export default defineMockData<Record<string, User>>('users', {
-  mark2022: {
-    account: mock.mock('@id()'),
-    username: mock.mock('@first()'),
-    age: 20,
+export default defineMockData<Record<string, User>>(
+  'users',
+  {
+    mark2022: {
+      account: mock.mock('@id()'),
+      username: mock.mock('@first()'),
+      age: 20,
+    },
+    john996: {
+      account: 'john996',
+      username: 'john',
+      age: 20,
+    },
+    // mark2021: {
+    //   account: mock.mock('@id()'),
+    //   username: mock.mock('@first()'),
+    //   age: 20,
+    // },
+    mark2020: {
+      account: mock.mock('@id()'),
+      username: mock.mock('@first()'),
+      age: 20,
+    },
   },
-  john996: {
-    account: 'john996',
-    username: 'john',
-    age: 20,
-  },
-  // mark2021: {
-  //   account: mock.mock('@id()'),
-  //   username: mock.mock('@first()'),
-  //   age: 20,
-  // },
-  mark2020: {
-    account: mock.mock('@id()'),
-    username: mock.mock('@first()'),
-    age: 20,
-  },
-}, { persistOnHMR: true })
+  { persistOnHMR: true },
+)

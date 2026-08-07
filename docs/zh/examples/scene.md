@@ -26,10 +26,12 @@ export default defineConfig({
 ```
 
 当 `activeScene` 设置为 `'test'` 时：
+
 - `GET /api/scene` 无匹配场景 → 返回 `{ scene: 'default scene' }`（通用 mock，无 scene 限制）
 - `GET /api/scene` 场景 `'test'` 匹配 → 返回 `{ scene: 'test scene' }`（scene 匹配）
 
 当未配置 `activeScene`（或为空）时：
+
 - `GET /api/scene` → 返回 `{ scene: 'default scene' }`（仅通用 mock 匹配）
 
 ## 按请求覆盖
@@ -39,7 +41,7 @@ export default defineConfig({
 ```ts
 // 为本次请求激活 'test' 场景
 fetch('/api/scene', {
-  headers: { 'X-Mock-Scene': 'test' }
+  headers: { 'X-Mock-Scene': 'test' },
 })
 // 响应: { scene: 'test scene' }
 ```
@@ -48,6 +50,6 @@ fetch('/api/scene', {
 
 ```ts
 fetch('/api/scene', {
-  headers: { 'X-Mock-Scene': 'test,dev' }
+  headers: { 'X-Mock-Scene': 'test,dev' },
 })
 ```

@@ -10,27 +10,27 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 export default defineMock({
   url: '/api/test',
   method: 'GET',
-  body: { message: 'Hello World' }
+  body: { message: 'Hello World' },
 })
 ```
 
 ## 配置项概览
 
-| 配置项 | 类型 | 必填 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| [url](../api/mock-http-item#url) | `string` | 是 | - | 请求路径，支持动态参数 |
-| [method](../api/mock-http-item#method) | `Method \| Method[]` | 否 | `['GET','POST']` | 允许的 HTTP 方法 |
-| [enabled](../api/mock-http-item#enabled) | `boolean` | 否 | `true` | 是否启用 |
-| [status](../api/mock-http-item#status) | `number` | 否 | `200` | 响应状态码 |
-| [statusText](../api/mock-http-item#statustext) | `string` | 否 | `'OK'` | 响应状态文本 |
-| [headers](../api/mock-http-item#headers) | `Headers \| Function` | 否 | - | 响应头 |
-| [body](../api/mock-http-item#body) | `ResponseBody \| Function` | 否 | `{}` | 响应体 |
-| [response](../api/mock-http-item#response) | `Function` | 否 | - | 自定义响应处理 |
-| [delay](../api/mock-http-item#delay) | `number \| [number, number]` | 否 | `0` | 响应延迟 |
-| [cookies](../api/mock-http-item#cookies) | `ResponseCookies \| Function` | 否 | - | 响应 Cookies |
-| [validator](../api/mock-http-item#validator) | `Validator \| Function` | 否 | - | 请求验证器 |
-| [scene](../api/mock-http-item#scene) | `string \| string[]` | 否 | - | 场景标识，用于过滤 |
-| [error](../api/mock-http-item#error) | `MockErrorConfig` | 否 | - | 错误模拟配置 |
+| 配置项                                         | 类型                          | 必填 | 默认值           | 说明                   |
+| ---------------------------------------------- | ----------------------------- | ---- | ---------------- | ---------------------- |
+| [url](../api/mock-http-item#url)               | `string`                      | 是   | -                | 请求路径，支持动态参数 |
+| [method](../api/mock-http-item#method)         | `Method \| Method[]`          | 否   | `['GET','POST']` | 允许的 HTTP 方法       |
+| [enabled](../api/mock-http-item#enabled)       | `boolean`                     | 否   | `true`           | 是否启用               |
+| [status](../api/mock-http-item#status)         | `number`                      | 否   | `200`            | 响应状态码             |
+| [statusText](../api/mock-http-item#statustext) | `string`                      | 否   | `'OK'`           | 响应状态文本           |
+| [headers](../api/mock-http-item#headers)       | `Headers \| Function`         | 否   | -                | 响应头                 |
+| [body](../api/mock-http-item#body)             | `ResponseBody \| Function`    | 否   | `{}`             | 响应体                 |
+| [response](../api/mock-http-item#response)     | `Function`                    | 否   | -                | 自定义响应处理         |
+| [delay](../api/mock-http-item#delay)           | `number \| [number, number]`  | 否   | `0`              | 响应延迟               |
+| [cookies](../api/mock-http-item#cookies)       | `ResponseCookies \| Function` | 否   | -                | 响应 Cookies           |
+| [validator](../api/mock-http-item#validator)   | `Validator \| Function`       | 否   | -                | 请求验证器             |
+| [scene](../api/mock-http-item#scene)           | `string \| string[]`          | 否   | -                | 场景标识，用于过滤     |
+| [error](../api/mock-http-item#error)           | `MockErrorConfig`             | 否   | -                | 错误模拟配置           |
 
 ## 多个配置
 
@@ -43,13 +43,13 @@ export default defineMock([
   {
     url: '/api/users',
     method: 'GET',
-    body: []
+    body: [],
   },
   {
     url: '/api/users',
     method: 'POST',
-    body: { id: 1 }
-  }
+    body: { id: 1 },
+  },
 ])
 ```
 

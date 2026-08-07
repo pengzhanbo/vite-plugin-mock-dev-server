@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer'
 import { PassThrough, Writable } from 'node:stream'
 import { describe, expect, it, vi } from 'vitest'
-import { createSSEStream } from '../src/helpers'
+import { createSSEStream } from '../src/helpers/index.js'
 
 /**
  * Test for SSE (Server-Sent Events) functionality
@@ -13,6 +13,8 @@ import { createSSEStream } from '../src/helpers'
  * Create mock request with socket
  *
  * 创建带有 socket 的模拟请求对象
+ *
+ * @returns - 带有 socket 的模拟请求对象
  */
 function createMockReq() {
   return {
@@ -28,6 +30,9 @@ function createMockReq() {
  * Collect output from SSE stream
  *
  * 从 SSE 流中收集输出
+ *
+ * @param sseStream - SSE 流
+ * @returns - 包含 SSE 流输出的 Promise
  */
 function collectStreamOutput(sseStream: any): Promise<string> {
   return new Promise((resolve) => {

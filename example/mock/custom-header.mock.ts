@@ -11,7 +11,7 @@ export default defineMock([
     url: '/api/custom-header-fn',
     headers({ headers }) {
       return {
-        'content-type': headers['content-type'] || 'application/json',
+        'content-type': headers['content-type'] ?? 'application/json',
       }
     },
   },

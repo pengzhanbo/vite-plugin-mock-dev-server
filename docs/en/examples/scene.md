@@ -26,10 +26,12 @@ export default defineConfig({
 ```
 
 When `activeScene` is set to `'test'`:
+
 - `GET /api/scene` without a matching scene → returns `{ scene: 'default scene' }` (universal, no scene)
 - `GET /api/scene` with scene `'test'` → returns `{ scene: 'test scene' }` (scene match)
 
 When `activeScene` is not configured (or empty):
+
 - `GET /api/scene` → returns `{ scene: 'default scene' }` (only universal mock matches)
 
 ## Per-Request Override
@@ -39,7 +41,7 @@ Use the `X-Mock-Scene` header to dynamically switch scenes per request:
 ```ts
 // Activate 'test' scene for this request
 fetch('/api/scene', {
-  headers: { 'X-Mock-Scene': 'test' }
+  headers: { 'X-Mock-Scene': 'test' },
 })
 // Response: { scene: 'test scene' }
 ```
@@ -48,6 +50,6 @@ The `X-Mock-Scene` header supports multiple comma-separated scenes:
 
 ```ts
 fetch('/api/scene', {
-  headers: { 'X-Mock-Scene': 'test,dev' }
+  headers: { 'X-Mock-Scene': 'test,dev' },
 })
 ```

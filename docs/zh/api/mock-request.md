@@ -32,8 +32,8 @@ export default defineMock({
   url: '/api/users',
   body: ({ query }) => ({
     page: query.page, // "1"
-    limit: query.limit // "10"
-  })
+    limit: query.limit, // "10"
+  }),
 })
 ```
 
@@ -49,8 +49,8 @@ export default defineMock({
 export default defineMock({
   url: '/api/users/:id',
   body: ({ params }) => ({
-    userId: params.id // "123"
-  })
+    userId: params.id, // "123"
+  }),
 })
 
 // 多个参数
@@ -59,8 +59,8 @@ export default defineMock({
   url: '/api/users/:userId/posts/:postId',
   body: ({ params }) => ({
     userId: params.userId, // "123"
-    postId: params.postId // "456"
-  })
+    postId: params.postId, // "456"
+  }),
 })
 ```
 
@@ -79,8 +79,8 @@ export default defineMock({
   body: ({ body }) => ({
     id: Date.now(),
     name: body.name, // "John"
-    email: body.email // "john@example.com"
-  })
+    email: body.email, // "john@example.com"
+  }),
 })
 ```
 
@@ -95,8 +95,8 @@ export default defineMock({
   body: ({ headers }) => ({
     userAgent: headers['user-agent'],
     contentType: headers['content-type'],
-    authorization: headers.authorization
-  })
+    authorization: headers.authorization,
+  }),
 })
 ```
 
@@ -113,8 +113,8 @@ export default defineMock({
 export default defineMock({
   url: '/api/theme',
   body: ({ refererQuery }) => ({
-    mode: refererQuery.mode || 'light' // "dark"
-  })
+    mode: refererQuery.mode || 'light', // "dark"
+  }),
 })
 ```
 
@@ -141,7 +141,7 @@ export default defineMock({
     }
 
     return { user: getUserByToken(token) }
-  }
+  },
 })
 ```
 
@@ -162,7 +162,7 @@ export default defineMock([
         url: {
           query,
           params,
-          refererQuery
+          refererQuery,
         },
 
         // 请求体
@@ -172,22 +172,22 @@ export default defineMock([
         headers: {
           contentType: headers['content-type'],
           userAgent: headers['user-agent'],
-          accept: headers.accept
+          accept: headers.accept,
         },
 
         // Cookies
         cookies: {
           session: getCookie('session'),
-          token: getCookie('token')
+          token: getCookie('token'),
         },
 
         // 元信息
         meta: {
           timestamp: Date.now(),
-          ip: headers['x-forwarded-for'] || 'unknown'
-        }
+          ip: headers['x-forwarded-for'] || 'unknown',
+        },
       }
-    }
+    },
   },
 
   // 根据查询参数返回不同数据
@@ -199,38 +199,35 @@ export default defineMock([
       // 模拟搜索结果
       const results = [
         { id: 1, title: 'Result 1', category: 'tech' },
-        { id: 2, title: 'Result 2', category: 'design' }
-      ].filter(item =>
-        !category || item.category === category
-      )
+        { id: 2, title: 'Result 2', category: 'design' },
+      ].filter((item) => !category || item.category === category)
 
       return {
         query: q,
         category,
         sort,
         results,
-        total: results.length
+        total: results.length,
       }
-    }
+    },
   },
 
   // 认证检查
   {
     url: '/api/admin/data',
     body: ({ headers, getCookie }) => {
-      const token = getCookie('admin-token')
-        || headers.authorization?.replace('Bearer ', '')
+      const token = getCookie('admin-token') || headers.authorization?.replace('Bearer ', '')
 
       if (!token || !isValidToken(token)) {
         return {
           status: 401,
-          body: { error: 'Unauthorized' }
+          body: { error: 'Unauthorized' },
         }
       }
 
       return { data: 'sensitive admin data' }
-    }
-  }
+    },
+  },
 ])
 ```
 

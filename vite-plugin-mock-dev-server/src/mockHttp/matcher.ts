@@ -1,9 +1,9 @@
-import type { Logger } from '../core'
-import type { ExtraRequest, Method, MockHttpItem, MockOptions } from '../types'
+import type { Logger } from '../core/index.js'
+import type { ExtraRequest, Method, MockHttpItem, MockOptions } from '../types/index.js'
 import { attempt, isArray, isFunction } from '@pengzhanbo/utils'
 import ansis from 'ansis'
-import { isPathMatch, matchScene } from '../utils'
-import { parseRequestParams, requestValidate } from './request'
+import { isPathMatch, matchScene } from '../utils/index.js'
+import { parseRequestParams, requestValidate } from './request.js'
 
 interface FindMockDataOptions {
   pathname: string
@@ -33,8 +33,9 @@ export function findMockData(
 ): MockHttpItem | undefined {
   return mockList.find((mock) => {
     // 避免用户编写 mock 文件时，在文件内容为空
-    if (!pathname || !mock || !mock.url || mock.ws)
+    if (!pathname || !mock || !mock.url || mock.ws) {
       return false
+    }
 
     const methods: Method[] = mock.method
       ? isArray(mock.method)
@@ -42,12 +43,14 @@ export function findMockData(
         : [mock.method]
       : ['GET', 'POST']
     // 判断发起的请求方法是否符合当前 mock 允许的方法
-    if (!methods.includes(method as Method))
+    if (!methods.includes(method as Method)) {
       return false
+    }
 
     // 判断发起的场景是否符合当前 mock 允许的场景
-    if (!matchScene(activeScene, mock.scene))
+    if (!matchScene(activeScene, mock.scene)) {
       return false
+    }
 
     const hasMock = isPathMatch(mock.url, pathname)
 
@@ -55,8 +58,7 @@ export function findMockData(
       const params = parseRequestParams(mock.url, pathname)
       if (isFunction(mock.validator)) {
         return mock.validator({ params, ...request })
-      }
-      else {
+      } else {
         const [error, validated] = attempt(requestValidate, { params, ...request }, mock.validator)
         if (error) {
           const file = (mock as any).__filepath__

@@ -44,12 +44,12 @@ Any request path starting with `prefix` will be intercepted and attempt to match
 ```ts
 // String prefix
 mockDevServerPlugin({
-  prefix: ['/api', '/mock']
+  prefix: ['/api', '/mock'],
 })
 
 // Regex form
 mockDevServerPlugin({
-  prefix: ['^/api/.*']
+  prefix: ['^/api/.*'],
 })
 ```
 
@@ -67,7 +67,7 @@ Rules in `wsPrefix` should not be configured in `viteConfig.server.proxy` at the
 
 ```ts
 mockDevServerPlugin({
-  wsPrefix: ['/ws', '/socket.io']
+  wsPrefix: ['/ws', '/socket.io'],
 })
 ```
 
@@ -79,7 +79,7 @@ mockDevServerPlugin({
 
 ```ts
 mockDevServerPlugin({
-  cwd: path.resolve(__dirname, 'src')
+  cwd: path.resolve(__dirname, 'src'),
 })
 ```
 
@@ -91,7 +91,7 @@ mockDevServerPlugin({
 
 ```ts
 mockDevServerPlugin({
-  dir: 'mock-data' // Will read <cwd>/mock-data directory
+  dir: 'mock-data', // Will read <cwd>/mock-data directory
 })
 ```
 
@@ -105,10 +105,7 @@ Uses [picomatch](https://github.com/micromatch/picomatch) syntax.
 
 ```ts
 mockDevServerPlugin({
-  include: [
-    '**/*.mock.ts',
-    '**/*.api.js'
-  ]
+  include: ['**/*.mock.ts', '**/*.api.js'],
 })
 ```
 
@@ -120,10 +117,7 @@ mockDevServerPlugin({
 
 ```ts
 mockDevServerPlugin({
-  exclude: [
-    '**/node_modules/**',
-    '**/*.test.mock.ts'
-  ]
+  exclude: ['**/node_modules/**', '**/*.test.mock.ts'],
 })
 ```
 
@@ -137,7 +131,7 @@ By default, Mock file modifications only update data content without refreshing 
 
 ```ts
 mockDevServerPlugin({
-  reload: true
+  reload: true,
 })
 ```
 
@@ -149,7 +143,7 @@ mockDevServerPlugin({
 
 ```ts
 mockDevServerPlugin({
-  log: 'debug' // Detailed logs
+  log: 'debug', // Detailed logs
   // log: 'silent'  // Disable logs
 })
 ```
@@ -166,8 +160,8 @@ By default, inherits Vite's `server.cors` configuration. For detailed configurat
 mockDevServerPlugin({
   cors: {
     origin: 'http://localhost:3000',
-    credentials: true
-  }
+    credentials: true,
+  },
 })
 ```
 
@@ -182,8 +176,8 @@ Used to handle `multipart/form-data` type requests. For detailed configuration, 
 mockDevServerPlugin({
   formidableOptions: {
     uploadDir: path.join(process.cwd(), 'uploads'),
-    maxFileSize: 10 * 1024 * 1024 // 10MB
-  }
+    maxFileSize: 10 * 1024 * 1024, // 10MB
+  },
 })
 ```
 
@@ -197,8 +191,8 @@ For detailed configuration, see [cookies](https://github.com/pillarjs/cookies#ne
 ```ts
 mockDevServerPlugin({
   cookiesOptions: {
-    keys: ['secret-key']
-  }
+    keys: ['secret-key'],
+  },
 })
 ```
 
@@ -213,8 +207,8 @@ For detailed configuration, see [co-body](https://github.com/cojs/co-body#option
 mockDevServerPlugin({
   bodyParserOptions: {
     jsonLimit: '10mb',
-    formLimit: '10mb'
-  }
+    formLimit: '10mb',
+  },
 })
 ```
 
@@ -236,8 +230,8 @@ interface ServerBuildOption {
 mockDevServerPlugin({
   build: {
     serverPort: 3000,
-    dist: 'mock-server'
-  }
+    dist: 'mock-server',
+  },
 })
 ```
 
@@ -252,11 +246,11 @@ Can be overridden per-request via the `X-Mock-Scene` request header.
 
 ```ts
 mockDevServerPlugin({
-  activeScene: 'test' // Only activate mocks with scene: 'test'
+  activeScene: 'test', // Only activate mocks with scene: 'test'
 })
 
 mockDevServerPlugin({
-  activeScene: ['dev', 'test'] // Activate mocks matching 'dev' or 'test'
+  activeScene: ['dev', 'test'], // Activate mocks matching 'dev' or 'test'
 })
 ```
 
@@ -279,10 +273,10 @@ mockDevServerPlugin({
     special: {
       '/api/:a/:b/c': {
         rules: ['/api/a/:b/:c'],
-        when: ['/api/a/b/c']
-      }
-    }
-  }
+        when: ['/api/a/b/c'],
+      },
+    },
+  },
 })
 ```
 
@@ -294,7 +288,7 @@ mockDevServerPlugin({
 
 When enabled, the plugin automatically records request responses forwarded through the Proxy and plays back the recorded data when Mock data is unavailable.
 
-```ts
+````ts
 interface RecordOptions {
   /**
    * Whether to enable the record feature
@@ -318,28 +312,30 @@ interface RecordOptions {
    * filter: { mode: 'path-to-regexp', include: '/api/:id' }
    * ```
    */
-  filter?: ((req: RecordedReq) => boolean) | {
-    /**
-     * Include the request links that need to be recorded
-     *
-     * String: Glob pattern or path-to-regexp pattern
-     * (Use the mode option to set the mode, default is glob)
-     */
-    include?: string | string[]
-    /**
-     * Exclude request links that do not need to be recorded
-     *
-     * String: Glob pattern or path-to-regexp pattern
-     * (Use the mode option to set the mode, default is glob)
-     */
-    exclude?: string | string[]
-    /**
-     * Matching mode for include/exclude patterns
-     * - 'glob': Glob pattern matching (default)
-     * - 'path-to-regexp': Path-to-regexp pattern matching
-     */
-    mode: 'glob' | 'path-to-regexp'
-  }
+  filter?:
+    | ((req: RecordedReq) => boolean)
+    | {
+        /**
+         * Include the request links that need to be recorded
+         *
+         * String: Glob pattern or path-to-regexp pattern
+         * (Use the mode option to set the mode, default is glob)
+         */
+        include?: string | string[]
+        /**
+         * Exclude request links that do not need to be recorded
+         *
+         * String: Glob pattern or path-to-regexp pattern
+         * (Use the mode option to set the mode, default is glob)
+         */
+        exclude?: string | string[]
+        /**
+         * Matching mode for include/exclude patterns
+         * - 'glob': Glob pattern matching (default)
+         * - 'path-to-regexp': Path-to-regexp pattern matching
+         */
+        mode: 'glob' | 'path-to-regexp'
+      }
 
   /**
    * Directory to store recorded data
@@ -385,12 +381,12 @@ interface RecordOptions {
    */
   gitignore?: boolean
 }
-```
+````
 
 ```ts
 // Abbreviation form: One-click activation
 mockDevServerPlugin({
-  record: true
+  record: true,
 })
 
 // Full configuration
@@ -401,8 +397,8 @@ mockDevServerPlugin({
     overwrite: true,
     expires: 0,
     status: [],
-    gitignore: true
-  }
+    gitignore: true,
+  },
 })
 ```
 

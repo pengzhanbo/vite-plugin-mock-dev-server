@@ -30,8 +30,8 @@ export default defineMock({
   body: {
     code: 0,
     message: 'ok',
-    result: 'custom data'
-  }
+    result: 'custom data',
+  },
 })
 ```
 
@@ -62,10 +62,10 @@ export default defineMock({
       message: 'ok',
       result: {
         info: 'custom data',
-        query
-      }
+        query,
+      },
     }
-  }
+  },
 })
 ```
 
@@ -77,6 +77,6 @@ export default defineMock({
   url: '/api/test',
   body() {
     return createReadStream('./my-app.dmg')
-  }
+  },
 })
 ```

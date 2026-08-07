@@ -25,6 +25,6 @@ export default defineMock({
     password: faker.internet.password(),
     birthdate: faker.date.birthdate(),
     registeredAt: faker.date.past(),
-  }
+  },
 })
 ```

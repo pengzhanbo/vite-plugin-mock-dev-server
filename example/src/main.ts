@@ -1,103 +1,103 @@
-import { get, post } from './request'
+import { get, post } from './request.js'
 
-function fileExtension() {
-  get('/api/json')
-  get('/api/json5')
-  get('/api/es-module-js')
-  get('/api/typescript')
-  get('/api/common-js')
-  get('/api/javascript')
+function fileExtension(): void {
+  void get('/api/json')
+  void get('/api/json5')
+  void get('/api/es-module-js')
+  void get('/api/typescript')
+  void get('/api/common-js')
+  void get('/api/javascript')
 }
 
-function allowMethod() {
-  get('/api/only-get-method')
-  post('/api/only-get-method')
-  get('/api/allow-get-and-post')
-  post('/api/allow-get-and-post')
+function allowMethod(): void {
+  void get('/api/only-get-method')
+  void post('/api/only-get-method')
+  void get('/api/allow-get-and-post')
+  void post('/api/allow-get-and-post')
 }
 
-function apiDev() {
-  get('/api-dev/list/get')
+function apiDev(): void {
+  void get('/api-dev/list/get')
 }
 
-function buffer() {
-  post('/api/buffer/buffer-type')
-  post('/api/buffer/buffer-body')
+function buffer(): void {
+  void post('/api/buffer/buffer-type')
+  void post('/api/buffer/buffer-body')
 }
 
-function cookie() {
-  post('/api/login')
-  post('/api/check-login')
-  post('/api/logout')
-  post('/api/check-login')
+function cookie(): void {
+  void post('/api/login')
+  void post('/api/check-login')
+  void post('/api/logout')
+  void post('/api/check-login')
 }
 
-function delay() {
-  get('/api/delay')
-  get('/api/delay-and-fail')
+function delay(): void {
+  void get('/api/delay')
+  void get('/api/delay-and-fail')
 }
 
-function customHeader() {
-  get('/api/custom-header')
-  get('/api/custom-header-fn')
+function customHeader(): void {
+  void get('/api/custom-header')
+  void get('/api/custom-header-fn')
 }
 
-function customResponse() {
-  get('/api/custom-response?a=1&b=2')
-  post('/api/custom-response-skip?skip=1', { skip: 1, aa: 222 })
-  get('/api/custom-response-skip')
+function customResponse(): void {
+  void get('/api/custom-response?a=1&b=2')
+  void post('/api/custom-response-skip?skip=1', { skip: 1, aa: 222 })
+  void get('/api/custom-response-skip')
 }
 
-function dynamicMatchUrl() {
-  get('/api/author/10001')
-  get('/api/author/10002')
-  get('/api/author/10003')
+function dynamicMatchUrl(): void {
+  void get('/api/author/10001')
+  void get('/api/author/10002')
+  void get('/api/author/10003')
 }
 
-function fail() {
-  get('/api/fail')
+function fail(): void {
+  void get('/api/fail')
 }
 
-function mockjs() {
-  get('/api/mockjs')
+function mockjs(): void {
+  void get('/api/mockjs')
 }
 
-function otherMock() {
-  post('/api/post/list', { page: 1 })
-  post('/api/post/delete/1')
-  post('/api/post/list', { page: 1 })
-  get('/api/user/list')
-  get('/api/user/mark2022')
+function otherMock(): void {
+  void post('/api/post/list', { page: 1 })
+  void post('/api/post/delete/1')
+  void post('/api/post/list', { page: 1 })
+  void get('/api/user/list')
+  void get('/api/user/mark2022')
 }
 
-function validatorBody() {
-  post('/api/post-update', { shouldUpdate: true })
-  post('/api/post-update', { shouldUpdate: false })
+function validatorBody(): void {
+  void post('/api/post-update', { shouldUpdate: true })
+  void post('/api/post-update', { shouldUpdate: false })
 }
 
-function validatorParams() {
-  get('/api/post/1001')
-  get('/api/post/1002')
-  get('/api/post/1003')
+function validatorParams(): void {
+  void get('/api/post/1001')
+  void get('/api/post/1002')
+  void get('/api/post/1003')
 }
 
-function validatorQuery() {
-  get('/api/post?id=1000')
-  get('/api/post?id=1001&other=1')
-  get('/api/post?id=1002')
-  get('/api/post?id=1003&other=1')
+function validatorQuery(): void {
+  void get('/api/post?id=1000')
+  void get('/api/post?id=1001&other=1')
+  void get('/api/post?id=1002')
+  void get('/api/post?id=1003&other=1')
 }
 
-function validatorRequest() {
-  get('/api/validator-check-cookie')
-  post('/api/validator-body-include', { ids: [] })
+function validatorRequest(): void {
+  void get('/api/validator-check-cookie')
+  void post('/api/validator-body-include', { ids: [] })
 }
 
-function scene() {
-  get('/api/scene')
+function scene(): void {
+  void get('/api/scene')
 }
 
-function httpMock() {
+function httpMock(): void {
   scene()
   fileExtension()
   allowMethod()
@@ -118,7 +118,7 @@ function httpMock() {
   delay()
 }
 
-function webSocketMock() {
+function webSocketMock(): void {
   const ws = new WebSocket('ws://localhost:5173/socket.io')
   ws.addEventListener(
     'open',
@@ -129,12 +129,13 @@ function webSocketMock() {
     { once: true },
   )
   setTimeout(() => {
-    if (ws.readyState === ws.OPEN)
+    if (ws.readyState === ws.OPEN) {
       ws.send(JSON.stringify({ type: 'message', payload: { a: 1 } }))
+    }
   }, 3000)
 }
 
-function eventSourceMock() {
+function eventSourceMock(): void {
   const es = new EventSource('/api/sse')
   es.addEventListener('count', (e) => {
     // eslint-disable-next-line no-console

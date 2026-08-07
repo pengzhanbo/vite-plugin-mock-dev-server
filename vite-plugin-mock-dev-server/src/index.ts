@@ -1,7 +1,7 @@
-import { mockDevServerPlugin } from './core'
+import { mockDevServerPlugin } from './core/index.js'
 
-export * from './helpers'
-export * from './server'
+export * from './helpers/index.js'
+export * from './server.js'
 export type {
   FormidableFile,
   MockHttpItem,
@@ -9,6 +9,6 @@ export type {
   MockRequest,
   MockServerPluginOptions,
   MockWebsocketItem,
-} from './types'
+} from './types/index.js'
 
 export { mockDevServerPlugin }

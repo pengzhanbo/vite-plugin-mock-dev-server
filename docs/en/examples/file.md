@@ -6,14 +6,14 @@ Form Upload File
 <form action="/api/upload" method="post" enctype="multipart/form-data">
   <p>
     <span>file: </span>
-    <input type="file" name="files" multiple>
+    <input type="file" name="files" multiple />
   </p>
   <p>
     <span>name:</span>
-    <input type="text" name="name" value="mark">
+    <input type="text" name="name" value="mark" />
   </p>
   <p>
-    <input type="submit" value="submit">
+    <input type="submit" value="submit" />
   </p>
 </form>
 ```
@@ -47,7 +47,7 @@ export default defineMock({
   url: '/api/download',
   // When you are unsure of the type, you can pass the file name for internal parsing by the plugin
   type: 'my-app.dmg',
-  body: () => createReadStream('./my-app.dmg')
+  body: () => createReadStream('./my-app.dmg'),
 })
 ```
 

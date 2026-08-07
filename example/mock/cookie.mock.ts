@@ -20,6 +20,7 @@ export default defineMock([
           token: ['', { expires: new Date(Date.now() - 86400000) }],
         }
       }
+      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
       return {} as any
     },
     body: {

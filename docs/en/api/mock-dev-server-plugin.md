@@ -5,9 +5,7 @@ Create the Mock Dev Server plugin, this is the plugin's entry function.
 ## Function Signature
 
 ```ts
-function mockDevServerPlugin(
-  options?: MockServerPluginOptions
-): Plugin[]
+function mockDevServerPlugin(options?: MockServerPluginOptions): Plugin[]
 ```
 
 ## Parameters
@@ -32,9 +30,7 @@ import { defineConfig } from 'vite'
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 
 export default defineConfig({
-  plugins: [
-    mockDevServerPlugin()
-  ]
+  plugins: [mockDevServerPlugin()],
 })
 ```
 
@@ -62,9 +58,9 @@ export default defineConfig({
       // Refresh page during hot reload
       reload: false,
       // CORS configuration
-      cors: true
-    })
-  ]
+      cors: true,
+    }),
+  ],
 })
 ```
 
@@ -77,18 +73,18 @@ import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 export default defineConfig({
   plugins: [
     mockDevServerPlugin({
-      prefix: ['/api']
-    })
+      prefix: ['/api'],
+    }),
   ],
   server: {
     proxy: {
       // Unmatched mock requests will be proxied to the target server
       '^/api': {
         target: 'http://localhost:8080',
-        changeOrigin: true
-      }
-    }
-  }
+        changeOrigin: true,
+      },
+    },
+  },
 })
 ```
 

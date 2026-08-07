@@ -11,10 +11,7 @@ Since the plugin compiles `*.mock.*` files as separate entries, this leads to in
 ## Function Signature
 
 ```ts
-function defineMockData<T = any>(
-  key: string,
-  initialData: T
-): MockData<T>
+function defineMockData<T = any>(key: string, initialData: T): MockData<T>
 ```
 
 ## Parameters
@@ -53,7 +50,7 @@ Therefore, manual configuration of the `persistOnHMR` option is required.
 ```ts
 type MockData<T> = readonly [
   () => T, // getter function
-  (val: T | ((val: T) => T | void)) => void // setter function
+  (val: T | ((val: T) => T | void)) => void, // setter function
 ] & {
   value: T // Directly accessible property
 }
@@ -69,13 +66,13 @@ import { defineMockData } from 'vite-plugin-mock-dev-server'
 // Define shared user data
 export const users = defineMockData('users', [
   { id: 1, name: 'John', email: 'john@example.com' },
-  { id: 2, name: 'Jane', email: 'jane@example.com' }
+  { id: 2, name: 'Jane', email: 'jane@example.com' },
 ])
 
 // Define shared post data
 export const posts = defineMockData('posts', [
   { id: 1, title: 'Hello World', authorId: 1 },
-  { id: 2, title: 'Getting Started', authorId: 2 }
+  { id: 2, title: 'Getting Started', authorId: 2 },
 ])
 ```
 
@@ -88,15 +85,15 @@ export default defineMock([
   {
     url: '/api/users',
     method: 'GET',
-    body: () => users.value
+    body: () => users.value,
   },
   // Get single user
   {
     url: '/api/users/:id',
     method: 'GET',
     body: ({ params }) => {
-      return users.value.find(u => u.id === Number(params.id))
-    }
+      return users.value.find((u) => u.id === Number(params.id))
+    },
   },
   // Create user
   {
@@ -105,12 +102,12 @@ export default defineMock([
     body: ({ body }) => {
       const newUser = {
         id: Date.now(),
-        ...body
+        ...body,
       }
       // Update data using setter
       users.value = [...users.value, newUser]
       return newUser
-    }
+    },
   },
   // Delete user
   {
@@ -119,10 +116,10 @@ export default defineMock([
     body: ({ params }) => {
       const id = Number(params.id)
       // Update using setter function form
-      users[1](prev => prev.filter(u => u.id !== id))
+      users[1]((prev) => prev.filter((u) => u.id !== id))
       return { success: true }
-    }
-  }
+    },
+  },
 ])
 ```
 
@@ -138,20 +135,20 @@ export default defineMock([
     url: '/api/counter',
     method: 'GET',
     body: () => ({
-      count: counter[0]().count // Using getter function
-    })
+      count: counter[0]().count, // Using getter function
+    }),
   },
   {
     url: '/api/counter/increment',
     method: 'POST',
     body: () => {
       // Using setter function
-      counter[1](prev => ({
-        count: prev.count + 1
+      counter[1]((prev) => ({
+        count: prev.count + 1,
       }))
       return { count: counter[0]().count }
-    }
-  }
+    },
+  },
 ])
 ```
 
@@ -171,7 +168,7 @@ const todos = defineMockData<Todo[]>(
   'todos',
   [
     { id: 1, text: 'Learn Vite', completed: false, createdAt: Date.now() },
-    { id: 2, text: 'Build Mock API', completed: true, createdAt: Date.now() }
+    { id: 2, text: 'Build Mock API', completed: true, createdAt: Date.now() },
   ],
   { persistOnHMR: true }, // Ensure data is not reset during HMR, preserving existing data state
 )
@@ -187,18 +184,16 @@ export default defineMock([
       // Filter by completion status
       if (query.completed !== undefined) {
         const isCompleted = query.completed === 'true'
-        result = result.filter(t => t.completed === isCompleted)
+        result = result.filter((t) => t.completed === isCompleted)
       }
 
       // Search by keyword
       if (query.q) {
-        result = result.filter(t =>
-          t.text.toLowerCase().includes(String(query.q).toLowerCase())
-        )
+        result = result.filter((t) => t.text.toLowerCase().includes(String(query.q).toLowerCase()))
       }
 
       return result
-    }
+    },
   },
   // Create todo
   {
@@ -209,11 +204,11 @@ export default defineMock([
         id: Date.now(),
         text: body.text,
         completed: false,
-        createdAt: Date.now()
+        createdAt: Date.now(),
       }
       todos.value = [newTodo, ...todos.value]
       return newTodo
-    }
+    },
   },
   // Toggle completion status
   {
@@ -221,24 +216,20 @@ export default defineMock([
     method: 'PATCH',
     body: ({ params }) => {
       const id = Number(params.id)
-      todos[1](prev =>
-        prev.map(t =>
-          t.id === id ? { ...t, completed: !t.completed } : t
-        )
-      )
-      return todos.value.find(t => t.id === id)
-    }
+      todos[1]((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)))
+      return todos.value.find((t) => t.id === id)
+    },
   },
   // Batch delete completed
   {
     url: '/api/todos/clear-completed',
     method: 'DELETE',
     body: () => {
-      const completedCount = todos.value.filter(t => t.completed).length
-      todos[1](prev => prev.filter(t => !t.completed))
+      const completedCount = todos.value.filter((t) => t.completed).length
+      todos[1]((prev) => prev.filter((t) => !t.completed))
       return { deleted: completedCount }
-    }
-  }
+    },
+  },
 ])
 ```
 
@@ -269,6 +260,6 @@ await db.read()
 
 export default defineMock({
   url: '/api/posts',
-  body: () => db.data.posts
+  body: () => db.data.posts,
 })
 ```

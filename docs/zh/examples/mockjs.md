@@ -18,9 +18,11 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 export default defineMock({
   url: '/api/test',
   body: Mock.mock({
-    'list|1-10': [{
-      'id|+1': 1
-    }]
-  })
+    'list|1-10': [
+      {
+        'id|+1': 1,
+      },
+    ],
+  }),
 })
 ```

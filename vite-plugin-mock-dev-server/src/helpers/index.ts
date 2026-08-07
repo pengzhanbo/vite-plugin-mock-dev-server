@@ -1,4 +1,4 @@
-export type * from '../types'
-export * from './createSSEStream'
-export * from './defineMock'
-export * from './defineMockData'
+export type * from '../types/index.js'
+export * from './createSSEStream.js'
+export * from './defineMock.js'
+export * from './defineMockData.js'

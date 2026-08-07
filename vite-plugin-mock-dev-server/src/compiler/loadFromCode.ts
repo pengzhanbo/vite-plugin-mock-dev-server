@@ -1,10 +1,10 @@
-import type { Logger } from '../core'
+import type { Logger } from '../core/logger.js'
 import fs, { promises as fsp } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 import { attemptAsync } from '@pengzhanbo/utils'
-import { getHash } from '../utils'
+import { getHash } from '../utils/index.js'
 
 interface LoadFromCodeOptions {
   filepath: string
@@ -45,18 +45,19 @@ export async function loadFromCode<T = any>({
 
 async function importDefault(filepath: string): Promise<any> {
   const mod = await import(filepath)
-  return mod.default || mod
+  return mod.default ?? mod
 }
 
-async function unlink(filepath: string) {
+async function unlink(filepath: string): Promise<void> {
   await fsp.unlink(filepath)
   TEMP_FILES.delete(filepath)
 }
 
-async function cleanupTempFiles() {
+async function cleanupTempFiles(): Promise<void> {
   for (const filepath of TEMP_FILES) {
-    if (fs.existsSync(filepath))
+    if (fs.existsSync(filepath)) {
       await attemptAsync(fsp.unlink, filepath)
+    }
   }
 }
 

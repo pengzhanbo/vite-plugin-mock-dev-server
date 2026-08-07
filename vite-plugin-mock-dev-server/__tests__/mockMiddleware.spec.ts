@@ -4,11 +4,11 @@
  * Mock 中间件测试
  */
 import type { Connect } from 'vite'
-import type { Compiler } from '../src/compiler'
-import type { MockHttpItem, MockOptions } from '../src/types'
+import type { Compiler } from '../src/compiler/index.js'
+import type { MockHttpItem, MockOptions } from '../src/types/index.js'
 import { Buffer } from 'node:buffer'
 import { describe, expect, it, vi } from 'vitest'
-import { createMockMiddleware } from '../src/mockHttp/middleware'
+import { createMockMiddleware } from '../src/mockHttp/middleware.js'
 
 /**
  * Create a mock compiler for testing
@@ -39,16 +39,14 @@ type Listener = (...args: any[]) => void
  * @param options.headers - Request headers / 请求头
  * @returns Mock request object / 模拟请求对象
  */
-function createMockRequest(options: {
-  url?: string
-  method?: string
-  headers?: Record<string, string>
-} = {}): Connect.IncomingMessage {
-  const {
-    url = '/api/users',
-    method = 'GET',
-    headers = {},
-  } = options
+function createMockRequest(
+  options: {
+    url?: string
+    method?: string
+    headers?: Record<string, string>
+  } = {},
+): Connect.IncomingMessage {
+  const { url = '/api/users', method = 'GET', headers = {} } = options
   const listeners: Record<string, Listener[]> = {}
   return {
     url,
@@ -57,8 +55,9 @@ function createMockRequest(options: {
     socket: { encrypted: false },
     connection: { encrypted: false },
     addListener(event: string, callback: Listener) {
-      if (!listeners[event])
+      if (!listeners[event]) {
         listeners[event] = []
+      }
       listeners[event].push(callback)
       return this
     },
@@ -69,11 +68,15 @@ function createMockRequest(options: {
       return (this as any).addListener(event, callback)
     },
     emit(event: string, ...args: any[]) {
-      listeners[event]?.forEach(cb => cb(...args))
+      listeners[event]?.forEach((cb) => cb(...args))
       return true
     },
-    removeListener() { return this },
-    removeAllListeners() { return this },
+    removeListener() {
+      return this
+    },
+    removeAllListeners() {
+      return this
+    },
   } as unknown as Connect.IncomingMessage
 }
 
@@ -88,12 +91,13 @@ function createEagerMultipartRequest(options: {
   let ended = false
 
   function emit(event: string, ...args: any[]) {
-    listeners[event]?.forEach(cb => cb(...args))
+    listeners[event]?.forEach((cb) => cb(...args))
   }
 
   function drain() {
-    if (drained)
+    if (drained) {
       return
+    }
 
     drained = true
     emit('data', options.body)
@@ -108,14 +112,16 @@ function createEagerMultipartRequest(options: {
     socket: { encrypted: false },
     connection: { encrypted: false },
     addListener(event: string, callback: Listener) {
-      if (!listeners[event])
+      if (!listeners[event]) {
         listeners[event] = []
+      }
       listeners[event].push(callback)
 
-      if (event === 'data')
+      if (event === 'data') {
         drain()
-      else if (event === 'end' && ended)
+      } else if (event === 'end' && ended) {
         callback()
+      }
 
       return this
     },
@@ -129,10 +135,18 @@ function createEagerMultipartRequest(options: {
       emit(event, ...args)
       return true
     },
-    pause() { return this },
-    resume() { return this },
-    removeListener() { return this },
-    removeAllListeners() { return this },
+    pause() {
+      return this
+    },
+    resume() {
+      return this
+    },
+    removeListener() {
+      return this
+    },
+    removeAllListeners() {
+      return this
+    },
   } as unknown as Connect.IncomingMessage
 }
 
@@ -195,7 +209,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     expect(next).toHaveBeenCalled()
   })
@@ -214,7 +228,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     expect(next).toHaveBeenCalled()
   })
@@ -244,7 +258,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     expect(next).not.toHaveBeenCalled()
     expect(res.statusCode).toBe(200)
@@ -277,7 +291,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     expect(res.statusCode).toBe(201)
     expect(JSON.parse(res.data)).toEqual({ success: true })
@@ -285,20 +299,22 @@ describe('mockMiddleware', () => {
 
   it('should parse multipart body when request recovery collects the stream', async () => {
     const boundary = '----mock-dev-server-test-boundary'
-    const rawBody = Buffer.from([
-      `--${boundary}`,
-      'Content-Disposition: form-data; name="file"; filename="test.txt"',
-      'Content-Type: text/plain',
-      '',
-      'hello',
-      `--${boundary}--`,
-      '',
-    ].join('\r\n'))
+    const rawBody = Buffer.from(
+      [
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="file"; filename="test.txt"',
+        'Content-Type: text/plain',
+        '',
+        'hello',
+        `--${boundary}--`,
+        '',
+      ].join('\r\n'),
+    )
 
     const mockItem: MockHttpItem = {
       url: '/api/upload',
       method: 'POST',
-      body: request => ({ hasFile: Boolean(request.body?.file) }),
+      body: (request) => ({ hasFile: Boolean(request.body?.file) }),
       status: 200,
       __filepath__: 'test.mock.ts',
     } as MockHttpItem
@@ -327,7 +343,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     expect(next).not.toHaveBeenCalled()
     expect(JSON.parse(res.data)).toEqual({ hasFile: true })
@@ -357,7 +373,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     expect(res.ended).toBe(true)
     expect(JSON.parse(res.data)).toEqual({ id: 1 })
@@ -387,7 +403,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     expect(res.ended).toBe(true)
   })
@@ -417,7 +433,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     expect(res.data).toBe('Hello World')
     expect(res.headers['Content-Type']).toContain('text/plain')
@@ -427,7 +443,7 @@ describe('mockMiddleware', () => {
     const mockItem: MockHttpItem = {
       url: '/api/dynamic',
       method: 'GET',
-      body: req => ({ query: req.query }),
+      body: (req) => ({ query: req.query }),
       __filepath__: 'test.mock.ts',
     } as MockHttpItem
 
@@ -447,7 +463,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     const responseData = JSON.parse(res.data)
     expect(responseData.query).toEqual({ foo: 'bar' })
@@ -478,7 +494,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     expect(res.headers['X-Custom-Header']).toBe('test-value')
   })
@@ -511,7 +527,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     // Cookies are set via Set-Cookie header
     const setCookieHeader = res.headers['Set-Cookie'] as string[]
@@ -549,7 +565,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     expect(res.statusCode).toBe(500)
     expect(res.statusMessage).toBe('Internal Server Error')
@@ -584,7 +600,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     expect(responseFn).toHaveBeenCalled()
     expect(res.headers['X-Custom']).toBe('value')
@@ -616,7 +632,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     expect(res.ended).toBe(true)
     expect(JSON.parse(res.data)).toEqual({ version: 1 })
@@ -647,7 +663,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     expect(next).toHaveBeenCalled()
   })
@@ -676,7 +692,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     expect(res.headers['Cache-Control']).toBe('no-cache,max-age=0')
     expect(res.headers['X-Mock-Power-By']).toBe('vite-plugin-mock-dev-server')
@@ -707,7 +723,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     expect(res.ended).toBe(true)
     expect(res.data).toBe('')
@@ -737,7 +753,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    await middleware(req, res, next)
+    middleware(req, res, next)
 
     const data = JSON.parse(res.data)
     expect(Array.isArray(data)).toBe(true)

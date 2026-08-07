@@ -1,5 +1,5 @@
-import post from './data/post'
-import { defineAPIMock } from './shared'
+import post from './data/post.js'
+import { defineAPIMock } from './shared.js'
 
 /**
  * 定义单个接口
@@ -10,8 +10,8 @@ export const fetchPostList = defineAPIMock({
   body({ params }) {
     // const data = post.splice(params.index, 1)
     const [getPost, setPost] = post
-    setPost((post) => {
-      post.splice(params.index, 1)
+    setPost((item) => {
+      item.splice(params.index, 1)
     })
     return {
       code: 200,

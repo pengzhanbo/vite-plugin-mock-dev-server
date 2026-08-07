@@ -4,7 +4,7 @@
  * Mock 服务器集成测试
  */
 import { describe, expect, it } from 'vitest'
-import { matchingWeight } from '../src/mockHttp/matchingWeight'
+import { matchingWeight } from '../src/mockHttp/matchingWeight.js'
 
 /**
  * Test suite for matching weight with complex scenarios
@@ -13,12 +13,7 @@ import { matchingWeight } from '../src/mockHttp/matchingWeight'
  */
 describe('integration: matching weight with priority', () => {
   it('should apply global priority rules', () => {
-    const rules = [
-      '/api/:a/:b',
-      '/api/a/:b',
-      '/api/:a/b',
-      '/api/a/b',
-    ]
+    const rules = ['/api/:a/:b', '/api/a/:b', '/api/:a/b', '/api/a/b']
     const priority = {
       global: ['/api/:a/b', '/api/a/:b'],
     }
@@ -29,11 +24,7 @@ describe('integration: matching weight with priority', () => {
   })
 
   it('should apply special priority rules', () => {
-    const rules = [
-      '/api/:a/:b/c',
-      '/api/a/:b/c',
-      '/api/:a/b/c',
-    ]
+    const rules = ['/api/:a/:b/c', '/api/a/:b/c', '/api/:a/b/c']
     const priority = {
       special: {
         '/api/:a/b/c': ['/api/a/:b/c'],
@@ -44,11 +35,7 @@ describe('integration: matching weight with priority', () => {
   })
 
   it('should apply special priority with when condition', () => {
-    const rules = [
-      '/api/a/:b/c',
-      '/api/:a/b/c',
-      '/api/:a/:b/c',
-    ]
+    const rules = ['/api/a/:b/c', '/api/:a/b/c', '/api/:a/:b/c']
     const priority = {
       special: {
         '/api/:a/b/c': {
@@ -62,10 +49,7 @@ describe('integration: matching weight with priority', () => {
   })
 
   it('should not apply special priority when when condition not met', () => {
-    const rules = [
-      '/api/a/:b/c',
-      '/api/:a/b/c',
-    ]
+    const rules = ['/api/a/:b/c', '/api/:a/b/c']
     const priority = {
       special: {
         '/api/:a/b/c': {
@@ -94,8 +78,12 @@ describe('integration: complex URL patterns', () => {
   it('should handle multiple optional segments', () => {
     const rules = ['/api{/:version}{/:subVersion}/users']
     expect(matchingWeight(rules, '/api/users', {})).toEqual(['/api{/:version}{/:subVersion}/users'])
-    expect(matchingWeight(rules, '/api/v1/users', {})).toEqual(['/api{/:version}{/:subVersion}/users'])
-    expect(matchingWeight(rules, '/api/v1/beta/users', {})).toEqual(['/api{/:version}{/:subVersion}/users'])
+    expect(matchingWeight(rules, '/api/v1/users', {})).toEqual([
+      '/api{/:version}{/:subVersion}/users',
+    ])
+    expect(matchingWeight(rules, '/api/v1/beta/users', {})).toEqual([
+      '/api{/:version}{/:subVersion}/users',
+    ])
   })
 
   it('should handle wildcard patterns', () => {

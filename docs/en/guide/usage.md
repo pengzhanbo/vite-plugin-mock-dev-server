@@ -10,7 +10,7 @@ It is recommended to use [pnpm](https://pnpm.io/) as the package manager
 
 ::: npm-to
 
-``` sh
+```sh
 npm i -D vite-plugin-mock-dev-server
 ```
 
@@ -20,7 +20,7 @@ npm i -D vite-plugin-mock-dev-server
 
 Open your project's `vite.config.{ts,js}` file, import and configure the plugin:
 
-``` ts [vite.config.{ts,js}]
+```ts [vite.config.{ts,js}]
 import { defineConfig } from 'vite'
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server' // [!code ++]
 
@@ -40,18 +40,16 @@ Usually, we configure proxies in the development environment to forward requests
 However, when the backend interface is not yet completed but the documentation is provided, we can mock only these interfaces to achieve parallel development of frontend and backend.
 The plugin directly reuses the `server.proxy` configuration, eliminating the need for additional parameter configuration and simplifying the process:
 
-``` ts [vite.config.{ts,js}]
+```ts [vite.config.{ts,js}]
 import { defineConfig } from 'vite'
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 
 export default defineConfig({
-  plugins: [
-    mockDevServerPlugin(),
-  ],
+  plugins: [mockDevServerPlugin()],
   // [!code ++:5]
   server: {
     proxy: {
-      '^/api': 'http://example.com/'
+      '^/api': 'http://example.com/',
     },
   },
 })
@@ -79,7 +77,7 @@ Create files in the format `**/*.mock.{js,ts,cjs,cts,mjs,mts,json,json5}` in the
 
 The plugin determines the project's default module type based on the `type` field in `package.json`, and determines the specific module format based on the file extension:
 
-``` json
+```json
 {
   "esm": [".mjs", ".mts"],
   "cjs": [".cjs", ".cts"],
@@ -108,7 +106,7 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
   url: '/api/test',
-  body: {}
+  body: {},
 })
 ```
 

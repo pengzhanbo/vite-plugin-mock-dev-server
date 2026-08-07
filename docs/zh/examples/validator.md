@@ -46,27 +46,27 @@
 
 ::: code-group
 
-``` ts [api.mock.ts]
+```ts [api.mock.ts]
 export default defineMock({
   url: '/mock/validator-body',
   validator: {
     body: {
       a: [1, 2], // 数组的项 必须都在 请求体 的 a 中
-      b: { c: 1 }
-    }
+      b: { c: 1 },
+    },
   },
-  body: ''
+  body: '',
 })
 ```
 
-``` ts [fetch.ts]
+```ts [fetch.ts]
 await fetch('/mock/validator-body', {
   method: 'POST',
   body: JSON.stringify({
     a: [1, 2, 3, 4],
     b: { c: 1, d: 2 },
     c: 1,
-  })
+  }),
 })
 ```
 

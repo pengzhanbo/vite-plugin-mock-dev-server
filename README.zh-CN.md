@@ -58,7 +58,7 @@
 > [!IMPORTANT]
 > 插件不再支持 `CommonJS` 导入使用，请使用 `ESModule` 导入插件
 
-----
+---
 
 > [!IMPORTANT]
 > 当前文档为插件的 `v2` 版本，如果您正在使用 `v1` 版本，请参考 [迁移文档](https://vite-plugin-mock-dev-server.netlify.app/zh/guide/migrate-v2)
@@ -83,17 +83,15 @@ import { defineConfig } from 'vite'
 import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
 
 export default defineConfig({
-  plugins: [
-    mockDevServerPlugin(),
-  ],
+  plugins: [mockDevServerPlugin()],
   // 这里定义的字段，在mock中也能使用
   define: {},
   server: {
     // 插件将会读取 `server.proxy`
     proxy: {
-      '^/api': { target: 'http://example.com' }
-    }
-  }
+      '^/api': { target: 'http://example.com' },
+    },
+  },
 })
 ```
 
@@ -112,7 +110,7 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
   url: '/api/user/:id',
-  body: { a: 1, b: 2 }
+  body: { a: 1, b: 2 },
 })
 ```
 
@@ -129,9 +127,7 @@ import { defineConfig } from 'vite'
 import mockDevServerPlugin from 'vite-plugin-mock-dev-server'
 
 export default defineConfig({
-  plugins: [
-    mockDevServerPlugin({/* 插件配置 */}),
-  ]
+  plugins: [mockDevServerPlugin({/* 插件配置 */})],
 })
 ```
 
@@ -139,12 +135,12 @@ export default defineConfig({
 
 Mock 配置类型帮助
 
-``` ts
+```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
   url: '/api/test',
-  body: {}
+  body: {},
 })
 ```
 
@@ -152,7 +148,7 @@ export default defineMock({
 
 返回一个自定义的 defineMock 函数，用于支持对 mock config 的预处理。
 
-``` ts
+```ts
 import path from 'node:path'
 import { createDefineMock } from 'vite-plugin-mock-dev-server'
 
@@ -162,7 +158,7 @@ const defineAPIMock = createDefineMock((mock) => {
 })
 
 export default defineApiMock({
-  url: '/test' // 补全为 '/api/test'
+  url: '/test', // 补全为 '/api/test'
 })
 ```
 
@@ -170,7 +166,7 @@ export default defineApiMock({
 
 创建一个 `Server-sent events` 写入流，用于支持模拟 `EventSource`。
 
-``` ts
+```ts
 import { createSSEStream, defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
@@ -179,7 +175,7 @@ export default defineMock({
     const sse = createSSEStream(req, res)
     sse.write({ event: 'message', data: { message: 'hello world' } })
     sse.end()
-  }
+  },
 })
 ```
 
@@ -294,7 +290,7 @@ export default defineMock({
   MockDevServerPlugin({
     formidableOptions: {
       uploadDir: path.join(process.cwd(), 'uploads'),
-    }
+    },
   })
   ```
 
@@ -352,7 +348,7 @@ export default defineMock({
   插件在 `vite.server.proxy` 的基础上，记录被 `http-proxy` 代理的请求数据。
   在获得响应后，插件会将请求数据和响应数据记录到指定的目录中。
 
-  ```ts
+  ````ts
   interface RecordOptions {
     /**
      * 是否启用录制功能
@@ -375,28 +371,30 @@ export default defineMock({
      * filter: { mode: 'path-to-regexp', include: '/api/:id' }
      * ```
      */
-    filter?: ((req: RecordedReq) => boolean) | {
-      /**
-       * 包含需要录制的请求链接
-       *
-       * glob 模式或 path-to-regexp 模式
-       * (使用 mode 选项设置模式，默认为 glob)
-       */
-      include?: string | string[]
-      /**
-       * 排除不需要录制的请求链接
-       *
-       * glob 模式或 path-to-regexp 模式
-       * (使用 mode 选项设置模式，默认为 glob)
-       */
-      exclude?: string | string[]
-      /**
-       * 包含/排除模式的匹配模式
-       * - 'glob': glob 模式匹配（默认）
-       * - 'path-to-regexp': path-to-regexp 模式匹配
-       */
-      mode: 'glob' | 'path-to-regexp'
-    }
+    filter?:
+      | ((req: RecordedReq) => boolean)
+      | {
+          /**
+           * 包含需要录制的请求链接
+           *
+           * glob 模式或 path-to-regexp 模式
+           * (使用 mode 选项设置模式，默认为 glob)
+           */
+          include?: string | string[]
+          /**
+           * 排除不需要录制的请求链接
+           *
+           * glob 模式或 path-to-regexp 模式
+           * (使用 mode 选项设置模式，默认为 glob)
+           */
+          exclude?: string | string[]
+          /**
+           * 包含/排除模式的匹配模式
+           * - 'glob': glob 模式匹配（默认）
+           * - 'path-to-regexp': path-to-regexp 模式匹配
+           */
+          mode: 'glob' | 'path-to-regexp'
+        }
     /**
      * 录制数据存储目录
      * 相对于项目根目录
@@ -435,7 +433,7 @@ export default defineMock({
      */
     gitignore?: boolean
   }
-  ```
+  ````
 
 ### replay
 
@@ -462,7 +460,7 @@ export default defineMock({
 import { defineMock } from 'vite-plugin-mock-dev-server'
 export default defineMock({
   url: '/api/test',
-  body: { message: 'hello world' }
+  body: { message: 'hello world' },
 })
 ```
 
@@ -477,7 +475,7 @@ export default defineMock({
     wss.on('connection', (ws, req) => {
       console.log('connected')
     })
-  }
+  },
 })
 ```
 
@@ -721,11 +719,7 @@ type Request = Connect.IncomingMessage & {
 
 ```ts
 type Response = http.ServerResponse<http.IncomingMessage> & {
-  setCookie: (
-    name: string,
-    value?: string | null,
-    option?: Cookies.SetOption,
-  ) => void
+  setCookie: (name: string, value?: string | null, option?: Cookies.SetOption) => void
 }
 ```
 
@@ -747,7 +741,7 @@ type defineMockData<T> = (
   initialData: T, // 初始化数据
   options?: {
     persistOnHMR?: boolean // 是否在热更新时保持数据状态
-  } // 可选配置
+  }, // 可选配置
 ) => [getter, setter] & { value: T }
 ```
 
@@ -773,16 +767,16 @@ import posts from './data'
 export default defineMock([
   {
     url: '/api/posts',
-    body: () => posts.value
+    body: () => posts.value,
   },
   {
     url: '/api/posts/delete/:id',
     body: (params) => {
       const id = params.id
-      posts.value = posts.value.filter(post => post.id !== id)
+      posts.value = posts.value.filter((post) => post.id !== id)
       return { success: true }
-    }
-  }
+    },
+  },
 ])
 ```
 
@@ -818,15 +812,15 @@ export default defineConfig({
           // when 用于进一步约束具体是哪些请求需要调整优先级。
           '/api/:a/:b/c': {
             rules: ['/api/a/:b/:c', '/api/a/b/:c'],
-            when: ['/api/a/b/c']
+            when: ['/api/a/b/c'],
           },
           // 如果不需要 when, 则表示命中规则的请求都需要调整优先级。
           // 可以简写为 [key]: [...rules]
           '/api/:a/b': ['/api/a/:b'],
-        }
-      }
-    })
-  ]
+        },
+      },
+    }),
+  ],
 })
 ```
 
@@ -864,7 +858,7 @@ export default defineMock({
 ```ts
 export default defineMock({
   url: '/api/test',
-  body: () => ({ a: 1 })
+  body: () => ({ a: 1 }),
 })
 ```
 
@@ -876,7 +870,7 @@ export default defineMock({
 ```ts
 export default defineMock({
   url: '/api/test',
-  method: 'GET'
+  method: 'GET',
 })
 ```
 
@@ -901,7 +895,7 @@ export default defineMock({
   },
   cookies() {
     return { 'my-cookie': '123456789' }
-  }
+  },
 })
 ```
 
@@ -937,8 +931,8 @@ export default defineMock([
   {
     url: '/api/test',
     method: ['POST'],
-    validator: { body: { a: [1, 2] } }
-  }
+    validator: { body: { a: [1, 2] } },
+  },
 ])
 ```
 
@@ -963,7 +957,7 @@ export default defineMock({
 export default defineMock({
   url: '/api/test',
   status: 502,
-  statusText: 'Bad Gateway'
+  statusText: 'Bad Gateway',
 })
 ```
 
@@ -977,7 +971,7 @@ export default defineMock({
   url: '/api/user/:userId',
   body({ params }) {
     return { userId: params.userId }
-  }
+  },
 })
 ```
 
@@ -995,7 +989,7 @@ import { Buffer } from 'node:buffer'
 // 但是 content-type 还是为 json
 export default defineMock({
   url: 'api/buffer',
-  body: Buffer.from(JSON.stringify({ a: 1 }))
+  body: Buffer.from(JSON.stringify({ a: 1 })),
 })
 ```
 
@@ -1006,7 +1000,7 @@ export default defineMock({
   url: 'api/buffer',
   type: 'buffer',
   // 内部使用 Buffer.from(body) 进行转换
-  body: { a: 1 }
+  body: { a: 1 },
 })
 ```
 
@@ -1024,7 +1018,7 @@ export default defineMock({
   url: '/api/download',
   // 当你不确定类型，可传入文件名由插件内部进行解析
   type: 'my-app.dmg',
-  body: () => createReadStream('./my-app.dmg')
+  body: () => createReadStream('./my-app.dmg'),
 })
 ```
 
@@ -1043,10 +1037,12 @@ import Mock from 'mockjs'
 export default defineMock({
   url: '/api/test',
   body: Mock.mock({
-    'list|1-10': [{
-      'id|+1': 1
-    }]
-  })
+    'list|1-10': [
+      {
+        'id|+1': 1,
+      },
+    ],
+  }),
 })
 ```
 
@@ -1066,12 +1062,14 @@ export default defineMock({
 
     res.status = 200
     res.setHeader('Content-Type', 'application/json')
-    res.end(JSON.stringify({
-      query,
-      body,
-      params,
-    }))
-  }
+    res.end(
+      JSON.stringify({
+        query,
+        body,
+        params,
+      }),
+    )
+  },
 })
 ```
 
@@ -1096,25 +1094,25 @@ export default defineMock({
 
 通过 [`formidable`](https://www.npmjs.com/package/formidable#readme) 支持。
 
-``` html
+```html
 <form action="/api/upload" method="post" enctype="multipart/form-data">
   <p>
     <span>file: </span>
-    <input type="file" name="files" multiple="multiple">
+    <input type="file" name="files" multiple="multiple" />
   </p>
   <p>
     <span>name:</span>
-    <input type="text" name="name" value="mark">
+    <input type="text" name="name" value="mark" />
   </p>
   <p>
-    <input type="submit" value="submit">
+    <input type="submit" value="submit" />
   </p>
 </form>
 ```
 
 fields `files` 映射为 `formidable.File` 类型。
 
-``` ts
+```ts
 export default defineMock({
   url: '/api/upload',
   method: 'POST',
@@ -1157,7 +1155,7 @@ export default defineMock({
 ```ts
 fetch('/api/graphql', {
   method: 'POST',
-  body: JSON.stringify({ source: '{ hello }' })
+  body: JSON.stringify({ source: '{ hello }' }),
 })
 ```
 
@@ -1178,12 +1176,10 @@ export default defineMock({
       wsMap.set(token, ws)
       ws.on('message', (raw) => {
         const data = JSON.parse(String(raw))
-        if (data.type === 'ping')
-          return
+        if (data.type === 'ping') return
         // Broadcast
         for (const [_token, _ws] of wsMap.entires()) {
-          if (_token !== token)
-            _ws.send(raw)
+          if (_token !== token) _ws.send(raw)
         }
       })
     })
@@ -1191,19 +1187,23 @@ export default defineMock({
       console.error(err)
     })
     onCleanup(() => wsMap.clear())
-  }
+  },
 })
 ```
 
 ```ts
 // app.ts
 const ws = new WebSocket('ws://localhost:5173/socket.io')
-ws.addEventListener('open', () => {
-  setInterval(() => {
-    // heartbeat
-    ws.send(JSON.stringify({ type: 'ping' }))
-  }, 1000)
-}, { once: true })
+ws.addEventListener(
+  'open',
+  () => {
+    setInterval(() => {
+      // heartbeat
+      ws.send(JSON.stringify({ type: 'ping' }))
+    }, 1000)
+  },
+  { once: true },
+)
 ws.addEventListener('message', (raw) => {
   console.log(raw)
 })

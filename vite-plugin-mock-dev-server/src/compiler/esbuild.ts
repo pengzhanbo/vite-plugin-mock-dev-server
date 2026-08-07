@@ -1,20 +1,21 @@
 import type { Plugin } from 'esbuild'
 import type { Alias } from 'vite'
-import type { CompilerOptions, TransformResult } from './types'
+import type { CompilerOptions, TransformResult } from './types.js'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 import ansis from 'ansis'
 import JSON5 from 'json5'
-import { isPackageExists, normalizePath } from '../utils'
+import { isPackageExists, normalizePath } from '../utils/index.js'
 
 const externalizeDeps: Plugin = {
   name: 'externalize-deps',
   setup(build) {
     build.onResolve({ filter: /.*/ }, ({ path: id }) => {
-      if (id[0] !== '.' && !path.isAbsolute(id))
+      if (id[0] !== '.' && !path.isAbsolute(id)) {
         return { external: isPackageExists(id) }
+      }
     })
   },
 }
@@ -22,8 +23,8 @@ const externalizeDeps: Plugin = {
 const json5Loader: Plugin = {
   name: 'json5-loader',
   setup(build) {
-    build.onLoad({ filter: /\.json5$/ }, async ({ path }) => {
-      const content = await fsp.readFile(path, 'utf-8')
+    build.onLoad({ filter: /\.json5$/ }, async ({ path: id }) => {
+      const content = await fsp.readFile(id, 'utf-8')
       return {
         contents: `export default ${JSON.stringify(JSON5.parse(content))}`,
         loader: 'js',
@@ -35,8 +36,8 @@ const json5Loader: Plugin = {
 const jsonLoader: Plugin = {
   name: 'json-loader',
   setup(build) {
-    build.onLoad({ filter: /\.json$/ }, async ({ path }) => {
-      const content = await fsp.readFile(path, 'utf-8')
+    build.onLoad({ filter: /\.json$/ }, async ({ path: id }) => {
+      const content = await fsp.readFile(id, 'utf-8')
       return {
         contents: `export default ${content}`,
         loader: 'js',
@@ -67,8 +68,9 @@ function aliasPlugin(alias: Alias[]): Plugin {
       build.onResolve({ filter: /.*/ }, async ({ path: id }) => {
         // First match is supposed to be the correct one
         const matchedEntry = alias.find(({ find }) => aliasMatches(find, id))
-        if (!matchedEntry)
+        if (!matchedEntry) {
           return null
+        }
 
         const { find, replacement } = matchedEntry
 
@@ -88,14 +90,17 @@ function aliasPlugin(alias: Alias[]): Plugin {
 }
 
 export function aliasMatches(pattern: string | RegExp, importee: string): boolean {
-  if (pattern instanceof RegExp)
+  if (pattern instanceof RegExp) {
     return pattern.test(importee)
+  }
 
-  if (importee.length < pattern.length)
+  if (importee.length < pattern.length) {
     return false
+  }
 
-  if (importee === pattern)
+  if (importee === pattern) {
     return true
+  }
 
   return importee.startsWith(`${pattern}/`)
 }
@@ -103,7 +108,7 @@ export function aliasMatches(pattern: string | RegExp, importee: string): boolea
 let _build: null | typeof import('esbuild').build = null
 
 async function esbuild(): Promise<NonNullable<typeof _build>> {
-  _build ||= (await import('esbuild')).build
+  _build ??= (await import('esbuild')).build
   return _build
 }
 
@@ -129,20 +134,21 @@ export async function transformWithEsbuild(
         ...define,
         __dirname: JSON.stringify(dirname),
         __filename: JSON.stringify(filename),
-        ...isESM ? {} : { 'import.meta.url': JSON.stringify(pathToFileURL(filepath)) },
+        ...(isESM ? {} : { 'import.meta.url': JSON.stringify(pathToFileURL(filepath)) }),
       },
       plugins: [aliasPlugin(alias), renamePlugin, externalizeDeps, jsonLoader, json5Loader],
       absWorkingDir: cwd,
     })
     const externalDeps: Set<string> = new Set()
     const internalDeps: Set<string> = new Set()
-    const inputs = result.metafile?.inputs || {}
-    Object.keys(inputs).forEach(key =>
+    const inputs = result.metafile.inputs
+    Object.keys(inputs).forEach((key) =>
       inputs[key].imports.forEach((dep) => {
-        if (dep.external)
+        if (dep.external) {
           externalDeps.add(normalizePath(dep.path))
-        else
+        } else {
           internalDeps.add(normalizePath(dep.path))
+        }
       }),
     )
 
@@ -151,8 +157,7 @@ export async function transformWithEsbuild(
       externalDeps: Array.from(externalDeps),
       internalDeps: Array.from(internalDeps),
     }
-  }
-  catch (e) {
+  } catch (e) {
     logger.error(`Failed to transform ${ansis.yellow.underline(filepath)}`)
     console.error(e)
   }

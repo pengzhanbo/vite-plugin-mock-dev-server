@@ -141,17 +141,26 @@ class SSEStream extends Transform {
    * @param encoding - Encoding / 编码
    * @param callback - Callback function / 回调函数
    */
-  _transform(message: SSEMessage, encoding: string, callback: (error?: (Error | null), data?: any) => void): void {
-    if (message.comment)
+  _transform(
+    message: SSEMessage,
+    encoding: string,
+    callback: (error?: Error | null, data?: any) => void,
+  ): void {
+    if (message.comment) {
       this.push(`: ${message.comment}\n`)
-    if (message.event)
+    }
+    if (message.event) {
       this.push(`event: ${message.event}\n`)
-    if (message.id)
+    }
+    if (message.id) {
       this.push(`id: ${message.id}\n`)
-    if (message.retry)
+    }
+    if (message.retry) {
       this.push(`retry: ${message.retry}\n`)
-    if (message.data)
+    }
+    if (message.data) {
       this.push(dataString(message.data))
+    }
     this.push('\n')
     callback()
   }
@@ -166,7 +175,11 @@ class SSEStream extends Transform {
    * @param cb - Callback function / 回调函数
    * @returns Whether the write was successful / 写入是否成功
    */
-  write(message: SSEMessage, encoding?: BufferEncoding, cb?: (error: Error | null | undefined) => void): boolean
+  write(
+    message: SSEMessage,
+    encoding?: BufferEncoding,
+    cb?: (error: Error | null | undefined) => void,
+  ): boolean
   /**
    * Write message to the stream
    *
@@ -216,9 +229,13 @@ class SSEStream extends Transform {
  * @returns SSE data string / SSE 数据字符串
  */
 function dataString(data: string | object): string {
-  if (typeof data === 'object')
+  if (typeof data === 'object') {
     return dataString(JSON.stringify(data))
-  return data.split(/\r\n|\r|\n/).map(line => `data: ${line}\n`).join('')
+  }
+  return data
+    .split(/\r\n|\r|\n/)
+    .map((line) => `data: ${line}\n`)
+    .join('')
 }
 
 /**

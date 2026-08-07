@@ -7,8 +7,8 @@ If using form submission, it is necessary to declare `enctype="multipart/form-da
 
 ```html
 <form action="/api/upload" method="post" enctype="multipart/form-data">
-  <input type="file" name="files" multiple>
-  <input type="submit" value="submit">
+  <input type="file" name="files" multiple />
+  <input type="submit" value="submit" />
 </form>
 ```
 
@@ -18,9 +18,9 @@ form.append('file', file)
 fetch('/api/upload', {
   method: 'POST',
   headers: {
-    'Content-Type': '`multipart/form-data'
+    'Content-Type': '`multipart/form-data',
   },
-  body: form
+  body: form,
 })
 ```
 

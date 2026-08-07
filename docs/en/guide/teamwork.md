@@ -29,19 +29,19 @@ The source page address that initiates the mock API will also be attached to the
 
 For example, the following configuration:
 
-``` ts
+```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
   url: '/api/demo',
   validator: {
     refererQuery: {
-      a: 1
-    }
+      a: 1,
+    },
   },
   body: {
-    message: 'request from "http://example.com/?a=1"'
-  }
+    message: 'request from "http://example.com/?a=1"',
+  },
 })
 ```
 

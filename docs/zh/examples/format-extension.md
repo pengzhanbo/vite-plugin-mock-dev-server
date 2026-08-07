@@ -19,19 +19,19 @@
 
 ::: code-group
 
-``` js [api.mock.mjs]
+```js [api.mock.mjs]
 /**
  * @type {import('vite-plugin-mock-dev-server').MockOptions}
  */
 export default [
   {
     url: 'api/post/1',
-    body: {}
+    body: {},
   },
   {
     url: 'api/post/2',
-    body: {}
-  }
+    body: {},
+  },
 ]
 ```
 
@@ -41,12 +41,12 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 export default defineMock([
   {
     url: 'api/post/1',
-    body: {}
+    body: {},
   },
   {
     url: 'api/post/2',
-    body: {}
-  }
+    body: {},
+  },
 ])
 ```
 

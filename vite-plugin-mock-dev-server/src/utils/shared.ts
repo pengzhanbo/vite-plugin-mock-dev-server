@@ -26,9 +26,10 @@ export function normalizePath(id: string): string {
 export function getHash(str: unknown): string {
   if (isPrimitive(str)) {
     str = String(str)
-  }
-  else {
+  } else {
     str = JSON.stringify(str)
   }
-  return createHash('md5').update(Buffer.from(str as string)).digest('hex')
+  return createHash('md5')
+    .update(Buffer.from(str as string))
+    .digest('hex')
 }

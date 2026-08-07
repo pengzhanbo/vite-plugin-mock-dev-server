@@ -37,10 +37,11 @@ export function createMatcher(
   const pattern: string[] = []
   const ignore: string[] = ['**/node_modules/**', ...toArray(exclude)]
   toArray(include).forEach((item) => {
-    if (item[0] === '!')
+    if (item[0] === '!') {
       ignore.push(item.slice(1))
-    else
+    } else {
       pattern.push(item)
+    }
   })
 
   const isMatch = picomatch(pattern, { ignore })

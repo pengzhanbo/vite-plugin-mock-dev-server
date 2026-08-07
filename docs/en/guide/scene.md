@@ -71,12 +71,12 @@ The scene can be overridden on a per-request basis using the `X-Mock-Scene` HTTP
 ```ts
 // Activate 'admin' scene for this request
 fetch('/api/user', {
-  headers: { 'X-Mock-Scene': 'admin' }
+  headers: { 'X-Mock-Scene': 'admin' },
 })
 
 // Activate multiple scenes
 fetch('/api/user', {
-  headers: { 'X-Mock-Scene': 'admin,demo' }
+  headers: { 'X-Mock-Scene': 'admin,demo' },
 })
 ```
 

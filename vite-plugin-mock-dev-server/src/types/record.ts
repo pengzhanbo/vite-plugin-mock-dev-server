@@ -36,42 +36,44 @@ export interface RecordOptions {
    * filter: { mode: 'path-to-regexp', include: '/api/:id' }
    * ```
    */
-  filter?: ((req: RecordedReq) => boolean) | {
-    /**
-     * Include the request links that need to be recorded
-     *
-     * String: Glob pattern or path-to-regexp pattern
-     * (Use the mode option to set the mode, default is glob)
-     *
-     * 包含需要录制的请求链接
-     *
-     * glob 模式或 path-to-regexp 模式
-     * (使用 mode 选项设置模式，默认为 glob)
-     */
-    include?: string | string[]
-    /**
-     * Exclude request links that do not need to be recorded
-     *
-     * String: Glob pattern or path-to-regexp pattern
-     * (Use the mode option to set the mode, default is glob)
-     *
-     * 排除不需要录制的请求链接
-     *
-     * glob 模式或 path-to-regexp 模式
-     * (使用 mode 选项设置模式，默认为 glob)
-     */
-    exclude?: string | string[]
-    /**
-     * Matching mode for include/exclude patterns
-     * - 'glob': Glob pattern matching (default)
-     * - 'path-to-regexp': Path-to-regexp pattern matching
-     *
-     * 包含/排除模式的匹配模式
-     * - 'glob': glob 模式匹配（默认）
-     * - 'path-to-regexp': path-to-regexp 模式匹配
-     */
-    mode: 'glob' | 'path-to-regexp'
-  }
+  filter?:
+    | ((req: RecordedReq) => boolean)
+    | {
+        /**
+         * Include the request links that need to be recorded
+         *
+         * String: Glob pattern or path-to-regexp pattern
+         * (Use the mode option to set the mode, default is glob)
+         *
+         * 包含需要录制的请求链接
+         *
+         * glob 模式或 path-to-regexp 模式
+         * (使用 mode 选项设置模式，默认为 glob)
+         */
+        include?: string | string[]
+        /**
+         * Exclude request links that do not need to be recorded
+         *
+         * String: Glob pattern or path-to-regexp pattern
+         * (Use the mode option to set the mode, default is glob)
+         *
+         * 排除不需要录制的请求链接
+         *
+         * glob 模式或 path-to-regexp 模式
+         * (使用 mode 选项设置模式，默认为 glob)
+         */
+        exclude?: string | string[]
+        /**
+         * Matching mode for include/exclude patterns
+         * - 'glob': Glob pattern matching (default)
+         * - 'path-to-regexp': Path-to-regexp pattern matching
+         *
+         * 包含/排除模式的匹配模式
+         * - 'glob': glob 模式匹配（默认）
+         * - 'path-to-regexp': path-to-regexp 模式匹配
+         */
+        mode: 'glob' | 'path-to-regexp'
+      }
 
   /**
    * Directory to store recorded data

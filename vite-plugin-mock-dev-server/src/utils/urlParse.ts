@@ -32,9 +32,10 @@ export function urlParse(input: string): {
     const pathname = decodeURIComponent(url.pathname)
     const query = queryParse(url.search.replace(/^\?/, ''))
     return { pathname, query }
-  }
-  catch {
-    console.error(`${ansis.red('[vite:mock]')} Failed to parse URL, input: ${ansis.yellow.underline(input)}`)
+  } catch {
+    console.error(
+      `${ansis.red('[vite:mock]')} Failed to parse URL, input: ${ansis.yellow.underline(input)}`,
+    )
     return { pathname: '', query: {} }
   }
 }

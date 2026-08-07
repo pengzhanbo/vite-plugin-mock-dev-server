@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { glob } from 'tinyglobby'
-import { createMatcher, normalizePath } from '../utils'
+import { createMatcher, normalizePath } from '../utils/index.js'
 
 export async function generateMockEntryCode(
   cwd: string,

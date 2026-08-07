@@ -46,12 +46,12 @@ interface MockServerPluginOptions {
 ```ts
 // 字符串前缀
 mockDevServerPlugin({
-  prefix: ['/api', '/mock']
+  prefix: ['/api', '/mock'],
 })
 
 // 正则形式
 mockDevServerPlugin({
-  prefix: ['^/api/.*']
+  prefix: ['^/api/.*'],
 })
 ```
 
@@ -69,7 +69,7 @@ mockDevServerPlugin({
 
 ```ts
 mockDevServerPlugin({
-  wsPrefix: ['/ws', '/socket.io']
+  wsPrefix: ['/ws', '/socket.io'],
 })
 ```
 
@@ -81,7 +81,7 @@ mockDevServerPlugin({
 
 ```ts
 mockDevServerPlugin({
-  cwd: path.resolve(__dirname, 'src')
+  cwd: path.resolve(__dirname, 'src'),
 })
 ```
 
@@ -93,7 +93,7 @@ mockDevServerPlugin({
 
 ```ts
 mockDevServerPlugin({
-  dir: 'mock-data' // 将读取 <cwd>/mock-data 目录
+  dir: 'mock-data', // 将读取 <cwd>/mock-data 目录
 })
 ```
 
@@ -107,10 +107,7 @@ mockDevServerPlugin({
 
 ```ts
 mockDevServerPlugin({
-  include: [
-    '**/*.mock.ts',
-    '**/*.api.js'
-  ]
+  include: ['**/*.mock.ts', '**/*.api.js'],
 })
 ```
 
@@ -122,10 +119,7 @@ mockDevServerPlugin({
 
 ```ts
 mockDevServerPlugin({
-  exclude: [
-    '**/node_modules/**',
-    '**/*.test.mock.ts'
-  ]
+  exclude: ['**/node_modules/**', '**/*.test.mock.ts'],
 })
 ```
 
@@ -139,7 +133,7 @@ mockDevServerPlugin({
 
 ```ts
 mockDevServerPlugin({
-  reload: true
+  reload: true,
 })
 ```
 
@@ -151,7 +145,7 @@ mockDevServerPlugin({
 
 ```ts
 mockDevServerPlugin({
-  log: 'debug' // 详细日志
+  log: 'debug', // 详细日志
   // log: 'silent'  // 关闭日志
 })
 ```
@@ -168,8 +162,8 @@ mockDevServerPlugin({
 mockDevServerPlugin({
   cors: {
     origin: 'http://localhost:3000',
-    credentials: true
-  }
+    credentials: true,
+  },
 })
 ```
 
@@ -184,8 +178,8 @@ mockDevServerPlugin({
 mockDevServerPlugin({
   formidableOptions: {
     uploadDir: path.join(process.cwd(), 'uploads'),
-    maxFileSize: 10 * 1024 * 1024 // 10MB
-  }
+    maxFileSize: 10 * 1024 * 1024, // 10MB
+  },
 })
 ```
 
@@ -199,8 +193,8 @@ mockDevServerPlugin({
 ```ts
 mockDevServerPlugin({
   cookiesOptions: {
-    keys: ['secret-key']
-  }
+    keys: ['secret-key'],
+  },
 })
 ```
 
@@ -215,8 +209,8 @@ mockDevServerPlugin({
 mockDevServerPlugin({
   bodyParserOptions: {
     jsonLimit: '10mb',
-    formLimit: '10mb'
-  }
+    formLimit: '10mb',
+  },
 })
 ```
 
@@ -243,8 +237,8 @@ interface ServerBuildOption {
 mockDevServerPlugin({
   build: {
     serverPort: 3000,
-    dist: 'mock-server'
-  }
+    dist: 'mock-server',
+  },
 })
 ```
 
@@ -259,11 +253,11 @@ mockDevServerPlugin({
 
 ```ts
 mockDevServerPlugin({
-  activeScene: 'test' // 仅激活 scene 为 'test' 的 mock
+  activeScene: 'test', // 仅激活 scene 为 'test' 的 mock
 })
 
 mockDevServerPlugin({
-  activeScene: ['dev', 'test'] // 激活 scene 为 'dev' 或 'test' 的 mock
+  activeScene: ['dev', 'test'], // 激活 scene 为 'dev' 或 'test' 的 mock
 })
 ```
 
@@ -286,10 +280,10 @@ mockDevServerPlugin({
     special: {
       '/api/:a/:b/c': {
         rules: ['/api/a/:b/:c'],
-        when: ['/api/a/b/c']
-      }
-    }
-  }
+        when: ['/api/a/b/c'],
+      },
+    },
+  },
 })
 ```
 
@@ -301,7 +295,7 @@ mockDevServerPlugin({
 
 启用后，插件会自动录制通过 Proxy 转发的请求响应，并在 Mock 数据不存在时回放录制的数据。
 
-```ts
+````ts
 interface RecordOptions {
   /**
    * 是否启用录制功能
@@ -325,28 +319,30 @@ interface RecordOptions {
    * filter: { mode: 'path-to-regexp', include: '/api/:id' }
    * ```
    */
-  filter?: ((req: RecordedReq) => boolean) | {
-    /**
-     * 包含需要录制的请求链接
-     *
-     * glob 模式或 path-to-regexp 模式
-     * (使用 mode 选项设置模式，默认为 glob)
-     */
-    include?: string | string[]
-    /**
-     * 排除不需要录制的请求链接
-     *
-     * glob 模式或 path-to-regexp 模式
-     * (使用 mode 选项设置模式，默认为 glob)
-     */
-    exclude?: string | string[]
-    /**
-     * 包含/排除模式的匹配模式
-     * - 'glob': glob 模式匹配（默认）
-     * - 'path-to-regexp': path-to-regexp 模式匹配
-     */
-    mode: 'glob' | 'path-to-regexp'
-  }
+  filter?:
+    | ((req: RecordedReq) => boolean)
+    | {
+        /**
+         * 包含需要录制的请求链接
+         *
+         * glob 模式或 path-to-regexp 模式
+         * (使用 mode 选项设置模式，默认为 glob)
+         */
+        include?: string | string[]
+        /**
+         * 排除不需要录制的请求链接
+         *
+         * glob 模式或 path-to-regexp 模式
+         * (使用 mode 选项设置模式，默认为 glob)
+         */
+        exclude?: string | string[]
+        /**
+         * 包含/排除模式的匹配模式
+         * - 'glob': glob 模式匹配（默认）
+         * - 'path-to-regexp': path-to-regexp 模式匹配
+         */
+        mode: 'glob' | 'path-to-regexp'
+      }
   /**
    * Directory to store recorded data
    * Relative to project root
@@ -389,12 +385,12 @@ interface RecordOptions {
    */
   gitignore?: boolean
 }
-```
+````
 
 ```ts
 // 简写形式：一键启用
 mockDevServerPlugin({
-  record: true
+  record: true,
 })
 
 // 完整配置
@@ -405,8 +401,8 @@ mockDevServerPlugin({
     overwrite: true,
     expires: 0,
     status: [],
-    gitignore: true
-  }
+    gitignore: true,
+  },
 })
 ```
 

@@ -8,8 +8,8 @@
 
 ```html
 <form action="/api/upload" method="post" enctype="multipart/form-data">
-  <input type="file" name="files" multiple>
-  <input type="submit" value="submit">
+  <input type="file" name="files" multiple />
+  <input type="submit" value="submit" />
 </form>
 ```
 
@@ -19,9 +19,9 @@ form.append('file', file)
 fetch('/api/upload', {
   method: 'POST',
   headers: {
-    'Content-Type': '`multipart/form-data'
+    'Content-Type': '`multipart/form-data',
   },
-  body: form
+  body: form,
 })
 ```
 
@@ -30,7 +30,7 @@ fetch('/api/upload', {
 
 在表单提交的数据字段中，如 表单字段 `files`, 解析后为 `formidable.File` 的对象类型，可用于获取上传的资源文件的相关信息：
 
-如果 声明了 `multiple` 属性，则对应字段解析为  `formidable.File[]` 的数组。
+如果 声明了 `multiple` 属性，则对应字段解析为 `formidable.File[]` 的数组。
 
 ::: code-group
 

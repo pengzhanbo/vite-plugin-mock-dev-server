@@ -1,3 +1,4 @@
+// oxlint-disable max-lines-per-function
 /**
  * The reason for not reusing the websocket proxy in `viteConfig.server.proxy` is that
  * it is difficult to check in a satisfactory way whether there are websocket-related
@@ -30,19 +31,15 @@
 import type { Server } from 'node:http'
 import type { Http2SecureServer } from 'node:http2'
 import type { WebSocket } from 'ws'
-import type { Compiler } from '../compiler'
-import type { ResolvedMockServerPluginOptions } from '../core/options'
-import type {
-  MockRequest,
-  MockWebsocketItem,
-  WebSocketSetupContext,
-} from '../types'
+import type { Compiler } from '../compiler/index.js'
+import type { ResolvedMockServerPluginOptions } from '../core/options.js'
+import type { MockRequest, MockWebsocketItem, WebSocketSetupContext } from '../types/index.js'
 import { findFirstThen, objectKeys, remove, toArray } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import Cookies from 'cookies'
 import { WebSocketServer } from 'ws'
-import { parseRequestParams } from '../mockHttp'
-import { doesProxyContextMatchUrl, isPathMatch, matchScene, urlParse } from '../utils'
+import { parseRequestParams } from '../mockHttp/index.js'
+import { doesProxyContextMatchUrl, isPathMatch, matchScene, urlParse } from '../utils/index.js'
 
 type PoolMap = Map<string, WSSMap>
 type WSSMap = Map<string, WebSocketServer>
@@ -57,6 +54,31 @@ interface WSSContext {
   cleanupList: (() => void)[]
   context: WebSocketSetupContext
   connectionList: Connection[]
+}
+
+const getWss = (wssMap: WSSMap, pathname: string): WebSocketServer => {
+  let wss = wssMap.get(pathname)
+  if (!wss) {
+    wssMap.set(pathname, (wss = new WebSocketServer({ noServer: true })))
+  }
+
+  return wss
+}
+
+const emitConnection = (
+  wss: WebSocketServer,
+  ws: WebSocket,
+  req: MockRequest,
+  connectionList: Connection[],
+): void => {
+  wss.emit('connection', ws, req)
+  ws.on('close', () => {
+    findFirstThen(
+      connectionList,
+      (item) => item.ws === ws,
+      (v) => remove(connectionList, v),
+    )
+  })
 }
 
 /**
@@ -75,12 +97,7 @@ interface WSSContext {
 export function mockWebSocket(
   compiler: Compiler,
   server: Server | Http2SecureServer | null,
-  {
-    wsProxies: proxies,
-    cookiesOptions,
-    logger,
-    activeScene,
-  }: ResolvedMockServerPluginOptions,
+  { wsProxies: proxies, cookiesOptions, logger, activeScene }: ResolvedMockServerPluginOptions,
 ): void {
   // Hot update file mapping
   // 热更新文件映射
@@ -92,24 +109,18 @@ export function mockWebSocket(
 
   const getWssMap = (mockUrl: string): WSSMap => {
     let wssMap = poolMap.get(mockUrl)
-    if (!wssMap)
+    if (!wssMap) {
       poolMap.set(mockUrl, (wssMap = new Map()))
+    }
 
     return wssMap
   }
 
-  const getWss = (wssMap: WSSMap, pathname: string): WebSocketServer => {
-    let wss = wssMap.get(pathname)
-    if (!wss)
-      wssMap.set(pathname, (wss = new WebSocketServer({ noServer: true })))
-
-    return wss
-  }
-
-  const addHmr = (filepath: string, mockUrl: string) => {
+  const addHmr = (filepath: string, mockUrl: string): void => {
     let urlList = hmrMap.get(filepath)
-    if (!urlList)
+    if (!urlList) {
       hmrMap.set(filepath, (urlList = new Set()))
+    }
     urlList.add(mockUrl)
   }
 
@@ -120,39 +131,22 @@ export function mockWebSocket(
     context: WebSocketSetupContext,
     pathname: string,
     filepath: string,
-  ) => {
+  ): void => {
     try {
       mock.setup?.(wss, context)
       wss.on('close', () => wssMap.delete(pathname))
       wss.on('error', (e) => {
         logger.error(
-          `${ansis.red(
-            `WebSocket mock error at ${wss.path}`,
-          )}\n${e}\n  at setup (${filepath})`,
+          `${ansis.red(`WebSocket mock error at ${wss.path}`)}\n${e}\n  at setup (${filepath})`,
           mock.log,
         )
       })
-    }
-    catch (e) {
+    } catch (e) {
       logger.error(
-        `${ansis.red(
-          `WebSocket mock error at ${wss.path}`,
-        )}\n${e}\n  at setup (${filepath})`,
+        `${ansis.red(`WebSocket mock error at ${wss.path}`)}\n${e}\n  at setup (${filepath})`,
         mock.log,
       )
     }
-  }
-
-  const emitConnection = (
-    wss: WebSocketServer,
-    ws: WebSocket,
-    req: MockRequest,
-    connectionList: Connection[],
-  ) => {
-    wss.emit('connection', ws, req)
-    ws.on('close', () => {
-      findFirstThen(connectionList, item => item.ws === ws, v => remove(connectionList, v))
-    })
   }
 
   const restartWss = (
@@ -161,7 +155,7 @@ export function mockWebSocket(
     mock: MockWebsocketItem,
     pathname: string,
     filepath: string,
-  ) => {
+  ): void => {
     const { cleanupList, connectionList, context } = wssContextMap.get(wss)!
     // During restart/hot update, need to re-execute setup(). Before execution,
     // need to clear old loops/auto tasks/listeners
@@ -174,9 +168,7 @@ export function mockWebSocket(
     wss.removeAllListeners()
 
     setupWss(wssMap, wss, mock, context, pathname, filepath)
-    connectionList.forEach(({ ws, req }) =>
-      emitConnection(wss, ws, req, connectionList),
-    )
+    connectionList.forEach(({ ws, req }) => emitConnection(wss, ws, req, connectionList))
   }
 
   // Detect ws-related mock file updates
@@ -184,18 +176,22 @@ export function mockWebSocket(
   // 检测 ws 相关的 mock 文件更新
   // 如果当前的 ws 配置已建立 wss 连接，则重启该 wss 连接
   compiler.on?.('mock:update-end', (filepath: string) => {
-    if (!hmrMap.has(filepath))
+    if (!hmrMap.has(filepath)) {
       return
+    }
     const mockUrlList = hmrMap.get(filepath)
-    if (!mockUrlList)
+    if (!mockUrlList) {
       return
+    }
     for (const mockUrl of mockUrlList.values()) {
       for (const mock of compiler.mockData[mockUrl]) {
-        if (!mock.ws || (mock as any).__filepath__ !== filepath)
+        if (!mock.ws || (mock as any).__filepath__ !== filepath) {
           continue
+        }
         const wssMap = getWssMap(mockUrl)
-        for (const [pathname, wss] of wssMap.entries())
+        for (const [pathname, wss] of wssMap.entries()) {
           restartWss(wssMap, wss, mock, pathname, filepath)
+        }
         return
       }
     }
@@ -203,26 +199,32 @@ export function mockWebSocket(
 
   const effectActiveScene = toArray(activeScene)
   server?.on('upgrade', (req, socket, head) => {
-    const { pathname, query } = urlParse(req.url!)
+    const { pathname, query } = urlParse(req.url)
     if (
-      !pathname
-      || proxies.length === 0
-      || !proxies.some(context => doesProxyContextMatchUrl(context, req.url!))
+      !pathname ||
+      proxies.length === 0 ||
+      !proxies.some((context) => doesProxyContextMatchUrl(context, req.url))
     ) {
       return
     }
 
     const mockData = compiler.mockData
-    const mockUrl = objectKeys(mockData).find(key => isPathMatch(key, pathname))
-    if (!mockUrl)
+    const mockUrl = objectKeys(mockData).find((key) => isPathMatch(key, pathname))
+    if (!mockUrl) {
       return
+    }
 
-    const mock = mockData[mockUrl].find((mock) => {
-      return mock.url && mock.ws && matchScene(effectActiveScene, mock.scene) && isPathMatch(mock.url, pathname)
-    }) as MockWebsocketItem
+    const mock = mockData[mockUrl].find(
+      (item) =>
+        item.url &&
+        item.ws &&
+        matchScene(effectActiveScene, item.scene) &&
+        isPathMatch(item.url, pathname),
+    ) as MockWebsocketItem
 
-    if (!mock)
+    if (!mock) {
       return
+    }
 
     const filepath = (mock as any).__filepath__
 
@@ -235,7 +237,7 @@ export function mockWebSocket(
     if (!wssContext) {
       const cleanupList: (() => void)[] = []
       const context: WebSocketSetupContext = {
-        onCleanup: cleanup => cleanupList.push(cleanup),
+        onCleanup: (cleanup) => cleanupList.push(cleanup),
       }
       wssContext = { cleanupList, context, connectionList: [] }
       wssContextMap.set(wss, wssContext)
@@ -244,8 +246,8 @@ export function mockWebSocket(
     }
 
     const request = req as MockRequest
-    const cookies = new Cookies(req, req as any, cookiesOptions)
-    const { query: refererQuery } = urlParse(req.headers.referer || '')
+    const cookies = new Cookies(req, req, cookiesOptions)
+    const { query: refererQuery } = urlParse(req.headers.referer ?? '')
 
     request.query = query
     request.refererQuery = refererQuery
@@ -286,9 +288,10 @@ export function mockWebSocket(
  *
  * @param cleanupList - Array of cleanup functions / 清理函数数组
  */
-function cleanupRunner(cleanupList: WSSContext['cleanupList']) {
+function cleanupRunner(cleanupList: WSSContext['cleanupList']): void {
   let cleanup: (() => void) | undefined
   // eslint-disable-next-line no-cond-assign
-  while ((cleanup = cleanupList.shift()))
+  while ((cleanup = cleanupList.shift())) {
     cleanup?.()
+  }
 }

@@ -14,7 +14,7 @@ export default defineMock({
   error: {
     probability: 0.5, // 50% 的错误概率
     status: 500,
-  }
+  },
 })
 ```
 
@@ -27,12 +27,12 @@ export default defineMock({
 
 #### `MockErrorConfig`
 
-| 选项 | 类型 | 默认值 | 描述 |
-| ---- | ---- | ------ | ---- |
-| `probability` | `number` | `0.5` | 错误概率（0-1） |
-| `status` | `number` | `500` | 错误状态码 |
-| `statusText` | `string` | - | 错误状态文本 |
-| `body` | `ResponseBody \| ResponseBodyFn` | - | 自定义错误响应体，适用于 status 为 200，但响应体需要模拟错误场景 |
+| 选项          | 类型                             | 默认值 | 描述                                                             |
+| ------------- | -------------------------------- | ------ | ---------------------------------------------------------------- |
+| `probability` | `number`                         | `0.5`  | 错误概率（0-1）                                                  |
+| `status`      | `number`                         | `500`  | 错误状态码                                                       |
+| `statusText`  | `string`                         | -      | 错误状态文本                                                     |
+| `body`        | `ResponseBody \| ResponseBodyFn` | -      | 自定义错误响应体，适用于 status 为 200，但响应体需要模拟错误场景 |
 
 ## 示例
 
@@ -49,7 +49,7 @@ export default defineMock([
     error: {
       probability: 0.7,
       status: 404,
-    }
+    },
   },
   {
     url: '/api/error-simulation/text',
@@ -59,8 +59,8 @@ export default defineMock([
     error: {
       probability: 0.5,
       status: 500,
-    }
-  }
+    },
+  },
 ])
 ```
 
@@ -76,8 +76,8 @@ export default defineMock({
   error: {
     probability: 0.5,
     status: 200, // 网络请求成功
-    body: { code: 500, msg: '内部错误', result: null } // 但返回错误的数据结构
-  }
+    body: { code: 500, msg: '内部错误', result: null }, // 但返回错误的数据结构
+  },
 })
 ```
 
@@ -93,8 +93,8 @@ export default defineMock({
   error: {
     probability: 0.5,
     status: 200,
-    body: { code: 200, msg: '成功', result: {} } // 成功状态但结果为空
-  }
+    body: { code: 200, msg: '成功', result: {} }, // 成功状态但结果为空
+  },
 })
 ```
 
@@ -115,10 +115,10 @@ export default defineMock({
       return {
         code: 500,
         msg: `请求错误: ${request.query.id || 'unknown'}`,
-        result: null
+        result: null,
       }
-    }
-  }
+    },
+  },
 })
 ```
 

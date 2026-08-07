@@ -33,15 +33,15 @@ import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 export default defineConfig({
   plugins: [
     // 确保插件已添加
-    mockDevServerPlugin()
+    mockDevServerPlugin(),
   ],
   // 确保代理配置正确
   server: {
     proxy: {
       // 插件读取 proxy 配置，匹配 /api 开头的请求
-      '/api': 'http://example.com'
-    }
-  }
+      '/api': 'http://example.com',
+    },
+  },
 })
 ```
 
@@ -49,7 +49,7 @@ export default defineConfig({
 
 默认情况下，插件会查找 `mock` 目录下的文件：
 
-``` txt
+```txt
 project-root/
 ├── mock/                 # Mock 文件目录
 │   ├── api.mock.ts
@@ -62,7 +62,7 @@ project-root/
 
 ```ts
 mockDevServerPlugin({
-  dir: 'my-mock-folder' // 确保目录存在
+  dir: 'my-mock-folder', // 确保目录存在
 })
 ```
 
@@ -95,7 +95,7 @@ mockDevServerPlugin({
 
 ```ts
 mockDevServerPlugin({
-  log: 'debug'
+  log: 'debug',
 })
 ```
 
@@ -106,7 +106,7 @@ mockDevServerPlugin({
 ```ts
 mockDevServerPlugin({
   include: ['**/*.mock.ts'], // 确保你的文件匹配这个模式
-  exclude: ['**/node_modules/**', '**/*.test.mock.ts'] // 确保没有被排除
+  exclude: ['**/node_modules/**', '**/*.test.mock.ts'], // 确保没有被排除
 })
 ```
 
@@ -116,7 +116,7 @@ mockDevServerPlugin({
 
 ```ts
 mockDevServerPlugin({
-  reload: true // 修改 Mock 文件后刷新页面
+  reload: true, // 修改 Mock 文件后刷新页面
 })
 ```
 
@@ -132,7 +132,7 @@ mockDevServerPlugin({
 
 ```ts
 mockDevServerPlugin({
-  log: 'debug'
+  log: 'debug',
 })
 ```
 
@@ -145,7 +145,7 @@ mockDevServerPlugin({
 ```ts
 // ❌ 错误：缺少前导斜杠
 export default defineMock({
-  url: 'api/users' // 应该是 '/api/users'
+  url: 'api/users', // 应该是 '/api/users'
 })
 
 // ❌ 错误：尾部斜杠不一致
@@ -165,7 +165,7 @@ fetch('/api/users') // 匹配
 
 ```ts
 mockDevServerPlugin({
-  prefix: ['/api'] // 只拦截 /api 开头的请求
+  prefix: ['/api'], // 只拦截 /api 开头的请求
 })
 
 // ✅ 会被拦截
@@ -187,7 +187,7 @@ WebSocket 连接无法建立或立即断开。
 
 ```ts
 mockDevServerPlugin({
-  wsPrefix: ['/ws', '/socket.io'] // WebSocket 路径前缀
+  wsPrefix: ['/ws', '/socket.io'], // WebSocket 路径前缀
 })
 ```
 
@@ -199,14 +199,14 @@ export default defineConfig({
   server: {
     proxy: {
       // ❌ 错误：WebSocket 路径不应该在这里配置
-      '/ws': 'http://localhost:8080'
-    }
+      '/ws': 'http://localhost:8080',
+    },
   },
   plugins: [
     mockDevServerPlugin({
-      wsPrefix: ['/ws'] // 应该只在这里配置
-    })
-  ]
+      wsPrefix: ['/ws'], // 应该只在这里配置
+    }),
+  ],
 })
 ```
 
@@ -235,11 +235,14 @@ export default defineMock({
   url: '/api/login',
   cookies: {
     // ✅ 正确：设置 Cookie
-    session: ['abc123', {
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000 // 24小时，单位是毫秒
-    }]
-  }
+    session: [
+      'abc123',
+      {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24小时，单位是毫秒
+      },
+    ],
+  },
 })
 ```
 
@@ -255,7 +258,7 @@ export default defineMock({
 
 ```ts
 mockDevServerPlugin({
-  cors: true // 或详细配置
+  cors: true, // 或详细配置
 })
 ```
 
@@ -273,8 +276,8 @@ mockDevServerPlugin({
 mockDevServerPlugin({
   formidableOptions: {
     maxFileSize: 10 * 1024 * 1024, // 10MB，默认 5MB
-    maxFieldsSize: 10 * 1024 * 1024
-  }
+    maxFieldsSize: 10 * 1024 * 1024,
+  },
 })
 ```
 
@@ -286,8 +289,8 @@ import path from 'node:path'
 mockDevServerPlugin({
   formidableOptions: {
     uploadDir: path.join(process.cwd(), 'uploads'), // 确保目录存在
-    keepExtensions: true // 保留文件扩展名
-  }
+    keepExtensions: true, // 保留文件扩展名
+  },
 })
 ```
 
@@ -314,9 +317,9 @@ Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
 fetch('/api/users', {
   method: 'POST',
   headers: {
-    'Content-Type': 'application/json' // 默认为 json 格式，其他格式需指定
+    'Content-Type': 'application/json', // 默认为 json 格式，其他格式需指定
   },
-  body: JSON.stringify({ name: 'John' })
+  body: JSON.stringify({ name: 'John' }),
 })
 ```
 
@@ -327,8 +330,8 @@ mockDevServerPlugin({
   bodyParserOptions: {
     jsonLimit: '10mb', // JSON 请求体大小限制
     formLimit: '10mb', // Form 请求体大小限制
-    textLimit: '10mb' // Text 请求体大小限制
-  }
+    textLimit: '10mb', // Text 请求体大小限制
+  },
 })
 ```
 
@@ -341,7 +344,7 @@ export default defineMock({
   body: (request) => {
     console.log('Request body:', request.body) // 调试用
     return { received: request.body }
-  }
+  },
 })
 ```
 
@@ -363,10 +366,10 @@ export default defineConfig({
       // 未匹配到 Mock 的请求转发到后端
       '^/api': {
         target: 'http://localhost:8080',
-        changeOrigin: true
-      }
-    }
-  }
+        changeOrigin: true,
+      },
+    },
+  },
 })
 ```
 
@@ -376,7 +379,7 @@ export default defineConfig({
 
 ```ts
 mockDevServerPlugin({
-  log: 'debug' // 'debug' | 'info' | 'warn' | 'error' | 'silent'
+  log: 'debug', // 'debug' | 'info' | 'warn' | 'error' | 'silent'
 })
 ```
 
@@ -385,7 +388,7 @@ mockDevServerPlugin({
 ```ts
 export default defineMock({
   url: '/api/debug',
-  body: request => ({
+  body: (request) => ({
     // 查看完整请求信息
     method: request.method,
     url: request.url,
@@ -393,8 +396,8 @@ export default defineMock({
     params: request.params,
     body: request.body,
     headers: request.headers,
-    cookies: request.getCookie('session')
-  })
+    cookies: request.getCookie('session'),
+  }),
 })
 ```
 

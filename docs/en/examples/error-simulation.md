@@ -14,7 +14,7 @@ export default defineMock({
   error: {
     probability: 0.5, // 50% probability of error
     status: 500,
-  }
+  },
 })
 ```
 
@@ -27,12 +27,12 @@ export default defineMock({
 
 #### `MockErrorConfig`
 
-| Option | Type | Default | Description |
-| ------ | ---- | ------- | ----------- |
-| `probability` | `number` | `0.5` | Error probability (0-1) |
-| `status` | `number` | `500` | Error status code |
-| `statusText` | `string` | - | Error status text |
-| `body` | `ResponseBody \| ResponseBodyFn` | - | Custom error response body, suitable for when the status is 200, but the response body needs to simulate an error scenario |
+| Option        | Type                             | Default | Description                                                                                                                |
+| ------------- | -------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `probability` | `number`                         | `0.5`   | Error probability (0-1)                                                                                                    |
+| `status`      | `number`                         | `500`   | Error status code                                                                                                          |
+| `statusText`  | `string`                         | -       | Error status text                                                                                                          |
+| `body`        | `ResponseBody \| ResponseBodyFn` | -       | Custom error response body, suitable for when the status is 200, but the response body needs to simulate an error scenario |
 
 ## Examples
 
@@ -49,7 +49,7 @@ export default defineMock([
     error: {
       probability: 0.7,
       status: 404,
-    }
+    },
   },
   {
     url: '/api/error-simulation/text',
@@ -59,8 +59,8 @@ export default defineMock([
     error: {
       probability: 0.5,
       status: 500,
-    }
-  }
+    },
+  },
 ])
 ```
 
@@ -76,8 +76,8 @@ export default defineMock({
   error: {
     probability: 0.5,
     status: 200, // Network request successful
-    body: { code: 500, msg: 'Internal error', result: null } // But returns error data structure
-  }
+    body: { code: 500, msg: 'Internal error', result: null }, // But returns error data structure
+  },
 })
 ```
 
@@ -93,8 +93,8 @@ export default defineMock({
   error: {
     probability: 0.5,
     status: 200,
-    body: { code: 200, msg: 'Success', result: {} } // Success status but empty result
-  }
+    body: { code: 200, msg: 'Success', result: {} }, // Success status but empty result
+  },
 })
 ```
 
@@ -115,10 +115,10 @@ export default defineMock({
       return {
         code: 500,
         msg: `Error for request: ${request.query.id || 'unknown'}`,
-        result: null
+        result: null,
       }
-    }
-  }
+    },
+  },
 })
 ```
 

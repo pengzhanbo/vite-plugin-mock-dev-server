@@ -6,7 +6,7 @@
 
 import type { MockOptions } from 'vite-plugin-mock-dev-server'
 import { describe, expect, it, vi } from 'vitest'
-import { findMockData } from '../src/mockHttp/matcher'
+import { findMockData } from '../src/mockHttp/matcher.js'
 
 /**
  * Test suite for findMockData function
@@ -38,9 +38,7 @@ describe('findMockData', () => {
   })
 
   it('should default to GET and POST methods if not specified', () => {
-    const mockList = [
-      { url: '/api/users', body: { data: 'users' } },
-    ]
+    const mockList = [{ url: '/api/users', body: { data: 'users' } }]
     const getResult = findMockData(mockList, logger, {
       pathname: '/api/users',
       method: 'GET',
@@ -185,9 +183,7 @@ describe('findMockData', () => {
   })
 
   it('should return undefined for websocket mock', () => {
-    const mockList = [
-      { url: '/api/ws', ws: true, setup: vi.fn() },
-    ] as any
+    const mockList = [{ url: '/api/ws', ws: true, setup: vi.fn() }] as any
     const result = findMockData(mockList, logger, {
       pathname: '/api/ws',
       method: 'GET',
@@ -218,12 +214,7 @@ describe('findMockData', () => {
   })
 
   it('should handle invalid mock data', () => {
-    const mockList = [
-      null,
-      undefined,
-      { url: null },
-      {} as any,
-    ]
+    const mockList = [null, undefined, { url: null }, {} as any]
     const result = findMockData(mockList, logger, {
       pathname: '/api/users',
       method: 'GET',

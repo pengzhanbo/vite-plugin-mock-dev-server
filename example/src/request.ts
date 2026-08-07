@@ -2,12 +2,12 @@ const jsonHeader = {
   'Content-Type': 'application/json',
 }
 
-export async function get(url: string) {
+export async function get(url: string): Promise<void> {
   const response = await fetch(url, { method: 'GET', headers: jsonHeader })
   await responseRender(url, 'GET', response)
 }
 
-export async function post(url: string, body?: Record<string, any>) {
+export async function post(url: string, body?: Record<string, any>): Promise<void> {
   const response = await fetch(url, {
     method: 'POST',
     body: body ? JSON.stringify(body) : undefined,
@@ -16,7 +16,11 @@ export async function post(url: string, body?: Record<string, any>) {
   await responseRender(url, 'POST', response)
 }
 
-async function responseRender(url: string, method: string, response: Response) {
+export async function responseRender(
+  url: string,
+  method: string,
+  response: Response,
+): Promise<void> {
   const container = document.createElement('div')
   container.classList.add('container')
   let content = `<p class="info">
@@ -38,19 +42,19 @@ async function responseRender(url: string, method: string, response: Response) {
   container.appendChild(headerEl)
   if (response.ok) {
     try {
-      const type = response.headers.get('content-type')?.toLowerCase() || ''
+      const type = response.headers.get('content-type')?.toLowerCase() ?? ''
       let str = ''
-      if (type.startsWith('application/json'))
+      if (type.startsWith('application/json')) {
         str = JSON.stringify(await response.json(), null, 2)
-      else
+      } else {
         str = await response.text()
+      }
 
       const code = document.createElement('pre')
       code.innerHTML = `<code>${str || 'no content'}</code>`
       code.classList.add('code')
       !str && code.classList.add('no-content')
       container.appendChild(code)
-    }
-    catch {}
+    } catch {}
   }
 }

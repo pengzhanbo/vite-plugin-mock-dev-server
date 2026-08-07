@@ -1,8 +1,8 @@
 import type { Options as COBodyOptions } from 'co-body'
 import type { CorsOptions } from 'cors'
 import type formidable from 'formidable'
-import type { CookiesOption } from './cookies'
-import type { RecordOptions } from './record'
+import type { CookiesOption } from './cookies.js'
+import type { RecordOptions } from './record.js'
 
 export type BodyParserOptions = COBodyOptions & {
   jsonLimit?: string | number
@@ -113,7 +113,7 @@ export interface MockMatchSpecialPriority {
    * }
    * ```
    */
-  [key: string]: string[] | { rules: string[], when: string[] }
+  [key: string]: string[] | { rules: string[]; when: string[] }
 }
 
 /**

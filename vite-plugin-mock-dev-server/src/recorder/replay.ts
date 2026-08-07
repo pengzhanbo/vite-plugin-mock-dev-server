@@ -1,10 +1,10 @@
 import type { IncomingMessage } from 'node:http'
-import type { MockHttpItem, RecordedRequest, ResolvedRecordOptions } from '../types'
+import type { MockHttpItem, RecordedRequest, ResolvedRecordOptions } from '../types/index.js'
 import { Buffer } from 'node:buffer'
 import path from 'node:path'
-import { isTextContent } from '../utils'
-import { getFilepath, isSameRecord, processRecordReq } from './helper'
-import { readRecordStorage } from './storage'
+import { isTextContent } from '../utils/index.js'
+import { getFilepath, isSameRecord, processRecordReq } from './helper.js'
+import { readRecordStorage } from './storage.js'
 
 /**
  * Replay a recorded request.
@@ -28,16 +28,17 @@ export async function replayRecordedRequest(
   const timestamp = Date.now()
 
   const records = await readRecordStorage(filepath)
-  const matchedList = records
-    .filter(item => timestamp - item.meta.timestamp < options.expires && isSameRecord(item.req, req))
+  const matchedList = records.filter(
+    (item) => timestamp - item.meta.timestamp < options.expires && isSameRecord(item.req, req),
+  )
   let matched: RecordedRequest | undefined
   // 如果未设置 status，优先使用 200 状态码，否则返回第一个记录
   if (options.status.length === 0) {
-    matched = matchedList.find(item => item.res.status === 200) || matchedList[0]
+    matched = matchedList.find((item) => item.res.status === 200) ?? matchedList[0]
   }
   // 返回第一个匹配的状态码记录
   else {
-    matched = matchedList.find(item => options.status.includes(item.res.status))
+    matched = matchedList.find((item) => options.status.includes(item.res.status))
   }
 
   if (matched) {

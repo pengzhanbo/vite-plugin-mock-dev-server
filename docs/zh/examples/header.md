@@ -12,7 +12,7 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 export default defineMock({
   url: 'api/post/1',
   headers: {
-    Authorization: 'Basic YWRtaW46YWRtaW4='
+    Authorization: 'Basic YWRtaW46YWRtaW4=',
   },
 })
 ```
@@ -31,7 +31,7 @@ export default defineMock({
     // headers 请求头
     // getCookie(name, option) 可以通过此方法获取请求头中携带的 cookie 信息
     return {
-      Authorization: 'Basic YWRtaW46YWRtaW4='
+      Authorization: 'Basic YWRtaW46YWRtaW4=',
     }
   },
 })

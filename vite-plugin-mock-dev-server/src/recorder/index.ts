@@ -1,3 +1,3 @@
-export * from './Recorder'
-export * from './replay'
-export * from './storage'
+export * from './Recorder.js'
+export * from './replay.js'
+export * from './storage.js'

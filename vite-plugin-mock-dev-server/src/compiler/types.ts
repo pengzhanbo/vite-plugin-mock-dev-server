@@ -1,6 +1,6 @@
 import type { Alias } from 'vite'
-import type { Logger } from '../core'
-import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types'
+import type { Logger } from '../core/index.js'
+import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types/index.js'
 
 export interface CompilerOptions {
   isESM?: boolean
@@ -22,4 +22,8 @@ export interface CompilerResult {
   internalDeps: string[]
 }
 
-export type MockRawData = MockOptions | MockHttpItem | MockWebsocketItem | Record<string, MockOptions | MockHttpItem | MockWebsocketItem>
+export type MockRawData =
+  | MockOptions
+  | MockHttpItem
+  | MockWebsocketItem
+  | Record<string, MockOptions | MockHttpItem | MockWebsocketItem>

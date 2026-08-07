@@ -22,9 +22,9 @@ export default defineConfig({
       // HTTP Mock 路径前缀
       prefix: ['/api'],
       // WebSocket Mock 路径前缀
-      wsPrefix: ['/ws', '/socket.io']
-    })
-  ]
+      wsPrefix: ['/ws', '/socket.io'],
+    }),
+  ],
 })
 ```
 
@@ -48,10 +48,12 @@ export default defineMock({
       console.log('Client connected:', req.url)
 
       // 发送欢迎消息
-      ws.send(JSON.stringify({
-        type: 'system',
-        message: 'Welcome to chat!'
-      }))
+      ws.send(
+        JSON.stringify({
+          type: 'system',
+          message: 'Welcome to chat!',
+        }),
+      )
 
       // 监听消息
       ws.on('message', (data) => {
@@ -61,10 +63,12 @@ export default defineMock({
         // 广播给所有客户端
         wss.clients.forEach((client) => {
           if (client.readyState === 1) {
-            client.send(JSON.stringify({
-              type: 'message',
-              data: message
-            }))
+            client.send(
+              JSON.stringify({
+                type: 'message',
+                data: message,
+              }),
+            )
           }
         })
       })
@@ -74,7 +78,7 @@ export default defineMock({
         console.log('Client disconnected')
       })
     })
-  }
+  },
 })
 ```
 
@@ -90,7 +94,7 @@ export default defineMock({
   ws: true, // 启用 WebSocket
   setup(wss, options) {
     // WebSocket 服务器逻辑
-  }
+  },
 })
 ```
 
@@ -103,6 +107,7 @@ function setup(wss, options): void
 ```
 
 参数说明：
+
 - `wss`: WebSocketServer - WebSocket 服务器实例
 - `options`: 包含 `onCleanup` 清理回调注册函数
 
@@ -110,11 +115,11 @@ function setup(wss, options): void
 
 WebSocket 服务器实例，提供以下功能：
 
-| 属性/方法 | 类型 | 说明 |
-|-----------|------|------|
-| `clients` | `Set<WebSocket>` | 所有连接的客户端 |
-| `on(event, callback)` | `Function` | 监听事件 |
-| `emit(event, data)` | `Function` | 触发事件 |
+| 属性/方法             | 类型             | 说明             |
+| --------------------- | ---------------- | ---------------- |
+| `clients`             | `Set<WebSocket>` | 所有连接的客户端 |
+| `on(event, callback)` | `Function`       | 监听事件         |
+| `emit(event, data)`   | `Function`       | 触发事件         |
 
 #### `options.onCleanup`
 
@@ -139,7 +144,7 @@ export default defineMock({
       clearInterval(interval)
       console.log('Cleanup WebSocket resources')
     })
-  }
+  },
 })
 ```
 
@@ -173,8 +178,7 @@ ws.on('message', (data, isBinary) => {
   if (isBinary) {
     // 处理二进制数据
     console.log('Binary data received:', data)
-  }
-  else {
+  } else {
     // 处理文本数据
     const text = data.toString()
     console.log('Text message:', text)
@@ -221,8 +225,10 @@ interface ChatMessage {
 const chatHistory = defineMockData<ChatMessage[]>('chat-history', [])
 
 // 存储在线用户
-const onlineUsers = defineMockData<Map<string, { username: string, joinTime: number }>>
-('online-users', new Map())
+const onlineUsers = defineMockData<Map<string, { username: string; joinTime: number }>>(
+  'online-users',
+  new Map(),
+)
 
 export default defineMock({
   url: '/ws/chat-room',
@@ -250,34 +256,35 @@ export default defineMock({
               userId = message.userId
               onlineUsers.value.set(userId, {
                 username: message.username,
-                joinTime: Date.now()
+                joinTime: Date.now(),
               })
 
               // 发送历史记录
-              ws.send(JSON.stringify({
-                type: 'history',
-                data: chatHistory.value.slice(-50) // 最近50条
-              }))
+              ws.send(
+                JSON.stringify({
+                  type: 'history',
+                  data: chatHistory.value.slice(-50), // 最近50条
+                }),
+              )
 
               // 广播用户加入
               broadcast({
                 type: 'user-joined',
                 userId,
                 username: message.username,
-                onlineCount: onlineUsers.value.size
+                onlineCount: onlineUsers.value.size,
               })
               break
 
             case 'message': {
-              if (!userId)
-                return
+              if (!userId) return
 
               const chatMessage: ChatMessage = {
                 id: generateId(),
                 userId,
                 username: message.username,
                 content: message.content,
-                timestamp: Date.now()
+                timestamp: Date.now(),
               }
 
               // 保存到历史
@@ -286,26 +293,30 @@ export default defineMock({
               // 广播消息
               broadcast({
                 type: 'new-message',
-                data: chatMessage
+                data: chatMessage,
               })
               break
             }
 
             case 'typing': {
-              broadcast({
-                type: 'user-typing',
-                userId,
-                username: message.username
-              }, ws)
+              broadcast(
+                {
+                  type: 'user-typing',
+                  userId,
+                  username: message.username,
+                },
+                ws,
+              )
               break
             }
           }
-        }
-        catch (error) {
-          ws.send(JSON.stringify({
-            type: 'error',
-            message: 'Invalid message format'
-          }))
+        } catch (error) {
+          ws.send(
+            JSON.stringify({
+              type: 'error',
+              message: 'Invalid message format',
+            }),
+          )
         }
       })
 
@@ -318,7 +329,7 @@ export default defineMock({
             type: 'user-left',
             userId,
             username: user?.username,
-            onlineCount: onlineUsers.value.size
+            onlineCount: onlineUsers.value.size,
           })
         }
       })
@@ -328,7 +339,7 @@ export default defineMock({
     onCleanup(() => {
       onlineUsers.value.clear()
     })
-  }
+  },
 })
 
 function generateId(): string {
@@ -350,7 +361,7 @@ export default defineMock({
       cpu: Math.random() * 100,
       memory: Math.random() * 100,
       network: Math.random() * 1000,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     })
 
     // 定期推送数据
@@ -358,7 +369,7 @@ export default defineMock({
       const data = generateMetrics()
       const message = JSON.stringify({
         type: 'metrics',
-        data
+        data,
       })
 
       wss.clients.forEach((client) => {
@@ -370,16 +381,18 @@ export default defineMock({
 
     wss.on('connection', (ws) => {
       // 立即发送当前数据
-      ws.send(JSON.stringify({
-        type: 'metrics',
-        data: generateMetrics()
-      }))
+      ws.send(
+        JSON.stringify({
+          type: 'metrics',
+          data: generateMetrics(),
+        }),
+      )
     })
 
     onCleanup(() => {
       clearInterval(interval)
     })
-  }
+  },
 })
 ```
 
@@ -408,11 +421,13 @@ export default defineMock({
       const docId = req.url?.split('/').pop()
 
       // 发送当前文档内容
-      ws.send(JSON.stringify({
-        type: 'init',
-        content: documentContent.value,
-        docId
-      }))
+      ws.send(
+        JSON.stringify({
+          type: 'init',
+          content: documentContent.value,
+          docId,
+        }),
+      )
 
       ws.on('message', (data) => {
         const message = JSON.parse(data.toString())
@@ -424,7 +439,7 @@ export default defineMock({
             type: message.operation.type,
             position: message.operation.position,
             content: message.operation.content,
-            timestamp: Date.now()
+            timestamp: Date.now(),
           }
 
           // 应用操作
@@ -434,10 +449,12 @@ export default defineMock({
           // 广播给其他客户端
           wss.clients.forEach((client) => {
             if (client !== ws && client.readyState === 1) {
-              client.send(JSON.stringify({
-                type: 'operation',
-                data: op
-              }))
+              client.send(
+                JSON.stringify({
+                  type: 'operation',
+                  data: op,
+                }),
+              )
             }
           })
         }
@@ -447,22 +464,18 @@ export default defineMock({
     function applyOperation(op: Operation) {
       const content = documentContent.value
       if (op.type === 'insert' && op.content) {
-        documentContent.value
-          = content.slice(0, op.position)
-            + op.content
-            + content.slice(op.position)
-      }
-      else if (op.type === 'delete') {
-        documentContent.value
-          = content.slice(0, op.position)
-            + content.slice(op.position + (op.content?.length || 1))
+        documentContent.value =
+          content.slice(0, op.position) + op.content + content.slice(op.position)
+      } else if (op.type === 'delete') {
+        documentContent.value =
+          content.slice(0, op.position) + content.slice(op.position + (op.content?.length || 1))
       }
     }
 
     function generateId(): string {
       return Date.now().toString(36) + Math.random().toString(36).substr(2)
     }
-  }
+  },
 })
 ```
 
@@ -478,11 +491,13 @@ ws.onopen = () => {
   console.log('Connected')
 
   // 发送加入消息
-  ws.send(JSON.stringify({
-    type: 'join',
-    userId: 'user-123',
-    username: 'John'
-  }))
+  ws.send(
+    JSON.stringify({
+      type: 'join',
+      userId: 'user-123',
+      username: 'John',
+    }),
+  )
 }
 
 // 接收消息
@@ -509,11 +524,13 @@ ws.onclose = () => {
 
 // 发送消息
 function sendMessage(content: string) {
-  ws.send(JSON.stringify({
-    type: 'message',
-    username: 'John',
-    content
-  }))
+  ws.send(
+    JSON.stringify({
+      type: 'message',
+      username: 'John',
+      content,
+    }),
+  )
 }
 ```
 
@@ -525,7 +542,7 @@ function sendMessage(content: string) {
 import { io } from 'socket.io-client'
 
 const socket = io('ws://localhost:5173', {
-  path: '/ws/chat'
+  path: '/ws/chat',
 })
 
 socket.on('connect', () => {
@@ -538,7 +555,7 @@ socket.on('new-message', (data) => {
 
 socket.emit('message', {
   username: 'John',
-  content: 'Hello!'
+  content: 'Hello!',
 })
 ```
 
@@ -548,7 +565,7 @@ socket.emit('message', {
 
 ```ts
 mockDevServerPlugin({
-  log: 'debug'
+  log: 'debug',
 })
 ```
 
@@ -587,6 +604,7 @@ wscat -c ws://localhost:5173/ws/chat
 ### Q: WebSocket 连接失败？
 
 检查以下几点：
+
 1. `wsPrefix` 配置是否正确
 2. 确保没有在 `vite.config.ts` 的 `proxy` 中配置相同路径
 3. 使用 `ws://` 或 `wss://` 协议，不是 `http://`
@@ -595,7 +613,8 @@ wscat -c ws://localhost:5173/ws/chat
 
 ```ts
 wss.clients.forEach((client) => {
-  if (client.readyState === 1) { // 确保连接打开
+  if (client.readyState === 1) {
+    // 确保连接打开
     client.send(message)
   }
 })

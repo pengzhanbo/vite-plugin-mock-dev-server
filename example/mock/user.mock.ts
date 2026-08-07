@@ -1,5 +1,5 @@
 import { defineMock } from 'vite-plugin-mock-dev-server'
-import user from './data/user'
+import user from './data/user.js'
 
 export default defineMock([
   {

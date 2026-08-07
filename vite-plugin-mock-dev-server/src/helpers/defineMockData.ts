@@ -24,7 +24,7 @@ import { deepClone, isFunction } from '@pengzhanbo/utils'
  *
  * Mock 数据缓存
  */
-const mockDataCache = new Map<string, CacheImpl<any>>()
+const mockDataCache = new Map<string, CacheImpl>()
 
 /**
  * Response cache for MockData objects
@@ -98,7 +98,7 @@ class CacheImpl<T = any> {
    *
    * @param value - New value / 新值
    */
-  hotUpdate(value: T) {
+  hotUpdate(value: T): void {
     // If persistOnHMR is enabled, skip the update to preserve the current cached value.
     // 如果启用了 persistOnHMR ,跳过更新以保留当前缓存值
     if (this.#persistOnHMR) {
@@ -112,8 +112,9 @@ class CacheImpl<T = any> {
     // 用于针对重复编译时，如果是通过 `mockjs` 或 `faker-js` 等
     // 生成的随机数据，由于随机性带来的可能的不同mock文件关联的接口数据不一致的情况
     // 由于编译加载的时间必然远小于用户修改的间隔，因此这里设置了一个缓存时间
-    if (Date.now() - this.#lastUpdate < staleInterval)
+    if (Date.now() - this.#lastUpdate < staleInterval) {
       return
+    }
 
     // After file changes and recompilation, when the two initialized data are not equal,
     // reinitialize to the newly compiled data.
@@ -134,11 +135,12 @@ class CacheImpl<T = any> {
    *
    * @param persistOnHMR - Whether to persist data on HMR / 热更新时是否保持数据
    */
-  setPersistOnHMR(persistOnHMR: boolean) {
+  setPersistOnHMR(persistOnHMR: boolean): void {
     // Once set to false, cannot be changed to true by subsequent calls
     // 设置为 false 后，不能被后续调用改为 true
-    if (!this.#persistOnHMR)
+    if (!this.#persistOnHMR) {
       this.#persistOnHMR = persistOnHMR
+    }
   }
 }
 
@@ -209,20 +211,15 @@ export function defineMockData<T = any>(
 ): MockData<T> {
   let cache = mockDataCache.get(key) as CacheImpl<T> | undefined
   if (!cache) {
-    const newCache = new CacheImpl<T>(
-      initialData,
-      options?.persistOnHMR,
-    )
+    const newCache = new CacheImpl<T>(initialData, options?.persistOnHMR)
     const existing = mockDataCache.get(key)
     if (existing) {
       cache = existing as CacheImpl<T>
-    }
-    else {
+    } else {
       mockDataCache.set(key, newCache)
       cache = newCache
     }
-  }
-  else {
+  } else {
     // If cache already exists, update persistOnHMR if not already set
     // 如果缓存已存在，且 persistOnHMR 尚未设置，则更新
     cache.setPersistOnHMR(options?.persistOnHMR ?? false)
@@ -230,14 +227,16 @@ export function defineMockData<T = any>(
 
   cache.hotUpdate(initialData)
 
-  if (responseCache.has(cache))
+  if (responseCache.has(cache)) {
     return responseCache.get(cache)!
+  }
 
   const res = [
     () => cache.value,
     (val) => {
-      if (isFunction(val))
+      if (isFunction(val)) {
         val = val(cache.value) ?? cache.value
+      }
 
       cache.value = val
     },

@@ -37,24 +37,24 @@ const posts = [
 export default defineMock([
   {
     url: '/api/post/list',
-    body: () => posts
+    body: () => posts,
   },
   {
     url: '/api/post/delete/:id',
     body: ({ params }) => {
-      const index = posts.find(post => post.id === Number.parseInt(params.id))
+      const index = posts.find((post) => post.id === Number.parseInt(params.id))
       index !== -1 && posts.splice(index, 1)
       return { message: 'success' }
-    }
+    },
   },
   {
     url: '/api/post/update/:id',
     body: ({ params, body }) => {
-      const index = posts.find(post => post.id === Number.parseInt(params.id))
+      const index = posts.find((post) => post.id === Number.parseInt(params.id))
       index !== -1 && (posts[index] = { ...posts[index], ...body })
       return { message: 'success' }
-    }
-  }
+    },
+  },
 ])
 ```
 
@@ -69,7 +69,7 @@ import { posts } from '../shared/data'
 
 export default defineMock({
   url: '/api/post/list',
-  body: () => posts
+  body: () => posts,
 })
 ```
 
@@ -80,10 +80,10 @@ import { posts } from '../shared/data'
 export default defineMock({
   url: '/api/post/update/:id',
   body: ({ params, body }) => {
-    const index = posts.findIndex(post => post.id === Number.parseInt(params.id))
+    const index = posts.findIndex((post) => post.id === Number.parseInt(params.id))
     index !== -1 && (posts[index] = { ...posts[index], ...body })
     return { message: 'success' }
-  }
+  },
 })
 ```
 
@@ -94,10 +94,10 @@ import { posts } from '../shared/data'
 export default defineMock({
   url: '/api/post/delete/:id',
   body: ({ params }) => {
-    const index = posts.findIndex(post => post.id === Number.parseInt(params.id))
+    const index = posts.findIndex((post) => post.id === Number.parseInt(params.id))
     index !== -1 && posts.splice(index, 1)
     return { message: 'success' }
-  }
+  },
 })
 ```
 
@@ -138,7 +138,7 @@ import { posts } from '../shared/data'
 
 export default defineMock({
   url: '/api/post/list',
-  body: () => posts.value
+  body: () => posts.value,
 })
 ```
 
@@ -149,10 +149,10 @@ import { posts } from '../shared/data'
 export default defineMock({
   url: '/api/post/update/:id',
   body: ({ params, body }) => {
-    const index = posts.value.findIndex(post => post.id === Number.parseInt(params.id))
+    const index = posts.value.findIndex((post) => post.id === Number.parseInt(params.id))
     index !== -1 && (posts.value[index] = { ...posts.value[index], ...body })
     return { message: 'success' }
-  }
+  },
 })
 ```
 
@@ -163,10 +163,10 @@ import { posts } from '../shared/data'
 export default defineMock({
   url: '/api/post/delete/:id',
   body: ({ params }) => {
-    const index = posts.value.findIndex(post => post.id === Number.parseInt(params.id))
+    const index = posts.value.findIndex((post) => post.id === Number.parseInt(params.id))
     index !== -1 && posts.value.splice(index, 1)
     return { message: 'success' }
-  }
+  },
 })
 ```
 

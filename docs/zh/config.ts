@@ -1,6 +1,6 @@
 import type { DefaultTheme } from 'vitepress'
 import { defineAdditionalConfig } from 'vitepress'
-import { version } from '../package.json'
+import { version } from '../package.json' with { type: 'json' }
 
 export default defineAdditionalConfig({
   lang: 'zh-CN',
@@ -67,8 +67,7 @@ export default defineAdditionalConfig({
 
     notFound: {
       title: '页面未找到',
-      quote:
-        '但如果你不改变方向，并且继续寻找，你可能最终会到达你所前往的地方。',
+      quote: '但如果你不改变方向，并且继续寻找，你可能最终会到达你所前往的地方。',
       linkLabel: '前往首页',
       linkText: '带我回首页',
     },
@@ -103,7 +102,10 @@ function nav(): DefaultTheme.NavItem[] {
     {
       text: `v${version}`,
       items: [
-        { text: '更新日志', link: 'https://github.com/pengzhanbo/vite-plugin-mock-dev-server/blob/main/CHANGELOG.md' },
+        {
+          text: '更新日志',
+          link: 'https://github.com/pengzhanbo/vite-plugin-mock-dev-server/blob/main/CHANGELOG.md',
+        },
       ],
     },
   ]
@@ -159,9 +161,7 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
     },
     {
       text: '故障排查',
-      items: [
-        { text: '常见问题', link: 'troubleshooting/' },
-      ],
+      items: [{ text: '常见问题', link: 'troubleshooting/' }],
     },
   ]
 }
@@ -194,9 +194,7 @@ function sidebarApi(): DefaultTheme.SidebarItem[] {
   return [
     {
       text: '概述',
-      items: [
-        { text: 'API 参考', link: 'index' },
-      ],
+      items: [{ text: 'API 参考', link: 'index' }],
     },
     {
       text: '辅助函数',

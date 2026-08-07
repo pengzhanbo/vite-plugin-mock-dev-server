@@ -9,7 +9,7 @@ import {
   doesProxyContextMatchUrl,
   isPathMatch,
   urlParse,
-} from '../src/utils'
+} from '../src/utils/index.js'
 
 /**
  * Test suite for urlParse function

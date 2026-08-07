@@ -130,9 +130,9 @@ import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 export default defineConfig({
   plugins: [
     mockDevServerPlugin({
-      record: true
-    })
-  ]
+      record: true,
+    }),
+  ],
 })
 ```
 
@@ -159,22 +159,23 @@ export default defineConfig({
         overwrite: true, // 覆盖已有录制数据
         expires: 0, // 录制数据过期时间(秒)
         status: [], // 需要录制的状态码
-        filter: { // 请求过滤配置
+        filter: {
+          // 请求过滤配置
           mode: 'glob',
           include: ['/api/**'],
-          exclude: ['/api/auth/**']
+          exclude: ['/api/auth/**'],
         },
-        gitignore: true // 添加.gitignore
+        gitignore: true, // 添加.gitignore
       },
       // 回放配置(可选，默认开启)
-      replay: true
-    })
+      replay: true,
+    }),
   ],
   server: {
     proxy: {
-      '/api': 'http://localhost:8080' // 后端服务地址
-    }
-  }
+      '/api': 'http://localhost:8080', // 后端服务地址
+    },
+  },
 })
 ```
 
@@ -228,10 +229,10 @@ export default defineConfig({
 export default {
   record: {
     filter: (req) => {
-    // 仅记录GET请求
+      // 仅记录GET请求
       return req.method === 'GET'
-    }
-  }
+    },
+  },
 }
 ```
 
@@ -243,9 +244,9 @@ export default {
     filter: {
       mode: 'glob', // 或'path-to-regexp'
       include: ['/api/**'], // 包含路径
-      exclude: ['/api/auth/**'] // 排除路径
-    }
-  }
+      exclude: ['/api/auth/**'], // 排除路径
+    },
+  },
 }
 ```
 
@@ -264,7 +265,7 @@ export default {
 ```ts
 export default {
   record: { enabled: false }, // 不录制新数据
-  replay: true // 但使用已有录制数据
+  replay: true, // 但使用已有录制数据
 }
 ```
 
@@ -438,14 +439,14 @@ export default defineConfig({
   plugins: [
     mockDevServerPlugin({
       prefix: ['/api'],
-      record: true // 一键开启录制与回放
-    })
+      record: true, // 一键开启录制与回放
+    }),
   ],
   server: {
     proxy: {
-      '/api': 'http://localhost:8080'
-    }
-  }
+      '/api': 'http://localhost:8080',
+    },
+  },
 })
 ```
 
@@ -463,10 +464,10 @@ export default defineConfig({
       record: {
         enabled: true,
         status: [200, 201], // 仅记录成功响应
-        overwrite: true
-      }
-    })
-  ]
+        overwrite: true,
+      },
+    }),
+  ],
 })
 ```
 
@@ -486,11 +487,11 @@ export default defineConfig({
         filter: {
           mode: 'glob',
           include: ['/api/users/**', '/api/orders/**'], // 仅记录用户和订单API
-          exclude: ['/api/users/sensitive/**'] // 排除敏感API
-        }
-      }
-    })
-  ]
+          exclude: ['/api/users/sensitive/**'], // 排除敏感API
+        },
+      },
+    }),
+  ],
 })
 ```
 
@@ -510,11 +511,11 @@ export default defineConfig({
         filter: {
           mode: 'path-to-regexp',
           include: ['/api/:resource/:id'], // 匹配/api/users/123
-          exclude: ['/api/auth/:action'] // 排除鉴权相关
-        }
-      }
-    })
-  ]
+          exclude: ['/api/auth/:action'], // 排除鉴权相关
+        },
+      },
+    }),
+  ],
 })
 ```
 
@@ -534,10 +535,10 @@ export default defineConfig({
         filter: (req) => {
           // 仅记录GET请求且不包含敏感信息的路径
           return req.method === 'GET' && !req.pathname.includes('sensitive')
-        }
-      }
-    })
-  ]
+        },
+      },
+    }),
+  ],
 })
 ```
 
@@ -555,10 +556,10 @@ export default defineConfig({
       record: {
         enabled: true,
         expires: 86400, // 录制数据24小时后过期
-        overwrite: true
-      }
-    })
-  ]
+        overwrite: true,
+      },
+    }),
+  ],
 })
 ```
 
@@ -574,9 +575,9 @@ export default defineConfig({
     mockDevServerPlugin({
       prefix: ['/api'],
       record: { enabled: false }, // 不录制新数据
-      replay: true // 但使用已有录制数据
-    })
-  ]
+      replay: true, // 但使用已有录制数据
+    }),
+  ],
 })
 ```
 
@@ -595,10 +596,10 @@ export default defineConfig({
         enabled: true,
         dir: 'recordings/api', // 自定义存储目录
         overwrite: false, // 不覆盖已有录制
-        gitignore: false // 不自动生成.gitignore
-      }
-    })
-  ]
+        gitignore: false, // 不自动生成.gitignore
+      },
+    }),
+  ],
 })
 ```
 
@@ -637,8 +638,8 @@ mock/.recordings/*
 export default {
   record: {
     enabled: true,
-    gitignore: false // 禁止自动生成.gitignore
-  }
+    gitignore: false, // 禁止自动生成.gitignore
+  },
 }
 ```
 
@@ -674,8 +675,8 @@ export default {
     filter: (req) => {
       console.log('录制请求:', req.pathname)
       return true // 临时返回true测试
-    }
-  }
+    },
+  },
 }
 ```
 
@@ -697,12 +698,13 @@ rm -rf mock/.recordings
 ```
 
 或在配置中设置1秒过期后重新录制：
+
 ```ts
 export default {
   record: {
     enabled: true,
-    expires: 1 // 1秒后过期
-  }
+    expires: 1, // 1秒后过期
+  },
 }
 ```
 
@@ -727,7 +729,7 @@ Mock数据 > 录制数据 > 代理转发
 // 如果mock文件中有匹配配置
 export default defineMock({
   url: '/api/users',
-  body: { list: [] } // Mock数据优先
+  body: { list: [] }, // Mock数据优先
 })
 
 // 即使存在录制数据，也会使用上述Mock配置
@@ -741,14 +743,14 @@ export default defineMock({
 export default defineConfig({
   plugins: [
     mockDevServerPlugin({
-      record: true
-    })
+      record: true,
+    }),
   ],
   server: {
     proxy: {
-      '/api': 'http://localhost:8080' // 录制会拦截此代理
-    }
-  }
+      '/api': 'http://localhost:8080', // 录制会拦截此代理
+    },
+  },
 })
 ```
 
@@ -760,7 +762,7 @@ export default defineConfig({
 mockDevServerPlugin({
   record: { enabled: true },
   build: {
-    includeRecord: true // 构建产物包含录制文件
-  }
+    includeRecord: true, // 构建产物包含录制文件
+  },
 })
 ```

@@ -10,7 +10,7 @@
 
 ::: npm-to
 
-``` sh
+```sh
 npm i -D vite-plugin-mock-dev-server
 ```
 
@@ -20,7 +20,7 @@ npm i -D vite-plugin-mock-dev-server
 
 打开项目的 `vite.config.{ts,js}` 文件，导入并配置插件：
 
-``` ts [vite.config.{ts,js}]
+```ts [vite.config.{ts,js}]
 import { defineConfig } from 'vite'
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server' // [!code ++]
 
@@ -40,18 +40,16 @@ export default defineConfig({
 但当后端接口尚未完成而文档已提供时，我们可以仅针对这部分接口进行 mock，实现前后端并行开发。
 插件直接复用 `server.proxy` 配置，省去了额外的参数配置，简化了流程：
 
-``` ts [vite.config.{ts,js}]
+```ts [vite.config.{ts,js}]
 import { defineConfig } from 'vite'
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 
 export default defineConfig({
-  plugins: [
-    mockDevServerPlugin(),
-  ],
+  plugins: [mockDevServerPlugin()],
   // [!code ++:5]
   server: {
     proxy: {
-      '^/api': 'http://example.com/'
+      '^/api': 'http://example.com/',
     },
   },
 })
@@ -79,7 +77,7 @@ export default defineConfig({
 
 插件会根据 `package.json` 的 `type` 字段判断项目默认模块类型，并通过文件后缀确定具体模块格式：
 
-``` json
+```json
 {
   "esm": [".mjs", ".mts"],
   "cjs": [".cjs", ".cts"],
@@ -96,7 +94,7 @@ export default defineConfig({
 ```tree
 .
 ├── mock
-│   └── ++ api.mock.ts # mock配置文件 
+│   └── ++ api.mock.ts # mock配置文件
 ├── src/
 └── package.json
 ```
@@ -108,7 +106,7 @@ import { defineMock } from 'vite-plugin-mock-dev-server'
 
 export default defineMock({
   url: '/api/test',
-  body: {}
+  body: {},
 })
 ```
 

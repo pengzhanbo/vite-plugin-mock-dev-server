@@ -1,5 +1,5 @@
 import { Buffer } from 'node:buffer'
-import { defineAPIMock } from './shared'
+import { defineAPIMock } from './shared.js'
 
 export const buffer1 = defineAPIMock({
   url: 'buffer/buffer-type',

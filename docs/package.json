@@ -1,8 +1,8 @@
 {
   "name": "docs",
-  "type": "module",
   "version": "2.4.2",
   "private": true,
+  "type": "module",
   "scripts": {
     "docs:build": "vitepress build .",
     "docs:dev": "vitepress dev .",
