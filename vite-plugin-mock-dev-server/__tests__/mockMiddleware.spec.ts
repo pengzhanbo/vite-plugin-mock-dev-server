@@ -209,7 +209,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     expect(next).toHaveBeenCalled()
   })
@@ -228,7 +228,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     expect(next).toHaveBeenCalled()
   })
@@ -258,7 +258,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     expect(next).not.toHaveBeenCalled()
     expect(res.statusCode).toBe(200)
@@ -291,7 +291,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     expect(res.statusCode).toBe(201)
     expect(JSON.parse(res.data)).toEqual({ success: true })
@@ -343,7 +343,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     expect(next).not.toHaveBeenCalled()
     expect(JSON.parse(res.data)).toEqual({ hasFile: true })
@@ -373,7 +373,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     expect(res.ended).toBe(true)
     expect(JSON.parse(res.data)).toEqual({ id: 1 })
@@ -403,7 +403,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     expect(res.ended).toBe(true)
   })
@@ -433,7 +433,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     expect(res.data).toBe('Hello World')
     expect(res.headers['Content-Type']).toContain('text/plain')
@@ -463,7 +463,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     const responseData = JSON.parse(res.data)
     expect(responseData.query).toEqual({ foo: 'bar' })
@@ -494,7 +494,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     expect(res.headers['X-Custom-Header']).toBe('test-value')
   })
@@ -527,7 +527,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     // Cookies are set via Set-Cookie header
     const setCookieHeader = res.headers['Set-Cookie'] as string[]
@@ -565,7 +565,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     expect(res.statusCode).toBe(500)
     expect(res.statusMessage).toBe('Internal Server Error')
@@ -600,7 +600,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     expect(responseFn).toHaveBeenCalled()
     expect(res.headers['X-Custom']).toBe('value')
@@ -632,7 +632,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     expect(res.ended).toBe(true)
     expect(JSON.parse(res.data)).toEqual({ version: 1 })
@@ -663,7 +663,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     expect(next).toHaveBeenCalled()
   })
@@ -692,7 +692,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     expect(res.headers['Cache-Control']).toBe('no-cache,max-age=0')
     expect(res.headers['X-Mock-Power-By']).toBe('vite-plugin-mock-dev-server')
@@ -723,7 +723,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     expect(res.ended).toBe(true)
     expect(res.data).toBe('')
@@ -753,7 +753,7 @@ describe('mockMiddleware', () => {
     const res = createMockResponse()
     const next = vi.fn()
 
-    middleware(req, res, next)
+    await middleware(req, res, next)
 
     const data = JSON.parse(res.data)
     expect(Array.isArray(data)).toBe(true)

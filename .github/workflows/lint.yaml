@@ -23,5 +23,8 @@ jobs:
       - name: Install
         run: pnpm i
 
+      - name: build
+        run: pnpm build
+
       - name: Lint
         run: pnpm run lint

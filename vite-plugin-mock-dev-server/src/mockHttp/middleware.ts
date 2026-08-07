@@ -1,6 +1,7 @@
 // oxlint-disable max-lines-per-function
 
 import type { CorsOptions } from 'cors'
+import type { ServerResponse } from 'node:http'
 import type { Connect } from 'vite'
 import type { Compiler } from '../compiler/index.js'
 import type { Logger, ResolvedMockServerPluginOptions } from '../core/index.js'
@@ -72,7 +73,11 @@ export function createMockMiddleware(
     replay,
     activeScene,
   }: CreateMockMiddlewareOptions,
-): Connect.NextHandleFunction {
+): (
+  req: Connect.IncomingMessage,
+  res: ServerResponse,
+  next: Connect.NextFunction,
+) => Promise<void> {
   const cors = createCors(corsOptions)
 
   return async function mockMiddleware(req, res, next) {

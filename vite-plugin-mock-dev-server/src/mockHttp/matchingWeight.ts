@@ -132,7 +132,7 @@ function defaultPriority(rules: string[]): string[] {
 export function matchingWeight(
   rules: string[],
   url: string,
-  priority: MockMatchPriority,
+  priority: MockMatchPriority = {},
 ): string[] {
   // Sort by default rules first
   // 基于默认规则下进行优先级排序
