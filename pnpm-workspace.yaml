@@ -41,7 +41,7 @@ catalogs:
     vitepress-plugin-file-tree: ^0.11.1
     vitepress-plugin-group-icons: ^1.7.6
     vitepress-plugin-llms: ^1.13.4
-    vitepress-plugin-npm-to: ^0.11.1
+    vitepress-plugin-npm-to: ^0.12.0
     vitepress-tuck: ^0.11.1
     vitest: ^4.1.10
     zstd-codec: ^0.1.5
