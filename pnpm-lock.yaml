@@ -320,9 +320,6 @@ catalogs:
     '@types/ws':
       specifier: ^8.18.1
       version: 8.18.1
-    bumpp:
-      specifier: ^12.2.0
-      version: 12.2.0
     conventional-changelog:
       specifier: ^8.1.1
       version: 8.1.1
@@ -466,7 +463,7 @@ importers:
         version: 8.18.1
       bumpp:
         specifier: catalog:dev
-        version: 12.2.0
+        version: 12.2.1
       conventional-changelog:
         specifier: catalog:dev
         version: 8.1.1(conventional-commits-filter@6.0.1)
@@ -2143,8 +2140,8 @@ packages:
     resolution: {integrity: sha512-ScQ4IuvIEF1TMlP7Zt+vjJ//9zlPb2SDcxWxM3bk8s6t6GGdJ7KO1dCcTidOPJKePW30LE/2cT7wCyPho9/Wxg==}
     engines: {node: 20 || >=22}
 
-  bumpp@12.2.0:
-    resolution: {integrity: sha512-pQuDUxqHpxxjfie/KABu0fppefIthnC/ZEIzcoSDy3RVxhascgsl+NI21+wQec6tTLr+wNQTLcjSeTSGr80qAw==}
+  bumpp@12.2.1:
+    resolution: {integrity: sha512-8inGPx8PC/BaEOWhzfxrNHGj/x5Srt0EeJatAcTJ9N7AZpQG/HlH4kGp5JWbEL8zffYXI5iBkMjG8SHnJ9e/6g==}
     engines: {node: ^22.18.0 || ^24.11.0 || >=26.0.0}
     hasBin: true
 
@@ -3616,7 +3613,7 @@ snapshots:
   '@antfu/install-pkg@1.1.0':
     dependencies:
       package-manager-detector: 1.8.0
-      tinyexec: 1.2.4
+      tinyexec: 1.3.0
 
   '@babel/helper-string-parser@7.29.7': {}
 
@@ -4678,7 +4675,7 @@ snapshots:
     dependencies:
       balanced-match: 4.0.4
 
-  bumpp@12.2.0:
+  bumpp@12.2.1:
     dependencies:
       args-tokenizer: 0.3.0
       cac: 7.0.0
