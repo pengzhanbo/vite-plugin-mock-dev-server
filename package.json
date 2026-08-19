@@ -44,16 +44,5 @@
     "typescript": "catalog:dev",
     "vitest": "catalog:dev"
   },
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "^11.20.0",
-      "onFail": "download"
-    },
-    "runtime": {
-      "name": "node",
-      "version": "^20.19.0 || ^22.11.0 || ^24.11.0 || >=26",
-      "onFail": "error"
-    }
-  }
+  "packageManager": "pnpm@11.22.0"
 }
