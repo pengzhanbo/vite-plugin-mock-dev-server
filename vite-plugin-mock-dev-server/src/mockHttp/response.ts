@@ -90,7 +90,7 @@ export async function provideResponseHeaders(
     )
     return
   }
-  objectKeys(data).forEach((key) => res.setHeader(key, data[key]!))
+  objectKeys(data).forEach((key) => res.setHeader(`${key}`, data[key]!))
 }
 
 /**
