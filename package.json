@@ -16,8 +16,8 @@
     "docs:build": "pnpm -F docs docs:build",
     "docs:dev": "pnpm -F docs docs:dev",
     "docs:preview": "pnpm -F docs docs:preview",
-    "lint": "oxlint . --type-check --type-aware",
-    "format": "oxfmt .",
+    "lint": "oxlint . --type-check --type-aware && oxfmt . --check",
+    "format": "oxlint . --type-check --type-aware --fix && oxfmt .",
     "test": "vitest",
     "release:changelog": "conventional-changelog -p angular",
     "release:publish": "pnpm -r publish",
@@ -44,5 +44,5 @@
     "typescript": "catalog:dev",
     "vitest": "catalog:dev"
   },
-  "packageManager": "pnpm@11.22.0"
+  "packageManager": "pnpm@11.24.0"
 }
