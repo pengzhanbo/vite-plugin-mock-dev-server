@@ -292,7 +292,7 @@ catalogs:
   dev:
     '@pengzhanbo/oxc-config':
       specifier: ^2.9.0
-      version: 2.9.0
+      version: 2.9.2
     '@types/co-body':
       specifier: ^6.1.3
       version: 6.1.3
@@ -439,7 +439,7 @@ importers:
     devDependencies:
       '@pengzhanbo/oxc-config':
         specifier: catalog:dev
-        version: 2.9.0(eslint@10.8.0(jiti@2.7.0))(oxfmt@0.65.0)(oxlint-tsgolint@7.0.2001)(oxlint@1.80.0(oxlint-tsgolint@7.0.2001))
+        version: 2.9.2(eslint@10.8.0(jiti@2.7.0))(oxfmt@0.65.0)(oxlint-tsgolint@7.0.2001)(oxlint@1.80.0(oxlint-tsgolint@7.0.2001))
       '@types/co-body':
         specifier: catalog:dev
         version: 6.1.3
@@ -1195,11 +1195,11 @@ packages:
   '@paralleldrive/cuid2@2.3.1':
     resolution: {integrity: sha512-XO7cAxhnTZl0Yggq6jOgjiOHhbgcO4NqFqwSmQpjK3b6TEE6Uj/jfSk6wzYyemh3+I0sHirKSetjQwn5cZktFw==}
 
-  '@pengzhanbo/oxc-config@2.9.0':
-    resolution: {integrity: sha512-NxkWoLl7wUGSaqwxyM/erftfrtwBaSHjeVbIyp25fjanufhIf0d/NJEBQttvxuvRwIjacxrQiJhabhPEA+lM2g==}
+  '@pengzhanbo/oxc-config@2.9.2':
+    resolution: {integrity: sha512-2RF+8CqBfGnvna61fM2yPAgTgUiGLedTs4J5OgnAxVDC7036noqUomCbmakzrhQ76b+UgEcjIiM+PFWbwZyZ2w==}
     peerDependencies:
-      oxfmt: ^0.63.0
-      oxlint: ^1.78.0
+      oxfmt: ^0.66.0
+      oxlint: ^1.81.0
       oxlint-tsgolint: ^7.0.2001
 
   '@pengzhanbo/utils@3.10.0':
@@ -2440,8 +2440,8 @@ packages:
     resolution: {integrity: sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw==}
     engines: {node: '>=12'}
 
-  eslint-plugin-regexp@3.1.1:
-    resolution: {integrity: sha512-MxR5nqoQCtVWmJwia0D2+NlXX1xzdpkslsVOZLEYQ4PQWEaL65PCZXURxaBc3lPnkNFpNxzMIRmYVxdl8giXRA==}
+  eslint-plugin-regexp@3.3.0:
+    resolution: {integrity: sha512-TT0JTQbW7CRKohntpGAsMdQ1K3MsmJK4gdAhKJtIwlJ0JvuYxauymFgJdvqxIY4lqNj0EuRZWVrymQtEdJYEFg==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
     peerDependencies:
       eslint: '>=9.38.0'
@@ -2681,9 +2681,9 @@ packages:
     resolution: {integrity: sha512-CY6crGq313MX8GkwvB7tzgp99vjQxY1++5y10/BKN/GUfHqWaOGQMNZkBvqSzsZKWk/ijwHlWzzkLulsGHhjWQ==}
     hasBin: true
 
-  jsdoc-type-pratt-parser@7.3.0:
-    resolution: {integrity: sha512-DoyJXo7x/n48M3NsGOs9QnEws0ft0tV3YsSgvWMNxz2hZtz+Q6fpqUD96lVYX4a+jcEkzHeFNDJOn68TzXfbdA==}
-    engines: {node: '>=20.0.0'}
+  jsdoc-type-pratt-parser@9.2.1:
+    resolution: {integrity: sha512-V4Ww4EHnTcTLSOMoB0FsF72JhQvcAsriCm/LWnxJeGWoxIjEL2l9na11abQok5SYShq8m0Gl02el/xAbTCulvQ==}
+    engines: {node: ^22.22.2 || >=24.15.0}
 
   json-buffer@3.0.1:
     resolution: {integrity: sha512-4bV5BfR2mqfQTJm+V5tPPdf+ZpuhiIvTuAB5g8kcrXOZpTT/QwwVRWBywX1ozr6lEuPdbHxwaJlm9G6mI2sfSQ==}
@@ -4107,9 +4107,9 @@ snapshots:
     dependencies:
       '@noble/hashes': 1.8.0
 
-  '@pengzhanbo/oxc-config@2.9.0(eslint@10.8.0(jiti@2.7.0))(oxfmt@0.65.0)(oxlint-tsgolint@7.0.2001)(oxlint@1.80.0(oxlint-tsgolint@7.0.2001))':
+  '@pengzhanbo/oxc-config@2.9.2(eslint@10.8.0(jiti@2.7.0))(oxfmt@0.65.0)(oxlint-tsgolint@7.0.2001)(oxlint@1.80.0(oxlint-tsgolint@7.0.2001))':
     dependencies:
-      eslint-plugin-regexp: 3.1.1(eslint@10.8.0(jiti@2.7.0))
+      eslint-plugin-regexp: 3.3.0(eslint@10.8.0(jiti@2.7.0))
       oxfmt: 0.65.0
       oxlint: 1.80.0(oxlint-tsgolint@7.0.2001)
       oxlint-tsgolint: 7.0.2001
@@ -4650,7 +4650,7 @@ snapshots:
       '@vue/shared': 3.5.41
       estree-walker: 2.0.2
       magic-string: 0.30.21
-      postcss: 8.5.25
+      postcss: 8.5.26
       source-map-js: 1.2.1
 
   '@vue/compiler-ssr@3.5.41':
@@ -5040,13 +5040,13 @@ snapshots:
 
   escape-string-regexp@5.0.0: {}
 
-  eslint-plugin-regexp@3.1.1(eslint@10.8.0(jiti@2.7.0)):
+  eslint-plugin-regexp@3.3.0(eslint@10.8.0(jiti@2.7.0)):
     dependencies:
       '@eslint-community/eslint-utils': 4.9.1(eslint@10.8.0(jiti@2.7.0))
       '@eslint-community/regexpp': 4.12.2
       comment-parser: 1.4.7
       eslint: 10.8.0(jiti@2.7.0)
-      jsdoc-type-pratt-parser: 7.3.0
+      jsdoc-type-pratt-parser: 9.2.1
       refa: 0.12.1
       regexp-ast-analysis: 0.7.1
       scslre: 0.3.0
@@ -5292,7 +5292,10 @@ snapshots:
     dependencies:
       argparse: 2.0.1
 
-  jsdoc-type-pratt-parser@7.3.0: {}
+  jsdoc-type-pratt-parser@9.2.1:
+    dependencies:
+      '@types/estree': 1.0.9
+      '@types/node': 26.4.0
 
   json-buffer@3.0.1: {}
 
@@ -6291,9 +6294,9 @@ snapshots:
   vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0):
     dependencies:
       lightningcss: 1.33.0
-      picomatch: 4.0.5
+      picomatch: 4.0.7
       postcss: 8.5.26
-      rolldown: 1.2.4
+      rolldown: 1.2.6
       tinyglobby: 0.2.17
     optionalDependencies:
       '@types/node': 26.4.0
