@@ -146,6 +146,9 @@ catalogs:
     conventional-changelog-angular:
       specifier: ^9.4.0
       version: 9.4.0
+    esbuild:
+      specifier: ^0.28.2
+      version: 0.28.2
     js-tokens:
       specifier: ^10.0.0
       version: 10.0.0
@@ -212,7 +215,7 @@ catalogs:
       version: 6.2.0
     cookies:
       specifier: ^0.9.1
-      version: 0.9.1
+      version: 0.9.2
     cors:
       specifier: ^2.8.6
       version: 2.8.6
@@ -364,7 +367,7 @@ importers:
         version: 6.2.0
       cookies:
         specifier: catalog:prod
-        version: 0.9.1
+        version: 0.9.2
       cors:
         specifier: catalog:prod
         version: 2.8.6
@@ -400,7 +403,7 @@ importers:
         version: 8.21.3
     devDependencies:
       esbuild:
-        specifier: ^0.28.2
+        specifier: catalog:dev
         version: 0.28.2
       rolldown:
         specifier: catalog:dev
@@ -1793,8 +1796,8 @@ packages:
     engines: {node: '>=22'}
     hasBin: true
 
-  cookies@0.9.1:
-    resolution: {integrity: sha512-TG2hpqe4ELx54QER/S3HQ9SRVnQnGBtKUz5bLQWtYAQ+o6GpgMs6sYUvaiJjVxb+UXwhRhAEP3m7LbsIZ77Hmw==}
+  cookies@0.9.2:
+    resolution: {integrity: sha512-8BIbcC6tPZMv2/PD4PrB3CtKks7LmAWhA7FRZK/6/b/WJ2RUz00KCga7gq50S4/RhZ22kxefRFGgsuts0v3eoA==}
     engines: {node: '>= 0.8'}
 
   cors@2.8.6:
@@ -4119,7 +4122,7 @@ snapshots:
       '@simple-libs/stream-utils': 2.0.0
       argue-cli: 3.2.0
 
-  cookies@0.9.1:
+  cookies@0.9.2:
     dependencies:
       depd: 2.0.0
       keygrip: 1.1.0
