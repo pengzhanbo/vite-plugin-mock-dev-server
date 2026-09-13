@@ -146,6 +146,9 @@ catalogs:
     conventional-changelog-angular:
       specifier: ^9.4.0
       version: 9.4.0
+    esbuild:
+      specifier: ^0.28.2
+      version: 0.28.2
     js-tokens:
       specifier: ^10.0.0
       version: 10.0.0
@@ -187,7 +190,7 @@ catalogs:
       version: 1.13.5
     vitepress-plugin-npm-to:
       specifier: ^0.12.1
-      version: 0.12.1
+      version: 0.12.2
     vitepress-tuck:
       specifier: ^0.12.1
       version: 0.12.1
@@ -328,7 +331,7 @@ importers:
         version: 1.13.5
       vitepress-plugin-npm-to:
         specifier: catalog:dev
-        version: 0.12.1(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2))
+        version: 0.12.2(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2))
       vitepress-tuck:
         specifier: catalog:dev
         version: 0.12.1(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2))
@@ -400,7 +403,7 @@ importers:
         version: 8.21.3
     devDependencies:
       esbuild:
-        specifier: ^0.28.2
+        specifier: catalog:dev
         version: 0.28.2
       rolldown:
         specifier: catalog:dev
@@ -2972,8 +2975,8 @@ packages:
     resolution: {integrity: sha512-CTiDkKRs0h64J5rdiICdHmXH4pM1gBu2S/MJ+OxSAm+vM72srBkHr86ZubzfMJbGJh4AMVKff4R3oCu8etI1ww==}
     engines: {node: '>=18'}
 
-  vitepress-plugin-npm-to@0.12.1:
-    resolution: {integrity: sha512-aa4LcxUBo+w4YmFa8XJPTCDZHk8uXBnXR3hkFFhN9EV9G2RwjgQERUV8pR07isqrXNkhBTGe5B2u/hRALS+TQA==}
+  vitepress-plugin-npm-to@0.12.2:
+    resolution: {integrity: sha512-asoJHPCJYRl1wNijJjS1In/kDFrBSJ903p/7rRxdEerfWXe36PNopRlWBsO18XuD2OydzSZgw545/AuDOFMPCg==}
     peerDependencies:
       vitepress: ^2.0.0-alpha.18
       vue: ^3.5.0
@@ -2984,8 +2987,19 @@ packages:
       vitepress: ^2.0.0-alpha.18
       vue: ^3.5.0
 
+  vitepress-plugin-toolkit@0.12.2:
+    resolution: {integrity: sha512-BW45EdzzPUtur+eF9Z6AkW3JTov773vNh4kDR0mvvNXEBz8FRySgFtU6SVWLXoAlbqd7SjbWC707z5T5D4esxQ==}
+    peerDependencies:
+      vitepress: ^2.0.0-alpha.18
+      vue: ^3.5.0
+
   vitepress-tuck@0.12.1:
     resolution: {integrity: sha512-4MuX3JSPmaeoh9Lgjr6yKIU1BlaWoddl/x2U9E+sVGkgIpIfVFN2OSKYHz0upJ9v5K/QRwLSGLShNCQnfFc0jw==}
+    peerDependencies:
+      vitepress: ^2.0.0-alpha.18
+
+  vitepress-tuck@0.12.2:
+    resolution: {integrity: sha512-r9nmTzCAkZGa+IWbd2cCWQ4RtdDPzIm+gwAD777E5Ge7a3dpLouDdbOBVIs/7gYlauyNYCg3nZF4HHvgueg9kw==}
     peerDependencies:
       vitepress: ^2.0.0-alpha.18
 
@@ -5447,13 +5461,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  vitepress-plugin-npm-to@0.12.1(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2)):
+  vitepress-plugin-npm-to@0.12.2(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2)):
     dependencies:
       '@pengzhanbo/utils': 3.11.0
       ansis: 4.3.1
       vitepress: 2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0)
-      vitepress-plugin-toolkit: 0.12.1(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2))
-      vitepress-tuck: 0.12.1(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2))
+      vitepress-plugin-toolkit: 0.12.2(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2))
+      vitepress-tuck: 0.12.2(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2))
       vue: 3.5.42(typescript@7.0.2)
     transitivePeerDependencies:
       - '@farmfe/core'
@@ -5477,7 +5491,35 @@ snapshots:
       vitepress: 2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0)
       vue: 3.5.42(typescript@7.0.2)
 
+  vitepress-plugin-toolkit@0.12.2(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2)):
+    dependencies:
+      '@pengzhanbo/utils': 3.11.0
+      '@vueuse/core': 14.4.0(vue@3.5.42(typescript@7.0.2))
+      ansis: 4.3.1
+      markdown-it-container: 4.0.0
+      picomatch: 4.0.7
+      vitepress: 2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0)
+      vue: 3.5.42(typescript@7.0.2)
+
   vitepress-tuck@0.12.1(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2)):
+    dependencies:
+      '@pengzhanbo/utils': 3.11.0
+      unplugin-vue-components: 32.1.0(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2))
+      vitepress: 2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0)
+    transitivePeerDependencies:
+      - '@farmfe/core'
+      - '@nuxt/kit'
+      - '@rspack/core'
+      - bun-types-no-globals
+      - esbuild
+      - rolldown
+      - rollup
+      - unloader
+      - vite
+      - vue
+      - webpack
+
+  vitepress-tuck@0.12.2(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2)):
     dependencies:
       '@pengzhanbo/utils': 3.11.0
       unplugin-vue-components: 32.1.0(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2))
