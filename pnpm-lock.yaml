@@ -146,6 +146,9 @@ catalogs:
     conventional-changelog-angular:
       specifier: ^9.4.0
       version: 9.4.0
+    esbuild:
+      specifier: ^0.28.2
+      version: 0.28.2
     js-tokens:
       specifier: ^10.0.0
       version: 10.0.0
@@ -190,7 +193,7 @@ catalogs:
       version: 0.12.1
     vitepress-tuck:
       specifier: ^0.12.1
-      version: 0.12.1
+      version: 0.12.2
     vitest:
       specifier: ^5.0.0
       version: 5.0.0
@@ -331,7 +334,7 @@ importers:
         version: 0.12.1(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2))
       vitepress-tuck:
         specifier: catalog:dev
-        version: 0.12.1(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2))
+        version: 0.12.2(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2))
 
   example:
     devDependencies:
@@ -400,7 +403,7 @@ importers:
         version: 8.21.3
     devDependencies:
       esbuild:
-        specifier: ^0.28.2
+        specifier: catalog:dev
         version: 0.28.2
       rolldown:
         specifier: catalog:dev
@@ -2989,6 +2992,11 @@ packages:
     peerDependencies:
       vitepress: ^2.0.0-alpha.18
 
+  vitepress-tuck@0.12.2:
+    resolution: {integrity: sha512-r9nmTzCAkZGa+IWbd2cCWQ4RtdDPzIm+gwAD777E5Ge7a3dpLouDdbOBVIs/7gYlauyNYCg3nZF4HHvgueg9kw==}
+    peerDependencies:
+      vitepress: ^2.0.0-alpha.18
+
   vitepress@2.0.0-alpha.20:
     resolution: {integrity: sha512-uQWKmP9PaBkf9zxHn0iOml/ZPPDaGKqQXVMBHz3yjwyyd9Eg+BKLGxbqmOGlfOMCt6Fj8TLiAnE59qlKZ0A3xw==}
     hasBin: true
@@ -5478,6 +5486,24 @@ snapshots:
       vue: 3.5.42(typescript@7.0.2)
 
   vitepress-tuck@0.12.1(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2)):
+    dependencies:
+      '@pengzhanbo/utils': 3.11.0
+      unplugin-vue-components: 32.1.0(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2))
+      vitepress: 2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0)
+    transitivePeerDependencies:
+      - '@farmfe/core'
+      - '@nuxt/kit'
+      - '@rspack/core'
+      - bun-types-no-globals
+      - esbuild
+      - rolldown
+      - rollup
+      - unloader
+      - vite
+      - vue
+      - webpack
+
+  vitepress-tuck@0.12.2(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitepress@2.0.0-alpha.20(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(postcss@8.5.28)(typescript@7.0.2)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2)):
     dependencies:
       '@pengzhanbo/utils': 3.11.0
       unplugin-vue-components: 32.1.0(esbuild@0.28.2)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vue@3.5.42(typescript@7.0.2))
