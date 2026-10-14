@@ -44,5 +44,5 @@
     "typescript": "catalog:dev",
     "vitest": "catalog:dev"
   },
-  "packageManager": "pnpm@12.8.1"
+  "packageManager": "pnpm@12.11.2"
 }
