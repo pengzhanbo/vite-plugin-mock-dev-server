@@ -3,9 +3,15 @@
  *
  * 响应处理函数测试
  */
-import { describe, expect, it } from 'vitest'
+import type { MockHttpItem, MockRequest, MockResponse } from '../src/types/index.js'
+import { IncomingMessage, ServerResponse } from 'node:http'
+import { Socket } from 'node:net'
+import Cookies from 'cookies'
+import { describe, expect, it, vi } from 'vitest'
 import {
   getHTTPStatusText,
+  provideResponseCookies,
+  provideResponseHeaders,
   provideResponseStatus,
   responseRealDelay,
 } from '../src/mockHttp/response.js'
@@ -63,6 +69,188 @@ describe('provideResponseStatus', () => {
     provideResponseStatus(res, 200, 'Custom OK')
     expect(res.statusCode).toBe(200)
     expect(res.statusMessage).toBe('Custom OK')
+  })
+})
+
+/**
+ * Create a real `ServerResponse` instance
+ *
+ * 创建真实的 `ServerResponse` 实例
+ *
+ * @returns ServerResponse instance / ServerResponse 实例
+ */
+function createServerResponse(): ServerResponse {
+  return new ServerResponse(new IncomingMessage(new Socket()))
+}
+
+/**
+ * Test suite for provideResponseHeaders function
+ *
+ * provideResponseHeaders 函数测试套件
+ */
+describe('provideResponseHeaders', () => {
+  /**
+   * Create a mock logger
+   *
+   * 创建模拟日志实例
+   *
+   * @returns Mock logger / 模拟日志实例
+   */
+  const createLogger = () => ({
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  })
+
+  /**
+   * Create request object
+   *
+   * 创建请求对象
+   *
+   * @returns Mock request / 模拟请求对象
+   */
+  const createRequest = () => ({ url: '/api/users' }) as unknown as MockRequest
+
+  it('should skip response headers with invalid names', async () => {
+    const logger = createLogger()
+    const res = createServerResponse()
+    const mock = {
+      url: '/api/users',
+      headers: { 'Bad Header': 'value', 'X-Ok': 'ok' },
+      __filepath__: 'test.mock.ts',
+    } as MockHttpItem
+
+    await provideResponseHeaders(createRequest(), res as unknown as MockResponse, mock, logger)
+
+    expect(res.getHeader('X-Ok')).toBe('ok')
+    expect(res.getHeader('Bad Header')).toBeUndefined()
+    expect(logger.error).toHaveBeenCalledTimes(1)
+    expect(logger.error.mock.calls[0][0]).toContain('Invalid response header name')
+    expect(logger.error.mock.calls[0][0]).toContain('Bad Header')
+  })
+
+  it('should skip response headers with invalid values', async () => {
+    const logger = createLogger()
+    const res = createServerResponse()
+    const mock = {
+      url: '/api/users',
+      headers: { 'X-Bad': 'invalid\nvalue', 'X-Ok': 'ok' },
+      __filepath__: 'test.mock.ts',
+    } as MockHttpItem
+
+    await provideResponseHeaders(createRequest(), res as unknown as MockResponse, mock, logger)
+
+    expect(res.getHeader('X-Ok')).toBe('ok')
+    expect(res.getHeader('X-Bad')).toBeUndefined()
+    expect(logger.error).toHaveBeenCalledTimes(1)
+    expect(logger.error.mock.calls[0][0]).toContain('ERR_INVALID_CHAR')
+  })
+
+  it('should encode non-latin1 filepath in the X-File-Path header', async () => {
+    const logger = createLogger()
+    const res = createServerResponse()
+    const mock = {
+      url: '/api/users',
+      body: {},
+      __filepath__: 'mock/中文/demo.mock.ts',
+    } as MockHttpItem
+
+    await provideResponseHeaders(createRequest(), res as unknown as MockResponse, mock, logger)
+
+    expect(res.getHeader('X-File-Path')).toBe('mock/%E4%B8%AD%E6%96%87/demo.mock.ts')
+    expect(logger.error).not.toHaveBeenCalled()
+  })
+
+  it('should not throw when the headers function returns undefined', async () => {
+    const logger = createLogger()
+    const res = createServerResponse()
+    const mock = {
+      url: '/api/users',
+      headers: () => undefined,
+      __filepath__: 'test.mock.ts',
+    } as unknown as MockHttpItem
+
+    await provideResponseHeaders(createRequest(), res as unknown as MockResponse, mock, logger)
+
+    expect(logger.error).not.toHaveBeenCalled()
+    expect(res.getHeader('X-Mock-Power-By')).toBe('vite-plugin-mock-dev-server')
+  })
+})
+
+/**
+ * Test suite for provideResponseCookies function
+ *
+ * provideResponseCookies 函数测试套件
+ */
+describe('provideResponseCookies', () => {
+  /**
+   * Create a response with a real `cookies` instance attached
+   *
+   * 创建挂载了真实 `cookies` 实例的响应对象
+   *
+   * @returns Mock request and response / 模拟请求与响应对象
+   */
+  const createCookieResponse = () => {
+    const req = {
+      url: '/api/users',
+      socket: { encrypted: false },
+    } as unknown as MockRequest
+    const res = createServerResponse() as unknown as MockResponse
+    const cookies = new Cookies(req, res, {})
+    res.setCookie = cookies.set.bind(cookies)
+    return { req, res }
+  }
+
+  it('should skip invalid cookies and keep the valid ones', async () => {
+    const logger = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+    const { req, res } = createCookieResponse()
+    const mock = {
+      url: '/api/users',
+      cookies: {
+        // A cookie name that is not a valid token would be dropped by the browser
+        'invalid name': 'value',
+        // A cookie value containing non-latin1 characters
+        'invalidValue': '中文',
+        'invalidOptions': ['value', { sameSite: 'invalid' }],
+        // A secure cookie cannot be sent over an unencrypted connection
+        'insecure': ['value', { secure: true }],
+        'valid': 'ok',
+      },
+      __filepath__: 'test.mock.ts',
+    } as unknown as MockHttpItem
+
+    await provideResponseCookies(req, res, mock, logger)
+
+    const setCookie = res.getHeader('Set-Cookie')
+    expect(setCookie).toHaveLength(1)
+    expect(String(setCookie)).toContain('valid=ok')
+    expect(logger.error).toHaveBeenCalledTimes(4)
+    expect(logger.error.mock.calls[0][0]).toContain('Invalid response cookie name')
+    expect(logger.error.mock.calls[0][0]).toContain('invalid name')
+    expect(logger.error.mock.calls[1][0]).toContain('argument value is invalid')
+    expect(logger.error.mock.calls[1][0]).toContain('invalidValue')
+    expect(logger.error.mock.calls[2][0]).toContain('option sameSite is invalid')
+    expect(logger.error.mock.calls[2][0]).toContain('invalidOptions')
+    expect(logger.error.mock.calls[3][0]).toContain(
+      'Cannot send secure cookie over unencrypted connection',
+    )
+    expect(logger.error.mock.calls[3][0]).toContain('insecure')
+  })
+
+  it('should not throw when the cookies function returns undefined', async () => {
+    const logger = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+    const { req, res } = createCookieResponse()
+    const mock = {
+      url: '/api/users',
+      cookies: () => undefined,
+      __filepath__: 'test.mock.ts',
+    } as unknown as MockHttpItem
+
+    await provideResponseCookies(req, res, mock, logger)
+
+    expect(logger.error).not.toHaveBeenCalled()
+    expect(res.getHeader('Set-Cookie')).toBeUndefined()
   })
 })
 

@@ -2,6 +2,7 @@ import type { Logger } from '../core/index.js'
 import type { MockHttpItem, MockRequest, MockResponse, ResponseBody } from '../types/index.js'
 import { Buffer } from 'node:buffer'
 import {
+  attempt,
   attemptAsync,
   isArray,
   isFunction,
@@ -45,6 +46,81 @@ export function provideResponseStatus(
   response.statusMessage = statusText ?? getHTTPStatusText(status)
 }
 
+const HTTP_TOKEN_REGEX = /^[\w`!#$%&'*+.|~^-]+$/
+const HTTP_VALUE_REGEX = /^[\t\x20-\x7E\x80-\xFF]*$/
+
+/**
+ * Check whether the name is a valid HTTP token
+ *
+ * 校验名称是否为合法的 HTTP token
+ *
+ * @see https://nodejs.org/api/http.html#responsesetheadername-value
+ * @param name - Name to validate / 需要校验的名称
+ * @returns Whether the name is valid / 名称是否合法
+ */
+function isValidHttpToken(name: string): boolean {
+  return HTTP_TOKEN_REGEX.test(name)
+}
+
+/**
+ * Normalize the header value created by the plugin itself
+ *
+ * 归一化由插件自身创建的 header 值
+ *
+ * @param value - Header value / header 值
+ * @returns Valid header value / 合法的 header 值
+ */
+function toHeaderValue(value: string): string {
+  return HTTP_VALUE_REGEX.test(value) ? value : encodeURI(value)
+}
+
+interface HeaderContext {
+  res: MockResponse
+  logger: Logger
+  url: string
+  filepath: string
+  level?: MockHttpItem['log']
+}
+
+/**
+ * Set a response header safely
+ *
+ * 安全地设置响应头
+ *
+ * `res.setHeader` throws when the header name is not a valid HTTP token, or the
+ * value contains invalid characters (such as non-latin1 characters or newlines).
+ * Such headers are skipped with an error log instead of breaking the response.
+ *
+ * 当 header 名称不是合法的 HTTP token，或 header 值包含非法字符
+ * （如非 latin1 字符、换行符）时，`res.setHeader` 会抛出异常。
+ * 此时跳过该 header 并输出错误日志，而不是导致响应异常。
+ *
+ * @param context - Header context / header 上下文
+ * @param name - Header name / header 名称
+ * @param value - Header value / header 值
+ */
+function setResponseHeader(context: HeaderContext, name: string, value: string | string[]): void {
+  const { res, logger, url, filepath, level } = context
+
+  if (!isValidHttpToken(name)) {
+    logger.error(
+      `${ansis.red(`mock error at ${url}`)}
+  Invalid response header name: ${ansis.yellow(name)}
+  at headers (${ansis.underline(filepath)})`,
+      level,
+    )
+    return
+  }
+
+  const [error] = attempt(() => res.setHeader(name, value))
+  if (error) {
+    logger.error(
+      `${ansis.red(`mock error at ${url}`)}\n${error}\n  at headers (${ansis.underline(filepath)})`,
+      level,
+    )
+  }
+}
+
 /**
  * Set response headers
  *
@@ -64,6 +140,13 @@ export async function provideResponseHeaders(
   const { headers, type = 'json' } = mock
   const filepath = (mock as any).__filepath__ as string
   const contentType = mime.contentType(type) || mime.contentType(mime.lookup(type) || '')
+  const context: HeaderContext = {
+    res,
+    logger,
+    url: req.url!.split('?')[0],
+    filepath,
+    level: mock.log,
+  }
 
   if (contentType) {
     res.setHeader('Content-Type', contentType)
@@ -73,7 +156,7 @@ export async function provideResponseHeaders(
   res.setHeader('X-Mock-Power-By', 'vite-plugin-mock-dev-server')
 
   if (filepath) {
-    res.setHeader('X-File-Path', filepath)
+    res.setHeader('X-File-Path', toHeaderValue(filepath))
   }
 
   if (!headers) {
@@ -85,12 +168,13 @@ export async function provideResponseHeaders(
   )
   if (error) {
     logger.error(
-      `${ansis.red(`mock error at ${req.url!.split('?')[0]}`)}\n${error}\n  at headers (${ansis.underline(filepath)})`,
+      `${ansis.red(`mock error at ${context.url}`)}\n${error}
+  at headers (${ansis.underline(filepath)})`,
       mock.log,
     )
     return
   }
-  objectKeys(data).forEach((key) => res.setHeader(`${key}`, data[key]!))
+  data && objectKeys(data).forEach((key) => setResponseHeader(context, `${key}`, data[key]!))
 }
 
 /**
@@ -114,23 +198,49 @@ export async function provideResponseCookies(
     return
   }
 
+  const filepath = (mock as any).__filepath__ as string
+  const url = req.url!.split('?')[0]
   const [error, data] = await attemptAsync(async () =>
     isFunction(cookies) ? cookies(req) : cookies,
   )
   if (error) {
-    const filepath = (mock as any).__filepath__ as string
     logger.error(
-      `${ansis.red(`mock error at ${req.url!.split('?')[0]}`)}\n${error}\n  at cookies (${ansis.underline(filepath)})`,
+      `${ansis.red(`mock error at ${url}`)}\n${error}\n  at cookies (${ansis.underline(filepath)})`,
       mock.log,
     )
     return
   }
-  data &&
-    objectKeys(data).forEach((key) => {
-      const cookie = data[key]
-      const [value, options] = isArray(cookie) ? cookie : [cookie]
-      res.setCookie(key, value, options)
-    })
+  if (!data) {
+    return
+  }
+
+  objectKeys(data).forEach((key) => {
+    // 非法 token 的 cookie 名称会被浏览器丢弃，这里跳过该 cookie 并输出错误日志
+    if (!isValidHttpToken(key)) {
+      logger.error(
+        `${ansis.red(`mock error at ${url}`)}
+  Invalid response cookie name: ${ansis.yellow(key)}
+  at cookies (${ansis.underline(filepath)})`,
+        mock.log,
+      )
+      return
+    }
+
+    const cookie = data[key]
+    const [value, options] = isArray(cookie) ? cookie : [cookie]
+    // `res.setCookie` 会对 cookie 的值以及选项（path、domain、sameSite 等）做校验，
+    // 非法的配置会抛出异常，这里跳过该 cookie 并输出错误日志，
+    // 避免影响其他 cookie 的输出以及本次响应
+    const [cookieError] = attempt(() => res.setCookie(key, value, options))
+    if (cookieError) {
+      logger.error(
+        `${ansis.red(`mock error at ${url}`)}\n${cookieError}
+  at cookies (${ansis.underline(filepath)})
+  cookie: ${ansis.yellow(key)}`,
+        mock.log,
+      )
+    }
+  })
 }
 
 /**
