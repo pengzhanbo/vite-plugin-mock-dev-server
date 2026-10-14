@@ -273,6 +273,8 @@ export default {
 }
 ```
 
+Replay is independent of recording: when `replay` is enabled, requests that miss all mock rules (including paths that have no mock rule at all) are still matched against existing recordings before falling back to the proxy. When `replay: true` is used together with `record.enabled: false`, the plugin prints a warning at startup to remind you that no new recordings will be generated.
+
 ## Recording Files
 
 ### Storage Structure
@@ -770,3 +772,17 @@ mockDevServerPlugin({
   },
 })
 ```
+
+`build.includeRecord` controls the copy independently of `record.enabled`, so existing recordings are also bundled when recording is disabled, which fits the replay-only workflow:
+
+```ts
+mockDevServerPlugin({
+  record: { enabled: false }, // Only replay existing recordings
+  replay: true,
+  build: {
+    includeRecord: true, // Still copy the existing recordings into the build output
+  },
+})
+```
+
+The generated mock server inherits the resolved `replay` option and keeps the recording directory layout (`record.dir`), so the bundled recordings are replayed when replay is enabled.

@@ -269,6 +269,8 @@ export default {
 }
 ```
 
+回放独立于录制：只要启用了 `replay`，未命中任何 mock 规则的请求（包括完全没有 mock 规则的路径）都会先尝试匹配已有录制数据，未命中时才回退到代理转发。当 `replay: true` 与 `record.enabled: false` 同时使用时，插件会在启动时输出一条警告，提示不会生成新的录制数据。
+
 ## 录制文件
 
 ### 存储结构
@@ -766,3 +768,17 @@ mockDevServerPlugin({
   },
 })
 ```
+
+`build.includeRecord` 独立控制录制文件的复制，与 `record.enabled` 无关，因此未开启录制时（仅回放场景）也能将已有录制文件打包到产物中：
+
+```ts
+mockDevServerPlugin({
+  record: { enabled: false }, // 仅回放已有录制数据
+  replay: true,
+  build: {
+    includeRecord: true, // 依然将已有录制文件复制到构建产物
+  },
+})
+```
+
+生成的 Mock 服务会继承解析后的 `replay` 配置，并保持录制目录结构（`record.dir`），在回放启用时使用打包的录制文件。

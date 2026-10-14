@@ -443,6 +443,8 @@ export default defineMock({
 
   是否开启请求回放功能。开启后，插件会根据记录的请求数据，模拟响应。
 
+  回放独立于录制，`replay: true` 可与 `record: { enabled: false }` 组合使用以复用已有的录制数据。录制关闭时，插件会在启动时输出警告。
+
 ### priority
 
 - **类型：** `MockMatchPriority`

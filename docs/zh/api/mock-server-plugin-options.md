@@ -227,7 +227,10 @@ interface ServerBuildOption {
   log?: LogLevel // 默认 'error'
   /**
    * 是否包含请求录制数据
-   * @default true
+   * 该选项独立于 `record.enabled`，未开启录制（仅回放）时
+   * 也会将已有录制文件打包到产物中
+   * @default 跟随解析后的 `replay` 配置，
+   * 未设置 `replay` 时取 `record.enabled`（并非固定为 true）
    */
   includeRecord?: boolean
 }
@@ -413,3 +416,5 @@ mockDevServerPlugin({
 - **描述**: 请求回放配置
 
 启用后，插件会在 Mock 数据不存在时，根据录制数据回放请求响应。
+
+回放独立于录制：`replay: true` 可以与 `record: { enabled: false }` 组合使用，以复用已有的录制数据。此时插件会在启动时输出警告，提示不会生成新的录制数据。

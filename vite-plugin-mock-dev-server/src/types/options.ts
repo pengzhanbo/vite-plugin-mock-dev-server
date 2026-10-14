@@ -40,10 +40,16 @@ export interface ServerBuildOption {
 
   /**
    * Whether to include record files in the build output
+   * It works independently of `record.enabled`, so existing recordings
+   * can be bundled even when recording is disabled (replay only).
    *
-   * 是否在构建输出中包含录制文件
+   * 是否在构建输出中包含录制文件。
+   * 该选项独立于 `record.enabled`，因此即使未开启录制功能（仅回放场景），
+   * 也可以将已有的录制文件打包到产物中。
    *
-   * @default true
+   * @default Follows the resolved `replay` option, which falls back to
+   * `record.enabled` when `replay` is not set.
+   * 默认跟随解析后的 `replay` 配置，未设置 `replay` 时取 `record.enabled`。
    */
   includeRecord?: boolean
 }
@@ -311,9 +317,12 @@ export interface MockServerPluginOptions {
   record?: boolean | RecordOptions
 
   /**
-   * Replay recorded requests, default enabled when record enabled
+   * Replay recorded requests, default enabled when record enabled.
+   * Replay works independently of recording, it can be enabled while recording is disabled,
+   * in which case only existing recordings will be replayed.
    *
-   * 回放已记录的请求，默认请求录制启用时自动启用回放功能
+   * 回放已记录的请求，默认请求录制启用时自动启用回放功能。
+   * 回放独立于录制，可在录制未启用时单独开启，此时仅回放已存在的录制数据。
    */
   replay?: boolean
 }

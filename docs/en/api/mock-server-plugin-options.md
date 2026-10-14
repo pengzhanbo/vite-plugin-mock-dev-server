@@ -223,6 +223,14 @@ interface ServerBuildOption {
   serverPort?: number // Default 8080
   dist?: string // Default 'dist/mockServer'
   log?: LogLevel // Default 'error'
+  /**
+   * Whether to include request recording files in the build output
+   * It works independently of `record.enabled`, so existing recordings
+   * are also bundled when recording is disabled (replay only).
+   * @default The resolved `replay` option, which falls back to
+   * `record.enabled` when `replay` is not set (not a fixed `true`)
+   */
+  includeRecord?: boolean
 }
 ```
 
@@ -409,3 +417,5 @@ replay
 - **Description**: Request replay configuration
 
 When enabled, the plugin will replay request responses based on recorded data when Mock data is not available.
+
+Replay works independently of recording: `replay: true` can be used together with `record: { enabled: false }` to reuse existing recordings. The plugin prints a warning at startup when recording is disabled, since no new recordings will be generated.

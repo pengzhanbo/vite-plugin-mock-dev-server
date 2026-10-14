@@ -7,8 +7,14 @@ import type { Connect } from 'vite'
 import type { Compiler } from '../src/compiler/index.js'
 import type { MockHttpItem, MockOptions } from '../src/types/index.js'
 import { Buffer } from 'node:buffer'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMockMiddleware } from '../src/mockHttp/middleware.js'
+import { replayRecordedRequest } from '../src/recorder/index.js'
+
+vi.mock('../src/recorder/index.js', () => ({
+  recordRequestWithRawReq: vi.fn(),
+  replayRecordedRequest: vi.fn(),
+}))
 
 /**
  * Create a mock compiler for testing
@@ -758,5 +764,98 @@ describe('mockMiddleware', () => {
     const data = JSON.parse(res.data)
     expect(Array.isArray(data)).toBe(true)
     expect(data).toHaveLength(2)
+  })
+})
+
+/**
+ * Test suite for replay without recording
+ *
+ * 仅回放（未开启录制）测试套件
+ */
+describe('mockMiddleware / replay', () => {
+  const mockLogger = {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  }
+
+  const recordedMock: MockHttpItem = {
+    url: '/api/replay-only',
+    status: 200,
+    headers: { 'content-type': 'application/json' },
+    body: Buffer.from(JSON.stringify({ ok: 1 })),
+    type: 'buffer',
+    __filepath__: 'mock/.recordings/api-replay-only.json',
+  } as MockHttpItem
+
+  beforeEach(() => {
+    vi.mocked(replayRecordedRequest).mockReset()
+  })
+
+  it('should replay recorded request when replay is enabled and record is disabled', async () => {
+    vi.mocked(replayRecordedRequest).mockResolvedValue(recordedMock)
+
+    const compiler = createMockCompiler({})
+    const middleware = createMockMiddleware(compiler, {
+      proxies: ['/api'],
+      logger: mockLogger as any,
+      cors: false,
+      record: { enabled: false },
+      replay: true,
+    } as any)
+
+    const req = createMockRequest({ url: '/api/replay-only' })
+    const res = createMockResponse()
+    const next = vi.fn()
+
+    await middleware(req, res, next)
+
+    expect(replayRecordedRequest).toHaveBeenCalledTimes(1)
+    expect(next).not.toHaveBeenCalled()
+    expect(res.statusCode).toBe(200)
+    expect(res.data.toString()).toBe(JSON.stringify({ ok: 1 }))
+  })
+
+  it('should passthrough when neither replay nor record is enabled', async () => {
+    const compiler = createMockCompiler({})
+    const middleware = createMockMiddleware(compiler, {
+      proxies: ['/api'],
+      logger: mockLogger as any,
+      cors: false,
+      record: { enabled: false },
+      replay: false,
+    } as any)
+
+    const req = createMockRequest({ url: '/api/replay-only' })
+    const res = createMockResponse()
+    const next = vi.fn()
+
+    await middleware(req, res, next)
+
+    expect(replayRecordedRequest).not.toHaveBeenCalled()
+    expect(next).toHaveBeenCalledTimes(1)
+  })
+
+  it('should passthrough when replay is enabled but no recording matched', async () => {
+    vi.mocked(replayRecordedRequest).mockResolvedValue(undefined)
+
+    const compiler = createMockCompiler({})
+    const middleware = createMockMiddleware(compiler, {
+      proxies: ['/api'],
+      logger: mockLogger as any,
+      cors: false,
+      record: { enabled: false },
+      replay: true,
+    } as any)
+
+    const req = createMockRequest({ url: '/api/replay-only' })
+    const res = createMockResponse()
+    const next = vi.fn()
+
+    await middleware(req, res, next)
+
+    expect(replayRecordedRequest).toHaveBeenCalledTimes(1)
+    expect(next).toHaveBeenCalledTimes(1)
   })
 })

@@ -442,6 +442,8 @@ export default defineMock({
 
   Whether to enable the request playback feature. Once enabled, the plugin will simulate responses based on the recorded request data.
 
+  Replay works independently of recording, `replay: true` can be used with `record: { enabled: false }` to reuse existing recordings. A warning is printed at startup when recording is disabled.
+
 ### priority
 
 - **Type:** `MockMatchPriority`
