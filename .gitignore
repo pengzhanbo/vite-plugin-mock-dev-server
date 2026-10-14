@@ -11,5 +11,22 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# AI Agent CLI Local Artifacts
+.agent/
+.agents/
+
 .claude/
 !.claude/skills/
+!.claude/rules/
+!.claude/hooks/
+!.claude/agents/
+
+.cline/
+.cursor/
+.gemini/
+.codex/
+.workbuddy/
+.trae/
+.windsurf/
+.opencode/
+.qoder/
