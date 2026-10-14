@@ -145,20 +145,40 @@ export function ensureProxies(serverProxy: ResolvedConfig['server']['proxy'] = {
   const wsProxies: string[] = []
   Object.keys(serverProxy).forEach((key) => {
     const value = serverProxy[key]
-    if (
-      typeof value === 'string' ||
-      (!value.ws &&
-        // oxlint-disable-next-line typescript/no-base-to-string
-        !value.target?.toString().startsWith('ws:') &&
-        // oxlint-disable-next-line typescript/no-base-to-string
-        !value.target?.toString().startsWith('wss:'))
-    ) {
-      httpProxies.push(key)
-    } else {
+
+    const isWsProxy =
+      typeof value === 'string'
+        ? isWebsocketProxyTarget(value)
+        : Boolean(value.ws) || isWebsocketProxyTarget(value.target)
+    if (isWsProxy) {
       wsProxies.push(key)
+    } else {
+      httpProxies.push(key)
     }
   })
   return { httpProxies, wsProxies }
+}
+
+/**
+ * Check whether the proxy target points to a websocket server
+ *
+ * 判断代理目标是否指向 websocket 服务
+ *
+ * @param target - Proxy target / 代理目标
+ * @returns Whether it points to a websocket server / 是否指向 websocket 服务
+ */
+export function isWebsocketProxyTarget(target: unknown): boolean {
+  if (typeof target === 'string') {
+    return /^wss?:\/\//i.test(target)
+  }
+  if (target instanceof URL) {
+    return /^wss?:$/.test(target.protocol)
+  }
+  if (typeof target === 'object' && target != null && 'protocol' in target) {
+    const { protocol } = target as { protocol?: unknown }
+    return typeof protocol === 'string' && /^wss?:$/.test(protocol)
+  }
+  return false
 }
 
 /**

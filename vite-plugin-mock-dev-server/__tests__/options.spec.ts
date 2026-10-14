@@ -51,6 +51,28 @@ describe('ensureProxies', () => {
     expect(result.wsProxies).toEqual([])
   })
 
+  it('should classify string websocket proxy targets as ws proxies', () => {
+    const proxy = {
+      '/api': 'http://localhost:3000',
+      '/socket.io': 'ws://localhost:3000',
+      '/secure-socket': 'wss://localhost:3000',
+    }
+    const result = ensureProxies(proxy)
+    expect(result.httpProxies).toEqual(['/api'])
+    expect(result.wsProxies).toEqual(['/socket.io', '/secure-socket'])
+  })
+
+  it('should classify URL websocket proxy targets as ws proxies', () => {
+    const proxy = {
+      '/api': { target: new URL('http://localhost:3000') },
+      '/ws': { target: new URL('ws://localhost:3000') },
+      '/wss': { target: new URL('wss://localhost:3000') },
+    }
+    const result = ensureProxies(proxy)
+    expect(result.httpProxies).toEqual(['/api'])
+    expect(result.wsProxies).toEqual(['/ws', '/wss'])
+  })
+
   it('should handle object proxy targets', () => {
     const proxy = {
       '/api': { target: 'http://localhost:3000' },
