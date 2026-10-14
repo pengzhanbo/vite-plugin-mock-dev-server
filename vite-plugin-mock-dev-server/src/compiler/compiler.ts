@@ -220,7 +220,7 @@ export class Compiler extends EventEmitter {
    * 从模块缓存更新 Mock 数据
    */
   private updateMockData(): void {
-    this._mockData = processMockData(this.moduleCache)
+    this._mockData = processMockData(this.moduleCache, this.options.logger)
   }
 
   /**

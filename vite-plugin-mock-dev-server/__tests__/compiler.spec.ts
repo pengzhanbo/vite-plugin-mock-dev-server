@@ -186,6 +186,67 @@ describe('processMockData', () => {
     expect(result['/ws/connect'][0]).toHaveProperty('ws', true)
   })
 
+  it('should drop mocks with invalid url patterns', () => {
+    const logger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    }
+    const mockList = new Map<string, MockOptions>([
+      [
+        'file1.mock.ts',
+        [
+          { url: '/api/users/:id*', method: 'GET', body: {} },
+          { url: '/api/posts(', method: 'GET', body: {} },
+          { url: '/api/users/:id', method: 'GET', body: {} },
+          { url: '/api/files/*path', method: 'GET', body: {} },
+          { url: '/ws/connect/:id*', ws: true, setup: vi.fn() },
+        ] as MockOptions,
+      ],
+    ])
+
+    const result = processMockData(mockList, logger)
+
+    expect(result).not.toHaveProperty('/api/users/:id*')
+    expect(result).not.toHaveProperty('/api/posts(')
+    expect(result).not.toHaveProperty('/ws/connect/:id*')
+    expect(result).toHaveProperty('/api/users/:id')
+    expect(result).toHaveProperty('/api/files/*path')
+    expect(logger.error).toHaveBeenCalledTimes(3)
+    expect(logger.error.mock.calls[0][0]).toContain('/api/users/:id*')
+  })
+
+  it('should still drop invalid url patterns on repeated hot updates', () => {
+    const logger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    }
+    const mockList = new Map<string, MockOptions>([
+      [
+        'file1.mock.ts',
+        [
+          { url: '/api/users/:id*', method: 'GET', body: {} },
+          { url: '/api/users/:id', method: 'GET', body: {} },
+        ] as MockOptions,
+      ],
+    ])
+
+    // Simulate two hot updates with the same patterns, the cached validation
+    // result must be reused without dropping the error
+    // 模拟两次使用相同模式的热更新，应复用缓存的校验结果且不丢失错误信息
+    const first = processMockData(mockList, logger)
+    const second = processMockData(mockList, logger)
+
+    expect(first).not.toHaveProperty('/api/users/:id*')
+    expect(second).not.toHaveProperty('/api/users/:id*')
+    expect(second).toHaveProperty('/api/users/:id')
+    expect(logger.error).toHaveBeenCalledTimes(2)
+    expect(logger.error.mock.calls[1][0]).toContain('/api/users/:id*')
+  })
+
   it('should handle empty input', () => {
     const result = processMockData(new Map())
     expect(result).toEqual({})

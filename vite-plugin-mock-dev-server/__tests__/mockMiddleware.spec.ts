@@ -765,6 +765,84 @@ describe('mockMiddleware', () => {
     expect(Array.isArray(data)).toBe(true)
     expect(data).toHaveLength(2)
   })
+
+  it('should passthrough when the mock url pattern is invalid', async () => {
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }
+    // An invalid pattern (such as the legacy `:id*` syntax) would throw when
+    // the rules are matched, the middleware should be degraded to `next()`
+    // 非法模式（如旧版本的 `:id*` 写法）在规则匹配时会抛出异常，
+    // 中间件应该降级为 `next()`
+    const mockItem: MockHttpItem = {
+      url: '/api/:id*',
+      method: 'GET',
+      body: { ok: 1 },
+      __filepath__: 'test.mock.ts',
+    } as MockHttpItem
+
+    const compiler = createMockCompiler({
+      '/api/:id*': [mockItem],
+    })
+
+    const middleware = createMockMiddleware(compiler, {
+      proxies: ['/api'],
+      logger: logger as any,
+      cors: false,
+      record: { enabled: false },
+      replay: false,
+    } as any)
+
+    const req = createMockRequest({ url: '/api/123' })
+    const res = createMockResponse()
+    const next = vi.fn()
+
+    await middleware(req, res, next)
+
+    expect(logger.error).toHaveBeenCalledTimes(1)
+    expect(next).toHaveBeenCalledTimes(1)
+    expect(next).toHaveBeenCalledWith()
+    expect(res.ended).toBe(false)
+  })
+
+  it('should not reject when an unexpected error occurs', async () => {
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }
+    const mockItem: MockHttpItem = {
+      url: '/api/error',
+      method: 'GET',
+      body: { ok: 1 },
+      __filepath__: 'test.mock.ts',
+    } as MockHttpItem
+
+    const compiler = createMockCompiler({
+      '/api/error': [mockItem],
+    })
+
+    const middleware = createMockMiddleware(compiler, {
+      proxies: ['/api'],
+      logger: logger as any,
+      cors: false,
+      record: { enabled: false },
+      replay: false,
+    } as any)
+
+    const req = createMockRequest({ url: '/api/error' })
+    const res = createMockResponse()
+    // Simulate an unexpected error, such as an invalid response header name
+    // 模拟非预期异常，如非法的响应头名称
+    const error = new TypeError('Header name must be a valid HTTP token')
+    res.setHeader = vi.fn(() => {
+      throw error
+    })
+    const next = vi.fn()
+
+    // The middleware must never reject, otherwise connect would not be able to
+    // catch it and the dev server process may be terminated
+    // 中间件不应抛出异常，否则 connect 无法捕获，可能导致开发服务进程被终止
+    await expect(middleware(req, res, next)).resolves.toBeUndefined()
+
+    expect(logger.error).toHaveBeenCalledTimes(1)
+    expect(next).toHaveBeenCalledTimes(1)
+    expect(next).toHaveBeenCalledWith(error)
+  })
 })
 
 /**

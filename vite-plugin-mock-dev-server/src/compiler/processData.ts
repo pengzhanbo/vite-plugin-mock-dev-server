@@ -1,3 +1,4 @@
+import type { Logger } from '../core/logger.js'
 import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types/index.js'
 import type { MockRawData } from './types.js'
 import {
@@ -5,10 +6,13 @@ import {
   isEmptyObject,
   isFunction,
   isPlainObject,
+  LRUCache,
   objectKeys,
   sortBy,
   toArray,
 } from '@pengzhanbo/utils'
+import ansis from 'ansis'
+import { parse } from 'path-to-regexp'
 import { isObjectSubset, urlParse } from '../utils/index.js'
 
 export function processRawData(
@@ -34,10 +38,45 @@ export function processRawData(
   return res
 }
 
+const patternErrorCache = new LRUCache<string, undefined | string>({ maxSize: 1000 })
+
+/**
+ * Validate the path pattern of a mock url
+ *
+ * 校验 mock url 的路径模式是否合法
+ *
+ * Mock url is parsed by `path-to-regexp`, an invalid pattern (such as the
+ * legacy `:id?` / `:id*` syntax) would throw when the request is matched.
+ * Such mocks should be dropped during compilation instead of breaking the
+ * dev server at request time.
+ *
+ * mock url 由 `path-to-regexp` 解析，非法模式（如旧版本的 `:id?` / `:id*` 写法）
+ * 会在请求匹配阶段抛出异常，这类 mock 应该在编译阶段就被丢弃，
+ * 而不是在请求期导致开发服务崩溃。
+ *
+ * @param pattern - Path pattern to validate / 需要校验的路径模式
+ * @returns Error message when the pattern is invalid, otherwise `undefined` / 模式非法时返回错误信息，否则返回 `undefined`
+ */
+function getPatternError(pattern: string): undefined | string {
+  if (patternErrorCache.has(pattern)) {
+    return patternErrorCache.get(pattern)
+  }
+
+  let error: undefined | string
+  try {
+    parse(pattern)
+  } catch (e) {
+    error = (e as Error).message
+  }
+  patternErrorCache.set(pattern, error)
+  return error
+}
+
 export function processMockData(
   mockList:
     | Map<string, MockHttpItem | MockWebsocketItem | MockOptions>
     | (MockHttpItem | MockWebsocketItem | MockOptions)[],
+  logger?: Logger,
 ): Record<string, MockOptions> {
   const list: MockOptions = []
   for (const [, handle] of mockList.entries()) {
@@ -52,6 +91,14 @@ export function processMockData(
     .filter((mock) => isPlainObject(mock) && mock.enabled !== false && mock.url)
     .forEach((mock) => {
       const { pathname, query } = urlParse(mock.url)
+      const patternError = getPatternError(pathname)
+      // 跳过非法 url 模式的 mock，避免在请求匹配阶段抛出异常
+      if (patternError) {
+        logger?.error(
+          `${ansis.red('Invalid mock url pattern')} ${ansis.yellow(mock.url)}\n  ${patternError}\n  at (${ansis.underline.gray((mock as any).__filepath__ ?? 'unknown')})`,
+        )
+        return
+      }
       const res = (mocks[pathname] ??= [])
 
       const current = { ...mock, url: pathname }
