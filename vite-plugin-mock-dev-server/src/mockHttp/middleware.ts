@@ -97,9 +97,10 @@ export function createMockMiddleware(
     // 对满足匹配规则的配置进行优先级排序
     const mockUrls = matchingWeight(Object.keys(mockData), pathname, priority)
 
-    // 如果没有匹配到 mock 数据，且录制功能未启用，则直接跳过
-    // 由于录制功能还需要额外记录请求，所以不能直接在这里跳过
-    if (mockUrls.length === 0 && !record.enabled) {
+    // 如果没有匹配到 mock 数据，且录制、回放功能均未启用，则直接跳过
+    // 录制功能需要额外记录请求，回放功能需要从录制记录中查找请求，
+    // 因此二者任一启用时都不能直接在这里跳过
+    if (mockUrls.length === 0 && !record.enabled && !replay) {
       return next()
     }
 

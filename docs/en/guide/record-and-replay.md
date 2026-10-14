@@ -273,6 +273,8 @@ export default {
 }
 ```
 
+Replay is independent of recording: when `replay` is enabled, requests that miss all mock rules (including paths that have no mock rule at all) are still matched against existing recordings before falling back to the proxy. When `replay: true` is used together with `record.enabled: false`, the plugin prints a warning at startup to remind you that no new recordings will be generated.
+
 ## Recording Files
 
 ### Storage Structure

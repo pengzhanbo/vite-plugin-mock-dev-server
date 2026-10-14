@@ -409,3 +409,5 @@ replay
 - **Description**: Request replay configuration
 
 When enabled, the plugin will replay request responses based on recorded data when Mock data is not available.
+
+Replay works independently of recording: `replay: true` can be used together with `record: { enabled: false }` to reuse existing recordings. The plugin prints a warning at startup when recording is disabled, since no new recordings will be generated.

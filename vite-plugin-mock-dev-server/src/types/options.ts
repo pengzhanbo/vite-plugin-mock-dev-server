@@ -311,9 +311,12 @@ export interface MockServerPluginOptions {
   record?: boolean | RecordOptions
 
   /**
-   * Replay recorded requests, default enabled when record enabled
+   * Replay recorded requests, default enabled when record enabled.
+   * Replay works independently of recording, it can be enabled while recording is disabled,
+   * in which case only existing recordings will be replayed.
    *
-   * 回放已记录的请求，默认请求录制启用时自动启用回放功能
+   * 回放已记录的请求，默认请求录制启用时自动启用回放功能。
+   * 回放独立于录制，可在录制未启用时单独开启，此时仅回放已存在的录制数据。
    */
   replay?: boolean
 }

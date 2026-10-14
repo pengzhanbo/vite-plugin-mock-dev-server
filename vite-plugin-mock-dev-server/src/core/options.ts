@@ -94,6 +94,14 @@ export function resolvePluginOptions(
   }
 
   const resolvedRecord = resolveRecordOptions(cwd, dir, record)
+  // replay 默认跟随 record，但允许在 record 关闭时单独开启，用于仅回放已有录制数据的场景
+  const resolvedReplay = replay ?? resolvedRecord.enabled
+
+  if (replay === true && !resolvedRecord.enabled) {
+    logger.warn(
+      'The replay option is enabled while the record option is disabled, only existing recordings will be replayed.',
+    )
+  }
 
   return {
     enabled: true,
@@ -114,7 +122,7 @@ export function resolvePluginOptions(
           serverPort: 8080,
           dist: 'mockServer',
           log: 'error',
-          includeRecord: replay ?? resolvedRecord.enabled,
+          includeRecord: resolvedReplay,
           ...(typeof build === 'object' ? build : {}),
         }
       : false,
@@ -125,7 +133,7 @@ export function resolvePluginOptions(
     alias,
     define: viteDefine(config),
     record: resolvedRecord,
-    replay: replay ?? resolvedRecord.enabled,
+    replay: resolvedReplay,
   }
 }
 
