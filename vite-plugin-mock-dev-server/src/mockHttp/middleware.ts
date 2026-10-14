@@ -6,7 +6,15 @@ import type { Connect } from 'vite'
 import type { Compiler } from '../compiler/index.js'
 import type { Logger, ResolvedMockServerPluginOptions } from '../core/index.js'
 import type { ExtraRequest, MockHttpItem, MockRequest, MockResponse } from '../types/index.js'
-import { attemptAsync, isFunction, isNil, omit, timestamp, toArray } from '@pengzhanbo/utils'
+import {
+  attempt,
+  attemptAsync,
+  isFunction,
+  isNil,
+  omit,
+  timestamp,
+  toArray,
+} from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import Cookies from 'cookies'
 import { recordRequestWithRawReq, replayRecordedRequest } from '../recorder/index.js'
@@ -80,7 +88,11 @@ export function createMockMiddleware(
 ) => Promise<void> {
   const cors = createCors(corsOptions)
 
-  return async function mockMiddleware(req, res, next) {
+  async function handleMockRequest(
+    req: Connect.IncomingMessage,
+    res: ServerResponse,
+    next: Connect.NextFunction,
+  ): Promise<void> {
     const startTime = timestamp()
     const { query, pathname } = urlParse(req.url!)
 
@@ -95,7 +107,18 @@ export function createMockMiddleware(
 
     const mockData = compiler.mockData
     // 对满足匹配规则的配置进行优先级排序
-    const mockUrls = matchingWeight(Object.keys(mockData), pathname, priority)
+    // mock 数据或优先级配置中若存在非法 url 模式，解析时会抛出异常，
+    // 此处降级为 `next()`，将请求交给后续中间件处理
+    const [weightError, mockUrls] = attempt(
+      matchingWeight,
+      Object.keys(mockData),
+      pathname,
+      priority,
+    )
+    if (weightError) {
+      logger.error(`${ansis.red(`Invalid mock url pattern at ${pathname}`)}\n  ${weightError}`)
+      return next()
+    }
 
     // 如果没有匹配到 mock 数据，且录制、回放功能均未启用，则直接跳过
     // 录制功能需要额外记录请求，回放功能需要从录制记录中查找请求，
@@ -253,5 +276,24 @@ export function createMockMiddleware(
     }
 
     res.end('')
+  }
+
+  return async function mockMiddleware(req, res, next) {
+    try {
+      await handleMockRequest(req, res, next)
+    } catch (error) {
+      logger.error(
+        `${ansis.red(`mock middleware error at ${ansis.underline(req.url!)}`)}\n  ${error}\n  at ${ansis.underline.gray('vite-plugin-mock-dev-server')}`,
+      )
+      if (res.writableEnded) {
+        return
+      }
+      // 响应已经开始发送，无法再输出错误页，直接结束本次响应
+      if (res.headersSent) {
+        res.end()
+        return
+      }
+      next(error)
+    }
   }
 }
