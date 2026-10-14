@@ -176,14 +176,21 @@ export function mockWebSocket(
   // 检测 ws 相关的 mock 文件更新
   // 如果当前的 ws 配置已建立 wss 连接，则重启该 wss 连接
   compiler.on?.('mock:update-end', (filepath: string) => {
-    if (!hmrMap.has(filepath)) {
-      return
-    }
     const mockUrlList = hmrMap.get(filepath)
     if (!mockUrlList) {
       return
     }
-    for (const mockUrl of mockUrlList.values()) {
+    for (const mockUrl of mockUrlList) {
+      if (!compiler.mockData[mockUrl]) {
+        mockUrlList.delete(mockUrl)
+      }
+    }
+    if (mockUrlList.size === 0) {
+      hmrMap.delete(filepath)
+      return
+    }
+
+    for (const mockUrl of mockUrlList) {
       for (const mock of compiler.mockData[mockUrl]) {
         if (!mock.ws || (mock as any).__filepath__ !== filepath) {
           continue
@@ -195,6 +202,12 @@ export function mockWebSocket(
         return
       }
     }
+  })
+
+  // The mock file has been deleted, remove its hot-update record
+  // mock 文件已被删除，移除其热更新记录
+  compiler.on?.('mock:unlink', (filepath: string) => {
+    hmrMap.delete(filepath)
   })
 
   const effectActiveScene = toArray(activeScene)

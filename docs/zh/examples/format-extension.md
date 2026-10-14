@@ -59,6 +59,7 @@ export default defineMock([
 ::: code-group
 <<< @/../example/mock/file-extension/api.mock.json
 :::
+
 ::: code-group
 <<< @/../example/mock/file-extension/api.mock.json5
 :::

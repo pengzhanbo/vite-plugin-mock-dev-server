@@ -59,6 +59,7 @@ Write mock files using JSON/JSON5 format
 ::: code-group
 <<< @/../example/mock/file-extension/api.mock.json
 :::
+
 ::: code-group
 <<< @/../example/mock/file-extension/api.mock.json5
 :::

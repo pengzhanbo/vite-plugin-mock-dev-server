@@ -43,6 +43,7 @@ The data encapsulated by `defineMockData` provides two different styles of data 
 - `[getter, setter] = posts`: Deconstruct to a tuple containing `setter/getter` methods.
 
 `*.mock.ts` (`.value`)
+
 ::: code-group
 
 ```ts [post-list.mock.ts]
@@ -72,6 +73,7 @@ export default defineMock({
 :::
 
 `*.mock.ts` (`[getter, setter]`)
+
 ::: code-group
 
 ```ts [post-list.mock.ts]

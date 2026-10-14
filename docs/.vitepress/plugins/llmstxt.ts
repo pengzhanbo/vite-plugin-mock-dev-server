@@ -13,7 +13,7 @@ export const llmsPlugin: () => VitepressPlugin = definePlugin(() => ({
     },
   },
   vite: {
-    plugins: [isProd && llmstxt()],
+    plugins: [isProd && llmstxt()] as any[],
     ssr: {
       noExternal: ['vitepress-plugin-llms'],
     },
