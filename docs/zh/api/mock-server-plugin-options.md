@@ -227,6 +227,8 @@ interface ServerBuildOption {
   log?: LogLevel // 默认 'error'
   /**
    * 是否包含请求录制数据
+   * 该选项独立于 `record.enabled`，未开启录制（仅回放）时
+   * 也会将已有录制文件打包到产物中
    * @default true
    */
   includeRecord?: boolean

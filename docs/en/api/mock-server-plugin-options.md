@@ -223,6 +223,13 @@ interface ServerBuildOption {
   serverPort?: number // Default 8080
   dist?: string // Default 'dist/mockServer'
   log?: LogLevel // Default 'error'
+  /**
+   * Whether to include request recording files in the build output
+   * It works independently of `record.enabled`, so existing recordings
+   * are also bundled when recording is disabled (replay only).
+   * @default true
+   */
+  includeRecord?: boolean
 }
 ```
 

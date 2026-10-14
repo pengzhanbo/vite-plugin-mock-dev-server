@@ -55,7 +55,9 @@ export async function generateMockServer(
   ]
 
   // 构建录制文件，复制到输出目录
-  if (options.record.enabled && buildOptions.includeRecord) {
+  // 由 `includeRecord` 独立控制：即使未开启录制功能（`record.enabled` 为 `false`），
+  // 只要 `includeRecord` 为 `true`，已有的录制文件依然会被打包到产物中（用于仅回放的场景）。
+  if (buildOptions.includeRecord) {
     const files = await glob(path.join(options.record.dir, '**/*.json'), {
       cwd: options.cwd,
       dot: true,

@@ -40,8 +40,12 @@ export interface ServerBuildOption {
 
   /**
    * Whether to include record files in the build output
+   * It works independently of `record.enabled`, so existing recordings
+   * can be bundled even when recording is disabled (replay only).
    *
-   * 是否在构建输出中包含录制文件
+   * 是否在构建输出中包含录制文件。
+   * 该选项独立于 `record.enabled`，因此即使未开启录制功能（仅回放场景），
+   * 也可以将已有的录制文件打包到产物中。
    *
    * @default true
    */

@@ -768,3 +768,17 @@ mockDevServerPlugin({
   },
 })
 ```
+
+`build.includeRecord` 独立控制录制文件的复制，与 `record.enabled` 无关，因此未开启录制时（仅回放场景）也能将已有录制文件打包到产物中：
+
+```ts
+mockDevServerPlugin({
+  record: { enabled: false }, // 仅回放已有录制数据
+  replay: true,
+  build: {
+    includeRecord: true, // 依然将已有录制文件复制到构建产物
+  },
+})
+```
+
+生成的 Mock 服务会继承解析后的 `replay` 配置，并保持录制目录结构（`record.dir`），在回放启用时使用打包的录制文件。

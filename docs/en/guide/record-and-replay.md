@@ -772,3 +772,17 @@ mockDevServerPlugin({
   },
 })
 ```
+
+`build.includeRecord` controls the copy independently of `record.enabled`, so existing recordings are also bundled when recording is disabled, which fits the replay-only workflow:
+
+```ts
+mockDevServerPlugin({
+  record: { enabled: false }, // Only replay existing recordings
+  replay: true,
+  build: {
+    includeRecord: true, // Still copy the existing recordings into the build output
+  },
+})
+```
+
+The generated mock server inherits the resolved `replay` option and keeps the recording directory layout (`record.dir`), so the bundled recordings are replayed when replay is enabled.
