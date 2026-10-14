@@ -47,7 +47,9 @@ export interface ServerBuildOption {
    * 该选项独立于 `record.enabled`，因此即使未开启录制功能（仅回放场景），
    * 也可以将已有的录制文件打包到产物中。
    *
-   * @default true
+   * @default Follows the resolved `replay` option, which falls back to
+   * `record.enabled` when `replay` is not set.
+   * 默认跟随解析后的 `replay` 配置，未设置 `replay` 时取 `record.enabled`。
    */
   includeRecord?: boolean
 }

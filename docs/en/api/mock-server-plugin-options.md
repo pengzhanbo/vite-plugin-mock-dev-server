@@ -227,7 +227,8 @@ interface ServerBuildOption {
    * Whether to include request recording files in the build output
    * It works independently of `record.enabled`, so existing recordings
    * are also bundled when recording is disabled (replay only).
-   * @default true
+   * @default The resolved `replay` option, which falls back to
+   * `record.enabled` when `replay` is not set (not a fixed `true`)
    */
   includeRecord?: boolean
 }
