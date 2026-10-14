@@ -61,6 +61,7 @@ export default defineMock([
 :::
 
 而如果对于复杂场景，我们可能需要拆解为不同的文件来进行管理时：
+
 ::: code-group
 
 ```ts [posts/list.mock.ts]
