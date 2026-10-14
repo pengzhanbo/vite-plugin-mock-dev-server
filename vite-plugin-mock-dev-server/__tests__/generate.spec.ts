@@ -18,6 +18,8 @@ vi.mock('../src/compiler/index.js', () => ({
 interface GenerateCase {
   recordEnabled: boolean
   includeRecord: boolean
+  activeScene?: string[]
+  formidableOptions?: Record<string, unknown>
 }
 
 /**
@@ -41,7 +43,7 @@ function createOptions(cwd: string, options: GenerateCase): ResolvedMockServerPl
     cors: false,
     cookiesOptions: {},
     log: 'error',
-    formidableOptions: { multiples: true },
+    formidableOptions: { multiples: true, ...options.formidableOptions },
     bodyParserOptions: {},
     priority: {},
     build: {
@@ -52,7 +54,7 @@ function createOptions(cwd: string, options: GenerateCase): ResolvedMockServerPl
     },
     proxies: ['/api'],
     wsProxies: [],
-    activeScene: [],
+    activeScene: options.activeScene ?? [],
     logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
     alias: [],
     define: {},
@@ -113,5 +115,38 @@ describe('generateMockServer', () => {
 
     expect(files).not.toContain(path.join('mockServer', 'mock/.recordings/api-users.json'))
     expect(files).toContain(path.join('mockServer', 'mock-data.js'))
+  })
+
+  it('should pass activeScene and serializable formidableOptions to the server entry', async () => {
+    const options = createOptions(cwd, {
+      recordEnabled: false,
+      includeRecord: false,
+      activeScene: ['dev'],
+      formidableOptions: { maxFileSize: 1024, filter: () => true },
+    })
+    const emitFile = vi.fn()
+
+    await generateMockServer({ emitFile } as any, options)
+
+    const assets = emitFile.mock.calls.map(([asset]) => asset)
+    const entry = assets.find((asset) => asset.fileName === path.join('mockServer', 'index.js'))
+
+    expect(entry.source).toContain('const activeScene = ["dev"];')
+    expect(entry.source).toContain(
+      'const formidableOptions = {"multiples":true,"maxFileSize":1024};',
+    )
+    expect(entry.source).toContain(
+      'mockWebSocket(compiler, server, { wsProxies, cookiesOptions, logger, activeScene });',
+    )
+    expect(entry.source).toContain(`  replay: false,
+  activeScene,
+}));`)
+
+    // Non-serializable options are ignored with a build-time warning
+    // 无法序列化的配置项会被忽略，并在构建期输出警告
+    const warn = vi.mocked(options.logger.warn)
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0][0]).toContain('filter')
+    expect(entry.source).not.toContain('"filter"')
   })
 })
