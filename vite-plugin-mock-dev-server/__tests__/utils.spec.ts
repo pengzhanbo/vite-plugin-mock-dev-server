@@ -8,6 +8,7 @@ import {
   createMatcher,
   doesProxyContextMatchUrl,
   isPathMatch,
+  matchScene,
   urlParse,
 } from '../src/utils/index.js'
 
@@ -141,5 +142,36 @@ describe('doesProxyContextMatchUrl', () => {
   it('should match exact regex', () => {
     expect(doesProxyContextMatchUrl('^/api/users$', '/api/users')).toBe(true)
     expect(doesProxyContextMatchUrl('^/api/users$', '/api/users/123')).toBe(false)
+  })
+})
+
+/**
+ * Test suite for matchScene function
+ *
+ * matchScene 函数测试套件
+ */
+describe('matchScene', () => {
+  it('should match mocks without scene', () => {
+    expect(matchScene(['dev'], undefined)).toBe(true)
+    expect(matchScene([], undefined)).toBe(true)
+  })
+
+  it('should not match mocks with scene when no scene is activated', () => {
+    expect(matchScene([], 'dev')).toBe(false)
+    expect(matchScene([], ['dev', 'test'])).toBe(false)
+  })
+
+  it('should match mocks with any activated scene', () => {
+    expect(matchScene(['dev'], 'dev')).toBe(true)
+    expect(matchScene(['dev'], ['prod', 'dev'])).toBe(true)
+    expect(matchScene(['dev'], 'prod')).toBe(false)
+  })
+
+  it('should default to an empty scene', () => {
+    // e.g. the generated standalone mock server may not pass `activeScene`
+    // 例如构建产物中的独立 mock server 可能不会传递 `activeScene`
+    expect(() => matchScene(undefined as unknown as string[], 'dev')).not.toThrow()
+    expect(matchScene(undefined as unknown as string[], 'dev')).toBe(false)
+    expect(matchScene(undefined as unknown as string[], undefined)).toBe(true)
   })
 })
