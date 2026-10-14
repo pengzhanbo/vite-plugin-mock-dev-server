@@ -824,14 +824,14 @@ describe('mockMiddleware', () => {
       replay: false,
     } as any)
 
-    const req = createMockRequest({ url: '/api/error' })
     const res = createMockResponse()
-    // Simulate an unexpected error, such as an invalid response header name
-    // 模拟非预期异常，如非法的响应头名称
-    const error = new TypeError('Header name must be a valid HTTP token')
-    res.setHeader = vi.fn(() => {
-      throw error
-    })
+    // Simulate an unexpected error, such as a request that cannot be read as a stream
+    // 模拟非预期异常，如无法按流读取的请求对象
+    const req = {
+      url: '/api/error',
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'content-length': '2' },
+    } as unknown as Connect.IncomingMessage
     const next = vi.fn()
 
     // The middleware must never reject, otherwise connect would not be able to
@@ -841,7 +841,7 @@ describe('mockMiddleware', () => {
 
     expect(logger.error).toHaveBeenCalledTimes(1)
     expect(next).toHaveBeenCalledTimes(1)
-    expect(next).toHaveBeenCalledWith(error)
+    expect(next.mock.calls[0][0]).toBeInstanceOf(TypeError)
   })
 })
 

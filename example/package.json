@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@types/mockjs": "catalog:dev",
+    "mime-types": "catalog:prod",
     "mockjs": "catalog:dev",
     "vite": "catalog:dev",
     "vite-plugin-mock-dev-server": "workspace:*"

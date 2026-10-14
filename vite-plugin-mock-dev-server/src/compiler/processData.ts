@@ -19,6 +19,10 @@ export function processRawData(
   raw: MockRawData,
   __filepath__: string,
 ): MockOptions | MockHttpItem | MockWebsocketItem {
+  if (!raw) {
+    return []
+  }
+
   let res: MockOptions | MockHttpItem | MockWebsocketItem
   if (isArray(raw)) {
     res = raw.map((item) => ({ ...item, __filepath__ }))
