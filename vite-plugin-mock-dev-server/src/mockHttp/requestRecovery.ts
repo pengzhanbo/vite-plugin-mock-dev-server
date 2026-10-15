@@ -16,7 +16,8 @@
 
 import type { Buffer } from 'node:buffer'
 import type { Connect, UserConfig } from 'vite'
-import { isString, objectKeys } from '@pengzhanbo/utils'
+import type { ProxySetup } from '../utils/index.js'
+import { setupProxyConfigure } from '../utils/index.js'
 
 const cache = new WeakMap<Connect.IncomingMessage, Buffer>()
 
@@ -35,6 +36,33 @@ export function cacheRequestBody(req: Connect.IncomingMessage, body?: Buffer): v
 }
 
 /**
+ * Proxy setup that restores the consumed request stream via http-proxy's `proxyReq` event.
+ *
+ * 通过 http-proxy 的 `proxyReq` 事件，重新写入被消费的请求流。
+ *
+ * @param proxy - http-proxy instance / http-proxy 实例
+ */
+export const requestRecoverySetup: ProxySetup = (proxy) => {
+  proxy.on('proxyReq', (proxyReq, req) => {
+    const buffer = cache.get(req)
+    if (buffer) {
+      cache.delete(req)
+      /**
+       * Using http-proxy's agent configuration will write to the proxy request stream in advance
+       * https://github.com/http-party/node-http-proxy/issues/1287
+       */
+      if (!proxyReq.headersSent) {
+        proxyReq.setHeader('Content-Length', buffer.byteLength)
+      }
+
+      if (!proxyReq.writableEnded) {
+        proxyReq.write(buffer)
+      }
+    }
+  })
+}
+
+/**
  * Recover request for proxy
  *
  * vite 在 proxy 配置中，允许通过 configure 访问 http-proxy 实例，
@@ -43,44 +71,5 @@ export function cacheRequestBody(req: Connect.IncomingMessage, body?: Buffer): v
  * @param config - Vite user config / Vite 用户配置
  */
 export function recoverRequest(config: UserConfig): void {
-  if (!config.server) {
-    return
-  }
-
-  const proxies = config.server.proxy ?? {}
-
-  objectKeys(proxies).forEach((key) => {
-    const target = proxies[key]
-    const options = isString(target) ? { target } : target
-    if (options.ws) {
-      return
-    }
-
-    const { configure, ...rest } = options
-
-    proxies[key] = {
-      ...rest,
-      configure(proxy, _options) {
-        configure?.(proxy, _options)
-
-        proxy.on('proxyReq', (proxyReq, req) => {
-          const buffer = cache.get(req)
-          if (buffer) {
-            cache.delete(req)
-            /**
-             * Using http-proxy's agent configuration will write to the proxy request stream in advance
-             * https://github.com/http-party/node-http-proxy/issues/1287
-             */
-            if (!proxyReq.headersSent) {
-              proxyReq.setHeader('Content-Length', buffer.byteLength)
-            }
-
-            if (!proxyReq.writableEnded) {
-              proxyReq.write(buffer)
-            }
-          }
-        })
-      },
-    }
-  })
+  setupProxyConfigure(config, [requestRecoverySetup])
 }
