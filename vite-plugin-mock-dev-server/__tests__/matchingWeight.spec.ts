@@ -4,10 +4,7 @@
  * 匹配权重功能测试
  */
 import { describe, expect, it } from 'vitest'
-import {
-  createMatchingWeightSorter,
-  matchingWeight,
-} from '../src/mockHttp/matchingWeight.js'
+import { createMatchingWeightSorter, matchingWeight } from '../src/mockHttp/matchingWeight.js'
 
 /**
  * Test suite for matching weight
@@ -167,13 +164,12 @@ describe('createMatchingWeightSorter', () => {
   })
 
   it('should bound the cache size', () => {
-    const sorter = createMatchingWeightSorter(2)
+    const sorter = createMatchingWeightSorter(1)
     const first = sorter(rules, '/api/a')
     sorter(rules, '/api/other')
-    sorter(rules, '/api/third')
 
-    // 超过容量后最久未使用的 `/api/a` 已被驱逐，重新排序不会命中缓存
-    // The least recently used `/api/a` is evicted once the capacity is exceeded,
+    // 超过容量后此前缓存的 `/api/a` 已被丢弃，重新排序不会命中缓存
+    // The previously cached `/api/a` is dropped once the capacity is exceeded,
     // so sorting again misses the cache
     expect(sorter(rules, '/api/a')).not.toBe(first)
     expect(sorter(rules, '/api/a')).toEqual(first)
