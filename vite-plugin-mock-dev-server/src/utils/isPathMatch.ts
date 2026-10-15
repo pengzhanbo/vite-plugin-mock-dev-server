@@ -1,6 +1,7 @@
+import { LRUCache } from '@pengzhanbo/utils'
 import { pathToRegexp } from 'path-to-regexp'
 
-const cache: Map<string, RegExp> = new Map()
+const cache = new LRUCache<string, RegExp>({ maxSize: 1024 })
 
 /**
  * 判断 path 是否匹配 pattern

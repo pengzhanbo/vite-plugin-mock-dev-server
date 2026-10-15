@@ -25,7 +25,7 @@
  */
 import type { Parameter, Text, Token, Wildcard } from 'path-to-regexp'
 import type { MockMatchPriority } from '../types/index.js'
-import { isArray, isEmptyObject, partition, uniq } from '@pengzhanbo/utils'
+import { isArray, isEmptyObject, LRUCache, partition, uniq } from '@pengzhanbo/utils'
 import { parse, pathToRegexp } from 'path-to-regexp'
 import { isPathMatch } from '../utils/index.js'
 
@@ -34,11 +34,24 @@ type PathToken =
   | (Parameter & { optional?: boolean })
   | (Wildcard & { optional?: boolean })
 
-const tokensCache: Record<string, PathToken[]> = {}
+/**
+ * URL 规则的 token 缓存
+ *
+ * 使用 `LRUCache` 而非普通对象，避免原型链上的 `constructor` / `toString` / `__proto__`
+ * 等键造成语义混乱，同时限制 mock 文件频繁增删改时的缓存增长
+ *
+ * Token cache of URL rules.
+ *
+ * `LRUCache` is used instead of a plain object to avoid the confusing semantics of
+ * keys inherited from the prototype chain (`constructor` / `toString` / `__proto__`),
+ * and to bound the cache growth when mock files are frequently added, removed or edited.
+ */
+const tokensCache = new LRUCache<string, PathToken[]>({ maxSize: 1024 })
 
 function getTokens(rule: string): PathToken[] {
-  if (tokensCache[rule]) {
-    return tokensCache[rule]
+  const cached = tokensCache.get(rule)
+  if (cached) {
+    return cached
   }
   const res: PathToken[] = []
   const flatten = (tokens: Token[], group = false): void => {
@@ -57,7 +70,7 @@ function getTokens(rule: string): PathToken[] {
     }
   }
   flatten(parse(rule).tokens)
-  tokensCache[rule] = res
+  tokensCache.set(rule, res)
   return res
 }
 
@@ -183,4 +196,61 @@ export function matchingWeight(
   }
 
   return matched
+}
+
+/**
+ * 带排序结果缓存的匹配权重排序器
+ *
+ * 以请求路径为键缓存排序结果，避免每个请求都重新排序全部候选规则。
+ * 缓存结果依赖 `rules`（全部 mock url）与 `priority` 配置：
+ * 前者随 mock 数据热更新而变化，后者由插件配置决定、运行时不变，
+ * 因此 mock 数据更新后（`mock:update-end`）需要调用返回函数的 `clear()` 清空缓存。
+ *
+ * Matching weight sorter with a sorted result cache.
+ *
+ * The sorted result is cached by request pathname to avoid re-sorting all candidate
+ * rules on every request. The result depends on `rules` (all mock urls) and the
+ * `priority` config: the former changes when mock data is hot-reloaded, the latter is
+ * fixed by the plugin options at runtime. So the cache must be cleared by calling
+ * `clear()` on the returned sorter once mock data is updated (`mock:update-end`).
+ *
+ * 每个中间件实例持有独立的排序器，避免不同 mock 数据集之间相互影响
+ *
+ * Each middleware instance owns its own sorter, so different mock datasets never
+ * interfere with each other
+ *
+ * @param maxSize - Cache size / 缓存容量
+ * @returns Cached sorter function / 带缓存的排序函数
+ */
+export interface MatchingWeightSorter {
+  (rules: string[], url: string, priority?: MockMatchPriority): string[]
+  /**
+   * Clear the sorted result cache
+   *
+   * 清空排序结果缓存
+   */
+  clear: () => void
+}
+
+/**
+ * Create a matching weight sorter with sorted result cache
+ *
+ * 创建一个带排序结果缓存的匹配权重排序器
+ *
+ * @param maxSize - Cache size / 缓存容量
+ * @returns Cached sorter function / 带缓存的排序函数
+ */
+export function createMatchingWeightSorter(maxSize = 500): MatchingWeightSorter {
+  const sortedCache = new LRUCache<string, string[]>({ maxSize })
+  const sorter: MatchingWeightSorter = (rules, url, priority = {}) => {
+    const cached = sortedCache.get(url)
+    if (cached) {
+      return cached
+    }
+    const matched = matchingWeight(rules, url, priority)
+    sortedCache.set(url, matched)
+    return matched
+  }
+  sorter.clear = () => sortedCache.clear()
+  return sorter
 }

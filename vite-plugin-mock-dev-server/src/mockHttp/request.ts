@@ -4,7 +4,7 @@ import type { Logger } from '../core/index.js'
 import type { BodyParserOptions, ExtraRequest, MockRequest } from '../types/index.js'
 import { Buffer } from 'node:buffer'
 import { PassThrough } from 'node:stream'
-import { isEmptyObject } from '@pengzhanbo/utils'
+import { isEmptyObject, LRUCache } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import bodyParser from 'co-body'
 import formidable from 'formidable'
@@ -185,11 +185,16 @@ async function parseRequestBodyWithMultipart(
  * Cache for path-to-regexp match functions
  *
  * path-to-regexp 匹配函数缓存
+ *
+ * 使用 `LRUCache` 限制缓存上限，避免 mock 文件频繁增删改时无界增长
+ *
+ * `LRUCache` bounds the cache size, avoiding unbounded growth when mock files are
+ * frequently added, removed or edited.
  */
-const matcherCache: Map<
+const matcherCache = new LRUCache<
   string,
   MatchFunction<Partial<Record<string, string | string[]>>>
-> = new Map()
+>({ maxSize: 1024 })
 
 /**
  * Parse request URL dynamic parameters
