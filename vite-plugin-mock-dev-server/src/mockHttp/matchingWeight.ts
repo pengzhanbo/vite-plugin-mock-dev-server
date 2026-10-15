@@ -240,7 +240,7 @@ export interface MatchingWeightSorter {
  * @param maxSize - Cache size / 缓存容量
  * @returns Cached sorter function / 带缓存的排序函数
  */
-export function createMatchingWeightSorter(maxSize = 500): MatchingWeightSorter {
+export function createMatchingWeightSorter(maxSize = 1024): MatchingWeightSorter {
   const sortedCache = new LRUCache<string, string[]>({ maxSize })
   const sorter: MatchingWeightSorter = (rules, url, priority = {}) => {
     const cached = sortedCache.get(url)

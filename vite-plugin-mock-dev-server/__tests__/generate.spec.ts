@@ -141,7 +141,7 @@ describe('generateMockServer', () => {
     )
     expect(entry.source).toContain(`  replay: false,
   activeScene,
-}));`)
+}, sortMockUrls));`)
 
     // Non-serializable options are ignored with a build-time warning
     // 无法序列化的配置项会被忽略，并在构建期输出警告
@@ -149,5 +149,79 @@ describe('generateMockServer', () => {
     expect(warn).toHaveBeenCalledTimes(1)
     expect(warn.mock.calls[0][0]).toContain('filter')
     expect(entry.source).not.toContain('"filter"')
+  })
+
+  it('should relocate a configured uploadDir into the output directory', async () => {
+    const options = createOptions(cwd, {
+      recordEnabled: false,
+      includeRecord: false,
+      formidableOptions: { maxFileSize: 1024, uploadDir: '/usr/xxx/tmp/' },
+    })
+    const emitFile = vi.fn()
+
+    await generateMockServer({ emitFile } as any, options)
+
+    const assets = emitFile.mock.calls.map(([asset]) => asset)
+    const entry = assets.find((asset) => asset.fileName === path.join('mockServer', 'index.js'))
+
+    // 机器相关的绝对路径不会出现在产物中
+    // The machine specific absolute path never appears in the artifact
+    expect(entry.source).not.toContain('/usr/xxx/tmp')
+    expect(entry.source).toContain(
+      'const formidableOptions = {"multiples":true,"maxFileSize":1024};',
+    )
+
+    // 重定位到产物目录下的同名目录，并在启动时创建
+    // It is relocated to the same-named directory inside the output directory,
+    // and created on startup
+    expect(entry.source).toContain(`import fs from 'node:fs';`)
+    expect(entry.source).toContain(`import path from 'node:path';`)
+    expect(entry.source).toContain('const uploadDir = path.resolve(import.meta.dirname, "tmp");')
+    expect(entry.source).toContain('fs.mkdirSync(uploadDir, { recursive: true });')
+    expect(entry.source).toContain('formidableOptions.uploadDir = uploadDir;')
+    expect(entry.source).toContain('formidableOptions.uploadDir = os.tmpdir();')
+
+    // 构建期提示
+    // A build-time notice is logged
+    const warn = vi.mocked(options.logger.warn)
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0][0]).toContain('/usr/xxx/tmp/')
+    expect(warn.mock.calls[0][0]).toContain('./tmp')
+  })
+
+  it('should relocate the legacy `uploaddir` alias as well', async () => {
+    const options = createOptions(cwd, {
+      recordEnabled: false,
+      includeRecord: false,
+      formidableOptions: { uploaddir: 'mock/uploads' },
+    })
+    const emitFile = vi.fn()
+
+    await generateMockServer({ emitFile } as any, options)
+
+    const assets = emitFile.mock.calls.map(([asset]) => asset)
+    const entry = assets.find((asset) => asset.fileName === path.join('mockServer', 'index.js'))
+
+    expect(entry.source).toContain('const formidableOptions = {"multiples":true};')
+    expect(entry.source).toContain(
+      'const uploadDir = path.resolve(import.meta.dirname, "uploads");',
+    )
+    expect(vi.mocked(options.logger.warn)).toHaveBeenCalledTimes(1)
+  })
+
+  it('should keep the server entry untouched when uploadDir is not configured', async () => {
+    const options = createOptions(cwd, { recordEnabled: false, includeRecord: false })
+    const emitFile = vi.fn()
+
+    await generateMockServer({ emitFile } as any, options)
+
+    const assets = emitFile.mock.calls.map(([asset]) => asset)
+    const entry = assets.find((asset) => asset.fileName === path.join('mockServer', 'index.js'))
+
+    expect(entry.source).not.toContain('mkdirSync')
+    expect(entry.source).not.toContain('node:fs')
+    expect(entry.source).not.toContain('node:os')
+    expect(entry.source).not.toContain('node:path')
+    expect(vi.mocked(options.logger.warn)).not.toHaveBeenCalled()
   })
 })
