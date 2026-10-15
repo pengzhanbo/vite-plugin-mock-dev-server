@@ -1,3 +1,4 @@
+import type { Stats } from 'node:fs'
 import type http from 'node:http'
 import type { RecordedRequest } from '../types/index.js'
 import fs from 'node:fs'
@@ -7,21 +8,43 @@ import { LRUCache } from '@pengzhanbo/utils'
 interface RecordStorageEntry {
   /** 记录数据 / recorded data */
   records: RecordedRequest[]
-  /** 文件修改时间，用于判断缓存是否过期 / file mtime, used to detect stale cache */
-  mtimeMs: number
-  /** 文件大小，用于判断缓存是否过期 / file size, used to detect stale cache */
-  size: number
+  /** 文件身份签名，用于判断缓存是否过期 / file signature, used to detect stale cache */
+  signature: string
 }
 
-// 缓存已记录的请求，使用 LRU 限制缓存上限，并记录文件信息以感知文件变更
-// Cache the recorded requests, `LRUCache` bounds the cache size, and the file
-// information is recorded so that external changes can be detected
+// 缓存已记录的请求，使用 LRU 限制缓存上限，并记录文件身份信息以感知文件变更
+// Cache the recorded requests, `LRUCache` bounds the cache size, and the file identity
+// is recorded so that external changes can be detected
 const storage = new LRUCache<string, RecordStorageEntry>({ maxSize: 1024 })
+
+/**
+ * 生成文件身份签名
+ *
+ * 仅比较 `mtime` 与文件大小并不充分：文件被替换（重新创建）时若内容大小相同、
+ * 修改时间又被保留（如 `cp -p`、`git checkout`、解压覆盖等场景），缓存会命中旧数据。
+ * 因此同时比较 `dev` + `ino`（文件身份标识）与 `ctime`（元数据变更时间），
+ * 只要文件被替换或元数据被改动，签名就会变化。
+ *
+ * Build the file identity signature.
+ *
+ * Comparing only `mtime` and the file size is not enough: when a file is replaced
+ * (recreated) with the same content size and its modification time is preserved
+ * (e.g. `cp -p`, `git checkout`, extracting an archive over it), the stale cache
+ * would be hit. So `dev` + `ino` (file identity) and `ctime` (metadata change time)
+ * are compared as well, making the signature change whenever the file is replaced
+ * or its metadata is modified.
+ *
+ * @param stats 文件状态 / file stats
+ * @returns 文件身份签名 / file identity signature
+ */
+function getFileSignature(stats: Stats): string {
+  return [stats.dev, stats.ino, stats.ctimeMs, stats.mtimeMs, stats.size].join(':')
+}
 
 /**
  * 读取记录文件
  *
- * 缓存命中时会比较文件的修改时间与大小，文件被外部修改或删除后会自动重新读取
+ * 缓存命中时会比较文件身份签名，文件被外部修改、替换或删除后会自动重新读取
  *
  * @param filepath 记录文件路径
  * @returns 记录的请求数组
@@ -29,14 +52,15 @@ const storage = new LRUCache<string, RecordStorageEntry>({ maxSize: 1024 })
 export async function readRecordStorage(filepath: string): Promise<RecordedRequest[]> {
   try {
     const stats = await fs.promises.stat(filepath)
+    const signature = getFileSignature(stats)
     const cached = storage.get(filepath)
-    if (cached && cached.mtimeMs === stats.mtimeMs && cached.size === stats.size) {
+    if (cached && cached.signature === signature) {
       return cached.records
     }
 
     const content = (await fs.promises.readFile(filepath, 'utf-8')) || '[]'
     const records = JSON.parse(content) as RecordedRequest[]
-    storage.set(filepath, { records, mtimeMs: stats.mtimeMs, size: stats.size })
+    storage.set(filepath, { records, signature })
     return records
   } catch (error) {
     // 记录文件不存在时无需报错 / a missing record file is not an error
