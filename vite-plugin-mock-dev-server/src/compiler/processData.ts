@@ -127,7 +127,10 @@ export function processMockData(
     })
 
   // 对具有相同路径匹配规则的配置项进行排序。
-  // 由于允许同时配置多条相同路径匹配规则，具体应用哪一条规则，需要根据 `validator` 做判断
+  // 由于允许同时配置多条相同路径匹配规则，具体应用哪一条规则，需要先根据 `scene` 做判断：
+  // 配置了 `scene` 的 mock 优先级最高，意味着用户只希望命中该场景下的 mock 数据，
+  // `validator` 的优先级不会跨越它；未命中当前场景的 mock 会在请求匹配时被过滤掉。
+  // 同一场景下，再根据 `validator` 做判断：
   // 默认 函数形式的 `validator` 具有最高的优先级，应该优先被匹配，
   // 而没有配置 `validator` 的，则优先级最低，作为 该规则下的 fallback
   // 对象形式的 `validator` ，则需要比对 query、body、params 等对象
@@ -144,27 +147,76 @@ export function processMockData(
 }
 
 export function sortByValidator(mocks: MockOptions): (MockHttpItem | MockWebsocketItem)[] {
-  // 优先级排序，数字越小，优先级越高，越优先被匹配
-  return sortBy(mocks, (item) => {
-    if (item.ws === true) {
-      return 0
-    }
-    const baseWeight = toArray(item.scene).length > 0 ? 0 : 1
+  // 优先级排序，数字越小，优先级越高，越优先被匹配。
+  // 依次比较以下条件：
+  // 1. 配置了 `scene` 的 mock 优先于通用 mock。这是最高优先级，validator 不会跨越它。
+  //    用户配置 `activeScene` 的意图是只命中该场景下的 mock 数据，
+  //    因此带 `scene` 的 mock 必须优先被匹配；不匹配当前场景的 mock 会在请求匹配时
+  //    被 `matchScene` 过滤掉，从而回退到通用 mock；
+  // 2. websocket mock 优先，其次按 validator 的类型比较：函数形式 > 对象形式 > 无 validator；
+  // 3. 对象形式的 validator，key 越多优先级越高。
+  return sortBy(mocks, [
+    (item) => (toArray(item.scene).length > 0 ? 0 : 1),
+    getValidatorPriority,
+    (item) => -countValidatorKeys(item),
+  ])
+}
 
-    const { validator } = item
-    // fix: #28
-    if (!validator || isEmptyObject(validator)) {
-      return 2 + baseWeight
-    }
-    if (isFunction(validator)) {
-      return 0 + baseWeight
-    }
-    const count = Object.keys(validator).reduce(
-      (prev, key) => prev + keysCount(validator[key as keyof typeof validator]),
-      0,
-    )
-    return 1 / count + baseWeight
-  })
+/**
+ * Get the match priority of a mock within the same scene
+ *
+ * 获取同一场景下 mock 的匹配优先级
+ *
+ * Websocket mocks come first, then mocks are compared by the validator type:
+ * a function validator has the highest priority, an object validator is
+ * compared by its key count, and a mock without validator is treated as
+ * the fallback of the same url rule, which has the lowest priority.
+ *
+ * websocket mock 优先，其后按 validator 的类型比较：
+ * 函数形式的 validator 优先级最高，对象形式的 validator 则依据其 key 数量比较，
+ * 而没有配置 validator 的 mock 作为同一 url 规则下的兜底配置，优先级最低。
+ *
+ * @param mock - Mock config item / mock 配置项
+ * @returns Priority, the smaller the value, the higher the priority / 优先级，数字越小优先级越高
+ */
+function getValidatorPriority(mock: MockHttpItem | MockWebsocketItem): number {
+  if (mock.ws === true) {
+    return 0
+  }
+  const { validator } = mock
+  // fix: #28
+  if (!validator || isEmptyObject(validator)) {
+    return 3
+  }
+  return isFunction(validator) ? 1 : 2
+}
+
+/**
+ * Count the keys of the object validator of a mock
+ *
+ * 统计 mock 的对象形式 validator 的 key 数量
+ *
+ * Only an object validator is counted, a function validator and a missing
+ * validator both return `0`.
+ *
+ * 仅统计对象形式的 validator，函数形式的 validator 和未配置的 validator 都返回 `0`。
+ *
+ * @param mock - Mock config item / mock 配置项
+ * @returns Key count / key 数量
+ */
+function countValidatorKeys(mock: MockHttpItem | MockWebsocketItem): number {
+  if (mock.ws === true) {
+    return 0
+  }
+  const { validator } = mock
+  if (!validator || isFunction(validator)) {
+    return 0
+  }
+  let count = 0
+  for (const key of Object.keys(validator)) {
+    count += keysCount(validator[key as keyof typeof validator])
+  }
+  return count
 }
 
 function keysCount(obj?: object): number {
