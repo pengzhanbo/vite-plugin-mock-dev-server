@@ -217,7 +217,7 @@ export default defineMock({
 
 - **类型**: `number | [number, number]`
 - **默认值**: `0`
-- **描述**: 响应延迟时间（毫秒）
+- **描述**: 响应延迟时间（毫秒）。延迟从请求开始时计时，请求解析阶段已消耗的时间会从延迟中扣除，因此数组形式表示的是**总耗时**的区间。
 
 ```ts
 export default defineMock({
@@ -225,7 +225,7 @@ export default defineMock({
   delay: 2000, // 延迟 2 秒
 })
 
-// 随机延迟 1-3 秒
+// 总耗时随机落在 1-3 秒之间
 export default defineMock({
   url: '/api/random-delay',
   delay: [1000, 3000],

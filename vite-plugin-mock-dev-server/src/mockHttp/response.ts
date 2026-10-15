@@ -268,6 +268,15 @@ export function sendResponseData(res: MockResponse, raw: ResponseBody, type: str
  *
  * 实际响应延迟
  *
+ * 延迟统一以「请求开始时间」为基准计时，请求解析阶段已消耗的时间会从延迟中扣除，
+ * 因此数值形式与数组形式语义一致：数组形式 `[min, max]` 表示**总耗时**落在该区间内，
+ * 而不是在此区间内额外再等待一次。
+ *
+ * The delay is always measured from the request start time, and the time already
+ * spent on request parsing is deducted. So the number form and the array form keep
+ * the same semantics: `[min, max]` bounds the **total** elapsed time instead of
+ * waiting an extra random duration within that range.
+ *
  * @param startTime - Request start time / 请求开始时间
  * @param delay - Delay configuration / 延迟配置
  */
@@ -282,12 +291,19 @@ export async function responseRealDelay(
   ) {
     return
   }
+  // 已经耗费的解析时间 / elapsed time already spent before responding
+  const elapsed = timestamp() - startTime
   let realDelay = 0
   if (isArray(delay)) {
     const [min, max] = delay
-    realDelay = random(min, max)
+    // 目标总耗时的取值区间为 [min, max]；
+    // 若已耗时超过 `min`，则以已耗时作为新的下限，避免总耗时低于用户配置的下限
+    // The target total elapsed range is [min, max]; if the elapsed time already exceeds
+    // `min`, take it as the new lower bound so the total elapsed never falls below `min`
+    const lowerBound = Math.min(Math.max(min, elapsed), max)
+    realDelay = lowerBound >= max ? 0 : random(lowerBound, max, true) - elapsed
   } else {
-    realDelay = delay - (timestamp() - startTime)
+    realDelay = delay - elapsed
   }
   if (realDelay > 0) {
     await sleep(realDelay)

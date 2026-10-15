@@ -82,9 +82,13 @@ export interface MockHttpItem extends MockBaseItem {
   /**
    * Configure response delay time,
    * If an array is passed in, it represents the range of delay time.
+   * The delay is counted from the request start time, and the time already spent on
+   * request parsing is deducted, so the actual total elapsed time stays within the range.
    * unit: `ms`
    *
    * 配置响应延迟时间, 如果传入的是一个数组，则代表延迟时间的范围
+   * 延迟从请求开始时计时，请求解析阶段已消耗的时间会被扣除，
+   * 因此实际总耗时始终在该范围内
    * 单位： `ms`
    * @default 0
    */

@@ -6,6 +6,7 @@
 import type { MockHttpItem, MockRequest, MockResponse } from '../src/types/index.js'
 import { IncomingMessage, ServerResponse } from 'node:http'
 import { Socket } from 'node:net'
+import { sleep } from '@pengzhanbo/utils'
 import Cookies from 'cookies'
 import { describe, expect, it, vi } from 'vitest'
 import {
@@ -302,5 +303,34 @@ describe('responseRealDelay', () => {
     await responseRealDelay(startTime, [20] as unknown as [number, number])
     const endTime = Date.now()
     expect(endTime - startTime).toBeLessThan(50)
+  })
+
+  it('should deduct elapsed time from the delay range', async () => {
+    const startTime = Date.now()
+    //模拟请求解析耗时 / simulate request parsing time
+    await sleep(80)
+    await responseRealDelay(startTime, [60, 100])
+    const total = Date.now() - startTime
+    // 总耗时应落在 [60, 100] 内，而不是 80 + [60, 100)
+    // The total elapsed time should stay within [60, 100], instead of 80 + [60, 100]
+    expect(total).toBeGreaterThanOrEqual(55)
+    expect(total).toBeLessThanOrEqual(130)
+  })
+
+  it('should not delay when elapsed time exceeds the delay range', async () => {
+    const startTime = Date.now()
+    await sleep(80)
+    await responseRealDelay(startTime, [20, 50])
+    const total = Date.now() - startTime
+    expect(total).toBeLessThan(130)
+  })
+
+  it('should deduct elapsed time from the number delay', async () => {
+    const startTime = Date.now()
+    await sleep(80)
+    await responseRealDelay(startTime, 200)
+    const total = Date.now() - startTime
+    expect(total).toBeGreaterThanOrEqual(170)
+    expect(total).toBeLessThan(230)
   })
 })
