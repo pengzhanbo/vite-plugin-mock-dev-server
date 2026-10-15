@@ -1,10 +1,9 @@
 import type { IncomingMessage } from 'node:http'
-import type { UserConfig } from 'vite'
 import type { RecordedReq, RecordedRequest, ResolvedRecordOptions } from '../types/index.js'
+import type { ProxySetup } from '../utils/index.js'
 import { Buffer } from 'node:buffer'
 import fs, { promises as fsp } from 'node:fs'
 import path from 'node:path'
-import { objectKeys } from '@pengzhanbo/utils'
 import {
   createRecordMatcher,
   getFilepath,
@@ -27,41 +26,27 @@ export class Recorder {
     this.filter = createRecordMatcher(options.filter)
   }
 
-  setup(config: UserConfig): void {
-    const options = this.options
-    if (!config.server || !options.enabled) {
-      return
-    }
-
+  /**
+   * Create the proxy setup that records requests from http-proxy.
+   *
+   * 创建从 http-proxy 记录请求的代理扩展。
+   *
+   * @returns Proxy setup callback / 代理扩展回调
+   */
+  createProxySetup(): ProxySetup {
     const recordRequest = this.record.bind(this)
-    const proxies = config.server.proxy ?? {}
     // 从 http-proxy 记录请求
-    objectKeys(proxies).forEach((key) => {
-      const target = proxies[key]
-      const proxyOptions = typeof target === 'string' ? { target } : target
-      if (proxyOptions.ws) {
-        return
-      }
-      const { configure, ...rest } = proxyOptions
-      proxies[key] = {
-        ...rest,
-        configure(proxy, _) {
-          configure?.call(this, proxy, _)
-          // 记录请求
-          proxy.on('proxyRes', (proxyRes, req) => {
-            // Capture response body
-            let chunks: Buffer[] | null = []
-            proxyRes.on('data', (chunk) => chunk && chunks!.push(chunk))
-            proxyRes.on('end', async () => {
-              await recordRequest(req, proxyRes, Buffer.concat(chunks!))
-              chunks = null
-            })
-          })
-        },
-      }
-    })
-    // 添加 .gitignore 文件
-    void this.addGitignore()
+    return (proxy) => {
+      proxy.on('proxyRes', (proxyRes, req) => {
+        // Capture response body
+        let chunks: Buffer[] | null = []
+        proxyRes.on('data', (chunk) => chunk && chunks!.push(chunk))
+        proxyRes.on('end', async () => {
+          await recordRequest(req, proxyRes, Buffer.concat(chunks!))
+          chunks = null
+        })
+      })
+    }
   }
 
   private async record(req: IncomingMessage, res: IncomingMessage, resBody: Buffer): Promise<void> {
@@ -121,7 +106,12 @@ export class Recorder {
     await writeRecordStorage(absoluteFilepath, records)
   }
 
-  private async addGitignore(): Promise<void> {
+  /**
+   * Add `.gitignore` file in the recording directory.
+   *
+   * 在录制目录中添加 `.gitignore` 文件。
+   */
+  async addGitignore(): Promise<void> {
     const options = this.options
 
     if (!options.gitignore) {

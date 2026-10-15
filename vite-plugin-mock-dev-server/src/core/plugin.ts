@@ -1,11 +1,13 @@
 import type { Plugin, ResolvedConfig } from 'vite'
 import type { MockServerPluginOptions } from '../types/index.js'
+import type { ProxySetup } from '../utils/index.js'
 import type { ResolvedMockServerPluginOptions } from './options.js'
 import process from 'node:process'
 import { toArray } from '@pengzhanbo/utils'
 import { generateMockServer } from '../build/index.js'
-import { recoverRequest } from '../mockHttp/index.js'
+import { requestRecoverySetup } from '../mockHttp/index.js'
 import { Recorder } from '../recorder/index.js'
+import { setupProxyConfigure } from '../utils/index.js'
 import { initMockMiddlewares } from './init.js'
 import { resolvePluginOptions, resolveRecordOptions } from './options.js'
 
@@ -90,9 +92,13 @@ export function serverPlugin(options: MockServerPluginOptions): Plugin {
         })
         config.server.proxy = proxy
       }
-      // #52 由于请求流被消费，vite http-proxy 无法获取已消费的请求，导致请求流无法继续
-      // 通过 http-proxy 的 proxyReq 事件，重新写入请求流
-      recoverRequest(config)
+      // 统一在同一处包装 http-proxy 的 configure，避免多次独立改写 config.server.proxy
+      // 导致的顺序敏感与 `this` 语义不一致
+      const setups: ProxySetup[] = [
+        // #52 由于请求流被消费，vite http-proxy 无法获取已消费的请求，导致请求流无法继续
+        // 通过 http-proxy 的 proxyReq 事件，重新写入请求流
+        requestRecoverySetup,
+      ]
 
       // 初始化请求录制
       const { cwd, dir } = options
@@ -103,8 +109,12 @@ export function serverPlugin(options: MockServerPluginOptions): Plugin {
       )
       if (recordOptions.enabled) {
         const recorder = new Recorder(recordOptions)
-        recorder.setup(config)
+        setups.push(recorder.createProxySetup())
+        // 添加 .gitignore 文件
+        void recorder.addGitignore()
       }
+
+      setupProxyConfigure(config, setups)
     },
 
     configResolved(config) {
