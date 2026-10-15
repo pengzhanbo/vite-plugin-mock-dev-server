@@ -6,9 +6,8 @@
 import type { MockHttpItem, MockRequest, MockResponse } from '../src/types/index.js'
 import { IncomingMessage, ServerResponse } from 'node:http'
 import { Socket } from 'node:net'
-import { sleep } from '@pengzhanbo/utils'
 import Cookies from 'cookies'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   getHTTPStatusText,
   provideResponseCookies,
@@ -305,32 +304,68 @@ describe('responseRealDelay', () => {
     expect(endTime - startTime).toBeLessThan(50)
   })
 
-  it('should deduct elapsed time from the delay range', async () => {
-    const startTime = Date.now()
-    //模拟请求解析耗时 / simulate request parsing time
-    await sleep(80)
-    await responseRealDelay(startTime, [60, 100])
-    const total = Date.now() - startTime
-    // 总耗时应落在 [60, 100] 内，而不是 80 + [60, 100)
-    // The total elapsed time should stay within [60, 100], instead of 80 + [60, 100]
-    expect(total).toBeGreaterThanOrEqual(55)
-    expect(total).toBeLessThanOrEqual(130)
-  })
+  /**
+   * 固定 `Date.now()` 与 `setTimeout`，使请求解析耗时与延迟耗时完全由推进的虚拟时间决定
+   *
+   * Fake `Date.now()` and `setTimeout` so that both the request parsing time and the
+   * delay time are fully determined by the advanced virtual time
+   */
+  describe('responseRealDelay deducts elapsed time', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+    })
 
-  it('should not delay when elapsed time exceeds the delay range', async () => {
-    const startTime = Date.now()
-    await sleep(80)
-    await responseRealDelay(startTime, [20, 50])
-    const total = Date.now() - startTime
-    expect(total).toBeLessThan(130)
-  })
+    afterEach(() => {
+      vi.useRealTimers()
+    })
 
-  it('should deduct elapsed time from the number delay', async () => {
-    const startTime = Date.now()
-    await sleep(80)
-    await responseRealDelay(startTime, 200)
-    const total = Date.now() - startTime
-    expect(total).toBeGreaterThanOrEqual(170)
-    expect(total).toBeLessThan(230)
+    it('should deduct elapsed time from the delay range', async () => {
+      const startTime = Date.now()
+      // 模拟请求解析耗时 / simulate request parsing time
+      await vi.advanceTimersByTimeAsync(80)
+
+      const pending = responseRealDelay(startTime, [60, 100])
+      // 推进到内部 `sleep` 的触发时刻，得到精确的实际耗时
+      // Advance to the moment the internal `sleep` fires to get the exact elapsed time
+      if (vi.getTimerCount() > 0) {
+        await vi.advanceTimersToNextTimerAsync()
+      }
+      await pending
+
+      const total = Date.now() - startTime
+      // 总耗时应落在 [60, 100] 内（实际为 [80, 100)），而不是 80 + [60, 100]
+      // The total elapsed time should stay within [60, 100] (actually [80, 100)),
+      // instead of 80 + [60, 100]
+      expect(total).toBeGreaterThanOrEqual(60)
+      expect(total).toBeLessThan(100)
+    })
+
+    it('should not delay when elapsed time exceeds the delay range', async () => {
+      const startTime = Date.now()
+      await vi.advanceTimersByTimeAsync(80)
+
+      const pending = responseRealDelay(startTime, [20, 50])
+      // 已耗时超出上限，不应再注册任何定时器
+      // The elapsed time already exceeds the upper bound, so no timer should be scheduled
+      expect(vi.getTimerCount()).toBe(0)
+
+      await pending
+      expect(Date.now() - startTime).toBe(80)
+    })
+
+    it('should deduct elapsed time from the number delay', async () => {
+      const startTime = Date.now()
+      await vi.advanceTimersByTimeAsync(80)
+
+      const pending = responseRealDelay(startTime, 200)
+      // 精确推进到 `sleep` 的触发时刻，剩余时间应为 200 - 80 = 120
+      // Advance exactly to the moment `sleep` fires, the remaining time should be 200 - 80 = 120
+      await vi.advanceTimersToNextTimerAsync()
+      await pending
+
+      // 总耗时精确等于 200，而不是 80 + 200
+      // The total elapsed time is exactly 200, instead of 80 + 200
+      expect(Date.now() - startTime).toBe(200)
+    })
   })
 })
