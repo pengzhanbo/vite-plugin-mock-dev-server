@@ -335,6 +335,78 @@ describe('sortByValidator', () => {
     expect(result[3]).not.toHaveProperty('validator')
   })
 
+  it('should sort scene mocks before universal mocks even if the latter has a function validator', () => {
+    const mocks: MockOptions = [
+      { url: '/api/users', method: 'GET', body: {}, validator: () => true },
+      {
+        url: '/api/users',
+        method: 'GET',
+        body: {},
+        scene: 'test',
+        validator: { query: { id: '1', name: 'test' } },
+      },
+    ] as MockOptions
+
+    const result = sortByValidator(mocks)
+
+    // 配置了 scene 的 mock 优先级最高，validator 不应该跨越它
+    expect((result[0] as any).scene).toBe('test')
+  })
+
+  it('should sort scene mocks before universal mocks with the same validator type', () => {
+    const mocks: MockOptions = [
+      { url: '/api/users', method: 'GET', body: {} },
+      { url: '/api/users', method: 'GET', body: {}, scene: 'test' },
+    ] as MockOptions
+
+    const result = sortByValidator(mocks)
+
+    expect((result[0] as any).scene).toBe('test')
+  })
+
+  it('should sort by validator priority within the same scene', () => {
+    const mocks: MockOptions = [
+      { url: '/api/users', method: 'GET', body: {}, scene: 'test' },
+      {
+        url: '/api/users',
+        method: 'GET',
+        body: {},
+        scene: 'test',
+        validator: { query: { id: '1' } },
+      },
+      { url: '/api/users', method: 'GET', body: {}, scene: 'test', validator: () => true },
+    ] as MockOptions
+
+    const result = sortByValidator(mocks)
+
+    expect(typeof (result[0] as any).validator).toBe('function')
+    expect((result[1] as any).validator).toEqual({ query: { id: '1' } })
+    expect(result[2]).not.toHaveProperty('validator')
+  })
+
+  it('should sort scene mocks by key count within the same validator type', () => {
+    const mocks: MockOptions = [
+      {
+        url: '/api/users',
+        method: 'GET',
+        body: {},
+        scene: 'test',
+        validator: { query: { id: '1' } },
+      },
+      {
+        url: '/api/users',
+        method: 'GET',
+        body: {},
+        scene: 'test',
+        validator: { query: { id: '1', name: 'test' } },
+      },
+    ] as MockOptions
+
+    const result = sortByValidator(mocks)
+
+    expect((result[0] as any).validator).toEqual({ query: { id: '1', name: 'test' } })
+  })
+
   it('should handle empty array', () => {
     const result = sortByValidator([])
     expect(result).toEqual([])
