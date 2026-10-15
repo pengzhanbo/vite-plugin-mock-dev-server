@@ -33,3 +33,18 @@ export function getHash(str: unknown): string {
     .update(Buffer.from(str as string))
     .digest('hex')
 }
+
+/**
+ * Format an unknown error into a readable message, including its stack if available.
+ *
+ * 将未知错误格式化为可读信息，若存在堆栈则一并包含。
+ *
+ * @param error - Unknown error / 未知错误
+ * @returns Formatted error message / 格式化后的错误信息
+ */
+export function formatError(error: unknown): string {
+  if (error instanceof Error) {
+    return error.stack ?? error.message
+  }
+  return String(error)
+}

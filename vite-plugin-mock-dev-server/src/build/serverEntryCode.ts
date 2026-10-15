@@ -44,7 +44,7 @@ import mockData from './mock-data.js';
 
 const app = connect();
 const server = createServer(app);
-const logger = createLogger('mock-server', '${log}');
+const logger = createLogger('mock-server', ${JSON.stringify(log)});
 const proxies = ${JSON.stringify(proxies)};
 const wsProxies = ${JSON.stringify(wsProxies)};
 const cookiesOptions = ${JSON.stringify(cookiesOptions)};

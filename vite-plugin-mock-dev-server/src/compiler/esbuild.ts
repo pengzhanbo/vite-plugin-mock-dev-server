@@ -7,7 +7,7 @@ import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 import ansis from 'ansis'
 import JSON5 from 'json5'
-import { isPackageExists, normalizePath } from '../utils/index.js'
+import { formatError, isPackageExists, normalizePath } from '../utils/index.js'
 
 const externalizeDeps: Plugin = {
   name: 'externalize-deps',
@@ -158,8 +158,7 @@ export async function transformWithEsbuild(
       internalDeps: Array.from(internalDeps),
     }
   } catch (e) {
-    logger.error(`Failed to transform ${ansis.yellow.underline(filepath)}`)
-    console.error(e)
+    logger.error(`Failed to transform ${ansis.yellow.underline(filepath)}\n${formatError(e)}`)
   }
   return { code: '', externalDeps: [], internalDeps: [] }
 }

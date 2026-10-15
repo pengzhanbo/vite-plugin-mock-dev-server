@@ -10,6 +10,7 @@ import ansis from 'ansis'
 import { loadPackageJSON } from 'local-pkg'
 import { glob } from 'tinyglobby'
 import { transform } from '../compiler/index.js'
+import { formatError } from '../utils/index.js'
 import { generateMockEntryCode } from './mockEntryCode.js'
 import { generatePackageJson, getMockDependencies } from './packageJson.js'
 import { generatorServerEntryCode } from './serverEntryCode.js'
@@ -92,7 +93,6 @@ export async function generateMockServer(
       }
     }
   } catch (e) {
-    options.logger.error(`Failed to generate mock server`)
-    console.error(e)
+    options.logger.error(`Failed to generate mock server\n${formatError(e)}`)
   }
 }
