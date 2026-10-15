@@ -110,8 +110,10 @@ export function serverPlugin(options: MockServerPluginOptions): Plugin {
       if (recordOptions.enabled) {
         const recorder = new Recorder(recordOptions)
         setups.push(recorder.createProxySetup())
-        // 添加 .gitignore 文件
-        void recorder.addGitignore()
+        // 仅在存在 server 配置时添加 .gitignore 文件
+        if (config.server) {
+          void recorder.addGitignore()
+        }
       }
 
       setupProxyConfigure(config, setups)
