@@ -257,68 +257,85 @@ describe('provideResponseCookies', () => {
 /**
  * Test suite for responseRealDelay function
  *
- * responseRealDelay 函数测试套件
+ * 固定 `Date.now()` 与 `setTimeout`，使请求解析耗时与延迟耗时完全由推进的虚拟时间决定，
+ * 避免真实计时器的精度误差导致测试失败。
+ *
+ * responseRealDelay 函数测试套件。
+ * `Date.now()` and `setTimeout` are faked so that both the request parsing time and the
+ * delay time are fully determined by the advanced virtual time, avoiding flaky tests
+ * caused by real timer precision.
  */
 describe('responseRealDelay', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('should not delay when delay is not provided', async () => {
     const startTime = Date.now()
     await responseRealDelay(startTime)
-    const endTime = Date.now()
-    expect(endTime - startTime).toBeLessThan(50)
+    // 未配置延迟时不应注册任何定时器
+    // No timer should be scheduled when the delay is not configured
+    expect(vi.getTimerCount()).toBe(0)
+    expect(Date.now() - startTime).toBe(0)
   })
 
   it('should not delay when delay is zero', async () => {
     const startTime = Date.now()
     await responseRealDelay(startTime, 0)
-    const endTime = Date.now()
-    expect(endTime - startTime).toBeLessThan(50)
+    expect(vi.getTimerCount()).toBe(0)
+    expect(Date.now() - startTime).toBe(0)
   })
 
   it('should not delay when delay is negative', async () => {
     const startTime = Date.now()
     await responseRealDelay(startTime, -100)
-    const endTime = Date.now()
-    expect(endTime - startTime).toBeLessThan(50)
+    expect(vi.getTimerCount()).toBe(0)
+    expect(Date.now() - startTime).toBe(0)
   })
 
   it('should delay for specified milliseconds', async () => {
     const startTime = Date.now()
-    await responseRealDelay(startTime, 50)
-    const endTime = Date.now()
-    expect(endTime - startTime).toBeGreaterThanOrEqual(45)
+    const pending = responseRealDelay(startTime, 50)
+    expect(vi.getTimerCount()).toBe(1)
+
+    await vi.advanceTimersByTimeAsync(50)
+    await pending
+    // 数值形式的延迟耗时精确等于配置值
+    // The number form waits exactly for the configured delay
+    expect(Date.now() - startTime).toBe(50)
   })
 
   it('should handle delay range', async () => {
     const startTime = Date.now()
-    await responseRealDelay(startTime, [30, 50])
-    const endTime = Date.now()
-    const delay = endTime - startTime
-    expect(delay).toBeGreaterThanOrEqual(25)
-    expect(delay).toBeLessThanOrEqual(100)
+    const pending = responseRealDelay(startTime, [30, 50])
+    // 采样值落在 `[min, max)` 区间内，直接推进到定时器触发时刻
+    // The sampled delay stays within `[min, max)`, advance exactly to the moment it fires
+    await vi.advanceTimersToNextTimerAsync()
+    await pending
+
+    const delay = Date.now() - startTime
+    expect(delay).toBeGreaterThanOrEqual(30)
+    expect(delay).toBeLessThan(50)
   })
 
   it('should not delay when delay array is invalid', async () => {
     const startTime = Date.now()
     await responseRealDelay(startTime, [20] as unknown as [number, number])
-    const endTime = Date.now()
-    expect(endTime - startTime).toBeLessThan(50)
+    expect(vi.getTimerCount()).toBe(0)
+    expect(Date.now() - startTime).toBe(0)
   })
 
   /**
-   * 固定 `Date.now()` 与 `setTimeout`，使请求解析耗时与延迟耗时完全由推进的虚拟时间决定
+   * 复用外层伪造的 `Date.now()` 与 `setTimeout`：验证已消耗的解析时间会从延迟中扣除
    *
-   * Fake `Date.now()` and `setTimeout` so that both the request parsing time and the
-   * delay time are fully determined by the advanced virtual time
+   * Reuse the faked `Date.now()` and `setTimeout` of the outer suite: verify that the
+   * elapsed request parsing time is deducted from the delay
    */
   describe('responseRealDelay deducts elapsed time', () => {
-    beforeEach(() => {
-      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
-    })
-
-    afterEach(() => {
-      vi.useRealTimers()
-    })
-
     it('should deduct elapsed time from the delay range', async () => {
       const startTime = Date.now()
       // 模拟请求解析耗时 / simulate request parsing time
