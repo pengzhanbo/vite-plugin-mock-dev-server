@@ -21,7 +21,7 @@ import { recordRequestWithRawReq, replayRecordedRequest } from '../recorder/inde
 import { doesProxyContextMatchUrl, urlParse } from '../utils/index.js'
 import { createCors } from './cors.js'
 import { findMockData } from './matcher.js'
-import { matchingWeight } from './matchingWeight.js'
+import { createMatchingWeightSorter } from './matchingWeight.js'
 import { parseRequestBodyWithRaw, parseRequestParams, requestLog } from './request.js'
 import { cacheRequestBody } from './requestRecovery.js'
 import {
@@ -88,6 +88,16 @@ export function createMockMiddleware(
 ) => Promise<void> {
   const cors = createCors(corsOptions)
 
+  // 每个中间件实例持有独立的排序结果缓存，避免不同 mock 数据集之间相互影响
+  // Each middleware instance owns its sorted result cache, so different mock datasets
+  // never interfere with each other
+  const sortMockUrls = createMatchingWeightSorter()
+
+  // mock 数据热更新后，候选规则集合会变化，此前缓存的排序结果随之失效
+  // After mock data is hot-reloaded the candidate rules change and the cached
+  // sorted results become stale
+  compiler.on('mock:update-end', sortMockUrls.clear)
+
   async function handleMockRequest(
     req: Connect.IncomingMessage,
     res: ServerResponse,
@@ -109,12 +119,7 @@ export function createMockMiddleware(
     // 对满足匹配规则的配置进行优先级排序
     // mock 数据或优先级配置中若存在非法 url 模式，解析时会抛出异常，
     // 此处降级为 `next()`，将请求交给后续中间件处理
-    const [weightError, mockUrls] = attempt(
-      matchingWeight,
-      Object.keys(mockData),
-      pathname,
-      priority,
-    )
+    const [weightError, mockUrls] = attempt(sortMockUrls, Object.keys(mockData), pathname, priority)
     if (weightError) {
       logger.error(`${ansis.red(`Invalid mock url pattern at ${pathname}`)}\n  ${weightError}`)
       return next()

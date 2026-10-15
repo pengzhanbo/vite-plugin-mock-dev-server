@@ -705,6 +705,54 @@ describe('mockMiddleware', () => {
     expect(res.headers['X-File-Path']).toBe('test/mock.ts')
   })
 
+  it('should clear the sorted result cache when mock data is updated', async () => {
+    const dynamicItem: MockHttpItem = {
+      url: '/api/:id',
+      method: 'GET',
+      body: { source: 'dynamic' },
+      __filepath__: 'test.mock.ts',
+    } as MockHttpItem
+
+    const compiler = createMockCompiler({
+      '/api/:id': [dynamicItem],
+    })
+
+    const middleware = createMockMiddleware(compiler, {
+      proxies: ['/api'],
+      logger: mockLogger as any,
+      cors: false,
+      record: { enabled: false },
+      replay: false,
+    } as any)
+
+    // 排序结果缓存的清理逻辑注册在 `mock:update-end` 上
+    // The cache invalidation is registered on `mock:update-end`
+    expect(compiler.on).toHaveBeenCalledWith('mock:update-end', expect.any(Function))
+
+    const firstRes = createMockResponse()
+    await middleware(createMockRequest({ url: '/api/users' }), firstRes, vi.fn())
+    expect(JSON.parse(firstRes.data)).toEqual({ source: 'dynamic' })
+
+    // 模拟 mock 热更新：数据被替换为静态规则，并触发 `mock:update-end`
+    // Simulate a hot reload: the data is replaced with a static rule and
+    // `mock:update-end` is emitted
+    const staticItem: MockHttpItem = {
+      url: '/api/users',
+      method: 'GET',
+      body: { source: 'static' },
+      __filepath__: 'test.mock.ts',
+    } as MockHttpItem
+    ;(compiler as any).mockData = { '/api/users': [staticItem] }
+    const clearCache = vi
+      .mocked(compiler.on)
+      .mock.calls.find(([event]) => event === 'mock:update-end')?.[1]
+    clearCache?.('test.mock.ts')
+
+    const secondRes = createMockResponse()
+    await middleware(createMockRequest({ url: '/api/users' }), secondRes, vi.fn())
+    expect(JSON.parse(secondRes.data)).toEqual({ source: 'static' })
+  })
+
   it('should handle empty body', async () => {
     const mockItem: MockHttpItem = {
       url: '/api/empty',
