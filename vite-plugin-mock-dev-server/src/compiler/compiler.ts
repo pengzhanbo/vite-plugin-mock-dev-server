@@ -125,6 +125,8 @@ export class Compiler extends EventEmitter {
     let timer: NodeJS.Immediate | null = null
 
     this.on('mock:update', async (filepath: string) => {
+      filepath = normalizePath(filepath)
+
       if (!isMatch(filepath)) {
         return
       }
@@ -141,11 +143,20 @@ export class Compiler extends EventEmitter {
     })
 
     this.on('mock:unlink', (filepath: string) => {
+      filepath = normalizePath(filepath)
       if (!isMatch(filepath)) {
         return
       }
-      filepath = normalizePath(path.join(this.options.dir, filepath))
+      // The watcher emits paths relative to `cwd` and already prefixed with `dir`
+      // (e.g. `mock/a.mock.ts`), which is exactly the key used by `moduleCache`.
+      // Joining `dir` again would build `mock/mock/a.mock.ts` and silently fail to
+      // remove the module, leaving deleted mock rules active until restart.
+      // 监视器发出的路径是相对 `cwd` 且已包含 `dir` 前缀的（如 `mock/a.mock.ts`），
+      // 正是 `moduleCache` 使用的键。再次拼接 `dir` 会得到 `mock/mock/a.mock.ts`，
+      // 导致删除静默失败，被删除的 mock 规则会一直生效直到重启。
       this.moduleCache.delete(filepath)
+      this.removeModuleDeps(filepath, true)
+      this.emit('update:deps')
       this.updateMockData()
       this.emit('mock:update-end', filepath)
     })
@@ -232,6 +243,11 @@ export class Compiler extends EventEmitter {
    * @param deps - Dependencies of the mock file / Mock 文件的依赖
    */
   private updateModuleDeps(filepath: string, deps: string[]): void {
+    // Drop stale reverse references first: when a mock file is re-compiled its
+    // dependency list may shrink, and old entries would otherwise live forever.
+    // 先清理过期的反向引用：mock 文件重新编译后依赖列表可能变短，
+    // 否则旧条目会永久驻留（内存与 watcher 泄漏）。
+    this.removeModuleDeps(filepath)
     for (const dep of deps) {
       if (!this.moduleDeps.has(dep)) {
         this.moduleDeps.set(dep, new Set())
@@ -241,6 +257,37 @@ export class Compiler extends EventEmitter {
       cur.add(filepath)
     }
     this.emit('update:deps')
+  }
+
+  /**
+   * Remove a mock file from the dependency mapping
+   *
+   * 从依赖映射中移除指定的 mock 文件
+   *
+   * Always removes every reference to the mock file held by other entries.
+   * When `removeSelf` is enabled the mock file is also removed as a dep key,
+   * which is only correct once the file is actually gone: other mock files may
+   * still import it and need to keep their tracking. Callers are responsible for
+   * emitting `update:deps` once the mapping is settled, so the deps watcher can
+   * release the files that are no longer needed.
+   *
+   * 始终移除其他条目对该 mock 文件的引用。
+   * 只有文件确实被删除时才应开启 `removeSelf`（同时移除它作为依赖键的条目）：
+   * 否则其他 mock 文件仍可能引用它，需要保留依赖跟踪。
+   * 调用方需在映射稳定后触发 `update:deps`，让依赖监视器释放不再需要的文件。
+   *
+   * @param filepath - Path to the mock file / Mock 文件路径
+   * @param removeSelf - Whether to drop the mock file as a dep key / 是否移除该 mock 文件自身的依赖键
+   */
+  private removeModuleDeps(filepath: string, removeSelf = false): void {
+    for (const [dep, mockFiles] of this.moduleDeps) {
+      if (mockFiles.delete(filepath) && mockFiles.size === 0) {
+        this.moduleDeps.delete(dep)
+      }
+    }
+    if (removeSelf) {
+      this.moduleDeps.delete(filepath)
+    }
   }
 
   /**
@@ -300,14 +347,22 @@ export class Compiler extends EventEmitter {
     watcher.on('unlink', (filepath) => {
       filepath = normalizePath(filepath)
       this.moduleDeps.delete(filepath)
+      this.emit('update:deps')
     })
 
     this.on('update:deps', () => {
       const deps: string[] = [...this.moduleDeps.keys()]
-      const exactDeps = deps.filter((dep) => !oldDeps.includes(dep))
+      const addedDeps = deps.filter((dep) => !oldDeps.includes(dep))
+      // Release dependencies that are no longer imported by any mock file,
+      // otherwise the watcher keeps references to them for the whole session.
+      // 释放不再被任何 mock 文件引用的依赖，否则监视器会在整个会话中保留它们。
+      const removedDeps = oldDeps.filter((dep) => !deps.includes(dep))
       oldDeps = deps
-      if (exactDeps.length > 0) {
-        watcher.add(exactDeps)
+      if (addedDeps.length > 0) {
+        watcher.add(addedDeps)
+      }
+      if (removedDeps.length > 0) {
+        void watcher.unwatch(removedDeps)
       }
     })
   }
