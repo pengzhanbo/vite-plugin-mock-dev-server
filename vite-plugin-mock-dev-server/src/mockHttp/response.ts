@@ -268,14 +268,17 @@ export function sendResponseData(res: MockResponse, raw: ResponseBody, type: str
  *
  * 实际响应延迟
  *
- * 延迟统一以「请求开始时间」为基准计时，请求解析阶段已消耗的时间会从延迟中扣除，
- * 因此数值形式与数组形式语义一致：数组形式 `[min, max]` 表示**总耗时**落在该区间内，
- * 而不是在此区间内额外再等待一次。
+ * 延迟统一以「请求开始时间」为基准计时，请求解析阶段已消耗的时间会从本次采样出的延迟中扣除，
+ * 因此数值形式与数组形式语义一致：两者都不是在此前的基础上「额外再等一次」。
+ * 需要注意的是，当请求解析耗时已经超过延迟（数组形式为范围上限）时，剩余等待时间为 0，
+ * 即直接响应，不会为了凑满延迟而继续等待。
  *
- * The delay is always measured from the request start time, and the time already
- * spent on request parsing is deducted. So the number form and the array form keep
- * the same semantics: `[min, max]` bounds the **total** elapsed time instead of
- * waiting an extra random duration within that range.
+ * The delay is always measured from the request start time, and the time already spent
+ * on request parsing is deducted from the sampled delay, so the number form and the array
+ * form share the same semantics: neither of them waits an extra round on top of it.
+ * Note that when the request parsing time already exceeds the delay (the upper bound for
+ * the array form), the remaining wait is 0 and the response is sent immediately, instead
+ * of waiting longer to fulfill the configured delay.
  *
  * @param startTime - Request start time / 请求开始时间
  * @param delay - Delay configuration / 延迟配置
@@ -296,10 +299,11 @@ export async function responseRealDelay(
   let realDelay = 0
   if (isArray(delay)) {
     const [min, max] = delay
-    // 目标总耗时的取值区间为 [min, max]；
-    // 若已耗时超过 `min`，则以已耗时作为新的下限，避免总耗时低于用户配置的下限
-    // The target total elapsed range is [min, max]; if the elapsed time already exceeds
-    // `min`, take it as the new lower bound so the total elapsed never falls below `min`
+    // 以「已耗时」与 `min` 中的较大者作为本次采样的下限，避免总耗时低于用户配置的下限；
+    // 若已耗时已达上限，则不再等待
+    // Take the larger of the elapsed time and `min` as the lower bound of the sampled
+    // delay so the total elapsed never falls below `min`; wait nothing once the elapsed
+    // time has already reached the upper bound
     const lowerBound = Math.min(Math.max(min, elapsed), max)
     realDelay = lowerBound >= max ? 0 : random(lowerBound, max, true) - elapsed
   } else {
