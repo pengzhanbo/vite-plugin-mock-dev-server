@@ -256,7 +256,7 @@ export function sendResponseData(res: MockResponse, raw: ResponseBody, type: str
   if (isReadableStream(raw)) {
     raw.pipe(res)
   } else if (Buffer.isBuffer(raw)) {
-    res.end(type === 'text' || type === 'json' ? raw.toString('utf-8') : raw)
+    res.end(raw)
   } else {
     const content = typeof raw === 'string' ? raw : JSON.stringify(raw)
     res.end(type === 'buffer' ? Buffer.from(content) : content)
