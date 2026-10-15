@@ -21,6 +21,41 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Compiler } from '../src/compiler/compiler.js'
 
+/**
+ * Gate that can hold the result of a finished compilation, so that a test can
+ * interleave a file deletion with a compilation that is still in flight
+ *
+ * 用于暂挂已完成编译结果的闸门，使测试能够把文件删除插入到仍在进行中的编译之间
+ */
+const compileGate = vi.hoisted(() => ({
+  /** Whether finished compilations are held / 是否暂挂已完成的编译 */
+  enabled: false,
+  /** Number of held compilations / 被暂挂的编译数量 */
+  held: 0,
+  /** Number of released compilations / 已释放的编译数量 */
+  released: 0,
+  /** Resolvers of the held compilations / 被暂挂编译的释放回调 */
+  waiters: [] as Array<() => void>,
+}))
+
+// The gate wraps the real implementation: the compilation itself runs normally,
+// only its result is withheld from the compiler
+// 闸门包裹真实实现：编译本身照常执行，仅把结果暂不交还给编译器
+vi.mock('../src/compiler/compile.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../src/compiler/compile.js')>()
+  return {
+    compile: async (...args: Parameters<typeof actual.compile>) => {
+      const result = await actual.compile(...args)
+      if (compileGate.enabled) {
+        compileGate.held++
+        await new Promise<void>((resolve) => compileGate.waiters.push(resolve))
+        compileGate.released++
+      }
+      return result
+    },
+  }
+})
+
 const DIR = 'mock'
 const SHARED_DEP = `${DIR}/shared.ts`
 const CHANGED_BODY = { name: 'changed' }
@@ -28,9 +63,9 @@ const TEST_TIMEOUT = 20_000
 const WAIT_TIMEOUT = 10_000
 
 /**
- * Shared module imported by a mock file
+ * Shared module imported by a mock file, parameterized by version
  *
- * 被 mock 文件引入的共享模块
+ * 被 mock 文件引入的共享模块，按版本参数化
  *
  * It exports a function on purpose: a module whose code is fully inlined as a
  * constant may be merged into the entry by the bundler and never reported as a
@@ -38,11 +73,18 @@ const WAIT_TIMEOUT = 10_000
  *
  * 它刻意导出一个函数：代码被完全内联为常量的模块可能被打包器合并进入口模块，
  * 从而不会被上报为依赖。
+ *
+ * @param version - Version rendered into the mock body / 写入 mock body 的版本号
+ * @returns Shared module source / 共享模块源码
  */
-const SHARED_DEP_CODE = `export function createMock(url: string): any {
-  return { url, method: 'GET', body: { name: url } }
+function sharedDepCode(version: number): string {
+  return `export function createMock(url: string): any {
+  return { url, method: 'GET', body: { name: url, version: ${version} } }
 }
 `
+}
+
+const SHARED_DEP_CODE = sharedDepCode(1)
 
 const MOCK_WITH_DEP_CODE = `import { createMock } from './shared.js'
 export default [createMock('/api/a')]
@@ -97,13 +139,20 @@ function createOptions(cwd: string, logger: LoggerStub): ResolvedMockServerPlugi
  *
  * 读取指定 url 上 mock 条目的 body
  *
+ * Returns `undefined` while the rule is not registered (a mock file may be
+ * transiently absent from the data between two updates), so that it can be used
+ * inside polling assertions.
+ *
+ * 规则未注册时返回 `undefined`（两次更新之间 mock 文件可能短暂从数据中消失），
+ * 因此可以在轮询断言中安全使用。
+ *
  * @param compiler - Compiler instance / 编译器实例
  * @param url - Mock url / mock url
  * @param index - Index of the mock item / mock 条目下标
- * @returns The mock body / mock body
+ * @returns The mock body, if registered / mock body（若已注册）
  */
-function bodyOf(compiler: Compiler, url: string, index = 0): MockHttpItem['body'] {
-  return (compiler.mockData[url][index] as MockHttpItem).body
+function bodyOf(compiler: Compiler, url: string, index = 0): MockHttpItem['body'] | undefined {
+  return (compiler.mockData[url]?.[index] as MockHttpItem | undefined)?.body
 }
 
 function mockFileCode(url: string, body: Record<string, unknown> = {}): string {
@@ -130,24 +179,32 @@ function waitForReady(watcher: FSWatcher): Promise<void> {
 }
 
 /**
- * Whether the watcher has already registered the given file.
+ * Wait until the given counter stopped changing for a quiet period
  *
- * 监视器是否已注册给定文件。
+ * 等待计数器在静默期内不再变化
  *
- * Needed because chokidar never emits `ready` for a watcher created without any
- * path, which is the case for the deps watcher on startup.
+ * The watcher may deliver more than one event per write (and chokidar delays
+ * unlink events to detect atomic writes), so measurements have to be taken
+ * after the previous events have been fully processed.
  *
- * 由于 chokidar 对启动时未指定任何路径的监视器（即依赖监视器）不会触发 `ready`，
- * 因此需要这个判断。
+ * 监视器对一次写入可能发出多个事件（且 chokidar 会延迟 unlink 事件以识别原子写），
+ * 因此需要在先前事件处理完毕后再进行测量。
  *
- * @param watcher - File watcher / 文件监视器
- * @param filename - File name to look for / 待查找的文件名
- * @returns Whether the file is watched / 文件是否已被监视
+ * @param read - Reader of the current counter / 当前计数器读取函数
+ * @param quiet - Quiet period in ms / 静默期（毫秒）
  */
-function isWatched(watcher: FSWatcher, filename: string): boolean {
-  return Object.values(watcher.getWatched()).some((files) =>
-    files.some((file) => file.includes(filename)),
-  )
+async function waitForQuiet(read: () => number, quiet = 400): Promise<void> {
+  let last = read()
+  const start = Date.now()
+  while (Date.now() - start < WAIT_TIMEOUT) {
+    await delay(quiet)
+    const current = read()
+    if (current === last) {
+      return
+    }
+    last = current
+  }
+  throw new Error('Timed out waiting for the pending events to settle')
 }
 
 describe('compiler watcher', () => {
@@ -205,10 +262,6 @@ describe('compiler watcher', () => {
     return instance
   }
 
-  function depsWatcherOf(instance: Compiler): FSWatcher {
-    return (instance as unknown as { depsWatcher: FSWatcher }).depsWatcher
-  }
-
   it(
     'should drop the mock rules of a deleted mock file',
     async () => {
@@ -259,6 +312,57 @@ describe('compiler watcher', () => {
       // Neither the mock file itself nor its reverse references stay behind
       // mock 文件自身与其反向引用都不应残留
       expect(moduleDeps.size).toBe(0)
+    },
+    TEST_TIMEOUT,
+  )
+
+  it(
+    'should not restore a mock file that is deleted while its compilation is in flight',
+    async () => {
+      await writeMock(`${DIR}/a.mock.ts`, mockFileCode('/api/a', { name: 'v1' }))
+      await writeMock(`${DIR}/b.mock.ts`, mockFileCode('/api/b', { name: 'b' }))
+      const instance = await start(['/api/a', '/api/b'])
+      const { moduleCache } = instance as unknown as { moduleCache: Map<string, unknown> }
+      const updateEvents: string[] = []
+      instance.on('mock:update-end', (filepath: string) => updateEvents.push(filepath))
+
+      // Hold the compilation triggered by the next change, so that the deletion
+      // happens while the compilation is still in flight
+      // 暂挂下一次变更触发的编译，使删除发生在编译仍在进行期间
+      compileGate.enabled = true
+      compileGate.held = 0
+      compileGate.released = 0
+      await writeMock(`${DIR}/a.mock.ts`, mockFileCode('/api/a', { name: 'v2' }))
+      await waitFor(() => compileGate.held > 0, 'the new compilation to finish and be held')
+      compileGate.enabled = false
+
+      await unlink(path.join(cwd, DIR, 'a.mock.ts'))
+      await waitFor(() => !instance.mockData['/api/a'], 'the deleted mock rule to be dropped')
+      // Let the remaining watcher events of this deletion be processed before
+      // measuring, so that the assertion below only reflects the released
+      // compilation
+      // 先等这次删除引发的其余监视器事件处理完毕，再进行测量，
+      // 使下面的断言只反映被释放的那次编译
+      await waitForQuiet(() => updateEvents.length)
+
+      const updatesBeforeRelease = updateEvents.length
+      for (const release of compileGate.waiters.splice(0)) {
+        release()
+      }
+      await waitFor(() => compileGate.released > 0, 'the held compilation to be released')
+      // Give the compiler enough time to publish a stale result: the coalescing
+      // `setImmediate` timer runs right after a compilation resolves
+      // 给编译器足够时间发布过期结果：合并计时器会在编译完成后立即执行
+      await delay(200)
+
+      // The deleted rule must stay gone, and its module must not come back
+      // 已删除的规则必须保持消失，其模块也不应回到缓存
+      expect(instance.mockData['/api/a']).toBeUndefined()
+      expect(moduleCache.has(`${DIR}/a.mock.ts`)).toBe(false)
+      // The cancelled compilation must not report an update either
+      // 被取消的编译同样不应上报更新
+      expect(updateEvents.length).toBe(updatesBeforeRelease)
+      expect(instance.mockData['/api/b']).toBeDefined()
     },
     TEST_TIMEOUT,
   )
@@ -339,24 +443,92 @@ describe('compiler watcher', () => {
   )
 
   it(
-    'should release the dependency tracking of a deleted dependency file',
+    'should keep the reverse references of a deleted dependency',
     async () => {
       await writeMock(SHARED_DEP, SHARED_DEP_CODE)
       await writeMock(`${DIR}/a.mock.ts`, MOCK_WITH_DEP_CODE)
       const instance = await start(['/api/a'])
-      const { moduleDeps } = instance as unknown as { moduleDeps: Map<string, Set<string>> }
-      expect(moduleDeps.size).toBe(1)
-
-      const depsWatcher = depsWatcherOf(instance)
-      await waitFor(() => isWatched(depsWatcher, 'shared.ts'), 'the dependency to be watched')
+      const { moduleDeps, missingDeps } = instance as unknown as {
+        moduleDeps: Map<string, Set<string>>
+        missingDeps: Set<string>
+      }
+      expect(moduleDeps.get(SHARED_DEP)).toEqual(new Set([`${DIR}/a.mock.ts`]))
 
       await unlink(path.join(cwd, SHARED_DEP))
-      await waitFor(() => moduleDeps.size === 0, 'the deleted dependency to be released')
+      await waitFor(() => missingDeps.has(SHARED_DEP), 'the deleted dependency to be tracked')
 
-      expect(moduleDeps.has(SHARED_DEP)).toBe(false)
-      // The watcher must release the dependency once nothing imports it
-      // 当没有任何文件引用该依赖时，监视器必须释放它
-      await waitFor(() => !isWatched(depsWatcher, 'shared.ts'), 'the dependency to be unwatched')
+      // The mock file importing the deleted dependency stays mapped to it: that
+      // relation is what allows it to be restored once the dependency returns
+      // 引用已删除依赖的 mock 文件仍与之保持映射关系：
+      // 该关系是依赖恢复后重新编译引用方的依据
+      expect(moduleDeps.get(SHARED_DEP)).toEqual(new Set([`${DIR}/a.mock.ts`]))
+      // The rule built from the last available content is kept (last-good)
+      // 基于最后一份可用内容构建的规则会被保留（last-good）
+      expect(bodyOf(instance, '/api/a')).toEqual({ name: '/api/a', version: 1 })
+    },
+    TEST_TIMEOUT,
+  )
+
+  it(
+    'should re-compile the mock files importing a dependency that is created again',
+    async () => {
+      await writeMock(SHARED_DEP, sharedDepCode(1))
+      await writeMock(`${DIR}/a.mock.ts`, MOCK_WITH_DEP_CODE)
+      const instance = await start(['/api/a'])
+      const { missingDeps } = instance as unknown as { missingDeps: Set<string> }
+      expect(bodyOf(instance, '/api/a')).toEqual({ name: '/api/a', version: 1 })
+
+      await unlink(path.join(cwd, SHARED_DEP))
+      await waitFor(() => missingDeps.has(SHARED_DEP), 'the deleted dependency to be tracked')
+
+      // The dependency is created again: the mock file importing it must be
+      // compiled again, otherwise it would keep serving the deleted content
+      // 依赖被重新创建：引用它的 mock 文件必须重新编译，
+      // 否则会继续提供已删除内容构建的规则
+      await writeMock(SHARED_DEP, sharedDepCode(2))
+      await waitFor(
+        () =>
+          JSON.stringify(bodyOf(instance, '/api/a')) ===
+          JSON.stringify({ name: '/api/a', version: 2 }),
+        'the dependent mock file to be re-compiled',
+      )
+      await waitFor(
+        () => !missingDeps.has(SHARED_DEP),
+        'the restored dependency to be tracked again',
+      )
+
+      expect(logger.error).not.toHaveBeenCalled()
+    },
+    TEST_TIMEOUT,
+  )
+
+  it(
+    'should re-compile the mock files importing a mock file that is created again',
+    async () => {
+      await writeMock(SHARED_MOCK, sharedMockCode(1))
+      await writeMock(`${DIR}/b.mock.ts`, MOCK_IMPORTING_MOCK)
+      const instance = await start(['/api/b', '/api/shared'])
+      const { missingDeps } = instance as unknown as { missingDeps: Set<string> }
+      expect(bodyOf(instance, '/api/b')).toEqual({ name: 'b', version: 1 })
+
+      await unlink(path.join(cwd, SHARED_MOCK))
+      await waitFor(() => missingDeps.has(SHARED_MOCK), 'the deleted mock file to be tracked')
+      // Only the rule of the deleted file itself is gone: its dependents keep
+      // the last-good rules until it is created again
+      // 只有被删除文件自身的规则消失：引用方保留 last-good 规则直到文件重新创建
+      expect(instance.mockData['/api/shared']).toBeUndefined()
+      expect(bodyOf(instance, '/api/b')).toEqual({ name: 'b', version: 1 })
+
+      // Re-creating the imported mock file restores the rules of its dependents
+      // 重新创建被引用的 mock 文件会恢复其引用方的规则
+      await writeMock(SHARED_MOCK, sharedMockCode(2))
+      await waitFor(
+        () =>
+          JSON.stringify(bodyOf(instance, '/api/b')) === JSON.stringify({ name: 'b', version: 2 }),
+        'the dependent mock file to be re-compiled',
+      )
+
+      expect(logger.error).not.toHaveBeenCalled()
     },
     TEST_TIMEOUT,
   )
