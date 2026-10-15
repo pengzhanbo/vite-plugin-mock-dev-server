@@ -217,7 +217,7 @@ export default defineMock({
 
 - **Type**: `number | [number, number]`
 - **Default**: `0`
-- **Description**: Response delay time (milliseconds)
+- **Description**: Response delay time (milliseconds). The delay is counted from the request start time, and the time already spent on request parsing is deducted from the sampled delay; if the parsing time already exceeds the upper bound of the array range, no extra waiting is applied and the response is sent immediately.
 
 ```ts
 export default defineMock({
@@ -225,7 +225,7 @@ export default defineMock({
   delay: 2000, // Delay 2 seconds
 })
 
-// Random delay 1-3 seconds
+// Random delay within 1-3 seconds, minus the time already spent on parsing
 export default defineMock({
   url: '/api/random-delay',
   delay: [1000, 3000],
