@@ -4,7 +4,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 import { attemptAsync } from '@pengzhanbo/utils'
-import { getHash } from '../utils/index.js'
+import { formatError, getHash } from '../utils/index.js'
 
 interface LoadFromCodeOptions {
   filepath: string
@@ -37,8 +37,7 @@ export async function loadFromCode<T = any>({
   const [error, mod] = await attemptAsync<any>(importDefault, String(pathToFileURL(filepathTmp)))
   await attemptAsync(unlink, filepathTmp)
   if (error) {
-    logger.error(`Failed to load mock configuration from code:`)
-    console.error(error)
+    logger.error(`Failed to load mock configuration from code:\n${formatError(error)}`)
   }
   return mod
 }

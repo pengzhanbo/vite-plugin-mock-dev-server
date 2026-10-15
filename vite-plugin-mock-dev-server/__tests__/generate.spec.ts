@@ -132,6 +132,7 @@ describe('generateMockServer', () => {
     const entry = assets.find((asset) => asset.fileName === path.join('mockServer', 'index.js'))
 
     expect(entry.source).toContain('const activeScene = ["dev"];')
+    expect(entry.source).toContain(`const logger = createLogger('mock-server', "error");`)
     expect(entry.source).toContain(
       'const formidableOptions = {"multiples":true,"maxFileSize":1024};',
     )

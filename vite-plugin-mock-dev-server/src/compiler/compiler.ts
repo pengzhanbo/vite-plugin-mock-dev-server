@@ -9,7 +9,7 @@ import { promiseParallel } from '@pengzhanbo/utils'
 import { watch } from 'chokidar'
 import { loadPackageJSONSync } from 'local-pkg'
 import { glob } from 'tinyglobby'
-import { createMatcher, debug, normalizePath } from '../utils/index.js'
+import { createMatcher, debug, formatError, normalizePath } from '../utils/index.js'
 import { compile } from './compile.js'
 import { processMockData, processRawData } from './processData.js'
 
@@ -183,7 +183,7 @@ export class Compiler extends EventEmitter {
       )
       .then((loaders) => promiseParallel(loaders, 64))
       .then(() => this.updateMockData())
-      .catch(this.options.logger.error)
+      .catch((e) => this.options.logger.error(formatError(e)))
   }
 
   /**
@@ -210,7 +210,7 @@ export class Compiler extends EventEmitter {
       this.moduleCache.set(filepath, processRawData(data, filepath))
       this.updateModuleDeps(filepath, internalDeps)
     } catch (e) {
-      console.error(e)
+      this.options.logger.error(`Failed to load mock file ${filepath}:\n${formatError(e)}`)
     }
   }
 
