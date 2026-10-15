@@ -3,7 +3,7 @@ import type { Http2SecureServer } from 'node:http2'
 import type { Connect, WebSocketServer } from 'vite'
 import type { ResolvedMockServerPluginOptions } from './options.js'
 import { Compiler } from '../compiler/index.js'
-import { createMockMiddleware } from '../mockHttp/index.js'
+import { createMatchingWeightSorter, createMockMiddleware } from '../mockHttp/index.js'
 import { mockWebSocket } from '../mockWebsocket/index.js'
 
 /**
@@ -28,6 +28,16 @@ export function initMockMiddlewares(
    * 并注入 vite `define` / `alias`
    */
   const compiler = new Compiler(options)
+
+  // 每个中间件实例持有独立的排序结果缓存，避免不同 mock 数据集之间相互影响
+  // Each middleware instance owns its sorted result cache, so different mock datasets
+  // never interfere with each other
+  const sortMockUrls = createMatchingWeightSorter()
+
+  // mock 数据热更新后，候选规则集合会变化，此前缓存的排序结果随之失效
+  // After mock data is hot-reloaded the candidate rules change and the cached
+  // sorted results become stale
+  compiler.on?.('mock:update-end', sortMockUrls.clear)
 
   /**
    * 监听 mock 文件是否发生变更，如何配置了 reload 为 true，
@@ -63,7 +73,7 @@ export function initMockMiddlewares(
      * 这导致了 vite 默认开启的 cors 对 mock 请求不生效。
      * 所以在 mock 中间件内部整合了 cors 处理来解决这个问题。
      */
-    createMockMiddleware(compiler, options),
+    createMockMiddleware(compiler, options, sortMockUrls),
   )
 
   compiler.run(!!server)

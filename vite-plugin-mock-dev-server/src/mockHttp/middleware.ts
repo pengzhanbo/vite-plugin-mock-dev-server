@@ -3,9 +3,15 @@
 import type { CorsOptions } from 'cors'
 import type { ServerResponse } from 'node:http'
 import type { Connect } from 'vite'
-import type { Compiler } from '../compiler/index.js'
 import type { Logger, ResolvedMockServerPluginOptions } from '../core/index.js'
-import type { ExtraRequest, MockHttpItem, MockRequest, MockResponse } from '../types/index.js'
+import type {
+  ExtraRequest,
+  MockHttpItem,
+  MockOptions,
+  MockRequest,
+  MockResponse,
+} from '../types/index.js'
+import type { MatchingWeightSorter } from './matchingWeight.js'
 import {
   attempt,
   attemptAsync,
@@ -32,6 +38,10 @@ import {
   sendResponseData,
 } from './response.js'
 
+export interface MockDataProvider {
+  mockData: Record<string, MockOptions>
+}
+
 export interface CreateMockMiddlewareOptions extends Pick<
   ResolvedMockServerPluginOptions,
   | 'formidableOptions'
@@ -52,23 +62,21 @@ export interface CreateMockMiddlewareOptions extends Pick<
  *
  * 创建 Mock 中间件
  *
- * @param compiler - Compiler instance / 编译器实例
+ * @param provider - Mock data provider / Mock 数据提供者
  * @param options - Middleware options / 中间件配置项
- * @param options.formidableOptions - Formidable options / Formidable 配置项
- * @param options.bodyParserOptions - Body parser options / 请求体解析配置项
- * @param options.proxies - Proxy paths / 代理路径
- * @param options.cookiesOptions - Cookies options / Cookies 配置项
- * @param options.logger - Logger instance / 日志实例
- * @param options.priority - Path matching priority / 路径匹配优先级
- * @param options.cors - CORS options / CORS 配置项
- * @param options.record - Record options / 录制配置项
- * @param options.replay - Replay options / 回放配置项
- * @param options.activeScene - Active scene / 活动场景
+ * @param sortMockUrls - Mock URLs sorter / Mock URLs 排序器
+ *
+ * 排序器由调用方注入，便于调用方在 mock 数据热更新后清理排序缓存；
+ * 未注入时使用独立的排序器实例（用于独立 mock server 等数据不会变更的场景）。
+ *
+ * The sorter is injected by the caller so that it can clear the sorted result cache
+ * once mock data is hot-reloaded. When it is not injected, a private sorter instance
+ * is used (for scenarios such as the standalone mock server, where data never changes).
  *
  * @returns Connect middleware function / Connect 中间件函数
  */
 export function createMockMiddleware(
-  compiler: Compiler,
+  provider: MockDataProvider,
   {
     formidableOptions,
     bodyParserOptions,
@@ -81,22 +89,13 @@ export function createMockMiddleware(
     replay,
     activeScene,
   }: CreateMockMiddlewareOptions,
+  sortMockUrls: MatchingWeightSorter = createMatchingWeightSorter(),
 ): (
   req: Connect.IncomingMessage,
   res: ServerResponse,
   next: Connect.NextFunction,
 ) => Promise<void> {
   const cors = createCors(corsOptions)
-
-  // 每个中间件实例持有独立的排序结果缓存，避免不同 mock 数据集之间相互影响
-  // Each middleware instance owns its sorted result cache, so different mock datasets
-  // never interfere with each other
-  const sortMockUrls = createMatchingWeightSorter()
-
-  // mock 数据热更新后，候选规则集合会变化，此前缓存的排序结果随之失效
-  // After mock data is hot-reloaded the candidate rules change and the cached
-  // sorted results become stale
-  compiler.on('mock:update-end', sortMockUrls.clear)
 
   async function handleMockRequest(
     req: Connect.IncomingMessage,
@@ -115,7 +114,7 @@ export function createMockMiddleware(
       return next()
     }
 
-    const mockData = compiler.mockData
+    const mockData = provider.mockData
     // 对满足匹配规则的配置进行优先级排序
     // mock 数据或优先级配置中若存在非法 url 模式，解析时会抛出异常，
     // 此处降级为 `next()`，将请求交给后续中间件处理
@@ -223,6 +222,7 @@ export function createMockMiddleware(
     } = mock as MockHttpItem & { __filepath__: string }
     let { body, status = 200, statusText } = mock
 
+    // 计算是否需要使接口返回错误
     const shouldSimulateError = errorConfig && (errorConfig.probability ?? 0.5) > Math.random()
 
     // error simulation
