@@ -328,6 +328,8 @@ interface RecordOptions {
          *
          * String: Glob pattern or path-to-regexp pattern
          * (Use the mode option to set the mode, default is glob)
+         *
+         * When omitted, all requests are included, and only `exclude` filters.
          */
         include?: string | string[]
         /**

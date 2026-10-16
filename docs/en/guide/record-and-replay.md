@@ -254,6 +254,9 @@ export default {
 }
 ```
 
+`include` can be omitted: requests are then included by default and only `exclude` filters them.
+The same applies to a `glob` mode `include` that only contains negation patterns (e.g. `['!**/auth/**']`).
+
 #### `record.gitignore`
 
 - **Type**: `boolean`

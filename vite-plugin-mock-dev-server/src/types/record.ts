@@ -45,10 +45,14 @@ export interface RecordOptions {
          * String: Glob pattern or path-to-regexp pattern
          * (Use the mode option to set the mode, default is glob)
          *
+         * When omitted, all requests are included, and only `exclude` filters.
+         *
          * 包含需要录制的请求链接
          *
          * glob 模式或 path-to-regexp 模式
          * (使用 mode 选项设置模式，默认为 glob)
+         *
+         * 省略时包含所有请求，仅由 `exclude` 排除。
          */
         include?: string | string[]
         /**

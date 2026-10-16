@@ -132,6 +132,8 @@ export function isSameRecord(prev: RecordedReq, current: RecordedReq): boolean {
 /**
  * 创建请求记录过滤器
  *
+ * `filter.include` 缺省时视为「包含所有请求」，仅由 `filter.exclude` 排除。
+ *
  * @param filter 记录过滤选项
  * @returns 请求匹配函数
  */
@@ -146,14 +148,22 @@ export function createRecordMatcher(
   const include = toArray(filter.include)
   const exclude = toArray(filter.exclude)
 
+  // include 缺省（或只写了否定模式）时，默认包含所有请求，仅保留 exclude 的排除语义。
+  // 否则 `picomatch([])` / `[].some()` 会拒绝一切路径，导致「配了 filter 就再也录不到数据且毫无提示」。
+  const hasInclude = include.some((item) => item[0] !== '!')
+
   if (mode === 'glob') {
-    const { isMatch } = createMatcher(include, exclude)
+    const { isMatch } = createMatcher(hasInclude ? include : ['**', ...include], exclude)
     return (req) => isMatch(req.pathname)
   }
 
+  const matchesInclude =
+    include.length === 0
+      ? () => true
+      : (pathname: string) => include.some((pattern) => isPathMatch(pattern, pathname))
+
   return (req) =>
-    include.some((pattern) => isPathMatch(pattern, req.pathname)) &&
-    exclude.every((pattern) => !isPathMatch(pattern, req.pathname))
+    matchesInclude(req.pathname) && exclude.every((pattern) => !isPathMatch(pattern, req.pathname))
 }
 
 /**

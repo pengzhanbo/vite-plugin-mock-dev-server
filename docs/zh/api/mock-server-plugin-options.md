@@ -330,6 +330,8 @@ interface RecordOptions {
          *
          * glob 模式或 path-to-regexp 模式
          * (使用 mode 选项设置模式，默认为 glob)
+         *
+         * 省略时包含所有请求，仅由 `exclude` 排除。
          */
         include?: string | string[]
         /**
