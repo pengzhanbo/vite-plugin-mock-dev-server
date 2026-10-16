@@ -215,6 +215,12 @@ mockDevServerPlugin({
 })
 ```
 
+::: tip
+The same path matching and priority rules also apply to
+[WebSocket mocks](./websocket-config). When several rules match the same websocket
+path at the same time, the rule with the higher priority wins.
+:::
+
 ## Real-world Application Scenarios
 
 ### Scenario 1: RESTful API Design

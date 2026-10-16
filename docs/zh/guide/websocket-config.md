@@ -82,6 +82,19 @@ export default defineMock({
 })
 ```
 
+### 路径匹配与优先级
+
+WebSocket Mock 与 HTTP Mock 使用**完全一致的路径匹配与优先级规则**
+（详见 [路径匹配规则](./path-matching)）。当多个规则同时命中同一个请求路径时，
+例如 `/ws/:room` 与 `/ws/lobby` 同时命中 `/ws/lobby`，插件会按匹配权重从高到低排序候选规则：
+
+1. 静态规则优先于动态规则；
+2. 动态参数更少、位置更靠后的规则优先级更高；
+3. 可通过 [`priority`](./plugin-config) 配置调整特定规则的优先级。
+
+排序后依次查找，**首个配置了 `ws: true` 的规则生效**；
+若优先级更高的规则只配置了 HTTP Mock，则会继续向后查找，直到找到可用的 WebSocket Mock。
+
 ## 配置选项详解
 
 ### `ws` 选项

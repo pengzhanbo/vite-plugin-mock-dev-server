@@ -34,11 +34,11 @@ import type { WebSocket } from 'ws'
 import type { Compiler } from '../compiler/index.js'
 import type { ResolvedMockServerPluginOptions } from '../core/options.js'
 import type { MockRequest, MockWebsocketItem, WebSocketSetupContext } from '../types/index.js'
-import { findFirstThen, objectKeys, remove, toArray } from '@pengzhanbo/utils'
+import { attempt, findFirstThen, objectKeys, remove, toArray } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import Cookies from 'cookies'
 import { WebSocketServer } from 'ws'
-import { parseRequestParams } from '../mockHttp/index.js'
+import { createMatchingWeightSorter, parseRequestParams } from '../mockHttp/index.js'
 import { doesProxyContextMatchUrl, isPathMatch, matchScene, urlParse } from '../utils/index.js'
 
 type PoolMap = Map<string, WSSMap>
@@ -89,15 +89,17 @@ const emitConnection = (
  * @param compiler - Compiler instance / 编译器实例
  * @param server - HTTP server instance / HTTP 服务器实例
  * @param options - Resolved plugin options / 解析后的插件配置
- * @param options.wsProxies - WebSocket proxy prefixes / WebSocket 代理前缀
- * @param options.cookiesOptions - Cookies options / Cookies 配置项
- * @param options.logger - Logger instance / 日志实例
- * @param options.activeScene - Active scene / 当前场景
  */
 export function mockWebSocket(
   compiler: Compiler,
   server: Server | Http2SecureServer | null,
-  { wsProxies: proxies, cookiesOptions, logger, activeScene }: ResolvedMockServerPluginOptions,
+  {
+    wsProxies: proxies,
+    cookiesOptions,
+    logger,
+    activeScene,
+    priority,
+  }: ResolvedMockServerPluginOptions,
 ): void {
   // Hot update file mapping
   // 热更新文件映射
@@ -106,6 +108,15 @@ export function mockWebSocket(
   // 连接池
   const poolMap: PoolMap = new Map()
   const wssContextMap: WSSContextMap = new WeakMap()
+
+  /**
+   * 候选规则的权重排序器
+   *
+   * 与 HTTP 侧保持一致的匹配优先级（静态规则优先于动态规则等），
+   * 避免命中多条规则时，匹配结果取决于 `mockData` 的键插入顺序（即 mock 文件的加载顺序）。
+   * 排序结果以 pathname 为键缓存，因此 mock 数据热更新后需要清空缓存。
+   */
+  const sortMockUrls = createMatchingWeightSorter()
 
   const getWssMap = (mockUrl: string): WSSMap => {
     let wssMap = poolMap.get(mockUrl)
@@ -171,6 +182,11 @@ export function mockWebSocket(
     connectionList.forEach(({ ws, req }) => emitConnection(wss, ws, req, connectionList))
   }
 
+  // mock 数据热更新后，候选规则集合会变化，此前缓存的排序结果随之失效
+  // After mock data is hot-reloaded the candidate rules change and the cached
+  // sorted results become stale
+  compiler.on?.('mock:update-end', sortMockUrls.clear)
+
   // Detect ws-related mock file updates
   // If the current ws configuration has established a wss connection, restart that wss connection
   // 检测 ws 相关的 mock 文件更新
@@ -222,20 +238,44 @@ export function mockWebSocket(
     }
 
     const mockData = compiler.mockData
-    const mockUrl = objectKeys(mockData).find((key) => isPathMatch(key, pathname))
-    if (!mockUrl) {
+    // 与 HTTP 侧一致，对命中当前请求的规则按匹配权重从高到低排序，
+    // 再依次查找首个可用的 websocket mock 配置，
+    // 命中多条规则时不再依赖 `mockData` 的键插入顺序（即 mock 文件的加载顺序）
+    // mock 数据或优先级配置中若存在非法 url 模式，解析时会抛出异常，
+    // 此处降级为不处理 upgrade，将连接交回 vite 的代理链路
+    // Same as the HTTP side: sort the rules matched by the current request from the
+    // highest priority to the lowest, then look up the first available websocket mock,
+    // so that a hit of several rules no longer depends on the key insertion order of
+    // `mockData` (that is, the loading order of the mock files).
+    // An invalid url pattern in the mock data or in the priority config throws when
+    // parsing, in that case the upgrade is left to the proxy chain of vite.
+    const [weightError, mockUrls] = attempt(sortMockUrls, objectKeys(mockData), pathname, priority)
+    if (weightError) {
+      logger.error(`${ansis.red(`Invalid mock url pattern at ${pathname}`)}\n  ${weightError}`)
       return
     }
 
-    const mock = mockData[mockUrl].find(
-      (item) =>
-        item.url &&
-        item.ws &&
-        matchScene(effectActiveScene, item.scene) &&
-        isPathMatch(item.url, pathname),
-    ) as MockWebsocketItem
+    let mockUrl: string | undefined
+    let mock: MockWebsocketItem | undefined
 
-    if (!mock) {
+    // 仅命中首个可用的 websocket mock 配置，与 HTTP 侧保持一致
+    // Only the first available websocket mock matches, consistent with the HTTP side
+    for (const candidate of mockUrls) {
+      const found = mockData[candidate].find(
+        (item) =>
+          item.url &&
+          item.ws &&
+          matchScene(effectActiveScene, item.scene) &&
+          isPathMatch(item.url, pathname),
+      )
+      if (found) {
+        mockUrl = candidate
+        mock = found as MockWebsocketItem
+        break
+      }
+    }
+
+    if (!mock || !mockUrl) {
       return
     }
 

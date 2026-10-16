@@ -215,6 +215,11 @@ mockDevServerPlugin({
 })
 ```
 
+::: tip 提示
+同样的匹配与优先级规则也适用于 [WebSocket Mock](./websocket-config)，
+当多个规则同时命中同一个 WebSocket 路径时，优先级更高的规则优先被匹配。
+:::
+
 ## 实际应用场景
 
 ### 场景 1：RESTful API 设计

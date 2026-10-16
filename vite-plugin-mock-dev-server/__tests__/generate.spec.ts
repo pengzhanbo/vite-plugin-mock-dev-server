@@ -137,7 +137,7 @@ describe('generateMockServer', () => {
       'const formidableOptions = {"multiples":true,"maxFileSize":1024};',
     )
     expect(entry.source).toContain(
-      'mockWebSocket(compiler, server, { wsProxies, cookiesOptions, logger, activeScene });',
+      'mockWebSocket(compiler, server, { wsProxies, cookiesOptions, logger, activeScene, priority });',
     )
     expect(entry.source).toContain(`  replay: false,
   activeScene,
