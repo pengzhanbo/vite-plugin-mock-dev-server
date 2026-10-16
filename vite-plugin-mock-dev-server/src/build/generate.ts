@@ -51,7 +51,7 @@ export async function generateMockServer(
     },
     {
       filename: path.join(outputDir, 'package.json'),
-      source: generatePackageJson(pkg, mockDeps),
+      source: generatePackageJson(pkg, mockDeps, cwd),
     },
   ]
 

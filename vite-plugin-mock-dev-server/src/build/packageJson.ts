@@ -1,9 +1,13 @@
 import type { Alias } from 'vite'
 import type { ResolvedMockServerPluginOptions } from '../core/options.js'
-import { isBuiltin } from 'node:module'
-import { getPackageInfoSync } from 'local-pkg'
+import fs from 'node:fs'
+import { createRequire, isBuiltin } from 'node:module'
+import path from 'node:path'
+import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 import { name as __PACKAGE_NAME__, version as __PACKAGE_VERSION__ } from '../../package.json'
 import { aliasMatches } from '../compiler/index.js'
+import { customRequire } from '../utils/index.js'
 
 /**
  * 从 mock 文件的 importers 中获取依赖
@@ -51,9 +55,13 @@ function normalizePackageName(dep: string): string {
   return scope
 }
 
-export function generatePackageJson(pkg: Record<string, any>, mockDeps: string[]): string {
+export function generatePackageJson(
+  pkg: Record<string, any>,
+  mockDeps: string[],
+  cwd: string = process.cwd(),
+): string {
   const { dependencies = {}, devDependencies = {} } = pkg
-  const dependents = { ...dependencies, ...devDependencies }
+  const dependents: Record<string, string | undefined> = { ...dependencies, ...devDependencies }
   const mockPkg = {
     name: 'mock-server',
     type: 'module',
@@ -67,15 +75,120 @@ export function generatePackageJson(pkg: Record<string, any>, mockDeps: string[]
     } as Record<string, string>,
     pnpm: { peerDependencyRules: { ignoreMissing: ['vite'] } },
   }
-  const ignores: string[] = ['catalog:', 'file:', 'workspace:']
   for (const dep of mockDeps) {
-    const version = dependents[dep] as string | undefined
-    if (!version || ignores.some((ignore) => version.startsWith(ignore))) {
-      const info = getPackageInfoSync(dep)
-      mockPkg.dependencies[dep] = info?.version ? `^${info.version}` : 'latest'
-    } else {
-      mockPkg.dependencies[dep] = 'latest'
-    }
+    mockPkg.dependencies[dep] = resolveDependencyVersion(dep, dependents[dep], cwd)
   }
   return JSON.stringify(mockPkg, null, 2)
+}
+
+// 版本范围中不可直接用作安装来源的协议前缀
+const IGNORE_PROTOCOLS = /^(?:catalog|file|workspace|link|portal|git(?:\+[^:]+)?|https?):/
+
+/**
+ * Pick the dependency version written into the generated `package.json`.
+ *
+ * 选择写入生成的 `package.json` 中的依赖版本。
+ *
+ * @param dep - Package name / 包名
+ * @param declared - Version range declared in the user's `package.json` / 用户 `package.json` 中声明的版本范围
+ * @param cwd - Project root used as the resolution base / 作为解析基准的项目根目录
+ * @returns Version range / 版本范围
+ */
+export function resolveDependencyVersion(
+  dep: string,
+  declared: string | undefined,
+  cwd: string,
+): string {
+  const version = resolveInstalledVersion(dep, cwd)
+  if (version) {
+    return `^${version}`
+  }
+  if (declared && !IGNORE_PROTOCOLS.test(declared)) {
+    return declared
+  }
+  return 'latest'
+}
+
+/**
+ * Resolve the real `version` of an installed package.
+ *
+ * 解析已安装依赖的 `version` 真实值。
+ *
+ * The package is located with `import.meta.resolve` / `require.resolve`, then its
+ * `package.json` is read —— so the result is immune to workspace protocols and
+ * to nested / hoisted installations.
+ *
+ * 通过 `import.meta.resolve` / `require.resolve` 定位依赖，再读取其 `package.json`，
+ * 因此对 workspace 协议与嵌套 / 提升安装都成立。
+ *
+ * @param name - Package name / 包名
+ * @param cwd - Project root used as the resolution base / 作为解析基准的项目根目录
+ * @returns Installed version, `undefined` when it cannot be resolved / 已安装版本，无法解析时为 `undefined`
+ */
+export function resolveInstalledVersion(name: string, cwd: string): string | undefined {
+  const pkgJsonPath = resolveInstalledPackageJson(name, cwd)
+  if (!pkgJsonPath) {
+    return undefined
+  }
+  try {
+    const { version } = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'))
+    return typeof version === 'string' && version ? version : undefined
+  } catch {
+    return undefined
+  }
+}
+
+function resolveInstalledPackageJson(name: string, cwd: string): string | undefined {
+  const packagePath = resolvePackagePath(name, cwd)
+  if (!packagePath) {
+    return undefined
+  }
+  // 入口文件所在目录向上查找最近的 `package.json`
+  // Walk up from the entry file to the nearest `package.json`
+  return findPackageJson(path.dirname(packagePath))
+}
+
+/**
+ * Locate the entry file of an installed dependency.
+ *
+ * 定位已安装依赖的入口文件。
+ *
+ * 解析顺序 / Resolution order:
+ * 1. `import.meta.resolve` —— 命中插件可见（含被提升）的安装位置，返回 `file:` URL；
+ * 2. 以项目根目录为基准的 `require.resolve` —— 覆盖 pnpm 隔离安装、workspace 与自定义 `cwd` 的场景；
+ * 3. `customRequire` —— 以进程 cwd 为基准兜底。
+ *
+ * @param name - Package name / 包名
+ * @param cwd - Project root used as the resolution base / 作为解析基准的项目根目录
+ * @returns Absolute path of the entry file / 入口文件的绝对路径
+ */
+function resolvePackagePath(name: string, cwd: string): string | undefined {
+  try {
+    const resolved = import.meta.resolve?.(name)
+    if (resolved) {
+      return fileURLToPath(resolved)
+    }
+  } catch {}
+  try {
+    return createRequire(path.join(cwd, 'index.js')).resolve(name)
+  } catch {}
+  try {
+    return customRequire.resolve(name)
+  } catch {}
+  return undefined
+}
+
+function findPackageJson(dir: string): string | undefined {
+  let current = dir
+  while (true) {
+    const file = path.join(current, 'package.json')
+    if (fs.existsSync(file)) {
+      return file
+    }
+    const parent = path.dirname(current)
+    if (parent === current) {
+      return undefined
+    }
+    current = parent
+  }
 }
