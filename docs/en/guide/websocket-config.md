@@ -99,6 +99,11 @@ The candidates are then checked in order, **the first rule that configures `ws: 
 If a rule with a higher priority only configures an HTTP mock, the plugin keeps looking
 until an available WebSocket mock is found.
 
+When a request path matches a `wsPrefix` but no WebSocket mock is available, the handshake
+is rejected with `404` right away, so the client fails immediately instead of waiting for a
+handshake response, which makes a misconfigured path easy to spot. The HMR upgrade request
+of Vite itself (the `vite-hmr` sub protocol) is never affected, it is always left to Vite.
+
 ## Configuration Options
 
 ### `ws` Option
@@ -625,6 +630,9 @@ Check the following:
 1. Is the `wsPrefix` configuration correct?
 2. Ensure the same path is not configured in `vite.config.ts`'s `proxy`
 3. Use `ws://` or `wss://` protocol, not `http://`
+4. When a path is inside a `wsPrefix` but no mock rule matches it, the handshake is rejected
+   with `404`; check whether the `url` of the mock matches the path requested by the client
+   (see [Path Matching and Priority](#path-matching-and-priority))
 
 ### Q: How to broadcast messages?
 

@@ -248,7 +248,9 @@ export function createMatchingWeightSorter(maxSize = 1024): MatchingWeightSorter
       return cached
     }
     const matched = matchingWeight(rules, url, priority)
-    sortedCache.set(url, matched)
+    if (matched.length > 0) {
+      sortedCache.set(url, matched)
+    }
     return matched
   }
   sorter.clear = () => sortedCache.clear()

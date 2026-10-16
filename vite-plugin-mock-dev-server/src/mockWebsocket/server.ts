@@ -28,12 +28,14 @@
  * 于 `server.proxy` 中，避免 vite 内的 http-proxy ws 与 插件的 ws 的冲突。
  */
 
-import type { Server } from 'node:http'
+import type { IncomingHttpHeaders, Server } from 'node:http'
 import type { Http2SecureServer } from 'node:http2'
+import type { Duplex } from 'node:stream'
 import type { WebSocket } from 'ws'
 import type { Compiler } from '../compiler/index.js'
 import type { ResolvedMockServerPluginOptions } from '../core/options.js'
 import type { MockRequest, MockWebsocketItem, WebSocketSetupContext } from '../types/index.js'
+import { STATUS_CODES } from 'node:http'
 import { attempt, findFirstThen, objectKeys, remove, toArray } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import Cookies from 'cookies'
@@ -44,6 +46,11 @@ import { doesProxyContextMatchUrl, isPathMatch, matchScene, urlParse } from '../
 type PoolMap = Map<string, WSSMap>
 type WSSMap = Map<string, WebSocketServer>
 type WSSContextMap = WeakMap<WebSocketServer, WSSContext>
+
+/**
+ * vite 用于 HMR websocket 与其心跳探测的子协议
+ */
+const VITE_HMR_PROTOCOLS = ['vite-hmr', 'vite-ping']
 
 interface Connection {
   req: MockRequest
@@ -82,6 +89,54 @@ const emitConnection = (
 }
 
 /**
+ * 该升级请求是否来自 vite 自身（HMR / 心跳探测）
+ *
+ * `wsPrefix` 可能与 vite HMR 的 websocket 路径重叠（如 `wsPrefix: ['/']`，
+ * 或 `hmr.path` 嵌套在某个前缀内）。这类请求必须交给 vite 自己的 upgrade 处理器：
+ * 接管它会把 mock 数据下发给 HMR 客户端，拒绝它则会直接切断 HMR 连接。
+
+ * 判定方式与 vite 自身的 upgrade 监听保持一致：`sec-websocket-protocol` 严格等于
+ * `vite-hmr` / `vite-ping`。
+ *
+ * @param req - Upgrade request / 升级请求
+ * @returns Whether the request belongs to vite / 是否属于 vite
+ */
+function isViteHmrUpgrade(req: { headers: IncomingHttpHeaders }): boolean {
+  const protocol = req.headers['sec-websocket-protocol']
+  return typeof protocol === 'string' && VITE_HMR_PROTOCOLS.includes(protocol)
+}
+
+/**
+ * 拒绝 websocket 升级请求
+ *
+ * 被拒绝的握手必须显式关闭连接。与开发服务不同，构建产物中的独立 mock server
+ * 不存在其他的 `upgrade` 处理器，若不响应就直接返回，客户端会一直等待握手响应。
+ * 响应按 `ws` 的 `abortHandshake()` 相同的结构写出，
+ * 让客户端能以明确的状态码快速失败，而不是一直等待或被静默重置。
+ *
+ * @param socket - Socket of the upgrade request / 升级请求的 socket
+ * @param statusCode - HTTP status code / HTTP 状态码
+ * @param message - Error message / 错误信息
+ */
+function abortUpgrade(socket: Duplex, statusCode: number, message: string): void {
+  const status = STATUS_CODES[statusCode] ?? ''
+  const body = `${statusCode} ${status}: ${message}`
+  // 写入失败（如客户端已经断开）时直接销毁，避免未处理的 error 事件
+  socket.on('error', () => socket.destroy())
+  socket.once('finish', () => socket.destroy())
+  socket.end(
+    [
+      `HTTP/1.1 ${statusCode} ${status}`,
+      'Connection: close',
+      'Content-Type: text/plain',
+      `Content-Length: ${Buffer.byteLength(body)}`,
+      '',
+      body,
+    ].join('\r\n'),
+  )
+}
+
+/**
  * Mock WebSocket server
  *
  * Mock WebSocket 服务器
@@ -114,7 +169,9 @@ export function mockWebSocket(
    *
    * 与 HTTP 侧保持一致的匹配优先级（静态规则优先于动态规则等），
    * 避免命中多条规则时，匹配结果取决于 `mockData` 的键插入顺序（即 mock 文件的加载顺序）。
-   * 排序结果以 pathname 为键缓存，因此 mock 数据热更新后需要清空缓存。
+   * 排序结果以 pathname 为键缓存，mock 数据热更新后需要清空缓存；
+   * 空结果不会被缓存，因此初次加载完成前建立的连接留下的空结果，
+   * 不会影响加载完成后建立的连接（不依赖 `mock:update-end` 清空）。
    */
   const sortMockUrls = createMatchingWeightSorter()
 
@@ -237,21 +294,23 @@ export function mockWebSocket(
       return
     }
 
+    // vite 自身的 HMR / 心跳升级请求必须放行：它可能落在 `wsPrefix` 内，
+    // 若被 mock 接管或拒绝，HMR 连接会被直接切断
+    if (isViteHmrUpgrade(req)) {
+      return
+    }
+
     const mockData = compiler.mockData
     // 与 HTTP 侧一致，对命中当前请求的规则按匹配权重从高到低排序，
     // 再依次查找首个可用的 websocket mock 配置，
     // 命中多条规则时不再依赖 `mockData` 的键插入顺序（即 mock 文件的加载顺序）
-    // mock 数据或优先级配置中若存在非法 url 模式，解析时会抛出异常，
-    // 此处降级为不处理 upgrade，将连接交回 vite 的代理链路
-    // Same as the HTTP side: sort the rules matched by the current request from the
-    // highest priority to the lowest, then look up the first available websocket mock,
-    // so that a hit of several rules no longer depends on the key insertion order of
-    // `mockData` (that is, the loading order of the mock files).
-    // An invalid url pattern in the mock data or in the priority config throws when
-    // parsing, in that case the upgrade is left to the proxy chain of vite.
     const [weightError, mockUrls] = attempt(sortMockUrls, objectKeys(mockData), pathname, priority)
     if (weightError) {
       logger.error(`${ansis.red(`Invalid mock url pattern at ${pathname}`)}\n  ${weightError}`)
+      // 无法计算权重就无法判断该连接属于哪条规则，必须显式拒绝这次握手：
+      // 让客户端立即失败，而不是一直等待一个永远不会到来的握手响应。
+      // 异常也不会泄漏到 `upgrade` 事件（否则会变成未处理异常）。
+      abortUpgrade(socket, 500, `Invalid mock url pattern at ${pathname}`)
       return
     }
 
@@ -276,6 +335,9 @@ export function mockWebSocket(
     }
 
     if (!mock || !mockUrl) {
+      // 命中 wsPrefix 但没有任何可用的 websocket mock：必须显式回应并关闭连接。
+      logger.debug(`No websocket mock matched ${pathname}, the upgrade is rejected`)
+      abortUpgrade(socket, 404, `No websocket mock matched ${pathname}`)
       return
     }
 
