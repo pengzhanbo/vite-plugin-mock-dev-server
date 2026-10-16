@@ -1,3 +1,27 @@
+# [2.5.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.4.2...v2.5.0) (2026-10-16)
+
+### Bug Fixes
+
+* fix `activeScene` and `formidableOptions` config are lost when building the mock server ([#214](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/214)) ([d9d152f](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/d9d152f74f25986eae723ae52d20ed3dbaaceaff))
+* fix `ensureProxies` categorization error ([#215](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/215)) ([d7d4b16](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/d7d4b1640b905d72df02515056d864929b30646d))
+* fix `scene` override function priority validator ([#216](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/216)) ([98713de](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/98713deba4029df714f7321bb67eebbb5aca1119))
+* fix actual request delay not within the interval ([#217](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/217)) ([2787e10](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/2787e10b6be20c5cfe84bea85217592cc401e98c))
+* fix cache leak with mock files and dependency watcher ([#223](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/223)) ([6e3b912](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/6e3b912077ddbee5f4f1cf5d12441bc88e8d4ec1))
+* fix dep version resolution error in generated `package.json` ([#224](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/224)) ([dd4edbf](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/dd4edbfdea6cc056b58e14d74ed8bf1c7b37479d))
+* fix frequent re-sorting of mock url matching weights ([#219](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/219)) ([42fbd47](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/42fbd47e91111bc77e972da3d8d72cdb92a3207b))
+* fix illegal URL patterns cause development service to crash ([#212](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/212)) ([4f495b5](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/4f495b5416baf7136ef877eddbb6d9da5d9b49c0))
+* fix invalid headers and Cookie cause response exceptions ([#213](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/213)) ([a7ef136](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/a7ef13679e896975d12a827d96144dfc4e290ac0))
+* fix record request filter rejects all requests when include is omitted ([#227](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/227)) ([1c6634d](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/1c6634da05bc093f7ac4879bfdd5d282dd2e17f8))
+* fix silent hmr failure caused by lost inline deps in rolldown ([#228](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/228)) ([8b9ca5f](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/8b9ca5fa7966c91456b365b526d7b2b5df3a51a5))
+* fix unnecessary type conversions in response data processing ([#218](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/218)) ([be864db](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/be864dbad14710a969ecf20a7e76463fa75e384e))
+* fix ws hot update records are not cleaned up ([#211](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/211)) ([6f7b44f](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/6f7b44f9bb7f14ed2a1598930ec4a299d46eba9d))
+
+### Features
+
+* reclaim ws service and client connections created by mock files when delete ([#226](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/226)) ([28e6f11](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/28e6f11a4ccb8c351a49bafa4e5431760db27655))
+* support enable replay when record disabled ([#209](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/209)) ([4c3cd22](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/4c3cd22aab995c14ad7041061060dc17cef9b21a))
+* unify path matching and priority rules of ws and http mock ([#225](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/225)) ([431ce53](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/431ce53fc83480d23922dda949d66dd51810532a))
+
 ## [2.4.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.4.1...v2.4.2) (2026-07-23)
 
 ### Bug Fixes
