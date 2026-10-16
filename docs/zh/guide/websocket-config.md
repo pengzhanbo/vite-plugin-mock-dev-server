@@ -99,6 +99,11 @@ WebSocket Mock 与 HTTP Mock 使用**完全一致的路径匹配与优先级规�
 客户端立即失败（而不是一直等待握手响应），便于快速定位路径配置问题。
 Vite 自身的 HMR 升级请求（`vite-hmr` 子协议）不受影响，始终交由 Vite 处理。
 
+删除 WebSocket Mock 文件时，该文件创建的 WebSocket 服务会被立即回收：已连接的客户端会被断开
+（关闭状态码 `1001`），`onCleanup` 注册的清理回调会被执行，连接池中的服务实例也一并被丢弃。
+文件重新创建后，新的连接会基于最新的 mock 数据重建服务并重新执行 `setup()`。
+未被删除的 mock 文件所创建的连接不受影响。
+
 ## 配置选项详解
 
 ### `ws` 选项
@@ -140,7 +145,7 @@ WebSocket 服务器实例，提供以下功能：
 
 #### `options.onCleanup`
 
-注册清理回调，在热更新时执行：
+注册清理回调，在热更新或 mock 文件被删除时执行：
 
 ```ts
 export default defineMock({
