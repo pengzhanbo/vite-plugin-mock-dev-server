@@ -103,7 +103,7 @@ ${uploadDirCode}const record = {
 const compiler = { mockData }
 const sortMockUrls = createMatchingWeightSorter()
 
-mockWebSocket(compiler, server, { wsProxies, cookiesOptions, logger, activeScene });
+mockWebSocket(compiler, server, { wsProxies, cookiesOptions, logger, activeScene, priority });
 
 app.use(createMockMiddleware(compiler, {
   formidableOptions,

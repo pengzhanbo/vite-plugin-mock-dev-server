@@ -82,6 +82,28 @@ export default defineMock({
 })
 ```
 
+### Path Matching and Priority
+
+WebSocket mocks use **exactly the same path matching and priority rules** as HTTP mocks
+(see [Path Matching](./path-matching)). When several rules match the same request path at
+the same time, for example `/ws/:room` and `/ws/lobby` both match `/ws/lobby`, the plugin
+sorts the candidate rules by matching weight, from the highest priority to the lowest:
+
+1. A static rule wins over a dynamic rule;
+2. A rule with fewer dynamic parameters wins; when the number of parameters is equal,
+   the later the parameter appears, the higher the priority;
+3. The priority of a specific rule can be adjusted by the
+   [`priority`](./plugin-config) option.
+
+The candidates are then checked in order, **the first rule that configures `ws: true` wins**.
+If a rule with a higher priority only configures an HTTP mock, the plugin keeps looking
+until an available WebSocket mock is found.
+
+When a request path matches a `wsPrefix` but no WebSocket mock is available, the handshake
+is rejected with `404` right away, so the client fails immediately instead of waiting for a
+handshake response, which makes a misconfigured path easy to spot. The HMR upgrade request
+of Vite itself (the `vite-hmr` sub protocol) is never affected, it is always left to Vite.
+
 ## Configuration Options
 
 ### `ws` Option
@@ -608,6 +630,9 @@ Check the following:
 1. Is the `wsPrefix` configuration correct?
 2. Ensure the same path is not configured in `vite.config.ts`'s `proxy`
 3. Use `ws://` or `wss://` protocol, not `http://`
+4. When a path is inside a `wsPrefix` but no mock rule matches it, the handshake is rejected
+   with `404`; check whether the `url` of the mock matches the path requested by the client
+   (see [Path Matching and Priority](#path-matching-and-priority))
 
 ### Q: How to broadcast messages?
 

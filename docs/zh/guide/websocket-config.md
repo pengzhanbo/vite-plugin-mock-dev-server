@@ -82,6 +82,23 @@ export default defineMock({
 })
 ```
 
+### 路径匹配与优先级
+
+WebSocket Mock 与 HTTP Mock 使用**完全一致的路径匹配与优先级规则**
+（详见 [路径匹配规则](./path-matching)）。当多个规则同时命中同一个请求路径时，
+例如 `/ws/:room` 与 `/ws/lobby` 同时命中 `/ws/lobby`，插件会按匹配权重从高到低排序候选规则：
+
+1. 静态规则优先于动态规则；
+2. 动态参数更少、位置更靠后的规则优先级更高；
+3. 可通过 [`priority`](./plugin-config) 配置调整特定规则的优先级。
+
+排序后依次查找，**首个配置了 `ws: true` 的规则生效**；
+若优先级更高的规则只配置了 HTTP Mock，则会继续向后查找，直到找到可用的 WebSocket Mock。
+
+若请求路径命中 `wsPrefix`，但没有任何可用的 WebSocket Mock，握手会直接以 `404` 被拒绝，
+客户端立即失败（而不是一直等待握手响应），便于快速定位路径配置问题。
+Vite 自身的 HMR 升级请求（`vite-hmr` 子协议）不受影响，始终交由 Vite 处理。
+
 ## 配置选项详解
 
 ### `ws` 选项
@@ -608,6 +625,8 @@ wscat -c ws://localhost:5173/ws/chat
 1. `wsPrefix` 配置是否正确
 2. 确保没有在 `vite.config.ts` 的 `proxy` 中配置相同路径
 3. 使用 `ws://` 或 `wss://` 协议，不是 `http://`
+4. 路径在 `wsPrefix` 内但没有匹配的 mock 规则时，握手会以 `404` 被拒绝，请检查 mock 的 `url`
+   是否与客户端请求的路径匹配（见 [路径匹配与优先级](#路径匹配与优先级)）
 
 ### Q: 如何广播消息？
 

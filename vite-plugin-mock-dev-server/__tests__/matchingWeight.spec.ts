@@ -144,6 +144,28 @@ describe('createMatchingWeightSorter', () => {
     expect(sorter(newRules, '/api/a')).toEqual(['/api/a', '/api/:a', '/api/*rest'])
   })
 
+  it('should not cache the empty result computed before the rules are loaded', () => {
+    const sorter = createMatchingWeightSorter()
+
+    // 初次加载完成前规则集为空，此时不能缓存空结果：
+    // 否则该路径的规则加载完成后，请求依然会命中缓存中的空结果，
+    // 而首次加载不保证上报 `mock:update-end`，缓存不会被清理
+    // Before the first load completes the rule set is empty and that empty result must
+    // not be cached: once the rules of the pathname are loaded the requests would keep
+    // hitting the cached empty result, and the first load is not guaranteed to emit
+    // `mock:update-end`, so the cache would never be cleared
+    const first = sorter([], '/api/a')
+    const second = sorter([], '/api/a')
+
+    expect(first).toEqual([])
+    expect(second).toEqual([])
+    expect(second).not.toBe(first)
+
+    // 规则加载完成后无需依赖缓存清理即可匹配
+    // The loaded rules match without relying on a cache clear
+    expect(sorter(rules, '/api/a')).toEqual(['/api/a', '/api/:a', '/api/*rest'])
+  })
+
   it('should cache different pathnames separately', () => {
     const sorter = createMatchingWeightSorter()
     const a = sorter(rules, '/api/a')

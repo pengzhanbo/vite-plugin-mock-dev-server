@@ -28,22 +28,29 @@
  * 于 `server.proxy` 中，避免 vite 内的 http-proxy ws 与 插件的 ws 的冲突。
  */
 
-import type { Server } from 'node:http'
+import type { IncomingHttpHeaders, Server } from 'node:http'
 import type { Http2SecureServer } from 'node:http2'
+import type { Duplex } from 'node:stream'
 import type { WebSocket } from 'ws'
 import type { Compiler } from '../compiler/index.js'
 import type { ResolvedMockServerPluginOptions } from '../core/options.js'
 import type { MockRequest, MockWebsocketItem, WebSocketSetupContext } from '../types/index.js'
-import { findFirstThen, objectKeys, remove, toArray } from '@pengzhanbo/utils'
+import { STATUS_CODES } from 'node:http'
+import { attempt, findFirstThen, objectKeys, remove, toArray } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import Cookies from 'cookies'
 import { WebSocketServer } from 'ws'
-import { parseRequestParams } from '../mockHttp/index.js'
+import { createMatchingWeightSorter, parseRequestParams } from '../mockHttp/index.js'
 import { doesProxyContextMatchUrl, isPathMatch, matchScene, urlParse } from '../utils/index.js'
 
 type PoolMap = Map<string, WSSMap>
 type WSSMap = Map<string, WebSocketServer>
 type WSSContextMap = WeakMap<WebSocketServer, WSSContext>
+
+/**
+ * vite 用于 HMR websocket 与其心跳探测的子协议
+ */
+const VITE_HMR_PROTOCOLS = ['vite-hmr', 'vite-ping']
 
 interface Connection {
   req: MockRequest
@@ -82,6 +89,54 @@ const emitConnection = (
 }
 
 /**
+ * 该升级请求是否来自 vite 自身（HMR / 心跳探测）
+ *
+ * `wsPrefix` 可能与 vite HMR 的 websocket 路径重叠（如 `wsPrefix: ['/']`，
+ * 或 `hmr.path` 嵌套在某个前缀内）。这类请求必须交给 vite 自己的 upgrade 处理器：
+ * 接管它会把 mock 数据下发给 HMR 客户端，拒绝它则会直接切断 HMR 连接。
+
+ * 判定方式与 vite 自身的 upgrade 监听保持一致：`sec-websocket-protocol` 严格等于
+ * `vite-hmr` / `vite-ping`。
+ *
+ * @param req - Upgrade request / 升级请求
+ * @returns Whether the request belongs to vite / 是否属于 vite
+ */
+function isViteHmrUpgrade(req: { headers: IncomingHttpHeaders }): boolean {
+  const protocol = req.headers['sec-websocket-protocol']
+  return typeof protocol === 'string' && VITE_HMR_PROTOCOLS.includes(protocol)
+}
+
+/**
+ * 拒绝 websocket 升级请求
+ *
+ * 被拒绝的握手必须显式关闭连接。与开发服务不同，构建产物中的独立 mock server
+ * 不存在其他的 `upgrade` 处理器，若不响应就直接返回，客户端会一直等待握手响应。
+ * 响应按 `ws` 的 `abortHandshake()` 相同的结构写出，
+ * 让客户端能以明确的状态码快速失败，而不是一直等待或被静默重置。
+ *
+ * @param socket - Socket of the upgrade request / 升级请求的 socket
+ * @param statusCode - HTTP status code / HTTP 状态码
+ * @param message - Error message / 错误信息
+ */
+function abortUpgrade(socket: Duplex, statusCode: number, message: string): void {
+  const status = STATUS_CODES[statusCode] ?? ''
+  const body = `${statusCode} ${status}: ${message}`
+  // 写入失败（如客户端已经断开）时直接销毁，避免未处理的 error 事件
+  socket.on('error', () => socket.destroy())
+  socket.once('finish', () => socket.destroy())
+  socket.end(
+    [
+      `HTTP/1.1 ${statusCode} ${status}`,
+      'Connection: close',
+      'Content-Type: text/plain',
+      `Content-Length: ${Buffer.byteLength(body)}`,
+      '',
+      body,
+    ].join('\r\n'),
+  )
+}
+
+/**
  * Mock WebSocket server
  *
  * Mock WebSocket 服务器
@@ -89,15 +144,17 @@ const emitConnection = (
  * @param compiler - Compiler instance / 编译器实例
  * @param server - HTTP server instance / HTTP 服务器实例
  * @param options - Resolved plugin options / 解析后的插件配置
- * @param options.wsProxies - WebSocket proxy prefixes / WebSocket 代理前缀
- * @param options.cookiesOptions - Cookies options / Cookies 配置项
- * @param options.logger - Logger instance / 日志实例
- * @param options.activeScene - Active scene / 当前场景
  */
 export function mockWebSocket(
   compiler: Compiler,
   server: Server | Http2SecureServer | null,
-  { wsProxies: proxies, cookiesOptions, logger, activeScene }: ResolvedMockServerPluginOptions,
+  {
+    wsProxies: proxies,
+    cookiesOptions,
+    logger,
+    activeScene,
+    priority,
+  }: ResolvedMockServerPluginOptions,
 ): void {
   // Hot update file mapping
   // 热更新文件映射
@@ -106,6 +163,17 @@ export function mockWebSocket(
   // 连接池
   const poolMap: PoolMap = new Map()
   const wssContextMap: WSSContextMap = new WeakMap()
+
+  /**
+   * 候选规则的权重排序器
+   *
+   * 与 HTTP 侧保持一致的匹配优先级（静态规则优先于动态规则等），
+   * 避免命中多条规则时，匹配结果取决于 `mockData` 的键插入顺序（即 mock 文件的加载顺序）。
+   * 排序结果以 pathname 为键缓存，mock 数据热更新后需要清空缓存；
+   * 空结果不会被缓存，因此初次加载完成前建立的连接留下的空结果，
+   * 不会影响加载完成后建立的连接（不依赖 `mock:update-end` 清空）。
+   */
+  const sortMockUrls = createMatchingWeightSorter()
 
   const getWssMap = (mockUrl: string): WSSMap => {
     let wssMap = poolMap.get(mockUrl)
@@ -171,6 +239,11 @@ export function mockWebSocket(
     connectionList.forEach(({ ws, req }) => emitConnection(wss, ws, req, connectionList))
   }
 
+  // mock 数据热更新后，候选规则集合会变化，此前缓存的排序结果随之失效
+  // After mock data is hot-reloaded the candidate rules change and the cached
+  // sorted results become stale
+  compiler.on?.('mock:update-end', sortMockUrls.clear)
+
   // Detect ws-related mock file updates
   // If the current ws configuration has established a wss connection, restart that wss connection
   // 检测 ws 相关的 mock 文件更新
@@ -221,21 +294,50 @@ export function mockWebSocket(
       return
     }
 
-    const mockData = compiler.mockData
-    const mockUrl = objectKeys(mockData).find((key) => isPathMatch(key, pathname))
-    if (!mockUrl) {
+    // vite 自身的 HMR / 心跳升级请求必须放行：它可能落在 `wsPrefix` 内，
+    // 若被 mock 接管或拒绝，HMR 连接会被直接切断
+    if (isViteHmrUpgrade(req)) {
       return
     }
 
-    const mock = mockData[mockUrl].find(
-      (item) =>
-        item.url &&
-        item.ws &&
-        matchScene(effectActiveScene, item.scene) &&
-        isPathMatch(item.url, pathname),
-    ) as MockWebsocketItem
+    const mockData = compiler.mockData
+    // 与 HTTP 侧一致，对命中当前请求的规则按匹配权重从高到低排序，
+    // 再依次查找首个可用的 websocket mock 配置，
+    // 命中多条规则时不再依赖 `mockData` 的键插入顺序（即 mock 文件的加载顺序）
+    const [weightError, mockUrls] = attempt(sortMockUrls, objectKeys(mockData), pathname, priority)
+    if (weightError) {
+      logger.error(`${ansis.red(`Invalid mock url pattern at ${pathname}`)}\n  ${weightError}`)
+      // 无法计算权重就无法判断该连接属于哪条规则，必须显式拒绝这次握手：
+      // 让客户端立即失败，而不是一直等待一个永远不会到来的握手响应。
+      // 异常也不会泄漏到 `upgrade` 事件（否则会变成未处理异常）。
+      abortUpgrade(socket, 500, `Invalid mock url pattern at ${pathname}`)
+      return
+    }
 
-    if (!mock) {
+    let mockUrl: string | undefined
+    let mock: MockWebsocketItem | undefined
+
+    // 仅命中首个可用的 websocket mock 配置，与 HTTP 侧保持一致
+    // Only the first available websocket mock matches, consistent with the HTTP side
+    for (const candidate of mockUrls) {
+      const found = mockData[candidate].find(
+        (item) =>
+          item.url &&
+          item.ws &&
+          matchScene(effectActiveScene, item.scene) &&
+          isPathMatch(item.url, pathname),
+      )
+      if (found) {
+        mockUrl = candidate
+        mock = found as MockWebsocketItem
+        break
+      }
+    }
+
+    if (!mock || !mockUrl) {
+      // 命中 wsPrefix 但没有任何可用的 websocket mock：必须显式回应并关闭连接。
+      logger.debug(`No websocket mock matched ${pathname}, the upgrade is rejected`)
+      abortUpgrade(socket, 404, `No websocket mock matched ${pathname}`)
       return
     }
 
