@@ -1,11 +1,15 @@
 import type { Debugger } from 'obug'
 import { Buffer } from 'node:buffer'
 import { createHash } from 'node:crypto'
+import { createRequire } from 'node:module'
 import os from 'node:os'
 import path from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { isPrimitive } from '@pengzhanbo/utils'
 import { createDebug } from 'obug'
+
+export const customRequire: NodeJS.Require = createRequire(process.cwd())
 
 export function getDirname(importMetaUrl: string): string {
   return path.dirname(fileURLToPath(importMetaUrl))

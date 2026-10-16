@@ -1,7 +1,6 @@
 import type { Readable, Stream } from 'node:stream'
-import { createRequire } from 'node:module'
-import process from 'node:process'
 import { LRUCache } from '@pengzhanbo/utils'
+import { customRequire } from './shared.js'
 
 export function isStream(stream: unknown): stream is Stream {
   return stream != null && typeof stream === 'object' && typeof (stream as any).pipe === 'function'
@@ -17,8 +16,13 @@ export function isReadableStream(stream: unknown): stream is Readable {
 }
 
 const PACKAGE_CACHE = new LRUCache<string, boolean>({ maxSize: 1024 })
-const require = createRequire(process.cwd())
 
+/**
+ * 检查包是否存在
+ *
+ * @param mod 包名
+ * @returns 包是否存在
+ */
 export function isPackageExists(mod: string): boolean {
   if (PACKAGE_CACHE.has(mod)) {
     return PACKAGE_CACHE.get(mod)!
@@ -30,7 +34,7 @@ export function isPackageExists(mod: string): boolean {
     if (import.meta.resolve) {
       isExists = !!import.meta.resolve(mod)
     } else {
-      require.resolve(mod)
+      customRequire.resolve(mod)
       isExists = true
     }
   } catch {}
