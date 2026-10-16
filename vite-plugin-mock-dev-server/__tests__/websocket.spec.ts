@@ -5,6 +5,7 @@
  */
 import type { Server } from 'node:http'
 import type { AddressInfo, Socket } from 'node:net'
+import type { WebSocketServer } from 'ws'
 import type { Compiler } from '../src/compiler/index.js'
 import type { ResolvedMockServerPluginOptions } from '../src/core/options.js'
 import type { MockOptions, MockWebsocketItem } from '../src/types/index.js'
@@ -245,6 +246,39 @@ describe('mockWebSocket', () => {
       await vi.waitFor(() => expect(connections.size).toBe(0))
     })
 
+    it('should report a throwing cleanup and keep recycling', async () => {
+      const cleanup = vi.fn()
+      const errorLog = vi.fn()
+      const logger = {
+        debug: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: errorLog,
+      } as unknown as ResolvedMockServerPluginOptions['logger']
+      const mockSetup: MockWebsocketItem['setup'] = (wss, context) => {
+        context.onCleanup(() => {
+          throw new Error('cleanup failed')
+        })
+        context.onCleanup(cleanup)
+      }
+      const mockData: Record<string, MockOptions> = { [MOCK_URL]: [createMockItem(mockSetup)] }
+      const { compiler, port } = await start(mockData, { logger })
+      const client = await connect(port)
+
+      compiler.emit('mock:unlink', FILEPATH)
+      delete mockData[MOCK_URL]
+      compiler.emit('mock:update-end', FILEPATH)
+
+      // 抛错的清理被记录，且不会中断其余清理与回收流程
+      // The throwing cleanup is reported, and does not interrupt the remaining cleanups
+      // nor the recycling
+      expect(cleanup).toHaveBeenCalledTimes(1)
+      expect(errorLog).toHaveBeenCalledTimes(1)
+      expect(String(errorLog.mock.calls[0][0])).toContain('cleanup failed')
+      await vi.waitFor(() => expect(client.readyState).toBe(WebSocket.CLOSED))
+      await vi.waitFor(() => expect(connections.size).toBe(0))
+    })
+
     it('should not affect the websocket servers of other mock files', async () => {
       const firstSetup = vi.fn()
       const secondSetup = vi.fn()
@@ -351,6 +385,38 @@ describe('mockWebSocket', () => {
 
       expect(reconnected.readyState).toBe(WebSocket.OPEN)
       expect(setup).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  // mock 注册的监听需要能被精确移除：热更新时旧监听被移除、`setup` 重新执行；
+  // 而插件自身的监听（同步 `connectionList`）与 `ws` 内部的监听（维护 `wss.clients`）
+  // 必须保留 —— 否则已断开的连接会一直留在 `wss.clients` 中
+  describe('listener lifecycle', () => {
+    it('should replace the listeners of the mock and keep the internal ones on hot update', async () => {
+      let received = 0
+      let wssRef: WebSocketServer | undefined
+      const mockSetup: MockWebsocketItem['setup'] = (wss) => {
+        wssRef = wss
+        wss.on('connection', (ws) => {
+          ws.on('message', () => {
+            received += 1
+          })
+        })
+      }
+      const mockData: Record<string, MockOptions> = { [MOCK_URL]: [createMockItem(mockSetup)] }
+      const { compiler, port } = await start(mockData)
+      const client = await connect(port)
+
+      // 热更新：mock 的旧监听被移除，`setup` 重新执行并注册新监听
+      compiler.emit('mock:update-end', FILEPATH)
+
+      client.send('hello')
+      // 旧监听已被移除，消息只会被处理一次（未移除时会收到两次）
+      await vi.waitFor(() => expect(received).toBe(1))
+
+      // `ws` 内部维护 `wss.clients` 的监听没有被移除：客户端断开后集合回到空
+      client.close()
+      await vi.waitFor(() => expect(wssRef?.clients.size).toBe(0))
     })
   })
 
