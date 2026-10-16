@@ -127,6 +127,22 @@ describe('requestValidate', () => {
     expect(requestValidate(request, validator)).toBe(true)
   })
 
+  it('should validate headers case-insensitively', () => {
+    // Node.js lowercases incoming header names, so validator keys written in
+    // any case must still match.
+    const request = {
+      query: {},
+      body: {},
+      params: {},
+      headers: { 'content-type': 'application/json', 'x-custom': 'value' },
+      refererQuery: {},
+    } as any
+
+    expect(requestValidate(request, { headers: { 'Content-Type': 'application/json' } })).toBe(true)
+    expect(requestValidate(request, { headers: { 'X-CUSTOM': 'value' } })).toBe(true)
+    expect(requestValidate(request, { headers: { 'X-Custom': 'other' } })).toBe(false)
+  })
+
   it('should validate matching refererQuery', () => {
     const request = {
       query: {},

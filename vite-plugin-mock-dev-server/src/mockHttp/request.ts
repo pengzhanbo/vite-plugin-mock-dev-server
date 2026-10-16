@@ -1,7 +1,7 @@
 import type { MatchFunction } from 'path-to-regexp'
 import type { Connect } from 'vite'
 import type { Logger } from '../core/index.js'
-import type { BodyParserOptions, ExtraRequest, MockRequest } from '../types/index.js'
+import type { BodyParserOptions, ExtraRequest, Headers, MockRequest } from '../types/index.js'
 import { Buffer } from 'node:buffer'
 import { PassThrough } from 'node:stream'
 import { isEmptyObject, LRUCache } from '@pengzhanbo/utils'
@@ -219,6 +219,25 @@ export function parseRequestParams(
 }
 
 /**
+ * Normalize header names to lowercase for case-insensitive comparison
+ *
+ * 将请求头名称归一化为小写，用于大小写不敏感的比较
+ *
+ * @param headers - Header object to normalize / 需要归一化的请求头对象
+ * @returns Normalized header object / 归一化后的请求头对象
+ */
+function normalizeHeaderNames(headers?: Headers): Headers | undefined {
+  if (!headers) {
+    return undefined
+  }
+  const normalized: Headers = {}
+  for (const name in headers) {
+    normalized[name.toLowerCase()] = headers[name]
+  }
+  return normalized
+}
+
+/**
  * Validate request against validator
  *
  * 验证请求是否符合 validator
@@ -229,7 +248,7 @@ export function parseRequestParams(
  */
 export function requestValidate(request: ExtraRequest, validator: Partial<ExtraRequest>): boolean {
   return (
-    isObjectSubset(request.headers, validator.headers) &&
+    isObjectSubset(request.headers, normalizeHeaderNames(validator.headers)) &&
     isObjectSubset(request.body, validator.body) &&
     isObjectSubset(request.params, validator.params) &&
     isObjectSubset(request.query, validator.query) &&
