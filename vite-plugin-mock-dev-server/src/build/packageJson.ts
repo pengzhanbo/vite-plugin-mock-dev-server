@@ -143,9 +143,9 @@ function resolveInstalledPackageJson(name: string, cwd: string): string | undefi
   if (!packagePath) {
     return undefined
   }
-  // 入口文件所在目录向上查找最近的 `package.json`
-  // Walk up from the entry file to the nearest `package.json`
-  return findPackageJson(path.dirname(packagePath))
+  // 从入口文件所在目录向上查找该依赖自身的 `package.json`
+  // Walk up from the entry file to the manifest of this dependency
+  return findPackageJson(path.dirname(packagePath), name, cwd)
 }
 
 /**
@@ -154,8 +154,9 @@ function resolveInstalledPackageJson(name: string, cwd: string): string | undefi
  * 定位已安装依赖的入口文件。
  *
  * 解析顺序 / Resolution order:
- * 1. `import.meta.resolve` —— 命中插件可见（含被提升）的安装位置，返回 `file:` URL；
- * 2. 以项目根目录为基准的 `require.resolve` —— 覆盖 pnpm 隔离安装、workspace 与自定义 `cwd` 的场景；
+ * 1. 以项目根目录（`cwd`）为基准创建的 `require.resolve` —— 与依赖在 mock 项目中的解析结果一致，
+ *    优先覆盖 pnpm 隔离安装、workspace 与自定义 `cwd` 的场景；
+ * 2. `import.meta.resolve` —— 回退到插件可见（含被提升）的安装位置，返回 `file:` URL；
  * 3. `customRequire` —— 以进程 cwd 为基准兜底。
  *
  * @param name - Package name / 包名
@@ -164,13 +165,13 @@ function resolveInstalledPackageJson(name: string, cwd: string): string | undefi
  */
 function resolvePackagePath(name: string, cwd: string): string | undefined {
   try {
+    return createRequire(path.join(cwd, 'index.js')).resolve(name)
+  } catch {}
+  try {
     const resolved = import.meta.resolve?.(name)
     if (resolved) {
       return fileURLToPath(resolved)
     }
-  } catch {}
-  try {
-    return createRequire(path.join(cwd, 'index.js')).resolve(name)
   } catch {}
   try {
     return customRequire.resolve(name)
@@ -178,17 +179,58 @@ function resolvePackagePath(name: string, cwd: string): string | undefined {
   return undefined
 }
 
-function findPackageJson(dir: string): string | undefined {
-  let current = dir
+/**
+ * Find the manifest that belongs to the dependency being resolved.
+ *
+ * 查找所解析依赖自身的 package.json。
+ *
+ * 查找区间 / Search scope:
+ * - 起始于入口文件所在目录，逐级向上；
+ * - **以用户项目（`cwd`）为界**：抵达项目根目录后即停止，不采用项目上下文之外的清单
+ *   （依赖通过 link / workspace 安装时其真实路径仍在项目内，因此不再以 `node_modules` 为界）；
+ * - 只接受 `name` 与所解析依赖一致的清单：无法读取 / 无法解析、缺少 `name`，
+ *   或 `name` 不一致（子目录中的副本、别名依赖）的清单都会被跳过；
+ * - 抵达项目根目录或文件系统根目录时返回 `undefined`。
+ *
+ * @param dir - Directory of the entry file / 入口文件所在目录
+ * @param name - Package name being resolved / 所解析的包名
+ * @param cwd - Project root, the search boundary / 项目根目录，查找边界
+ * @returns Absolute path of the manifest, `undefined` when not found / 清单的绝对路径，未找到时为 `undefined`
+ */
+function findPackageJson(dir: string, name: string, cwd: string): string | undefined {
+  const root = toRealPath(cwd)
+  let current = toRealPath(dir)
   while (true) {
     const file = path.join(current, 'package.json')
-    if (fs.existsSync(file)) {
+    if (readPackageName(file) === name) {
       return file
+    }
+    // 边界：用户项目上下文之外不再查找
+    // Boundary: never look beyond the context of the user's project
+    if (current === root) {
+      return undefined
     }
     const parent = path.dirname(current)
     if (parent === current) {
       return undefined
     }
     current = parent
+  }
+}
+
+function toRealPath(p: string): string {
+  try {
+    return fs.realpathSync(p)
+  } catch {
+    return path.resolve(p)
+  }
+}
+
+function readPackageName(file: string): string | undefined {
+  try {
+    const { name } = JSON.parse(fs.readFileSync(file, 'utf-8'))
+    return typeof name === 'string' ? name : undefined
+  } catch {
+    return undefined
   }
 }
