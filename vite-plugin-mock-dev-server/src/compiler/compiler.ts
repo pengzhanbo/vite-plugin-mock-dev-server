@@ -163,10 +163,6 @@ export class Compiler extends EventEmitter {
         return
       }
       const applied = await this.load(filepath)
-      // A compilation that was invalidated (the file was deleted, or a newer
-      // compilation superseded it) must not report an update: for a deleted file
-      // the rules are gone from the cache, and reporting it would restart the ws
-      // mocks / full-reload for a file that no longer exists.
       // 被取消的编译（文件已删除或已被更新的编译取代）不应上报更新：
       // 文件已删除时规则已从缓存移除，否则会为已不存在的文件重启 ws mock
       // 或触发全页刷新。
@@ -189,23 +185,14 @@ export class Compiler extends EventEmitter {
       if (!isMatch(filepath)) {
         return
       }
-      // The watcher emits paths relative to `cwd` and already prefixed with `dir`
-      // (e.g. `mock/a.mock.ts`), which is exactly the key used by `moduleCache`.
-      // Joining `dir` again would build `mock/mock/a.mock.ts` and silently fail to
-      // remove the module, leaving deleted mock rules active until restart.
       // 监视器发出的路径是相对 `cwd` 且已包含 `dir` 前缀的（如 `mock/a.mock.ts`），
       // 正是 `moduleCache` 使用的键。再次拼接 `dir` 会得到 `mock/mock/a.mock.ts`，
       // 导致删除静默失败，被删除的 mock 规则会一直生效直到重启。
       this.moduleCache.delete(filepath)
-      // Cancel the compilation that may still be in flight for this file,
-      // otherwise `load()` would write the deleted module back into the caches
-      // once it resolves (see `loadTokens`).
       // 取消该文件可能仍在进行中的编译，否则 `load()` 完成后会把已删除的模块
       // 写回缓存（见 `loadTokens`）。
       this.loadTokens.delete(filepath)
       this.removeModuleDeps(filepath, true)
-      // A deleted mock file may itself be imported by other mock files: keep
-      // watching it, so that they can be restored when it is created again.
       // 被删除的 mock 文件也可能被其他 mock 文件引用：继续监视它，
       // 以便它重新创建时恢复这些引用方。
       this.watchDepReturn(filepath)
@@ -280,9 +267,6 @@ export class Compiler extends EventEmitter {
         alias,
         logger,
       })
-      // The mock file may have been deleted (or re-compiled) while compiling:
-      // writing the stale result would bring the deleted mock rules back, so it
-      // must be dropped before touching the caches.
       // 编译期间 mock 文件可能已被删除（或重新编译）：写入过期结果会让已删除的
       // mock 规则「复活」，因此必须在写入缓存前丢弃。
       if (this.loadTokens.get(filepath) !== token) {
@@ -292,8 +276,6 @@ export class Compiler extends EventEmitter {
       this.updateModuleDeps(filepath, internalDeps)
       return true
     } catch (e) {
-      // A compilation that fails for an already invalidated file is expected
-      // (the file was deleted on purpose), so stay silent in that case.
       // 已被取消的编译失败属于预期情况（文件被有意删除），此时不必报错。
       if (this.loadTokens.get(filepath) !== token) {
         return false
@@ -325,8 +307,6 @@ export class Compiler extends EventEmitter {
    * @param deps - Dependencies of the mock file / Mock 文件的依赖
    */
   private updateModuleDeps(filepath: string, deps: string[]): void {
-    // Drop stale reverse references first: when a mock file is re-compiled its
-    // dependency list may shrink, and old entries would otherwise live forever.
     // 先清理过期的反向引用：mock 文件重新编译后依赖列表可能变短，
     // 否则旧条目会永久驻留（内存与 watcher 泄漏）。
     this.removeModuleDeps(filepath)
@@ -342,20 +322,8 @@ export class Compiler extends EventEmitter {
   }
 
   /**
-   * Remove a mock file from the dependency mapping
-   *
    * 从依赖映射中移除指定的 mock 文件
    *
-   * Always removes every reference to the mock file held by other entries, since
-   * a file that no longer exists is not a dependency of anything anymore.
-   *
-   * With `removeSelf` (the file itself has been deleted) the reverse references
-   * are kept instead of being dropped: other mock files may still import the
-   * deleted file, and that relation is what allows them to be re-compiled once
-   * the file is created again. The dep key is marked in `missingDeps`, so the
-   * deps watcher can watch for its return and clean the marker up on its own
-   * terms. Callers are responsible for emitting `update:deps` once the mapping is
-   * settled.
    *
    * 始终移除其他条目对该 mock 文件的引用：文件不存在就不再是任何条目的依赖。
    *
@@ -386,13 +354,8 @@ export class Compiler extends EventEmitter {
   }
 
   /**
-   * Watch a deleted dependency for its return
-   *
    * 等待已删除的依赖重新创建
-   *
-   * chokidar stops watching a path once it disappeared, so the dependency has to
-   * be registered again to be notified when it is created again.
-   *
+
    * chokidar 在路径消失后会停止监视，因此需要重新注册该依赖，
    * 才能在它被重新创建时收到通知。
    *
@@ -405,13 +368,7 @@ export class Compiler extends EventEmitter {
   }
 
   /**
-   * Re-compile the mock files that import a dependency
-   *
    * 重新编译引用该依赖的 mock 文件
-   *
-   * Used when a deleted dependency has been created again: the mock files that
-   * import it still serve the rules compiled from the previous content, so they
-   * have to be compiled again to pick up the new version.
    *
    * 用于已删除的依赖被重新创建之后：引用它的 mock 文件仍在提供基于旧内容编译的
    * 规则，因此需要重新编译它们，以获取最新版本。
@@ -437,7 +394,6 @@ export class Compiler extends EventEmitter {
         if (filepath.includes('node_modules')) {
           return true
         }
-        // Normalize path for cross-platform compatibility (Windows)
         // 规范化路径以确保跨平台兼容性（Windows）
         return !!stats?.isFile() && !isMatch(normalizePath(filepath))
       },
@@ -495,8 +451,6 @@ export class Compiler extends EventEmitter {
     this.on('update:deps', () => {
       const deps: string[] = [...this.moduleDeps.keys()]
       const addedDeps = deps.filter((dep) => !oldDeps.includes(dep))
-      // Release dependencies that are no longer imported by any mock file,
-      // otherwise the watcher keeps references to them for the whole session.
       // 释放不再被任何 mock 文件引用的依赖，否则监视器会在整个会话中保留它们。
       const removedDeps = oldDeps.filter((dep) => !deps.includes(dep))
       oldDeps = deps

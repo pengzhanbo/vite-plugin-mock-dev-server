@@ -3,7 +3,7 @@ import fs, { promises as fsp } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
-import { attemptAsync } from '@pengzhanbo/utils'
+import { attempt, attemptAsync } from '@pengzhanbo/utils'
 import { formatError, getHash } from '../utils/index.js'
 
 interface LoadFromCodeOptions {
@@ -19,6 +19,8 @@ interface LoadFromCodeOptions {
  * 导致插件的非预期的情况下被执行。
  * 这可能会导致插件在错误的环境下被调用，生成临时文件后没有及时删除。
  * 因此，在进程退出时，需要清理临时文件，确保没有遗留的临时文件。
+ *
+ * 这只是一种兜底策略，实际上在某些 IDE 中能否清理存疑。
  */
 const TEMP_FILES = new Set<string>()
 
@@ -52,12 +54,16 @@ async function unlink(filepath: string): Promise<void> {
   TEMP_FILES.delete(filepath)
 }
 
-async function cleanupTempFiles(): Promise<void> {
+/**
+ * 清理当前进程遗留的临时文件
+ */
+function cleanupTempFiles(): void {
   for (const filepath of TEMP_FILES) {
     if (fs.existsSync(filepath)) {
-      await attemptAsync(fsp.unlink, filepath)
+      attempt(fs.unlinkSync, filepath)
     }
   }
+  TEMP_FILES.clear()
 }
 
 // 在进程退出时，清理临时文件
