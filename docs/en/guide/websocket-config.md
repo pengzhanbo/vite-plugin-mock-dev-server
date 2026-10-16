@@ -104,6 +104,12 @@ is rejected with `404` right away, so the client fails immediately instead of wa
 handshake response, which makes a misconfigured path easy to spot. The HMR upgrade request
 of Vite itself (the `vite-hmr` sub protocol) is never affected, it is always left to Vite.
 
+Deleting a WebSocket mock file recycles the WebSocket servers created by that file right away:
+the connected clients are disconnected (close code `1001`), the cleanup callbacks registered
+with `onCleanup` are executed, and the pooled server instances are dropped. Once the file is
+created again, the next connection rebuilds the servers from the latest mock data and runs
+`setup()` anew. The connections created by mock files that were not deleted are unaffected.
+
 ## Configuration Options
 
 ### `ws` Option
@@ -145,7 +151,7 @@ WebSocket server instance, providing the following features:
 
 #### `options.onCleanup`
 
-Register cleanup callbacks, executed during hot reload:
+Register cleanup callbacks, executed during hot reload and when the mock file is deleted:
 
 ```ts
 export default defineMock({

@@ -61,6 +61,12 @@ interface WSSContext {
   cleanupList: (() => void)[]
   context: WebSocketSetupContext
   connectionList: Connection[]
+  /**
+   * Path of the mock file whose `setup` created this websocket server
+   *
+   * 创建该 websocket 服务的 mock 文件路径（即提供 `setup` 的文件）
+   */
+  filepath: string
 }
 
 const getWss = (wssMap: WSSMap, pathname: string): WebSocketServer => {
@@ -224,11 +230,11 @@ export function mockWebSocket(
     pathname: string,
     filepath: string,
   ): void => {
-    const { cleanupList, connectionList, context } = wssContextMap.get(wss)!
-    // During restart/hot update, need to re-execute setup(). Before execution,
-    // need to clear old loops/auto tasks/listeners
-    // For multiple client ws connections, each ws connection needs to clear old listeners
-    // and manually trigger a connection listener
+    const wssContext = wssContextMap.get(wss)!
+    const { cleanupList, connectionList, context } = wssContext
+    // 本次更新所对应的 mock 文件从现在起提供 `setup`：同步记录归属者，
+    // 以便删除该文件时可以回收这个 websocket 服务。
+    wssContext.filepath = filepath
     // 重启/热更新时，需要重新执行 setup()，在执行前，需要清除旧的循环/自动任务/监听
     // 多个客户端 ws 连接，每个 ws连接都需要清除旧的监听，并手动触发一次 connection 监听
     cleanupRunner(cleanupList)
@@ -239,13 +245,43 @@ export function mockWebSocket(
     connectionList.forEach(({ ws, req }) => emitConnection(wss, ws, req, connectionList))
   }
 
+  /**
+   * 被删除的 mock 文件是这些服务 `setup` 的唯一来源：若保留它们，客户端会一直与
+   * 已被删除的 mock 逻辑通信，直到开发服务停止。这里执行清理回调、断开客户端、
+   * 关闭服务并丢弃它们的连接池条目。
+   *
+   * 条目也必须丢弃：已关闭的服务无法复用（`handleUpgrade` 在非运行状态的服务上会失败），
+   * 因此后续连接需要基于当时的 mock 数据重建服务 —— 这也正是该 mock 文件被重新创建后
+   * 能够重新生效的原因。
+   *
+   * @param filepath - Path of the deleted mock file / 已删除的 mock 文件路径
+   */
+  const closeWssOfFile = (filepath: string): void => {
+    for (const [mockUrl, wssMap] of poolMap) {
+      for (const [pathname, wss] of [...wssMap]) {
+        const wssContext = wssContextMap.get(wss)
+        // 只回收 `setup` 来自该已删除文件的服务：归属其他 mock 文件的服务不受影响。
+        if (wssContext?.filepath !== filepath) {
+          continue
+        }
+        // 释放 `setup()` 注册的循环 / 定时器 / 监听
+        cleanupRunner(wssContext.cleanupList)
+        // mock 已不存在，因此断开客户端，而不是把它们留在逻辑已被删除的服务上
+        // （状态码 1001：服务端离开）。
+        wssContext.connectionList.forEach(({ ws }) => ws.close(1001))
+        wss.close()
+        wssContextMap.delete(wss)
+        wssMap.delete(pathname)
+      }
+      if (wssMap.size === 0) {
+        poolMap.delete(mockUrl)
+      }
+    }
+  }
+
   // mock 数据热更新后，候选规则集合会变化，此前缓存的排序结果随之失效
-  // After mock data is hot-reloaded the candidate rules change and the cached
-  // sorted results become stale
   compiler.on?.('mock:update-end', sortMockUrls.clear)
 
-  // Detect ws-related mock file updates
-  // If the current ws configuration has established a wss connection, restart that wss connection
   // 检测 ws 相关的 mock 文件更新
   // 如果当前的 ws 配置已建立 wss 连接，则重启该 wss 连接
   compiler.on?.('mock:update-end', (filepath: string) => {
@@ -277,10 +313,10 @@ export function mockWebSocket(
     }
   })
 
-  // The mock file has been deleted, remove its hot-update record
-  // mock 文件已被删除，移除其热更新记录
+  // mock 文件已被删除：移除其热更新记录，并回收它创建的 websocket 服务及其客户端
   compiler.on?.('mock:unlink', (filepath: string) => {
     hmrMap.delete(filepath)
+    closeWssOfFile(filepath)
   })
 
   const effectActiveScene = toArray(activeScene)
@@ -354,7 +390,7 @@ export function mockWebSocket(
       const context: WebSocketSetupContext = {
         onCleanup: (cleanup) => cleanupList.push(cleanup),
       }
-      wssContext = { cleanupList, context, connectionList: [] }
+      wssContext = { cleanupList, context, connectionList: [], filepath }
       wssContextMap.set(wss, wssContext)
 
       setupWss(wssMap, wss, mock, context, pathname, filepath)
