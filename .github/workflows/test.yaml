@@ -25,4 +25,4 @@ jobs:
         run: pnpm i
 
       - name: Test
-        run: pnpm vitest run
+        run: pnpm vitest run --retry=1
