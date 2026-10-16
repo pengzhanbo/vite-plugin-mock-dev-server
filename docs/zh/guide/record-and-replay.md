@@ -250,6 +250,9 @@ export default {
 }
 ```
 
+`include` 可以省略：此时默认包含所有请求，仅由 `exclude` 进行排除。
+`glob` 模式下 `include` 只写否定模式（如 `['!**/auth/**']`）时同理。
+
 #### `record.gitignore`
 
 - **类型**：`boolean`
