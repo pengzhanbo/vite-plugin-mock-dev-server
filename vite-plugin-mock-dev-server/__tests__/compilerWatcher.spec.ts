@@ -67,27 +67,27 @@ const WAIT_TIMEOUT = 10_000
  *
  * 被 mock 文件引入的共享模块，按版本参数化
  *
- * It exports a function on purpose: a module whose code is fully inlined as a
- * constant may be merged into the entry by the bundler and never reported as a
- * dependency.
+ * It exports a plain constant on purpose: a module whose code is fully inlined
+ * into the entry chunk is not reported in the output chunk (`chunk.moduleIds`),
+ * so the constant keeps the M5 regression (dependencies collected from the
+ * output chunk only) detectable here, in the real watcher pipeline, instead of
+ * only in the unit test of the bundler channel.
  *
- * 它刻意导出一个函数：代码被完全内联为常量的模块可能被打包器合并进入口模块，
- * 从而不会被上报为依赖。
+ * 它刻意导出一个纯常量：被完全内联进入口 chunk 的模块不会出现在输出 chunk
+ * （`chunk.moduleIds`）中，因此常量能让 M5 的回归（只从输出 chunk 采集依赖）
+ * 在真实的监视器链路中同样可被检出，而不只是在打包通道的单元测试里。
  *
  * @param version - Version rendered into the mock body / 写入 mock body 的版本号
  * @returns Shared module source / 共享模块源码
  */
 function sharedDepCode(version: number): string {
-  return `export function createMock(url: string): any {
-  return { url, method: 'GET', body: { name: url, version: ${version} } }
-}
-`
+  return `export const version = ${version}\n`
 }
 
 const SHARED_DEP_CODE = sharedDepCode(1)
 
-const MOCK_WITH_DEP_CODE = `import { createMock } from './shared.js'
-export default [createMock('/api/a')]
+const MOCK_WITH_DEP_CODE = `import { version } from './shared.js'
+export default [{ url: '/api/a', method: 'GET', body: { name: '/api/a', version } }]
 `
 
 const SHARED_MOCK = `${DIR}/shared.mock.ts`
