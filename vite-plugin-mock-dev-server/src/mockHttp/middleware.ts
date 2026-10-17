@@ -24,13 +24,15 @@ import {
 import ansis from 'ansis'
 import Cookies from 'cookies'
 import { recordRequestWithRawReq, replayRecordedRequest } from '../recorder/index.js'
-import { doesProxyContextMatchUrl, urlParse } from '../utils/index.js'
+import { doesProxyContextMatchUrl, isReadableStream, urlParse } from '../utils/index.js'
 import { createCors } from './cors.js'
 import { findMockData } from './matcher.js'
 import { createMatchingWeightSorter } from './matchingWeight.js'
 import { parseRequestBodyWithRaw, parseRequestParams, requestLog } from './request.js'
 import { cacheRequestBody } from './requestRecovery.js'
 import {
+  attachStreamHandlers,
+  pipeStreamData,
   provideResponseCookies,
   provideResponseHeaders,
   provideResponseStatus,
@@ -251,6 +253,23 @@ export function createMockMiddleware(
     if (!isNil(body)) {
       const [error] = await attemptAsync(async () => {
         const content = isFunction(body) ? await body(request) : body
+        // 流式响应先注册错误与关闭处理器，再等待延迟：流可能在延迟阶段就读取失败，
+        // 客户端也可能在延迟阶段提前断开，延迟结束后才开始传输流。
+        if (isReadableStream(content)) {
+          const canPipe = attachStreamHandlers(response, content, {
+            logger,
+            url: pathname,
+            filepath,
+            level: logLevel,
+          })
+          if (!canPipe) {
+            return
+          }
+          await responseRealDelay(startTime, delay)
+          pipeStreamData(response, content)
+          return
+        }
+
         await responseRealDelay(startTime, delay)
         sendResponseData(response, content, type)
       })
