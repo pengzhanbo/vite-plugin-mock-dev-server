@@ -118,7 +118,7 @@ export function createMockMiddleware(
     // 对满足匹配规则的配置进行优先级排序
     // mock 数据或优先级配置中若存在非法 url 模式，解析时会抛出异常，
     // 此处降级为 `next()`，将请求交给后续中间件处理
-    const [weightError, mockUrls] = attempt(sortMockUrls, Object.keys(mockData), pathname, priority)
+    const [weightError, mockUrls] = attempt(sortMockUrls, getMockUrls(mockData), pathname, priority)
     if (weightError) {
       logger.error(`${ansis.red(`Invalid mock url pattern at ${pathname}`)}\n  ${weightError}`)
       return next()
@@ -237,11 +237,12 @@ export function createMockMiddleware(
     await provideResponseHeaders(request, response, mock, logger)
     await provideResponseCookies(request, response, mock, logger)
 
-    logger.info(requestLog(request, filepath, shouldSimulateError), logLevel)
+    logger.info(() => requestLog(request, filepath, shouldSimulateError), logLevel)
     logger.debug(
-      `${ansis.magenta('DEBUG')} ${ansis.underline(pathname)} matches: [ ${mockUrls
-        .map((m) => (m === _mockUrl ? ansis.underline.bold(m) : ansis.dim(m)))
-        .join(', ')} ]\n`,
+      () =>
+        `${ansis.magenta('DEBUG')} ${ansis.underline(pathname)} matches: [ ${mockUrls
+          .map((m) => (m === _mockUrl ? ansis.underline.bold(m) : ansis.dim(m)))
+          .join(', ')} ]\n`,
     )
 
     if (!isNil(body)) {
@@ -301,4 +302,15 @@ export function createMockMiddleware(
       next(error)
     }
   }
+}
+
+const keysCache = new WeakMap<Record<string, MockOptions>, string[]>()
+
+function getMockUrls(mockData: Record<string, MockOptions>): string[] {
+  let mockUrls = keysCache.get(mockData)
+  if (!mockUrls) {
+    mockUrls = Object.keys(mockData)
+    keysCache.set(mockData, mockUrls)
+  }
+  return mockUrls
 }

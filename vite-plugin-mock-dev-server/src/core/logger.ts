@@ -3,6 +3,22 @@ import { isBoolean } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 
 /**
+ * Log message, either a string or a factory for building it lazily
+ *
+ * 日志消息，字符串或惰性构建消息的工厂函数
+ *
+ * The factory form is only evaluated when the log level allows the message to be
+ * output. It is meant for messages whose formatting costs something (string
+ * concatenation, `JSON.stringify`, `new URL`, colorizing...) so that they are not
+ * built at all when the log is filtered out.
+ *
+ * 工厂函数形式只有在日志级别允许输出时才会被求值，用于格式化存在开销的消息
+ * （字符串拼接、`JSON.stringify`、`new URL`、着色等），
+ * 使日志被级别过滤时完全不产生构建开销。
+ */
+export type LogMessage = string | (() => string)
+
+/**
  * Logger interface
  *
  * 日志接口
@@ -13,25 +29,25 @@ export interface Logger {
    *
    * 调试日志
    */
-  debug: (msg: string, level?: boolean | LogLevel) => void
+  debug: (msg: LogMessage, level?: boolean | LogLevel) => void
   /**
    * Info log
    *
    * 信息日志
    */
-  info: (msg: string, level?: boolean | LogLevel) => void
+  info: (msg: LogMessage, level?: boolean | LogLevel) => void
   /**
    * Warning log
    *
    * 警告日志
    */
-  warn: (msg: string, level?: boolean | LogLevel) => void
+  warn: (msg: LogMessage, level?: boolean | LogLevel) => void
   /**
    * Error log
    *
    * 错误日志
    */
-  error: (msg: string, level?: boolean | LogLevel) => void
+  error: (msg: LogMessage, level?: boolean | LogLevel) => void
 }
 
 /**
@@ -68,7 +84,7 @@ export function createLogger(prefix: string, defaultLevel: LogLevel = 'info'): L
    * @param msg - Log message / 日志消息
    * @param level - Log level / 日志级别
    */
-  function output(type: LogType, msg: string, level: boolean | LogLevel): void {
+  function output(type: LogType, msg: LogMessage, level: boolean | LogLevel): void {
     level = isBoolean(level) ? (level ? defaultLevel : 'error') : level
     const thresh = logLevels[level]
     if (thresh >= logLevels[type]) {
@@ -81,7 +97,10 @@ export function createLogger(prefix: string, defaultLevel: LogLevel = 'info'): L
             : type === 'warn'
               ? ansis.yellow.bold(prefix)
               : ansis.red.bold(prefix)
-      const format = `${ansis.dim(new Date().toLocaleTimeString())} ${tag} ${msg}`
+      // 惰性消息只在确认需要输出后才求值，日志被过滤时不产生格式化开销
+      // Lazy messages are only evaluated once the log is known to be output
+      const message = typeof msg === 'function' ? msg() : msg
+      const format = `${ansis.dim(new Date().toLocaleTimeString())} ${tag} ${message}`
       console[method](format)
     }
   }

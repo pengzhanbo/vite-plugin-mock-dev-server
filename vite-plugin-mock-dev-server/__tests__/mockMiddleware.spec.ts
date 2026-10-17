@@ -772,6 +772,89 @@ describe('mockMiddleware', () => {
     expect(JSON.parse(secondRes.data)).toEqual({ source: 'static' })
   })
 
+  it('should invalidate the cached mock url keys when the mock data is replaced', async () => {
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }
+    const usersItem: MockHttpItem = {
+      url: '/api/users',
+      method: 'GET',
+      body: { source: 'users' },
+      __filepath__: 'test.mock.ts',
+    } as MockHttpItem
+    const compiler = createMockCompiler({ '/api/users': [usersItem] })
+    const sortMockUrls = createMatchingWeightSorter()
+
+    const middleware = createMockMiddleware(
+      compiler,
+      {
+        proxies: ['/api'],
+        logger: logger as any,
+        cors: false,
+        record: { enabled: false },
+        replay: false,
+      } as any,
+      sortMockUrls,
+    )
+
+    const firstRes = createMockResponse()
+    await middleware(createMockRequest({ url: '/api/users' }), firstRes, vi.fn())
+    expect(JSON.parse(firstRes.data)).toEqual({ source: 'users' })
+
+    // 热更新时 `Compiler.updateMockData` 会整体替换 mockData 对象，
+    // 中间件缓存的 url 键列表必须随之失效，否则会继续命中已被删除的规则
+    // A hot update replaces the whole mockData object (`Compiler.updateMockData`),
+    // the cached url keys must be invalidated with it, otherwise a removed rule
+    // would still be matched
+    const postsItem: MockHttpItem = {
+      url: '/api/posts',
+      method: 'GET',
+      body: { source: 'posts' },
+      __filepath__: 'test.mock.ts',
+    } as MockHttpItem
+    ;(compiler as any).mockData = { '/api/posts': [postsItem] }
+    sortMockUrls.clear()
+
+    const removedRes = createMockResponse()
+    const removedNext = vi.fn()
+    await middleware(createMockRequest({ url: '/api/users' }), removedRes, removedNext)
+    expect(removedNext).toHaveBeenCalled()
+    expect(removedRes.ended).toBe(false)
+
+    const addedRes = createMockResponse()
+    await middleware(createMockRequest({ url: '/api/posts' }), addedRes, vi.fn())
+    expect(JSON.parse(addedRes.data)).toEqual({ source: 'posts' })
+    expect(logger.error).not.toHaveBeenCalled()
+  })
+
+  it('should pass the request log as a lazy message', async () => {
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }
+    const mockItem: MockHttpItem = {
+      url: '/api/users',
+      method: 'GET',
+      body: { id: 1 },
+      __filepath__: 'test.mock.ts',
+    } as MockHttpItem
+
+    const middleware = createMockMiddleware(createMockCompiler({ '/api/users': [mockItem] }), {
+      proxies: ['/api'],
+      logger: logger as any,
+      cors: false,
+      record: { enabled: false },
+      replay: false,
+    } as any)
+
+    await middleware(createMockRequest({ url: '/api/users' }), createMockResponse(), vi.fn())
+
+    // 请求日志以工厂函数的形式交给 logger，由 logger 在确认需要输出时才求值，
+    // 避免日志级别过滤时仍拼接字符串（`JSON.stringify` / `new URL`）
+    // The request log is handed to the logger as a factory, so that the string is
+    // only built when the logger decides to output it, instead of on every filtered request
+    expect(logger.info).toHaveBeenCalledTimes(1)
+    const [message, level] = logger.info.mock.calls[0]
+    expect(typeof message).toBe('function')
+    expect(level).toBeUndefined()
+    expect(message()).toContain('GET')
+  })
+
   it('should handle a compiler without event support', async () => {
     const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }
     const mockItem: MockHttpItem = {
