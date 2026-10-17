@@ -131,9 +131,10 @@ export interface MockMatchSpecialPriority {
    * @example
    * ```ts
    * {
-   *   // A 与 B 同时命中时，二者都会被提升，且 A 排在 B 之前
-   *   // When both A and B match, both are promoted and A comes before B
-   *   A: ['B'],
+   *   // A、B、C 同时命中且 C 初始位于首位时，A、B 都会被提升，且 A 排在 B 之前
+   *   // When A, B and C all match and C is initially on top, both A and B are
+   *   // promoted and A comes before B
+   *   A: ['C'],
    *   B: ['C']
    * }
    * ```
