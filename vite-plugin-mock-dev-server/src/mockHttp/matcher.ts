@@ -13,26 +13,33 @@ interface FindMockDataOptions {
 }
 
 /**
- * Check whether the mock rules support the given HTTP method
+ * Check whether the mock rules support the given HTTP method in the active scene
  *
- * 判断 Mock 规则是否支持指定的请求方法
+ * 判断 Mock 规则在当前场景下是否支持指定的请求方法
  *
- * 预检请求不会经过请求体与校验器的匹配流程，只需确认该路径下存在支持目标方法的规则。
- * 未显式声明 `method` 的规则与 `findMockData` 保持一致，默认为 `GET`、`POST`。
+ * 预检请求不会经过请求体与校验器的匹配流程，只需确认该路径下存在支持目标方法、
+ * 且场景匹配的规则。未显式声明 `method` 的规则与 `findMockData` 保持一致，
+ * 默认为 `GET`、`POST`；场景判断复用 `matchScene`，与正常 mock 匹配一致。
  *
  * A preflight request does not go through the request body / validator matching, so it
- * only needs to know whether the path has a rule supporting the target method. Rules
- * without an explicit `method` default to `GET` and `POST`, consistent with
- * `findMockData`.
+ * only needs to know whether the path has a rule that supports the target method and
+ * matches the active scene. Rules without an explicit `method` default to `GET` and
+ * `POST`, consistent with `findMockData`; the scene check reuses `matchScene`, the same
+ * as the normal mock matching.
  *
  * @param mockList - Mock options list / Mock 配置列表
  * @param method - HTTP method to check / 需要检查的 HTTP 方法
+ * @param activeScene - Active scene / 当前激活的场景
  * @returns Whether the method is supported / 是否支持该方法
  */
-export function hasMockMethod(mockList: MockOptions, method: string): boolean {
+export function hasMockMethod(
+  mockList: MockOptions,
+  method: string,
+  activeScene: string[] = [],
+): boolean {
   const target = method.toUpperCase()
   return mockList.some((mock) => {
-    if (!mock || mock.ws) {
+    if (!mock || mock.ws || !matchScene(activeScene, mock.scene)) {
       return false
     }
     return toArray<Method>(mock.method ?? ['GET', 'POST'])

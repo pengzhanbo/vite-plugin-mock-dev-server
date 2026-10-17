@@ -1214,11 +1214,13 @@ describe('mockMiddleware / cors preflight', () => {
    *
    * @param mockData - Mock data / Mock 数据
    * @param cors - CORS options / CORS 配置项
+   * @param options - Extra middleware options / 其他中间件配置
    * @returns Mock middleware / Mock 中间件
    */
   function createCorsMiddleware(
     mockData: Record<string, MockOptions>,
     cors: any = { origin: '*' },
+    options: Record<string, any> = {},
   ) {
     return createMockMiddleware(createMockCompiler(mockData), {
       proxies: ['/api'],
@@ -1226,6 +1228,7 @@ describe('mockMiddleware / cors preflight', () => {
       cors,
       record: { enabled: false },
       replay: false,
+      ...options,
     } as any)
   }
 
@@ -1302,6 +1305,77 @@ describe('mockMiddleware / cors preflight', () => {
     expect(next).not.toHaveBeenCalled()
     expect(res.statusCode).toBe(200)
     expect(res.ended).toBe(true)
+    expect(res.headers['Access-Control-Allow-Origin']).toBe('*')
+  })
+
+  it('should pass preflight requests through for mocks in an inactive scene', async () => {
+    // 非活动场景的 mock 不参与正常匹配，也不应触发预检响应
+    // Mocks of an inactive scene do not take part in the normal matching, and they must
+    // not trigger a preflight response either
+    const middleware = createCorsMiddleware({
+      '/api/users': [{ ...postMock, scene: ['admin'] }],
+    })
+    const req = createMockRequest({
+      url: '/api/users',
+      method: 'OPTIONS',
+      headers: {
+        'origin': 'http://localhost:3000',
+        'access-control-request-method': 'POST',
+      },
+    })
+    const res = createMockResponse()
+    const next = vi.fn()
+
+    await middleware(req, res, next)
+
+    expect(next).toHaveBeenCalledTimes(1)
+    expect(res.headers['Access-Control-Allow-Origin']).toBeUndefined()
+  })
+
+  it('should answer preflight requests for mocks activated by the X-Mock-Scene header', async () => {
+    const middleware = createCorsMiddleware({
+      '/api/users': [{ ...postMock, scene: ['admin'] }],
+    })
+    const req = createMockRequest({
+      url: '/api/users',
+      method: 'OPTIONS',
+      headers: {
+        'origin': 'http://localhost:3000',
+        'access-control-request-method': 'POST',
+        'x-mock-scene': 'admin',
+      },
+    })
+    const res = createMockResponse()
+    const next = vi.fn()
+
+    await middleware(req, res, next)
+
+    expect(next).not.toHaveBeenCalled()
+    expect(res.statusCode).toBe(204)
+    expect(res.headers['Access-Control-Allow-Origin']).toBe('*')
+  })
+
+  it('should answer preflight requests for mocks activated by the activeScene option', async () => {
+    const middleware = createCorsMiddleware(
+      { '/api/users': [{ ...postMock, scene: ['admin'] }] },
+      undefined,
+      { activeScene: ['admin'] },
+    )
+    const req = createMockRequest({
+      url: '/api/users',
+      method: 'OPTIONS',
+      headers: {
+        'origin': 'http://localhost:3000',
+        'access-control-request-method': 'POST',
+      },
+    })
+    const res = createMockResponse()
+    const next = vi.fn()
+
+    await middleware(req, res, next)
+
+    expect(next).not.toHaveBeenCalled()
+    expect(res.statusCode).toBe(204)
     expect(res.headers['Access-Control-Allow-Origin']).toBe('*')
   })
 })

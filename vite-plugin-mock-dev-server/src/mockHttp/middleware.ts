@@ -104,13 +104,15 @@ export function createMockMiddleware(
    *
    * 预检请求（`OPTIONS` + `Access-Control-Request-Method`）不对应任何 mock 规则，
    * `cors` 又会直接结束响应而不调用 `next`，因此不能放在「匹配到 mock 之后」处理。
-   * 仅当该路径存在支持预检方法的 mock 时才由插件响应，否则交回后续中间件（如代理）。
+   * 仅当该路径存在支持预检方法、且场景匹配（与正常匹配相同的 `activeScene`）的 mock
+   * 时才由插件响应，否则交回后续中间件（如代理）。
    *
    * @param req - Request object / 请求对象
    * @param res - Response object / 响应对象
    * @param next - Next middleware / 下一个中间件
    * @param mockData - Mock data / Mock 数据
    * @param mockUrls - Mock URLs matching the request pathname / 命中请求路径的 Mock URL
+   * @param scene - Active scene / 当前激活的场景
    * @returns Whether the preflight request is handled / 预检请求是否已被处理
    */
   async function handleCorsPreflight(
@@ -119,6 +121,7 @@ export function createMockMiddleware(
     next: Connect.NextFunction,
     mockData: Record<string, MockOptions>,
     mockUrls: string[],
+    scene: string[],
   ): Promise<boolean> {
     if (!cors || req.method?.toUpperCase() !== 'OPTIONS') {
       return false
@@ -129,7 +132,7 @@ export function createMockMiddleware(
       .toUpperCase()
     if (
       !preflightMethod ||
-      !mockUrls.some((mockUrl) => hasMockMethod(mockData[mockUrl], preflightMethod))
+      !mockUrls.some((mockUrl) => hasMockMethod(mockData[mockUrl], preflightMethod, scene))
     ) {
       return false
     }
@@ -187,8 +190,18 @@ export function createMockMiddleware(
 
     const method = req.method!.toUpperCase()
 
+    // Resolve effective active scenario: X-Mock-Scene header overrides config
+    // X-Mock-Scene 头部覆盖配置
+    const headerScene = req.headers['x-mock-scene']
+    const effectiveScene: string[] = headerScene
+      ? toArray(headerScene)
+          .map((item) => item.split(',').map((s) => s.trim()))
+          .flat()
+          .filter(Boolean)
+      : activeScene
+
     // 预检请求需要在匹配 mock 之前处理，详见 `handleCorsPreflight`
-    if (await handleCorsPreflight(req, res, next, mockData, mockUrls)) {
+    if (await handleCorsPreflight(req, res, next, mockData, mockUrls, effectiveScene)) {
       return
     }
 
@@ -211,16 +224,6 @@ export function createMockMiddleware(
       headers: req.headers,
       getCookie: cookies.get.bind(cookies),
     }
-
-    // Resolve effective active scenario: X-Mock-Scene header overrides config
-    // X-Mock-Scene 头部覆盖配置
-    const headerScene = req.headers['x-mock-scene']
-    const effectiveScene: string[] = headerScene
-      ? toArray(headerScene)
-          .map((item) => item.split(',').map((s) => s.trim()))
-          .flat()
-          .filter(Boolean)
-      : activeScene
 
     // 查找匹配的mock，仅找出首个匹配的配置项后立即结束
     for (const mockUrl of mockUrls) {
