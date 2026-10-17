@@ -79,13 +79,16 @@ export async function processRecordRes(res: IncomingMessage, body: Buffer): Prom
     }
   }
   const isText = isTextContent(headers['content-type'] || '')
-  if (isText) {
-    const { body: decodedBody, encoding } = await decompressBody(
-      body,
-      headers['content-encoding'] || '',
-    )
-    body = Buffer.from(decodedBody)
-    headers['content-encoding'] = encoding
+  const contentEncoding = headers['content-encoding']
+  if (isText && contentEncoding) {
+    const { body: decodedBody, encoding } = await decompressBody(body, contentEncoding)
+    // 解压成功时 `encoding` 为 `identity`：响应体已是明文，必须移除 `content-encoding`
+    // （不能写成 `identity`），否则客户端会按错误的编码解析响应体。
+    // 解压失败时响应体保持压缩状态，保留原始 `content-encoding`。
+    if (encoding === 'identity') {
+      body = Buffer.from(decodedBody)
+      delete headers['content-encoding']
+    }
   }
   return { status, statusText, headers, body: body.toString(isText ? 'utf-8' : 'base64') }
 }
