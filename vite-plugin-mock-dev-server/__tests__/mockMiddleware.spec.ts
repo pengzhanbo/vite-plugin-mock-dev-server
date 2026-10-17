@@ -1085,7 +1085,7 @@ describe('mockMiddleware', () => {
     // 模拟非预期异常，如无法按流读取的请求对象
     const req = {
       url: '/api/error',
-      method: 'POST',
+      method: 'GET',
       headers: { 'content-type': 'application/json', 'content-length': '2' },
     } as unknown as Connect.IncomingMessage
     const next = vi.fn()
@@ -1098,6 +1098,39 @@ describe('mockMiddleware', () => {
     expect(logger.error).toHaveBeenCalledTimes(1)
     expect(next).toHaveBeenCalledTimes(1)
     expect(next.mock.calls[0][0]).toBeInstanceOf(TypeError)
+  })
+
+  it('should pass the body limit error to the error handler', async () => {
+    // 超出请求体上限时通过 content-length 快速拒绝，错误携带 413 状态码
+    // An oversized body is rejected through `content-length` with a 413 status
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }
+    const mockItem: MockHttpItem = {
+      url: '/api/upload',
+      method: 'POST',
+      body: { ok: true },
+      __filepath__: 'test.mock.ts',
+    } as MockHttpItem
+    const middleware = createMockMiddleware(createMockCompiler({ '/api/upload': [mockItem] }), {
+      proxies: ['/api'],
+      logger: logger as any,
+      cors: false,
+      record: { enabled: false },
+      replay: false,
+      bodyParserOptions: { jsonLimit: '1kb' },
+    } as any)
+    const req = createMockRequest({
+      url: '/api/upload',
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'content-length': '2048' },
+    })
+    const res = createMockResponse()
+    const next = vi.fn()
+
+    await expect(middleware(req, res, next)).resolves.toBeUndefined()
+
+    expect(next).toHaveBeenCalledTimes(1)
+    expect(next.mock.calls[0][0]).toMatchObject({ status: 413 })
+    expect(res.ended).toBe(false)
   })
 })
 

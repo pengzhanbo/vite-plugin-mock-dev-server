@@ -71,6 +71,107 @@ export interface ParsedRequestBody {
 }
 
 /**
+ * Default buffering limit of the JSON / form / text body
+ *
+ * JSON / form / text 请求体的默认缓冲上限
+ *
+ * 与 co-body（raw-body）的 `1mb` 默认限制保持一致
+ *
+ * Kept in sync with the `1mb` default limit of co-body (raw-body)
+ */
+const DEFAULT_BODY_LIMIT: number = 1024 * 1024
+
+/**
+ * Default buffering limit of the multipart body
+ *
+ * multipart 请求体的默认缓冲上限
+ *
+ * 与 formidable 的 `maxFileSize` 默认值保持一致
+ *
+ * Kept in sync with the `maxFileSize` default of formidable
+ */
+const DEFAULT_MULTIPART_LIMIT: number = 200 * 1024 * 1024
+
+const SIZE_UNITS: Record<string, number> = {
+  b: 1,
+  kb: 1024,
+  mb: 1024 ** 2,
+  gb: 1024 ** 3,
+  tb: 1024 ** 4,
+  pb: 1024 ** 5,
+}
+
+const SIZE_REGEX = /^(\d+(?:\.\d+)?)\s*(b|kb|mb|gb|tb|pb)?$/i
+
+/**
+ * Parse a body size option into bytes
+ *
+ * 将请求体大小配置解析为字节数
+ *
+ * 支持数字以及 `bytes` 风格的字符串（如 `'10mb'`），无法解析时返回 `undefined`
+ *
+ * Supports numbers and `bytes` style strings (such as `'10mb'`), returns `undefined`
+ * when the value cannot be parsed
+ *
+ * @param value - Size option / 大小配置
+ * @returns Size in bytes, `undefined` when not configured or invalid / 字节数，未配置或非法时为 `undefined`
+ */
+function parseBodyLimit(value?: string | number): number | undefined {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) && value >= 0 ? value : undefined
+  }
+  if (!value) {
+    return undefined
+  }
+  const matched = SIZE_REGEX.exec(value.trim())
+  if (!matched) {
+    return undefined
+  }
+  return Math.floor(Number(matched[1]) * (SIZE_UNITS[(matched[2] ?? 'b').toLowerCase()] ?? 1))
+}
+
+/**
+ * Resolve the buffering limit of the request body
+ *
+ * 解析请求体的缓冲上限
+ *
+ * 读取阶段就应用与解析阶段一致的限制，避免先把超大请求体完整拼进内存后
+ * 才被 co-body / formidable 拒绝。无法确认解析方式的 content-type 不做限制，
+ * 以免影响通过代理转发的大文件请求。
+ *
+ * @param contentType - Request content type / 请求的 content-type
+ * @param bodyParserOptions - Body parser options / 请求体解析配置项
+ * @param formidableOptions - Formidable options / Formidable 配置项
+ * @returns Limit in bytes, `undefined` for no limit / 字节上限，`undefined` 表示不限制
+ */
+function resolveBodyLimit(
+  contentType: string,
+  bodyParserOptions: BodyParserOptions,
+  formidableOptions: formidable.Options | undefined,
+): number | undefined {
+  const { limit, jsonLimit, formLimit, textLimit } = bodyParserOptions
+
+  if (contentType.startsWith('application/json')) {
+    return parseBodyLimit(jsonLimit ?? limit) ?? DEFAULT_BODY_LIMIT
+  }
+  if (contentType.startsWith('application/x-www-form-urlencoded')) {
+    return parseBodyLimit(formLimit ?? limit) ?? DEFAULT_BODY_LIMIT
+  }
+  if (contentType.startsWith('text/plain')) {
+    return parseBodyLimit(textLimit ?? limit) ?? DEFAULT_BODY_LIMIT
+  }
+  if (contentType.startsWith('multipart/form-data')) {
+    return (
+      parseBodyLimit(limit) ??
+      parseBodyLimit(formidableOptions?.maxTotalFileSize) ??
+      parseBodyLimit(formidableOptions?.maxFileSize) ??
+      DEFAULT_MULTIPART_LIMIT
+    )
+  }
+  return undefined
+}
+
+/**
  * Parse request body and collect raw body
  *
  * 解析请求体并收集原始请求体
@@ -99,7 +200,11 @@ export async function parseRequestBodyWithRaw(
     return { body: undefined }
   }
 
-  const rawBody = await readRequestBody(req)
+  const type = typeof contentType === 'string' ? contentType.toLowerCase() : ''
+  const rawBody = await readRequestBody(
+    req,
+    resolveBodyLimit(type, bodyParserOptions, formidableOptions),
+  )
   if (!rawBody.byteLength) {
     return { body: undefined, rawBody }
   }
@@ -114,17 +219,135 @@ export async function parseRequestBodyWithRaw(
   return { body, rawBody }
 }
 
-function readRequestBody(req: Connect.IncomingMessage): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = []
+/**
+ * Create an error when reading the request body fails
+ *
+ * 创建读取请求体失败时的错误
+ *
+ * `status` 会被 Vite / connect 的错误处理中间件用作响应状态码
 
-    req.on('error', reject)
-    req.on('end', () => {
-      resolve(chunks.length ? Buffer.concat(chunks) : Buffer.alloc(0))
-    })
-    req.on('data', (chunk) => {
-      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
-    })
+ * @param status - HTTP status code / HTTP 状态码
+ * @param message - Error message / 错误信息
+ * @param code - Error code / 错误码
+ * @returns The created error / 创建的错误
+ */
+function createRequestBodyError(
+  status: number,
+  message: string,
+  code: string,
+): Error & { status: number; code: string } {
+  return Object.assign(new Error(message), { status, code })
+}
+
+/**
+ * Check whether the error means the client aborted the request
+ *
+ * 判断错误是否表示客户端中断了请求
+ *
+ * @param error - Error to check / 需要判断的错误
+ * @returns Whether the request is aborted / 请求是否被中断
+ */
+export function isRequestAbortedError(error: unknown): boolean {
+  return (error as { code?: string } | undefined)?.code === 'ECONNABORTED'
+}
+
+/**
+ * Read the request body with a size limit
+ *
+ * 读取请求体（带大小上限）
+ *
+ * 读取前先通过 `content-length` 快速拒绝超大请求；读取过程中累计已接收的字节数，
+ * 超限立即停止读取并返回 413 错误，避免把超大请求体完整拼进内存。
+ * 同时监听 `aborted` / `close`，客户端中途断开时立即 reject，避免异步链悬挂。
+ *
+ * @param req - Incoming message object / 入站消息对象
+ * @param limit - Maximum body size in bytes, `undefined` for no limit / 请求体字节上限，`undefined` 表示不限制
+ * @returns Raw request body / 原始请求体
+ */
+function readRequestBody(req: Connect.IncomingMessage, limit?: number): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const contentLength = Number(req.headers['content-length'])
+    if (limit !== undefined && Number.isFinite(contentLength) && contentLength > limit) {
+      reject(
+        createRequestBodyError(
+          413,
+          `request entity too large: content-length ${contentLength} exceeds the limit ${limit}`,
+          'ETOOLARGE',
+        ),
+      )
+      return
+    }
+
+    const chunks: Buffer[] = []
+    let received = 0
+    let settled = false
+
+    function cleanup(): void {
+      req.removeListener('data', onData)
+      req.removeListener('end', onEnd)
+      req.removeListener('error', onError)
+      req.removeListener('aborted', onAborted)
+      req.removeListener('close', onClose)
+    }
+
+    function done(error?: Error, body?: Buffer): void {
+      if (settled) {
+        return
+      }
+      settled = true
+      cleanup()
+      if (error) {
+        // 停止消费剩余请求体，避免继续占用内存
+        // Stop consuming the rest of the request to avoid further memory usage
+        req.pause()
+        reject(error)
+        return
+      }
+      resolve(body!)
+    }
+
+    function onData(chunk: Buffer): void {
+      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
+      received += buffer.byteLength
+      if (limit !== undefined && received > limit) {
+        done(
+          createRequestBodyError(
+            413,
+            `request entity too large: received more than the limit ${limit}`,
+            'ETOOLARGE',
+          ),
+        )
+        return
+      }
+      chunks.push(buffer)
+    }
+
+    function onEnd(): void {
+      done(undefined, chunks.length ? Buffer.concat(chunks) : Buffer.alloc(0))
+    }
+
+    function onError(error: Error): void {
+      done(error)
+    }
+
+    function onAborted(): void {
+      done(createRequestBodyError(400, 'request aborted by the client', 'ECONNABORTED'))
+    }
+
+    function onClose(): void {
+      // `close` 在请求未正常结束时也会触发，`complete` 表示消息已完整接收
+      // `close` is also emitted when the request does not end normally, while
+      // `complete` indicates the message has been fully received
+      if (!req.complete) {
+        onAborted()
+      }
+    }
+
+    req.on('data', onData)
+    req.once('end', onEnd)
+    req.once('error', onError)
+    req.once('aborted', onAborted)
+    req.once('close', onClose)
   })
 }
 

@@ -12,6 +12,7 @@ import type {
   MockResponse,
 } from '../types/index.js'
 import type { MatchingWeightSorter } from './matchingWeight.js'
+import type { ParsedRequestBody } from './request.js'
 import {
   attempt,
   attemptAsync,
@@ -28,7 +29,12 @@ import { doesProxyContextMatchUrl, isReadableStream, urlParse } from '../utils/i
 import { createCors } from './cors.js'
 import { findMockData, hasMockMethod } from './matcher.js'
 import { createMatchingWeightSorter } from './matchingWeight.js'
-import { parseRequestBodyWithRaw, parseRequestParams, requestLog } from './request.js'
+import {
+  isRequestAbortedError,
+  parseRequestBodyWithRaw,
+  parseRequestParams,
+  requestLog,
+} from './request.js'
 import { cacheRequestBody } from './requestRecovery.js'
 import {
   attachStreamHandlers,
@@ -70,11 +76,7 @@ export interface CreateMockMiddlewareOptions extends Pick<
  *
  * 排序器由调用方注入，便于调用方在 mock 数据热更新后清理排序缓存；
  * 未注入时使用独立的排序器实例（用于独立 mock server 等数据不会变更的场景）。
- *
- * The sorter is injected by the caller so that it can clear the sorted result cache
- * once mock data is hot-reloaded. When it is not injected, a private sorter instance
- * is used (for scenarios such as the standalone mock server, where data never changes).
- *
+
  * @returns Connect middleware function / Connect 中间件函数
  */
 export function createMockMiddleware(
@@ -158,6 +160,41 @@ export function createMockMiddleware(
     return true
   }
 
+  /**
+   * 仅在需要时读取请求体
+   *
+   * 若没有支持当前方法与场景的 mock，且未开启录制 / 回放，请求会直接交给
+   * 后续中间件（如代理），无需缓冲请求体（尤其是大文件上传），
+   * 同时避免对这类请求应用 mock 的请求体大小限制。
+   *
+   * @param req - Request object / 请求对象
+   * @param method - HTTP method / HTTP 方法
+   * @param mockData - Mock data / Mock 数据
+   * @param mockUrls - Mock URLs matching the request pathname / 命中请求路径的 Mock URL
+   * @param scene - Active scene / 当前激活的场景
+   * @returns Parsed request body / 解析后的请求体
+   */
+  async function parseRequestBodyIfNeeded(
+    req: Connect.IncomingMessage,
+    method: string,
+    mockData: Record<string, MockOptions>,
+    mockUrls: string[],
+    scene: string[],
+  ): Promise<ParsedRequestBody> {
+    const needsBody =
+      record.enabled ||
+      replay ||
+      mockUrls.some((mockUrl) => hasMockMethod(mockData[mockUrl], method, scene))
+
+    if (!needsBody) {
+      return { body: undefined }
+    }
+
+    const parsed = await parseRequestBodyWithRaw(req, logger, formidableOptions, bodyParserOptions)
+    cacheRequestBody(req, parsed.rawBody)
+    return parsed
+  }
+
   async function handleMockRequest(
     req: Connect.IncomingMessage,
     res: ServerResponse,
@@ -210,13 +247,9 @@ export function createMockMiddleware(
     }
 
     const cookies = new Cookies(req, res, cookiesOptions)
-    const { body: parsedBody, rawBody } = await parseRequestBodyWithRaw(
-      req,
-      logger,
-      formidableOptions,
-      bodyParserOptions,
-    )
-    cacheRequestBody(req, rawBody)
+    const parsedBody = (
+      await parseRequestBodyIfNeeded(req, method, mockData, mockUrls, effectiveScene)
+    ).body
 
     let mock: MockHttpItem | undefined
     let _mockUrl: string | undefined
@@ -375,6 +408,10 @@ export function createMockMiddleware(
     try {
       await handleMockRequest(req, res, next)
     } catch (error) {
+      // 客户端中断请求后连接已关闭，无需响应也无需记录错误
+      if (isRequestAbortedError(error)) {
+        return
+      }
       logger.error(
         `${ansis.red(`mock middleware error at ${ansis.underline(req.url!)}`)}\n  ${error}\n  at ${ansis.underline.gray('vite-plugin-mock-dev-server')}`,
       )
