@@ -29,7 +29,6 @@ export type ResolvedMockServerPluginOptions = Required<
   record: ResolvedRecordOptions
 }
 
-// oxlint-disable-next-line complexity
 export function resolvePluginOptions(
   {
     prefix = [],
@@ -65,23 +64,10 @@ export function resolvePluginOptions(
     )
   }
 
-  // enable cors by default
-  const enabled = cors === false ? false : config.server.cors !== false
-  let corsOptions: CorsOptions = {}
-
-  if (enabled && config.server.cors !== false) {
-    corsOptions = {
-      ...corsOptions,
-      ...((typeof config.server.cors === 'boolean' ? {} : config.server.cors) as CorsOptions),
-    }
-  }
-
-  if (enabled && cors !== false) {
-    corsOptions = {
-      ...corsOptions,
-      ...(typeof cors === 'boolean' ? {} : cors),
-    }
-  }
+  // CORS 默认启用：插件 `cors` 与 Vite `server.cors` 中任一显式禁用时关闭
+  // CORS is enabled by default: it is turned off as soon as either the plugin
+  // `cors` option or the Vite `server.cors` option disables it
+  const resolvedCors = resolveCorsOptions(cors, config.server.cors)
 
   const alias: Alias[] = []
   const aliasConfig = config.resolve.alias ?? []
@@ -111,7 +97,7 @@ export function resolvePluginOptions(
     exclude,
     context: config.root,
     reload,
-    cors: enabled ? corsOptions : false,
+    cors: resolvedCors,
     cookiesOptions,
     log,
     formidableOptions: { multiples: true, ...formidableOptions },
@@ -179,6 +165,37 @@ export function isWebsocketProxyTarget(target: unknown): boolean {
     return typeof protocol === 'string' && /^wss?:$/.test(protocol)
   }
   return false
+}
+
+/**
+ * Resolve the cors options
+ *
+ * 解析 cors 配置
+ *
+ * CORS is enabled only when neither the plugin `cors` option nor the Vite
+ * `server.cors` option disables it. The Vite `server.cors` options are used as
+ * the base, and the plugin `cors` options take precedence over them.
+ *
+ * 仅当插件的 `cors` 选项与 Vite 的 `server.cors` 选项都未禁用 CORS 时才启用。
+ * 以 Vite `server.cors` 的配置为基础，插件的 `cors` 配置优先于它。
+ *
+ * @param cors - Plugin cors option / 插件的 cors 配置
+ * @param serverCors - Vite server.cors option / Vite 的 server.cors 配置
+ * @returns Resolved cors options, `false` when disabled / 解析后的 cors 配置，禁用时为 `false`
+ */
+export function resolveCorsOptions(
+  cors: boolean | CorsOptions,
+  serverCors?: boolean | CorsOptions,
+): false | CorsOptions {
+  // 任一配置显式禁用 cors 时，整体关闭
+  // CORS is disabled as a whole when either option disables it
+  if (cors === false || serverCors === false) {
+    return false
+  }
+  return {
+    ...(typeof serverCors === 'object' ? serverCors : {}),
+    ...(typeof cors === 'object' ? cors : {}),
+  }
 }
 
 /**

@@ -221,7 +221,7 @@ mockDevServerPlugin({
 ```ts
 interface ServerBuildOption {
   serverPort?: number // Default 8080
-  dist?: string // Default 'dist/mockServer'
+  dist?: string // Default 'mockServer', resolved against the Vite `build.outDir`
   log?: LogLevel // Default 'error'
   /**
    * Whether to include request recording files in the build output

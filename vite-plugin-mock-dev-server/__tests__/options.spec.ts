@@ -5,7 +5,7 @@
  */
 import type { ResolvedConfig } from 'vite'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { ensureProxies, resolvePluginOptions } from '../src/core/options.js'
+import { ensureProxies, resolveCorsOptions, resolvePluginOptions } from '../src/core/options.js'
 
 /**
  * Create a minimal resolved Vite config for testing
@@ -96,6 +96,43 @@ describe('ensureProxies', () => {
 })
 
 /**
+ * Test suite for resolveCorsOptions function
+ *
+ * resolveCorsOptions 函数测试套件
+ */
+describe('resolveCorsOptions', () => {
+  it('should enable cors with empty options by default', () => {
+    expect(resolveCorsOptions(true)).toEqual({})
+    expect(resolveCorsOptions({})).toEqual({})
+  })
+
+  it('should disable cors when either option disables it', () => {
+    expect(resolveCorsOptions(false)).toBe(false)
+    expect(resolveCorsOptions(true, false)).toBe(false)
+    expect(resolveCorsOptions(false, { origin: '*' })).toBe(false)
+  })
+
+  it('should use the vite server.cors options as the base', () => {
+    expect(resolveCorsOptions(true, { origin: 'https://vite.dev', credentials: true })).toEqual({
+      origin: 'https://vite.dev',
+      credentials: true,
+    })
+  })
+
+  it('should override the vite server.cors options with the plugin cors options', () => {
+    expect(
+      resolveCorsOptions(
+        { origin: 'https://mock.dev' },
+        {
+          origin: 'https://vite.dev',
+          credentials: true,
+        },
+      ),
+    ).toEqual({ origin: 'https://mock.dev', credentials: true })
+  })
+})
+
+/**
  * Test suite for resolvePluginOptions function
  *
  * resolvePluginOptions 函数测试套件
@@ -140,5 +177,23 @@ describe('resolvePluginOptions', () => {
     expect(options.record.enabled).toBe(false)
     expect(options.replay).toBe(false)
     expect(warnSpy).not.toHaveBeenCalled()
+  })
+
+  it('should disable cors when the vite server.cors option is disabled', () => {
+    const config = createResolvedConfig()
+    config.server.cors = false
+
+    const options = resolvePluginOptions({ prefix: ['/api'] }, config)
+
+    expect(options.cors).toBe(false)
+  })
+
+  it('should merge the plugin cors options over the vite server.cors options', () => {
+    const config = createResolvedConfig()
+    config.server.cors = { origin: 'https://vite.dev', credentials: true }
+
+    const options = resolvePluginOptions({ prefix: ['/api'], cors: { origin: '*' } }, config)
+
+    expect(options.cors).toEqual({ origin: '*', credentials: true })
   })
 })

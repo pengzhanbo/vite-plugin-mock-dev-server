@@ -25,8 +25,12 @@ export interface ServerBuildOption {
   /**
    * Service application output directory
    *
+   * A relative path is resolved against the Vite `build.outDir`.
+   *
    * 服务应用输出目录
-   * @default 'dist/mockServer'
+   *
+   * 相对路径时落于 Vite 的 `build.outDir` 之下。
+   * @default 'mockServer'
    */
   dist?: string
 

@@ -223,7 +223,7 @@ mockDevServerPlugin({
 ```ts
 interface ServerBuildOption {
   serverPort?: number // 默认 8080
-  dist?: string // 默认 'mockServer'
+  dist?: string // 默认 'mockServer'，相对路径时落于 Vite 的 `build.outDir` 下
   log?: LogLevel // 默认 'error'
   /**
    * 是否包含请求录制数据

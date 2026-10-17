@@ -183,12 +183,15 @@ export function createMockMiddleware(
 
     if (!mock) {
       // 请求体录制时，需要记录请求体，以便后续回放时使用
-      record.enabled && recordRequestWithRawReq(req, pathname, extraReq.body)
+      if (record.enabled) {
+        recordRequestWithRawReq(req, pathname, extraReq.body)
+      }
       const matched = mockUrls
         .map((m) => (m === _mockUrl ? ansis.underline.bold(m) : ansis.dim(m)))
         .join(', ')
-      matched.length &&
+      if (matched.length > 0) {
         logger.warn(`${ansis.green(pathname)} matches ${matched}, but mock data is not found.`)
+      }
 
       return next()
     }
