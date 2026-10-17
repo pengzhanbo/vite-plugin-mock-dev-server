@@ -3,8 +3,37 @@ import type { MockHttpItem, RecordedRequest, ResolvedRecordOptions } from '../ty
 import { Buffer } from 'node:buffer'
 import path from 'node:path'
 import { isTextContent } from '../utils/index.js'
+import { BODY_FRAMING_HEADERS } from './constants.js'
 import { getFilepath, isSameRecord, processRecordReq } from './helper.js'
 import { readRecordStorage } from './storage.js'
+
+/**
+ * 回放前归一化录制响应的响应头。
+ *
+ * 需要处理的场景：
+ * - 旧版本录制的响应可能保留了（解压前的）`content-length` / `transfer-encoding`，
+ *   而回放写出的是解压后的响应体，长度不一致会导致客户端挂起或解析失败；
+ * - 旧版本会在 `content-encoding` 写入 `identity`，它等价于「未压缩」，不应再下发。
+ *
+ * 响应体长度交由 Node 在 `res.end(buffer)` 时依据实际写出的字节计算。
+ *
+ * @param headers Recorded response headers / 录制响应的响应头
+ * @returns Normalized headers / 归一化后的响应头
+ */
+export function normalizeReplayHeaders(headers: Record<string, string>): Record<string, string> {
+  const normalized: Record<string, string> = {}
+  for (const [key, value] of Object.entries(headers)) {
+    const lowerKey = key.toLowerCase()
+    if (BODY_FRAMING_HEADERS.includes(lowerKey)) {
+      continue
+    }
+    if (lowerKey === 'content-encoding' && value.trim().toLowerCase() === 'identity') {
+      continue
+    }
+    normalized[key] = value
+  }
+  return normalized
+}
 
 /**
  * Replay a recorded request.
@@ -47,7 +76,7 @@ export async function replayRecordedRequest(
       url: matched.req.pathname,
       status: matched.res.status,
       statusText: matched.res.statusText,
-      headers: matched.res.headers,
+      headers: normalizeReplayHeaders(matched.res.headers),
       body: Buffer.from(matched.res.body, isText ? 'utf-8' : 'base64'),
       type: 'buffer',
       __filepath__: matched.meta.filepath,

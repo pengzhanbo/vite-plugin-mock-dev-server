@@ -1,11 +1,13 @@
 /**
- * Test for the recorder request filter
+ * Test for the recorder helpers
  *
- * 录制请求过滤器测试
+ * 录制辅助函数测试
  */
+import type { IncomingMessage } from 'node:http'
 import type { RecordedReq } from '../src/types/index.js'
+import { gzipSync } from 'node:zlib'
 import { describe, expect, it, vi } from 'vitest'
-import { createRecordMatcher } from '../src/recorder/helper.js'
+import { createRecordMatcher, processRecordRes } from '../src/recorder/helper.js'
 
 /**
  * Create a recorded request
@@ -85,5 +87,68 @@ describe('recorder request filter', () => {
     expect(isMatch(createReq('/api/users/1'))).toBe(true)
     expect(isMatch(createReq('/api/auth/login'))).toBe(false)
     expect(isMatch(createReq('/api/users'))).toBe(false)
+  })
+})
+
+/**
+ * Create a proxy response for testing
+ *
+ * 构造用于测试的代理响应
+ *
+ * @param headers - Response headers / 响应头
+ * @returns Response object / 响应对象
+ */
+function createRes(headers: Record<string, string>): IncomingMessage {
+  return { statusCode: 200, statusMessage: 'OK', headers } as unknown as IncomingMessage
+}
+
+describe('processRecordRes', () => {
+  it('should decompress the body and drop the headers describing the compressed body', async () => {
+    // 解压后的响应体与压缩前的 content-length 不一致，这些 header 必须由 Node
+    // 在回放时依据实际写出的字节重新计算，否则客户端会挂起或解析失败
+    // The decompressed body does not match the compressed `content-length`; these
+    // headers must be recomputed by Node on replay, otherwise clients hang or fail
+    const content = JSON.stringify({ ok: true })
+    const rawBody = gzipSync(Buffer.from(content))
+    const res = createRes({
+      'content-type': 'application/json',
+      'content-encoding': 'gzip',
+      'content-length': String(rawBody.length),
+      'transfer-encoding': 'chunked',
+    })
+
+    const record = await processRecordRes(res, rawBody)
+
+    expect(record.body).toBe(content)
+    expect(record.headers).not.toHaveProperty('content-length')
+    expect(record.headers).not.toHaveProperty('transfer-encoding')
+    // 解压成功后响应体已是明文，不能保留 content-encoding（也不能写成 identity）
+    // The body is no longer compressed, so `content-encoding` must be removed
+    expect(record.headers).not.toHaveProperty('content-encoding')
+  })
+
+  it('should not add a content-encoding header for uncompressed responses', async () => {
+    const res = createRes({ 'content-type': 'application/json' })
+
+    const record = await processRecordRes(res, Buffer.from('{"ok":true}'))
+
+    expect(record.headers).not.toHaveProperty('content-encoding')
+  })
+
+  it('should keep the compressed body and its encoding when decompression fails', async () => {
+    // 解压失败时响应体保持压缩状态，encoding 必须保留，长度仍由 Node 计算
+    // When decompression fails the body stays compressed; the encoding is kept and
+    // the length is still computed by Node
+    const res = createRes({
+      'content-type': 'application/json',
+      'content-encoding': 'gzip',
+      'content-length': '8',
+    })
+
+    const record = await processRecordRes(res, Buffer.from('not-gzip'))
+
+    expect(record.headers['content-encoding']).toBe('gzip')
+    expect(record.headers).not.toHaveProperty('content-length')
+    expect(record.body).toBe('not-gzip')
   })
 })
