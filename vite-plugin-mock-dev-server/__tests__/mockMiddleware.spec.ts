@@ -8,6 +8,7 @@ import type { Compiler } from '../src/compiler/index.js'
 import type { MatchingWeightSorter } from '../src/mockHttp/matchingWeight.js'
 import type { MockHttpItem, MockOptions } from '../src/types/index.js'
 import { Buffer } from 'node:buffer'
+import { Readable } from 'node:stream'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMatchingWeightSorter } from '../src/mockHttp/matchingWeight.js'
 import { createMockMiddleware } from '../src/mockHttp/middleware.js'
@@ -168,15 +169,24 @@ function createEagerMultipartRequest(options: {
  *
  * 创建模拟响应对象
  *
+ * 该对象带有最小的事件能力，用于覆盖流式响应的错误与关闭处理。
+ *
+ * The object provides a minimal event API so that the error and close handling of
+ * stream responses can be covered.
+ *
  * @returns Mock response object / 模拟响应对象
  */
 function createMockResponse(): any {
+  const listeners: Record<string, Listener[]> = {}
   const res: any = {
     statusCode: 0,
     statusMessage: '',
     headers: {} as Record<string, string | string[]>,
     cookies: {} as Record<string, any>,
     ended: false,
+    writableEnded: false,
+    headersSent: false,
+    destroyed: false,
     data: null as any,
     setHeader(key: string, value: string | string[]) {
       this.headers[key] = value
@@ -184,12 +194,27 @@ function createMockResponse(): any {
     getHeader(key: string) {
       return this.headers[key]
     },
+    removeHeader(key: string) {
+      delete this.headers[key]
+    },
     setCookie(key: string, value: string, options?: any) {
       this.cookies[key] = { value, options }
     },
     end(data?: any) {
       this.ended = true
+      this.writableEnded = true
       this.data = data
+    },
+    destroy() {
+      this.destroyed = true
+    },
+    once(event: string, callback: Listener) {
+      ;(listeners[event] ||= []).push(callback)
+      return this
+    },
+    emit(event: string, ...args: any[]) {
+      listeners[event]?.forEach((cb) => cb(...args))
+      return true
     },
   }
   return res
@@ -480,6 +505,51 @@ describe('mockMiddleware', () => {
 
     const responseData = JSON.parse(res.data)
     expect(responseData.query).toEqual({ foo: 'bar' })
+  })
+
+  it('should attach stream handlers before the response delay', async () => {
+    // 流式响应必须在延迟前注册错误处理器：延迟阶段源流出错时，
+    // 未注册会抛出未捕获异常并终止进程；延迟结束后才开始传输流
+    // Stream responses must attach the error handler before the delay: a failure during
+    // the delay would otherwise be an uncaught exception that terminates the process;
+    // the stream starts piping only after the delay
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }
+    const stream = new Readable({ read() {} })
+    const mockItem: MockHttpItem = {
+      url: '/api/stream',
+      method: 'GET',
+      delay: 100,
+      body: () => stream,
+      type: 'text',
+      __filepath__: 'test.mock.ts',
+    } as MockHttpItem
+    const compiler = createMockCompiler({ '/api/stream': [mockItem] })
+    const middleware = createMockMiddleware(compiler, {
+      proxies: ['/api'],
+      logger: logger as any,
+      cors: false,
+      record: { enabled: false },
+      replay: false,
+    } as any)
+
+    const req = createMockRequest({ url: '/api/stream' })
+    const res = createMockResponse()
+    const next = vi.fn()
+    const pending = middleware(req, res, next)
+
+    // 等待中间件进入延迟阶段后再让源流出错
+    // Wait until the middleware is in the delay stage, then fail the stream
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(() => stream.emit('error', new Error('early boom'))).not.toThrow()
+
+    await pending
+
+    expect(next).not.toHaveBeenCalled()
+    expect(res.statusCode).toBe(500)
+    expect(res.ended).toBe(true)
+    expect(stream.destroyed).toBe(true)
+    expect(logger.error).toHaveBeenCalledTimes(1)
+    expect(logger.error.mock.calls[0][0]).toContain('early boom')
   })
 
   it('should handle custom headers', async () => {

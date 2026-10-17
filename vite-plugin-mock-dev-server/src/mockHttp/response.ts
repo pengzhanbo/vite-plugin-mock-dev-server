@@ -280,7 +280,9 @@ export function sendResponseData(
   context?: StreamErrorContext,
 ): void {
   if (isReadableStream(raw)) {
-    sendStreamData(res, raw, context)
+    if (attachStreamHandlers(res, raw, context)) {
+      pipeStreamData(res, raw)
+    }
   } else if (Buffer.isBuffer(raw)) {
     res.end(raw)
   } else {
@@ -290,22 +292,38 @@ export function sendResponseData(
 }
 
 /**
- * Pipe a readable stream to the response with error handling
+ * Attach the error and close handlers of a stream response
  *
- * 将可读流写入响应，并处理流错误
+ * 为流式响应注册错误与关闭处理器
  *
- * `pipe` 不会为源流注册 `error` 监听，mock 返回文件流 / 网络流时，一旦读取失败
- * （文件被删除、上游断流），`error` 事件无人接管会抛出未捕获异常并终止进程。
+ * 需要在开始传输流之前调用：`body` 函数返回的流可能在延迟阶段就读取失败，
+ * 客户端也可能在延迟阶段提前断开，提前注册才能接管这些情况。
+ * 响应此时已销毁时不会再注册处理器，并直接销毁源流。
  *
- * `pipe` does not register an `error` listener on the source stream. When a mock
- * returns a file or network stream, a read failure (deleted file, broken upstream)
- * would emit an unhandled `error` event and terminate the process.
+ * Must be called before piping the stream: the stream returned by a `body` function
+ * may fail during the response delay, and the client may disconnect during it as
+ * well, so the handlers have to be attached in advance. When the response is already
+ * destroyed, no handler is attached and the source stream is destroyed instead.
  *
  * @param res - Response object / 响应对象
  * @param raw - Readable stream / 可读流
  * @param context - Error log context / 错误日志上下文
+ * @returns Whether the stream can be piped to the response / 是否可以继续传输流
  */
-function sendStreamData(res: MockResponse, raw: Readable, context?: StreamErrorContext): void {
+export function attachStreamHandlers(
+  res: MockResponse,
+  raw: Readable,
+  context?: StreamErrorContext,
+): boolean {
+  // 响应已销毁（如客户端提前断开）时不再连接源流
+  // The response is already destroyed (e.g. the client disconnected early)
+  if (res.destroyed) {
+    if (!raw.destroyed) {
+      raw.destroy()
+    }
+    return false
+  }
+
   raw.once('error', (error: Error) => {
     if (context) {
       context.logger.error(
@@ -349,6 +367,31 @@ function sendStreamData(res: MockResponse, raw: Readable, context?: StreamErrorC
     }
   })
 
+  return true
+}
+
+/**
+ * Pipe a prepared stream to the response
+ *
+ * 将已注册处理器的可读流写入响应
+ *
+ * 注册处理器与开始传输之间可能存在响应延迟，期间响应可能已经结束或销毁，
+ * 此时不再连接源流，避免向已关闭的响应写入数据。
+ *
+ * The response delay may elapse between attaching the handlers and starting the pipe;
+ * the response may have finished or been destroyed in the meantime, in which case the
+ * source stream is not connected to avoid writing to a closed response.
+ *
+ * @param res - Response object / 响应对象
+ * @param raw - Readable stream / 可读流
+ */
+export function pipeStreamData(res: MockResponse, raw: Readable): void {
+  if (res.destroyed || res.writableEnded) {
+    if (!raw.destroyed) {
+      raw.destroy()
+    }
+    return
+  }
   raw.pipe(res)
 }
 

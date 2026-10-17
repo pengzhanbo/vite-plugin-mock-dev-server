@@ -11,7 +11,9 @@ import { Readable } from 'node:stream'
 import Cookies from 'cookies'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  attachStreamHandlers,
   getHTTPStatusText,
+  pipeStreamData,
   provideResponseCookies,
   provideResponseHeaders,
   provideResponseStatus,
@@ -399,6 +401,70 @@ describe('sendResponseData', () => {
 
     sendResponseData(res as unknown as MockResponse, stream, 'text')
     res.emit('close')
+
+    expect(stream.destroyed).toBe(true)
+  })
+
+  it('should not pipe the stream to a destroyed response', () => {
+    // 响应已销毁时不能再连接源流，也不应再注册处理器
+    // A destroyed response must not get a source stream, and no handler should be attached
+    const once = vi.fn()
+    const res = {
+      destroyed: true,
+      headersSent: false,
+      writableEnded: false,
+      once,
+    } as unknown as MockResponse
+    const stream = new Readable({ read() {} })
+
+    sendResponseData(res, stream, 'text')
+
+    expect(stream.destroyed).toBe(true)
+    expect(once).not.toHaveBeenCalled()
+  })
+
+  it('should handle a stream error raised before the pipe starts', () => {
+    // 延迟阶段源流就出错时，处理器必须已注册：按 500 结束响应并销毁源流
+    // When the stream fails during the response delay the handlers must already be
+    // attached: the response ends with 500 and the source stream is destroyed
+    const logger = createStreamLogger()
+    const stream = new Readable({ read() {} })
+    const res: any = {
+      statusCode: 200,
+      statusMessage: 'OK',
+      headersSent: false,
+      writableEnded: false,
+      destroyed: false,
+      removeHeader: vi.fn(),
+      end: vi.fn(function end(this: any) {
+        this.writableEnded = true
+      }),
+      once: vi.fn(),
+    }
+
+    const canPipe = attachStreamHandlers(res, stream, {
+      logger,
+      url: '/api/stream',
+      filepath: 'mock/stream.mock.ts',
+    })
+    expect(canPipe).toBe(true)
+
+    expect(() => stream.emit('error', new Error('early boom'))).not.toThrow()
+
+    expect(res.statusCode).toBe(500)
+    expect(res.end).toHaveBeenCalledWith('')
+    expect(stream.destroyed).toBe(true)
+    expect(logger.error).toHaveBeenCalledTimes(1)
+    expect(logger.error.mock.calls[0][0]).toContain('early boom')
+  })
+
+  it('should not pipe the stream to a finished response', () => {
+    // 注册处理器与开始传输之间响应可能已经结束
+    // The response may have finished between attaching the handlers and piping
+    const res = { destroyed: false, writableEnded: true } as unknown as MockResponse
+    const stream = new Readable({ read() {} })
+
+    pipeStreamData(res, stream)
 
     expect(stream.destroyed).toBe(true)
   })
