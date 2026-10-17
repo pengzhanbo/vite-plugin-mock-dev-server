@@ -1285,12 +1285,13 @@ describe('mockMiddleware / cors preflight', () => {
     expect(res.headers['Access-Control-Allow-Origin']).toBeUndefined()
   })
 
-  it('should end the preflight response when preflightContinue is enabled', async () => {
-    // preflightContinue 为 true 时 cors 不结束响应，由插件收尾
-    // With `preflightContinue: true` cors does not end the response, so the plugin does
+  it('should pass preflight requests to the next handler when preflightContinue is enabled', async () => {
+    // preflightContinue 为 true 时 cors 不结束响应，插件应把请求交给后续 handler
+    // With `preflightContinue: true` cors does not end the response, so the plugin passes
+    // the request to the following handler
     const middleware = createCorsMiddleware(
       { '/api/users': [postMock] },
-      { origin: '*', preflightContinue: true, optionsSuccessStatus: 200 },
+      { origin: '*', preflightContinue: true },
     )
     const req = createMockRequest({
       url: '/api/users',
@@ -1302,9 +1303,10 @@ describe('mockMiddleware / cors preflight', () => {
 
     await middleware(req, res, next)
 
-    expect(next).not.toHaveBeenCalled()
-    expect(res.statusCode).toBe(200)
-    expect(res.ended).toBe(true)
+    expect(next).toHaveBeenCalledTimes(1)
+    expect(res.ended).toBe(false)
+    // CORS 响应头仍由 cors 在调用 next 前设置
+    // The CORS headers are still set by `cors` before calling `next`
     expect(res.headers['Access-Control-Allow-Origin']).toBe('*')
   })
 

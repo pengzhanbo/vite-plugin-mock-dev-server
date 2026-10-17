@@ -144,8 +144,12 @@ export function createMockMiddleware(
       return true
     }
 
-    // 默认配置下 `cors` 已结束响应；`preflightContinue: true` 时由插件收尾
-    if (!res.writableEnded) {
+    // 默认配置下 `cors` 已结束预检响应；
+    // `preflightContinue: true` 时 `cors` 只设置响应头并调用 next，
+    // 这里同样将请求交给后续 handler，保持与 cors 一致的语义。
+    if (typeof corsOptions === 'object' && corsOptions.preflightContinue) {
+      next()
+    } else if (!res.writableEnded) {
       const optionsSuccessStatus =
         typeof corsOptions === 'object' ? corsOptions.optionsSuccessStatus : undefined
       res.statusCode = optionsSuccessStatus ?? 204
