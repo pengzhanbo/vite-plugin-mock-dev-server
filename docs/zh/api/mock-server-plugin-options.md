@@ -290,6 +290,8 @@ mockDevServerPlugin({
 })
 ```
 
+多条 `special` 规则同时满足条件时，都会被提升到首位，并按声明顺序排列。
+
 ### record
 
 - **类型**: `boolean | RecordOptions`

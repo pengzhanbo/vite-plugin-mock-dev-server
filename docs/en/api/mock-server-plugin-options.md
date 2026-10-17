@@ -288,6 +288,9 @@ mockDevServerPlugin({
 })
 ```
 
+When several `special` rules satisfy their conditions at once, all of them are promoted to the
+front and keep the declaration order.
+
 ### record
 
 - **Type**: `boolean | RecordOptions`
