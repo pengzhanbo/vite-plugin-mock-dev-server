@@ -176,26 +176,51 @@ export function matchingWeight(
     return matched
   }
 
-  // Check if the current matching rules contain special rules that need order adjustment
-  // 检查当前匹配规则中是否包含特殊规则，有则需要调整匹配顺序
-  const specialRule = Object.keys(special).filter((rule) => matched.includes(rule))[0]
+  // Check if the current matching rules contain special rules that need order adjustment.
+  //
+  // Every applicable special rule is promoted, not only the first configured one:
+  // a request may hit several special rules at once, and the ones declared later
+  // must not be silently ignored. The configuration order is kept, so a rule
+  // declared earlier ends up in front of the ones declared later.
+  //
+  // 检查当前匹配规则中是否包含需要调整顺序的特殊规则。
+  //
+  // 所有满足条件的特殊规则都会被提升，而不是只处理配置中首个命中的规则：
+  // 一次请求可能同时命中多条特殊规则，配置靠后的规则不应被静默忽略。
+  // 提升后保持配置顺序，即配置靠前的规则排在靠后的规则之前。
+  const top = matched[0]
+  const promoted: string[] = []
 
-  if (!specialRule) {
+  for (const rule of Object.keys(special)) {
+    // The special rule itself has to match the current request
+    // 特殊规则本身必须命中当前请求
+    if (!matched.includes(rule)) {
+      continue
+    }
+
+    const options = special[rule]
+    const { rules: lowerRules, when } = isArray(options) ? { rules: options, when: [] } : options
+
+    // The rule is only promoted when one of its competing rules is currently on top,
+    // and the optional `when` condition matches
+    // 仅当与其竞争的规则当前位于首位，且满足可选的 `when` 条件时才提升
+    if (!lowerRules.includes(top)) {
+      continue
+    }
+    if (when.length > 0 && !when.some((path) => pathToRegexp(path).regexp.test(url))) {
+      continue
+    }
+
+    promoted.push(rule)
+  }
+
+  if (promoted.length === 0) {
     return matched
   }
 
-  const options = special[specialRule]
-  const { rules: lowerRules, when } = isArray(options) ? { rules: options, when: [] } : options
-
-  if (lowerRules.includes(matched[0])) {
-    if (when.length === 0 || when.some((path) => pathToRegexp(path).regexp.test(url))) {
-      // Insert special rule at the front to ensure it takes priority
-      // 特殊规则插入到最前，保证特殊规则优先
-      matched = uniq([specialRule, ...matched])
-    }
-  }
-
-  return matched
+  // Insert the promoted rules at the front to ensure they take priority
+  // 将提升的规则插入到最前，保证特殊规则优先
+  return uniq([...promoted, ...matched])
 }
 
 /**

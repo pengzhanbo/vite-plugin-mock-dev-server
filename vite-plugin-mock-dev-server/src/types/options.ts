@@ -108,14 +108,34 @@ export interface MockMatchSpecialPriority {
    * insert A into the top position.The `when` option is used to further constrain
    * the priority adjustment to be effective only for certain requests.
    *
+   * Every applicable rule is promoted, not only the first declared one: when a
+   * request hits several special rules at once, all of them are promoted and the
+   * declaration order is kept, so a rule declared earlier ends up in front of the
+   * ones declared later.
+   *
    * 当 A 与 B或 C 同时满足匹配，`B` 或 `C` 在排序首位时，将A插入到首位。
    * when 选项用于进一步约束该优先级调整仅针对哪些请求有效。
+   *
+   * 所有满足条件的规则都会被提升，而不是只处理首个命中的规则：
+   * 一次请求同时命中多条特殊规则时，它们都会被提升，并保持声明顺序，
+   * 即声明靠前的规则排在声明靠后的规则之前。
    *
    * @example
    * ```ts
    * {
    *   A: ['B', 'C'],
    *   A: { rules: ['B', 'C'], when: ['/api/a/b/c'] }
+   * }
+   * ```
+   *
+   * @example
+   * ```ts
+   * {
+   *   // A、B、C 同时命中且 C 初始位于首位时，A、B 都会被提升，且 A 排在 B 之前
+   *   // When A, B and C all match and C is initially on top, both A and B are
+   *   // promoted and A comes before B
+   *   A: ['C'],
+   *   B: ['C']
    * }
    * ```
    */

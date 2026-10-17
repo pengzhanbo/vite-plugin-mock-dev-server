@@ -215,6 +215,12 @@ mockDevServerPlugin({
 })
 ```
 
+::: tip Multiple special rules
+Every `special` rule that satisfies its `rules` / `when` conditions is promoted to the front. When a request hits several special rules at once, all of
+them are promoted and the declaration order is kept: a rule declared earlier comes before
+the ones declared later.
+:::
+
 ::: tip
 The same path matching and priority rules also apply to
 [WebSocket mocks](./websocket-config). When several rules match the same websocket

@@ -61,6 +61,61 @@ describe('integration: matching weight with priority', () => {
     const result = matchingWeight(rules, '/api/a/b/c', priority)
     expect(result).toEqual(['/api/a/:b/c', '/api/:a/b/c'])
   })
+
+  it('should apply every matching special priority rule in declaration order', () => {
+    const rules = ['/api/a/:b/c', '/api/:a/b/c', '/api/:a/:b/c', '/api/:a/b/:c']
+    const priority = {
+      special: {
+        '/api/:a/:b/c': ['/api/a/:b/c'],
+        '/api/:a/b/:c': ['/api/a/:b/c'],
+      },
+    }
+    const result = matchingWeight(rules, '/api/a/b/c', priority)
+
+    // 两条特殊规则同时满足条件时都被提升，且声明靠前的排在更前面，
+    // 不会出现「只有首个命中的特殊规则生效」的情况
+    // Both special rules apply at once and keep the declaration order, instead of
+    // silently ignoring every rule after the first one
+    expect(result.slice(0, 2)).toEqual(['/api/:a/:b/c', '/api/:a/b/:c'])
+    expect(result).toEqual(['/api/:a/:b/c', '/api/:a/b/:c', '/api/a/:b/c', '/api/:a/b/c'])
+  })
+
+  it('should apply a later declared special rule when the first one is not applicable', () => {
+    const rules = ['/api/a/:b/c', '/api/:a/b/c', '/api/:a/:b/c']
+    const priority = {
+      special: {
+        // 与其竞争的规则不在首位，因此不生效
+        // The competing rule is not on top, so this rule is not promoted
+        '/api/:a/:b/c': ['/api/:a/b/c'],
+        // 与其竞争的规则在首位，因此生效
+        // The competing rule is on top, so this rule is promoted
+        '/api/:a/b/c': ['/api/a/:b/c'],
+      },
+    }
+    const result = matchingWeight(rules, '/api/a/b/c', priority)
+
+    expect(result).toEqual(['/api/:a/b/c', '/api/a/:b/c', '/api/:a/:b/c'])
+  })
+
+  it('should evaluate the when condition of each special rule independently', () => {
+    const rules = ['/api/a/:b/c', '/api/:a/b/c', '/api/:a/:b/c', '/api/:a/b/:c']
+    const priority = {
+      special: {
+        // `when` 不匹配，不生效 / the `when` condition does not match, not promoted
+        '/api/:a/:b/c': { rules: ['/api/a/:b/c'], when: ['/api/other/path'] },
+        // `when` 匹配，生效 / the `when` condition matches, promoted
+        '/api/:a/b/:c': { rules: ['/api/a/:b/c'], when: ['/api/a/b/c'] },
+      },
+    }
+    const result = matchingWeight(rules, '/api/a/b/c', priority)
+
+    expect(result[0]).toBe('/api/:a/b/:c')
+    // 未满足 `when` 的规则仍然参与匹配，只是不被提升
+    // The rule whose `when` does not match still takes part in the matching,
+    // it is simply not promoted
+    expect(result).toContain('/api/:a/:b/c')
+    expect(result.indexOf('/api/:a/:b/c')).toBeGreaterThan(0)
+  })
 })
 
 /**

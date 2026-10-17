@@ -215,6 +215,11 @@ mockDevServerPlugin({
 })
 ```
 
+::: tip 多条特殊规则
+所有满足 `rules` / `when` 条件的 `special` 规则都会被提升到首位。
+一次请求同时命中多条特殊规则时，它们都会被提升，并保持声明顺序：声明靠前的规则排在更前面。
+:::
+
 ::: tip 提示
 同样的匹配与优先级规则也适用于 [WebSocket Mock](./websocket-config)，
 当多个规则同时命中同一个 WebSocket 路径时，优先级更高的规则优先被匹配。
