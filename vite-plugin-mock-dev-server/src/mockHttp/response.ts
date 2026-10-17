@@ -298,12 +298,17 @@ export function sendResponseData(
  *
  * 需要在开始传输流之前调用：`body` 函数返回的流可能在延迟阶段就读取失败，
  * 客户端也可能在延迟阶段提前断开，提前注册才能接管这些情况。
+ * 同时监听源流的关闭：源流未正常结束（`readableEnded` 为 `false`）就被关闭时，
+ * 响应不会收到结束信号，需要主动结束或销毁响应，避免客户端一直等待。
  * 响应此时已销毁时不会再注册处理器，并直接销毁源流。
  *
  * Must be called before piping the stream: the stream returned by a `body` function
  * may fail during the response delay, and the client may disconnect during it as
- * well, so the handlers have to be attached in advance. When the response is already
- * destroyed, no handler is attached and the source stream is destroyed instead.
+ * well, so the handlers have to be attached in advance. The close of the source
+ * stream is handled too: when it is closed without ending (`readableEnded` is
+ * `false`), the response never gets an end signal, so it is ended or destroyed to
+ * keep the client from waiting forever. When the response is already destroyed, no
+ * handler is attached and the source stream is destroyed instead.
  *
  * @param res - Response object / 响应对象
  * @param raw - Readable stream / 可读流
@@ -365,6 +370,29 @@ export function attachStreamHandlers(
     if (!raw.destroyed) {
       raw.destroy()
     }
+  })
+
+  // 源流未正常结束就被关闭（如 mock 代码主动 destroy、上游连接被重置）时，
+  // 响应不会收到结束信号，客户端会一直等待剩余字节，此时主动结束或销毁响应。
+  // A source stream closed without ending (e.g. destroyed by the mock code or an
+  // upstream reset) never ends the response, leaving the client waiting for the
+  // remaining bytes; end or destroy the response in that case.
+  raw.once('close', () => {
+    if (raw.readableEnded || res.destroyed || res.writableEnded) {
+      return
+    }
+
+    // 响应头已发出时无法改写状态码，销毁连接让客户端感知响应不完整
+    // The headers have been sent, so destroy the connection to notify the client
+    if (res.headersSent) {
+      res.destroy()
+      return
+    }
+
+    res.removeHeader('content-length')
+    res.statusCode = 500
+    res.statusMessage = getHTTPStatusText(500)
+    res.end('')
   })
 
   return true

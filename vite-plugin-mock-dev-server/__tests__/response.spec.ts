@@ -468,6 +468,58 @@ describe('sendResponseData', () => {
 
     expect(stream.destroyed).toBe(true)
   })
+
+  it('should end the response when the source stream is destroyed without ending', async () => {
+    // 源流未正常结束就被关闭时，响应不会收到结束信号，客户端不能一直等待
+    // A source stream closed without ending never ends the response, so the client
+    // must not be left waiting
+    const result = await withServer(
+      (_req, res) => {
+        const stream = new Readable({ read() {} })
+        sendResponseData(res as unknown as MockResponse, stream, 'text')
+        setTimeout(() => stream.destroy(), 10)
+      },
+      async (url) => {
+        const response = await fetch(url, { signal: AbortSignal.timeout(3000) })
+        return { status: response.status, text: await response.text() }
+      },
+    )
+
+    expect(result.status).toBe(500)
+    expect(result.text).toBe('')
+  })
+
+  it('should destroy the response when the source stream is destroyed after sending data', async () => {
+    // 响应头已发出，无法再改写状态码：销毁连接，客户端感知响应不完整而不是挂起
+    // The headers are already sent, so the connection is destroyed to let the client
+    // notice the incomplete response instead of waiting
+    const error = await withServer(
+      (_req, res) => {
+        let sent = false
+        const stream = new Readable({
+          read() {
+            if (!sent) {
+              sent = true
+              this.push('partial')
+            }
+          },
+        })
+        sendResponseData(res as unknown as MockResponse, stream, 'text')
+        setTimeout(() => stream.destroy(), 10)
+      },
+      async (url) => {
+        try {
+          const response = await fetch(url, { signal: AbortSignal.timeout(3000) })
+          await response.text()
+          return null
+        } catch (err) {
+          return err as Error
+        }
+      },
+    )
+
+    expect(error).toBeInstanceOf(Error)
+  })
 })
 
 /**
