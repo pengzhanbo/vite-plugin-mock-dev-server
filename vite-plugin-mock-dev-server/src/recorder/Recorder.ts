@@ -15,19 +15,19 @@ import {
 import { originalReqCache, readRecordStorage, writeRecordStorage } from './storage.js'
 
 /**
+ * 以记录文件绝对路径为键的待写入队列
+ *
+ * 录制是「读文件 → 修改 → 写文件」的过程。同一 pathname 的并发代理响应会读到
+ * 相同的文件内容，后写入的结果会覆盖先前的记录，因此按文件串行化写入。
+ */
+const writeQueue: Map<string, Promise<void>> = new Map()
+
+/**
  * 请求记录器
  */
 export class Recorder {
   private options: ResolvedRecordOptions
   private filter: (req: RecordedReq) => boolean
-
-  /**
-   * 以记录文件绝对路径为键的待写入队列
-   *
-   * 录制是「读文件 → 修改 → 写文件」的过程。同一 pathname 的并发代理响应会读到
-   * 相同的文件内容，后写入的结果会覆盖先前的记录，因此按文件串行化写入。
-   */
-  private writeQueue: Map<string, Promise<void>> = new Map()
 
   constructor(options: ResolvedRecordOptions) {
     this.options = options
@@ -125,7 +125,7 @@ export class Recorder {
     filepath: string,
     update: (records: RecordedRequest[]) => RecordedRequest[],
   ): Promise<void> {
-    const previous = this.writeQueue.get(filepath) ?? Promise.resolve()
+    const previous = writeQueue.get(filepath) ?? Promise.resolve()
 
     const task = previous
       // 前一次写入失败不应阻断后续写入
@@ -136,14 +136,14 @@ export class Recorder {
         return writeRecordStorage(filepath, records)
       })
 
-    this.writeQueue.set(filepath, task)
+    writeQueue.set(filepath, task)
 
     try {
       await task
     } finally {
       // 队列为空时及时清理，避免映射随录制文件数量无限增长
-      if (this.writeQueue.get(filepath) === task) {
-        this.writeQueue.delete(filepath)
+      if (writeQueue.get(filepath) === task) {
+        writeQueue.delete(filepath)
       }
     }
   }

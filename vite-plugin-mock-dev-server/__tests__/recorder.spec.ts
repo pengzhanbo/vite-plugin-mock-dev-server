@@ -134,6 +134,31 @@ describe('recorder', () => {
     expect(records.map((item) => String(item.req.query.id)).sort()).toEqual(['1', '2'])
   })
 
+  it('should serialize the writes of recorders sharing the same directory', async () => {
+    // 多个 Recorder 实例可能使用相同的 cwd 与 dir（如 dev server 与 preview server），
+    // 它们写入的是同一批记录文件，写入队列需要跨实例共享才能避免互相覆盖
+    // Several recorders may share the same `cwd` and `dir` (e.g. the dev server and
+    // the preview server) and write into the same record files, so the write queue
+    // has to be shared across instances to avoid overwriting each other
+    const anotherRecorder = new Recorder(createOptions(cwd))
+    const anotherProxy = new EventEmitter()
+    anotherRecorder.createProxySetup()(anotherProxy as any, {})
+
+    for (const [target, query] of [
+      [proxy, '?id=1'],
+      [anotherProxy, '?id=2'],
+    ] as const) {
+      const req = createRequest(`/api/users${query}`)
+      recordRequestWithRawReq(req, '/api/users', undefined)
+      emitProxyResponse(target, req, query)
+    }
+
+    const records = await waitForRecords(filepath, (items) => items.length === 2)
+
+    expect(records).toHaveLength(2)
+    expect(records.map((item) => String(item.req.query.id)).sort()).toEqual(['1', '2'])
+  })
+
   it('should overwrite the record of the same request', async () => {
     const first = createRequest('/api/users?id=1')
     recordRequestWithRawReq(first, '/api/users', undefined)
