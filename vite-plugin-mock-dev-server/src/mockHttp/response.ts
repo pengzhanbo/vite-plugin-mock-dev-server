@@ -1,3 +1,4 @@
+import type { Readable } from 'node:stream'
 import type { Logger } from '../core/index.js'
 import type { MockHttpItem, MockRequest, MockResponse, ResponseBody } from '../types/index.js'
 import { Buffer } from 'node:buffer'
@@ -244,23 +245,111 @@ export async function provideResponseCookies(
 }
 
 /**
+ * Context used to report the errors of a stream response
+ *
+ * 用于输出流式响应错误的上下文
+ */
+interface StreamErrorContext {
+  logger: Logger
+  url: string
+  filepath?: string
+  level?: MockHttpItem['log']
+}
+
+/**
  * Send response data
  *
  * 设置响应数据
  *
+ * 流式响应的源流错误会被接管：记录错误日志后按响应是否已开始发送分别处理，
+ * 避免 `error` 事件无人监听抛出未捕获异常而终止整个 dev server 进程。
+ *
+ * Errors of a stream response are handled here: the error is logged and handled
+ * according to whether the response has started, so that an unhandled `error`
+ * event cannot crash the whole dev server process.
+ *
  * @param res - Response object / 响应对象
  * @param raw - Response body data / 响应体数据
  * @param type - Response data type / 响应数据类型
+ * @param context - Error log context of the stream response / 流式响应的错误日志上下文
  */
-export function sendResponseData(res: MockResponse, raw: ResponseBody, type: string): void {
+export function sendResponseData(
+  res: MockResponse,
+  raw: ResponseBody,
+  type: string,
+  context?: StreamErrorContext,
+): void {
   if (isReadableStream(raw)) {
-    raw.pipe(res)
+    sendStreamData(res, raw, context)
   } else if (Buffer.isBuffer(raw)) {
     res.end(raw)
   } else {
     const content = typeof raw === 'string' ? raw : JSON.stringify(raw)
     res.end(type === 'buffer' ? Buffer.from(content) : content)
   }
+}
+
+/**
+ * Pipe a readable stream to the response with error handling
+ *
+ * 将可读流写入响应，并处理流错误
+ *
+ * `pipe` 不会为源流注册 `error` 监听，mock 返回文件流 / 网络流时，一旦读取失败
+ * （文件被删除、上游断流），`error` 事件无人接管会抛出未捕获异常并终止进程。
+ *
+ * `pipe` does not register an `error` listener on the source stream. When a mock
+ * returns a file or network stream, a read failure (deleted file, broken upstream)
+ * would emit an unhandled `error` event and terminate the process.
+ *
+ * @param res - Response object / 响应对象
+ * @param raw - Readable stream / 可读流
+ * @param context - Error log context / 错误日志上下文
+ */
+function sendStreamData(res: MockResponse, raw: Readable, context?: StreamErrorContext): void {
+  raw.once('error', (error: Error) => {
+    if (context) {
+      context.logger.error(
+        `${ansis.red(`mock error at ${context.url}`)}\n  ${error}\n  at stream (${ansis.underline.gray(context.filepath ?? '')})`,
+        context.level,
+      )
+    }
+
+    // 源流已不可用，停止向响应写入剩余数据
+    // The source stream is not usable anymore, stop writing to the response
+    if (!raw.destroyed) {
+      raw.destroy()
+    }
+
+    // 响应体已经开始写出，无法再改写状态码：销毁响应，让客户端感知响应不完整，
+    // 而不是一直等待剩余字节。不传入 error，避免再触发未监听的 `error` 事件。
+    // The response has already started, so the status cannot be changed anymore:
+    // destroy it so the client notices the incomplete response instead of waiting
+    // for the remaining bytes. No error is passed to avoid emitting an unhandled
+    // `error` event on the response.
+    if (res.headersSent || res.writableEnded) {
+      res.destroy()
+      return
+    }
+
+    // 尚未写出任何响应体，按 500 结束本次响应
+    // Nothing has been written yet, end the response with 500
+    res.removeHeader('content-length')
+    res.statusCode = 500
+    res.statusMessage = getHTTPStatusText(500)
+    res.end('')
+  })
+
+  // 客户端提前断开时销毁源流，避免文件句柄 / 上游连接泄漏；
+  // `pipe` 会在目标流关闭时自动 unpipe，但不会销毁源流
+  // Destroy the source stream when the client disconnects early to avoid leaking
+  // file handles / upstream connections; `pipe` unpipes but does not destroy it
+  res.once('close', () => {
+    if (!raw.destroyed) {
+      raw.destroy()
+    }
+  })
+
+  raw.pipe(res)
 }
 
 /**

@@ -252,7 +252,12 @@ export function createMockMiddleware(
       const [error] = await attemptAsync(async () => {
         const content = isFunction(body) ? await body(request) : body
         await responseRealDelay(startTime, delay)
-        sendResponseData(response, content, type)
+        sendResponseData(response, content, type, {
+          logger,
+          url: pathname,
+          filepath,
+          level: logLevel,
+        })
       })
 
       if (error) {

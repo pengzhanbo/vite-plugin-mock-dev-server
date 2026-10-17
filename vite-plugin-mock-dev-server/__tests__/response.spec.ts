@@ -3,9 +3,11 @@
  *
  * 响应处理函数测试
  */
+import type { AddressInfo } from 'node:net'
 import type { MockHttpItem, MockRequest, MockResponse } from '../src/types/index.js'
-import { IncomingMessage, ServerResponse } from 'node:http'
+import http, { IncomingMessage, ServerResponse } from 'node:http'
 import { Socket } from 'node:net'
+import { Readable } from 'node:stream'
 import Cookies from 'cookies'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
@@ -14,6 +16,7 @@ import {
   provideResponseHeaders,
   provideResponseStatus,
   responseRealDelay,
+  sendResponseData,
 } from '../src/mockHttp/response.js'
 
 /**
@@ -251,6 +254,153 @@ describe('provideResponseCookies', () => {
 
     expect(logger.error).not.toHaveBeenCalled()
     expect(res.getHeader('Set-Cookie')).toBeUndefined()
+  })
+})
+
+/**
+ * Create a mock logger for the stream response tests
+ *
+ * 创建流式响应测试使用的模拟日志实例
+ *
+ * @returns Mock logger / 模拟日志实例
+ */
+function createStreamLogger() {
+  return { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+}
+
+/**
+ * Start a server, run the assertions against it, then close it
+ *
+ * 启动一个服务，执行断言后关闭
+ *
+ * @param handler - Request handler / 请求处理函数
+ * @param run - Assertions receiving the request url / 接收请求地址的断言函数
+ * @returns Result of the assertions / 断言结果
+ */
+async function withServer<T>(
+  handler: http.RequestListener,
+  run: (url: string) => Promise<T>,
+): Promise<T> {
+  const server = http.createServer(handler)
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
+  try {
+    const { port } = server.address() as AddressInfo
+    return await run(`http://127.0.0.1:${port}/api/stream`)
+  } finally {
+    await new Promise<void>((resolve) => {
+      server.close(() => resolve())
+      // 出错场景可能留下未关闭的连接，主动清理以保证测试及时结束
+      // Failed scenarios may leave open connections; close them to end the test promptly
+      server.closeAllConnections()
+    })
+  }
+}
+
+/**
+ * Test suite for sendResponseData function
+ *
+ * sendResponseData 函数测试套件
+ */
+describe('sendResponseData', () => {
+  it('should pipe a readable stream to the response', async () => {
+    const text = await withServer(
+      (_req, res) => {
+        sendResponseData(res as unknown as MockResponse, Readable.from(['hello']), 'text')
+      },
+      async (url) => {
+        const response = await fetch(url, { signal: AbortSignal.timeout(3000) })
+        return response.text()
+      },
+    )
+
+    expect(text).toBe('hello')
+  })
+
+  it('should respond with 500 when the stream fails before sending any data', async () => {
+    // 源流的 `error` 事件必须被接管，否则会抛出未捕获异常并终止整个进程
+    // The `error` event of the source stream must be handled, otherwise it would be
+    // thrown as an uncaught exception and terminate the whole process
+    const logger = createStreamLogger()
+
+    const { status, text } = await withServer(
+      (_req, res) => {
+        const stream = new Readable({
+          read() {
+            this.destroy(new Error('boom'))
+          },
+        })
+        sendResponseData(res as unknown as MockResponse, stream, 'json', {
+          logger,
+          url: '/api/stream',
+          filepath: 'mock/stream.mock.ts',
+        })
+      },
+      async (url) => {
+        const response = await fetch(url, { signal: AbortSignal.timeout(3000) })
+        return { status: response.status, text: await response.text() }
+      },
+    )
+
+    expect(status).toBe(500)
+    expect(text).toBe('')
+    expect(logger.error).toHaveBeenCalledTimes(1)
+    expect(logger.error.mock.calls[0][0]).toContain('boom')
+    expect(logger.error.mock.calls[0][0]).toContain('stream')
+  })
+
+  it('should destroy the response when the stream fails after sending data', async () => {
+    // 响应头已发出，无法再改写状态码，此时应销毁响应让客户端感知失败，
+    // 而不是让它在等待剩余字节时一直挂起
+    // The headers are already sent so the status cannot be changed; the response must be
+    // destroyed so the client notices the failure instead of waiting for more bytes
+    const logger = createStreamLogger()
+
+    const error = await withServer(
+      (_req, res) => {
+        let sent = false
+        const stream = new Readable({
+          read() {
+            if (sent) {
+              this.destroy(new Error('late boom'))
+              return
+            }
+            sent = true
+            this.push('partial')
+          },
+        })
+        sendResponseData(res as unknown as MockResponse, stream, 'text', {
+          logger,
+          url: '/api/stream',
+          filepath: 'mock/stream.mock.ts',
+        })
+      },
+      async (url) => {
+        try {
+          const response = await fetch(url, { signal: AbortSignal.timeout(3000) })
+          await response.text()
+          return null
+        } catch (err) {
+          return err as Error
+        }
+      },
+    )
+
+    expect(error).toBeInstanceOf(Error)
+    expect(logger.error).toHaveBeenCalledTimes(1)
+    expect(logger.error.mock.calls[0][0]).toContain('late boom')
+  })
+
+  it('should destroy the source stream when the response is closed', () => {
+    // 客户端提前断开时源流必须被销毁，避免文件句柄 / 上游连接泄漏
+    // The source stream must be destroyed when the client disconnects early to avoid
+    // leaking file handles / upstream connections
+    const res = createServerResponse()
+    const stream = new Readable({ read() {} })
+
+    sendResponseData(res as unknown as MockResponse, stream, 'text')
+    res.emit('close')
+
+    expect(stream.destroyed).toBe(true)
   })
 })
 
