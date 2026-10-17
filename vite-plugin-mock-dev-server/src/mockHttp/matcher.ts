@@ -1,6 +1,6 @@
 import type { Logger } from '../core/index.js'
 import type { ExtraRequest, Method, MockHttpItem, MockOptions } from '../types/index.js'
-import { attempt, isArray, isFunction } from '@pengzhanbo/utils'
+import { attempt, isFunction, toArray } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import { isPathMatch, matchScene } from '../utils/index.js'
 import { parseRequestParams, requestValidate } from './request.js'
@@ -37,13 +37,11 @@ export function findMockData(
       return false
     }
 
-    const methods: Method[] = mock.method
-      ? isArray(mock.method)
-        ? mock.method
-        : [mock.method]
-      : ['GET', 'POST']
+    const methods = toArray<Method>(mock.method ?? ['GET', 'POST']).map((item) =>
+      item.toUpperCase(),
+    )
     // 判断发起的请求方法是否符合当前 mock 允许的方法
-    if (!methods.includes(method as Method)) {
+    if (!methods.includes(method)) {
       return false
     }
 

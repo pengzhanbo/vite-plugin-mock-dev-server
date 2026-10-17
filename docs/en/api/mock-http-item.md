@@ -75,6 +75,8 @@ export default defineMock({
 })
 ```
 
+Method names are case-insensitive, `'get'` is equivalent to `'GET'`.
+
 ## Response Configuration
 
 ### status

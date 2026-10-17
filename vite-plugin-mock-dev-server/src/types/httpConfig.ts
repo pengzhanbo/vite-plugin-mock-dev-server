@@ -1,4 +1,4 @@
-import type { LiteralUnion } from '@pengzhanbo/utils'
+import type { LiteralUnion, Arrayable } from '@pengzhanbo/utils'
 import type { Connect } from 'vite'
 import type {
   MockBaseItem,
@@ -50,11 +50,13 @@ export interface MockErrorConfig {
 export interface MockHttpItem extends MockBaseItem {
   /**
    * The interface allows request methods, and by default allows both GET and POST.
+   * Method names are case-insensitive.
    *
-   * 该接口允许的 请求方法，默认同时支持 GET 和 POST
+   * 该接口允许的 请求方法，默认同时支持 GET 和 POST。
+   * 方法名不区分大小写。
    * @default ['POST','GET']
    */
-  method?: Method | Method[]
+  method?: Arrayable<Method>
   /**
    * Configure the response body headers
    *

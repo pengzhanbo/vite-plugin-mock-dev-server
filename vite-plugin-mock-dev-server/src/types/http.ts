@@ -4,7 +4,23 @@ import type { Readable } from 'node:stream'
 import type { Connect } from 'vite'
 import type { GetCookieOption, SetCookieOption } from './cookies.js'
 
-export type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'TRACE' | 'OPTIONS'
+export type Method =
+  | 'GET'
+  | 'POST'
+  | 'PUT'
+  | 'DELETE'
+  | 'PATCH'
+  | 'HEAD'
+  | 'TRACE'
+  | 'OPTIONS'
+  | 'get'
+  | 'post'
+  | 'put'
+  | 'delete'
+  | 'patch'
+  | 'head'
+  | 'trace'
+  | 'options'
 
 export type Headers = http.IncomingHttpHeaders
 

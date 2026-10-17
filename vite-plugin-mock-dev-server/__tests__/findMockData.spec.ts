@@ -95,6 +95,49 @@ describe('findMockData', () => {
     expect(putResult).toEqual(mockList[0])
   })
 
+  it('should match a lowercase method name', () => {
+    // .js / .json 的 mock 文件中可能写成小写
+    // Method names may be written in lowercase in .js / .json mock files
+    const mockList = [
+      { url: '/api/users', method: 'get', body: { data: 'users' } },
+    ] as unknown as MockOptions
+    const result = findMockData(mockList, logger, {
+      pathname: '/api/users',
+      method: 'GET',
+      request: {
+        query: {},
+        refererQuery: {},
+        body: {},
+        headers: {},
+      } as any,
+      activeScene: [],
+    })
+    expect(result).toEqual(mockList[0])
+  })
+
+  it('should match a method array with mixed case', () => {
+    const mockList = [
+      { url: '/api/users', method: ['get', 'Put'], body: { data: 'users' } },
+    ] as unknown as MockOptions
+
+    const createRequest = (method: string) =>
+      ({
+        pathname: '/api/users',
+        method,
+        request: {
+          query: {},
+          refererQuery: {},
+          body: {},
+          headers: {},
+        },
+        activeScene: [],
+      }) as any
+
+    expect(findMockData(mockList, logger, createRequest('GET'))).toEqual(mockList[0])
+    expect(findMockData(mockList, logger, createRequest('PUT'))).toEqual(mockList[0])
+    expect(findMockData(mockList, logger, createRequest('DELETE'))).toBeUndefined()
+  })
+
   it('should respect enabled flag when enabled is false', () => {
     const mockList: MockOptions = [
       { url: '/api/users', method: 'GET', body: { data: 'users' }, enabled: true },

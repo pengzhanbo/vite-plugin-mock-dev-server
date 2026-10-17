@@ -75,6 +75,8 @@ export default defineMock({
 })
 ```
 
+方法名不区分大小写，`'get'` 与 `'GET'` 等效。
+
 ## 响应配置
 
 ### status
