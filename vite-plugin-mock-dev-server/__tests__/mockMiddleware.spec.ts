@@ -204,6 +204,7 @@ function createMockResponse(): any {
       this.ended = true
       this.writableEnded = true
       this.data = data
+      this.emit('finish')
     },
     destroy() {
       this.destroyed = true
@@ -1190,5 +1191,117 @@ describe('mockMiddleware / replay', () => {
 
     expect(replayRecordedRequest).toHaveBeenCalledTimes(1)
     expect(next).toHaveBeenCalledTimes(1)
+  })
+})
+
+/**
+ * Test suite for CORS preflight requests
+ *
+ * CORS 预检请求测试套件
+ */
+describe('mockMiddleware / cors preflight', () => {
+  const mockLogger = {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  }
+
+  /**
+   * Create the middleware with cors enabled
+   *
+   * 创建开启 CORS 的中间件
+   *
+   * @param mockData - Mock data / Mock 数据
+   * @param cors - CORS options / CORS 配置项
+   * @returns Mock middleware / Mock 中间件
+   */
+  function createCorsMiddleware(
+    mockData: Record<string, MockOptions>,
+    cors: any = { origin: '*' },
+  ) {
+    return createMockMiddleware(createMockCompiler(mockData), {
+      proxies: ['/api'],
+      logger: mockLogger as any,
+      cors,
+      record: { enabled: false },
+      replay: false,
+    } as any)
+  }
+
+  const postMock: MockHttpItem = {
+    url: '/api/users',
+    method: 'POST',
+    body: { ok: true },
+    __filepath__: 'test.mock.ts',
+  } as MockHttpItem
+
+  it('should answer preflight requests before matching mock data', async () => {
+    // 预检请求没有对应的 mock，且 cors 会直接结束响应而不调用 next
+    // A preflight request has no matching mock, and `cors` ends the response without
+    // calling `next`
+    const middleware = createCorsMiddleware({ '/api/users': [postMock] })
+    const req = createMockRequest({
+      url: '/api/users',
+      method: 'OPTIONS',
+      headers: {
+        'origin': 'http://localhost:3000',
+        'access-control-request-method': 'POST',
+      },
+    })
+    const res = createMockResponse()
+    const next = vi.fn()
+
+    await middleware(req, res, next)
+
+    expect(next).not.toHaveBeenCalled()
+    expect(res.statusCode).toBe(204)
+    expect(res.ended).toBe(true)
+    expect(res.headers['Access-Control-Allow-Origin']).toBe('*')
+    expect(res.headers['Content-Length']).toBe('0')
+  })
+
+  it('should pass preflight requests through when no mock supports the requested method', async () => {
+    // 路径存在 mock，但不支持预检声明的 DELETE 方法，应交给后续中间件（代理）
+    // The path has mocks but not for the preflighted DELETE method, so the request
+    // is passed to the following middleware (the proxy)
+    const middleware = createCorsMiddleware({
+      '/api/users': [{ ...postMock, method: 'GET' }],
+    })
+    const req = createMockRequest({
+      url: '/api/users',
+      method: 'OPTIONS',
+      headers: { 'access-control-request-method': 'DELETE' },
+    })
+    const res = createMockResponse()
+    const next = vi.fn()
+
+    await middleware(req, res, next)
+
+    expect(next).toHaveBeenCalledTimes(1)
+    expect(res.headers['Access-Control-Allow-Origin']).toBeUndefined()
+  })
+
+  it('should end the preflight response when preflightContinue is enabled', async () => {
+    // preflightContinue 为 true 时 cors 不结束响应，由插件收尾
+    // With `preflightContinue: true` cors does not end the response, so the plugin does
+    const middleware = createCorsMiddleware(
+      { '/api/users': [postMock] },
+      { origin: '*', preflightContinue: true, optionsSuccessStatus: 200 },
+    )
+    const req = createMockRequest({
+      url: '/api/users',
+      method: 'OPTIONS',
+      headers: { 'access-control-request-method': 'POST' },
+    })
+    const res = createMockResponse()
+    const next = vi.fn()
+
+    await middleware(req, res, next)
+
+    expect(next).not.toHaveBeenCalled()
+    expect(res.statusCode).toBe(200)
+    expect(res.ended).toBe(true)
+    expect(res.headers['Access-Control-Allow-Origin']).toBe('*')
   })
 })

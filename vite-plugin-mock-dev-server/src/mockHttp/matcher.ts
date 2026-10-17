@@ -13,6 +13,35 @@ interface FindMockDataOptions {
 }
 
 /**
+ * Check whether the mock rules support the given HTTP method
+ *
+ * 判断 Mock 规则是否支持指定的请求方法
+ *
+ * 预检请求不会经过请求体与校验器的匹配流程，只需确认该路径下存在支持目标方法的规则。
+ * 未显式声明 `method` 的规则与 `findMockData` 保持一致，默认为 `GET`、`POST`。
+ *
+ * A preflight request does not go through the request body / validator matching, so it
+ * only needs to know whether the path has a rule supporting the target method. Rules
+ * without an explicit `method` default to `GET` and `POST`, consistent with
+ * `findMockData`.
+ *
+ * @param mockList - Mock options list / Mock 配置列表
+ * @param method - HTTP method to check / 需要检查的 HTTP 方法
+ * @returns Whether the method is supported / 是否支持该方法
+ */
+export function hasMockMethod(mockList: MockOptions, method: string): boolean {
+  const target = method.toUpperCase()
+  return mockList.some((mock) => {
+    if (!mock || mock.ws) {
+      return false
+    }
+    return toArray<Method>(mock.method ?? ['GET', 'POST'])
+      .map((item) => item.toUpperCase())
+      .includes(target)
+  })
+}
+
+/**
  * Find matching mock data
  *
  * 查找匹配的 mock data

@@ -26,7 +26,7 @@ import Cookies from 'cookies'
 import { recordRequestWithRawReq, replayRecordedRequest } from '../recorder/index.js'
 import { doesProxyContextMatchUrl, isReadableStream, urlParse } from '../utils/index.js'
 import { createCors } from './cors.js'
-import { findMockData } from './matcher.js'
+import { findMockData, hasMockMethod } from './matcher.js'
 import { createMatchingWeightSorter } from './matchingWeight.js'
 import { parseRequestBodyWithRaw, parseRequestParams, requestLog } from './request.js'
 import { cacheRequestBody } from './requestRecovery.js'
@@ -99,6 +99,58 @@ export function createMockMiddleware(
 ) => Promise<void> {
   const cors = createCors(corsOptions)
 
+  /**
+   * 在匹配 mock 数据之前处理 CORS 预检请求
+   *
+   * 预检请求（`OPTIONS` + `Access-Control-Request-Method`）不对应任何 mock 规则，
+   * `cors` 又会直接结束响应而不调用 `next`，因此不能放在「匹配到 mock 之后」处理。
+   * 仅当该路径存在支持预检方法的 mock 时才由插件响应，否则交回后续中间件（如代理）。
+   *
+   * @param req - Request object / 请求对象
+   * @param res - Response object / 响应对象
+   * @param next - Next middleware / 下一个中间件
+   * @param mockData - Mock data / Mock 数据
+   * @param mockUrls - Mock URLs matching the request pathname / 命中请求路径的 Mock URL
+   * @returns Whether the preflight request is handled / 预检请求是否已被处理
+   */
+  async function handleCorsPreflight(
+    req: Connect.IncomingMessage,
+    res: ServerResponse,
+    next: Connect.NextFunction,
+    mockData: Record<string, MockOptions>,
+    mockUrls: string[],
+  ): Promise<boolean> {
+    if (!cors || req.method?.toUpperCase() !== 'OPTIONS') {
+      return false
+    }
+
+    const preflightMethod = (toArray(req.headers['access-control-request-method'])[0] ?? '')
+      .trim()
+      .toUpperCase()
+    if (
+      !preflightMethod ||
+      !mockUrls.some((mockUrl) => hasMockMethod(mockData[mockUrl], preflightMethod))
+    ) {
+      return false
+    }
+
+    const [corsError] = await attemptAsync(cors, req, res)
+    if (corsError) {
+      logger.error(`CORS error: ${corsError}`)
+      next(corsError)
+      return true
+    }
+
+    // 默认配置下 `cors` 已结束响应；`preflightContinue: true` 时由插件收尾
+    if (!res.writableEnded) {
+      const optionsSuccessStatus =
+        typeof corsOptions === 'object' ? corsOptions.optionsSuccessStatus : undefined
+      res.statusCode = optionsSuccessStatus ?? 204
+      res.end()
+    }
+    return true
+  }
+
   async function handleMockRequest(
     req: Connect.IncomingMessage,
     res: ServerResponse,
@@ -133,6 +185,13 @@ export function createMockMiddleware(
       return next()
     }
 
+    const method = req.method!.toUpperCase()
+
+    // 预检请求需要在匹配 mock 之前处理，详见 `handleCorsPreflight`
+    if (await handleCorsPreflight(req, res, next, mockData, mockUrls)) {
+      return
+    }
+
     const cookies = new Cookies(req, res, cookiesOptions)
     const { body: parsedBody, rawBody } = await parseRequestBodyWithRaw(
       req,
@@ -145,7 +204,6 @@ export function createMockMiddleware(
     let mock: MockHttpItem | undefined
     let _mockUrl: string | undefined
 
-    const method = req.method!.toUpperCase()
     const extraReq: Omit<ExtraRequest, 'params'> = {
       query,
       refererQuery: req.headers.referer ? urlParse(req.headers.referer).query : {},
