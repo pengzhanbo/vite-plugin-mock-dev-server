@@ -12,7 +12,7 @@ import {
   toArray,
 } from '@pengzhanbo/utils'
 import ansis from 'ansis'
-import { parse } from 'path-to-regexp'
+import { pathToRegexp } from 'path-to-regexp'
 import { isObjectSubset, urlParse } from '../utils/index.js'
 
 export function processRawData(
@@ -49,14 +49,10 @@ const patternErrorCache = new LRUCache<string, undefined | string>({ maxSize: 10
  *
  * 校验 mock url 的路径模式是否合法
  *
- * Mock url is parsed by `path-to-regexp`, an invalid pattern (such as the
- * legacy `:id?` / `:id*` syntax) would throw when the request is matched.
- * Such mocks should be dropped during compilation instead of breaking the
- * dev server at request time.
+ * mock url 在请求匹配阶段（见 `isPathMatch` / `parseRequestParams`）由
+ * `path-to-regexp` 编译，非法模式（如旧版本的 `:id?` / `:id*` 写法）会在请求期抛出异常，
+ * 这类 mock 应该在编译阶段就被丢弃，而不是导致开发服务崩溃。
  *
- * mock url 由 `path-to-regexp` 解析，非法模式（如旧版本的 `:id?` / `:id*` 写法）
- * 会在请求匹配阶段抛出异常，这类 mock 应该在编译阶段就被丢弃，
- * 而不是在请求期导致开发服务崩溃。
  *
  * @param pattern - Path pattern to validate / 需要校验的路径模式
  * @returns Error message when the pattern is invalid, otherwise `undefined` / 模式非法时返回错误信息，否则返回 `undefined`
@@ -68,7 +64,7 @@ function getPatternError(pattern: string): undefined | string {
 
   let error: undefined | string
   try {
-    parse(pattern)
+    pathToRegexp(pattern)
   } catch (e) {
     error = (e as Error).message
   }
