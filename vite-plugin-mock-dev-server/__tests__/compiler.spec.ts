@@ -6,6 +6,7 @@
 import type { MockOptions } from '../src/types/index.js'
 import { pathToRegexp } from 'path-to-regexp'
 import { describe, expect, it, vi } from 'vitest'
+import { aliasMatches } from '../src/compiler/aliasMatches.js'
 import { processMockData, processRawData, sortByValidator } from '../src/compiler/processData.js'
 
 describe('processRawData', () => {
@@ -499,5 +500,28 @@ describe('sortByValidator', () => {
     const result = sortByValidator(mocks)
 
     expect(result).toHaveLength(2)
+  })
+})
+
+/**
+ * Test suite for aliasMatches function
+ *
+ * aliasMatches 函数测试套件
+ */
+describe('aliasMatches', () => {
+  it('should match a string alias by exact path or subpath', () => {
+    expect(aliasMatches('@', '@')).toBe(true)
+    expect(aliasMatches('@', '@/utils')).toBe(true)
+    // 前缀相同但并非子路径时不匹配
+    // A shared prefix that is not a subpath does not match
+    expect(aliasMatches('@', '@scope/utils')).toBe(false)
+    expect(aliasMatches('@/utils', '@/utils/helper')).toBe(true)
+    expect(aliasMatches('@/utils', '@/utils-extra')).toBe(false)
+    expect(aliasMatches('/src', '/source')).toBe(false)
+  })
+
+  it('should test a RegExp alias directly', () => {
+    expect(aliasMatches(/^~/, '~/utils')).toBe(true)
+    expect(aliasMatches(/^~/, '@utils')).toBe(false)
   })
 })

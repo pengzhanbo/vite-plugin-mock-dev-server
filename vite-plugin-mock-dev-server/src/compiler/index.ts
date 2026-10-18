@@ -1,3 +1,4 @@
+export * from './aliasMatches.js'
 export * from './compile.js'
 export * from './compiler.js'
 export * from './esbuild.js'

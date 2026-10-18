@@ -8,6 +8,7 @@ import { pathToFileURL } from 'node:url'
 import ansis from 'ansis'
 import JSON5 from 'json5'
 import { formatError, isPackageExists, normalizePath } from '../utils/index.js'
+import { aliasMatches } from './aliasMatches.js'
 
 const externalizeDeps: Plugin = {
   name: 'externalize-deps',
@@ -87,22 +88,6 @@ function aliasPlugin(alias: Alias[]): Plugin {
       })
     },
   }
-}
-
-export function aliasMatches(pattern: string | RegExp, importee: string): boolean {
-  if (pattern instanceof RegExp) {
-    return pattern.test(importee)
-  }
-
-  if (importee.length < pattern.length) {
-    return false
-  }
-
-  if (importee === pattern) {
-    return true
-  }
-
-  return importee.startsWith(`${pattern}/`)
 }
 
 let _build: null | typeof import('esbuild').build = null

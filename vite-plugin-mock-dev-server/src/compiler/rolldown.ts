@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url'
 import ansis from 'ansis'
 import JSON5 from 'json5'
 import { formatError, isPackageExists, normalizePath } from '../utils/index.js'
-import { aliasMatches } from './esbuild.js'
+import { aliasMatches } from './aliasMatches.js'
 
 const renamePlugin: Plugin = {
   name: 'vite-mock:rename-plugin',
