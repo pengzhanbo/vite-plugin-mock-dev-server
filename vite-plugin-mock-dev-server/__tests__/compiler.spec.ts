@@ -4,6 +4,7 @@
  * 编译器模块测试
  */
 import type { MockOptions } from '../src/types/index.js'
+import { pathToRegexp } from 'path-to-regexp'
 import { describe, expect, it, vi } from 'vitest'
 import { processMockData, processRawData, sortByValidator } from '../src/compiler/processData.js'
 
@@ -215,6 +216,48 @@ describe('processMockData', () => {
     expect(result).toHaveProperty('/api/files/*path')
     expect(logger.error).toHaveBeenCalledTimes(3)
     expect(logger.error.mock.calls[0][0]).toContain('/api/users/:id*')
+  })
+
+  it('should validate url patterns with the compiler used at request time', () => {
+    const logger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    }
+    const patterns = [
+      '/',
+      '/api/users',
+      '/api/:id',
+      '/api/:id/:id',
+      '/api/{:id}',
+      '/api/files/*path',
+      '/api/:id?',
+      '/api/:id*',
+      '/api/(.*)',
+    ]
+    const mockList = new Map<string, MockOptions>([
+      ['file1.mock.ts', patterns.map((url) => ({ url, method: 'GET', body: {} }))],
+    ])
+
+    const result = processMockData(mockList, logger)
+
+    // 校验与请求期使用同一个编译器（`pathToRegexp`）：只有它可以编译的模式才会被保留，
+    // 避免「校验通过但请求期抛错」的盲区
+    // Validation uses the same compiler as the request matching (`pathToRegexp`), so only
+    // patterns it can compile are kept: no pattern passes validation and then throws when
+    // a request is matched
+    const canCompile = (pattern: string): boolean => {
+      try {
+        pathToRegexp(pattern)
+        return true
+      } catch {
+        return false
+      }
+    }
+    for (const pattern of patterns) {
+      expect(pattern in result).toBe(canCompile(pattern))
+    }
   })
 
   it('should still drop invalid url patterns on repeated hot updates', () => {
