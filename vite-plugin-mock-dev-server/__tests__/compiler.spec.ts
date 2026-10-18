@@ -320,7 +320,9 @@ describe('processMockData', () => {
     expect(delayOf('/api/ok')).toEqual([100, 300])
     expect(logger.warn).toHaveBeenCalledTimes(3)
     expect(String(logger.warn.mock.calls[1][0])).toContain('swapped')
-    expect(String(logger.warn.mock.calls[0][0])).toContain('at (file1.mock.ts)')
+    // 日志中的文件路径带有 ANSI 下划线转义，这里只断言文件名，避免依赖完整文本
+    // The file path is wrapped in ANSI underline escapes, only the file name is asserted
+    expect(String(logger.warn.mock.calls[0][0])).toContain('file1.mock.ts')
   })
 
   it('should handle empty input', () => {

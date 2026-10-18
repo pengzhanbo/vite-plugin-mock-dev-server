@@ -226,20 +226,44 @@ describe('resolvePluginOptions', () => {
  * 两个插件共享选项解析结果的测试套件
  */
 describe('plugin option resolution', () => {
-  it('should resolve the options only once when both plugins share the holder', () => {
-    // `config.logger.warn` 只由 Vite 日志清理 hack 调用；两个插件共享解析结果后只执行一次，
-    // 既不会重复输出 "No proxy configured" 等告警，也不会重复创建 logger
-    // `config.logger.warn` is only called by the log cleanup hack; with a shared
-    // holder it runs once, so warnings such as "No proxy configured" are not duplicated
-    const logger = { warn: vi.fn() }
-    const config = { ...createResolvedConfig(), logger } as unknown as ResolvedConfig
-    const holder = {}
-    const server = serverPlugin({ prefix: ['/api'] }, holder)
-    const generator = buildPlugin({ prefix: ['/api'] }, holder)
+  it('should resolve the options once per resolved config', () => {
+    // 未配置 proxy 时 `resolvePluginOptions` 每次解析都会输出一次告警，
+    // 用它来观察解析次数，不依赖 `suppressViteLogCleanup` 这个日志 hack
+    // Without proxies each resolution logs a warning; it is used to observe how many
+    // times the options are resolved, without depending on the log cleanup hack
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    try {
+      const holder = {}
+      const server = serverPlugin({}, holder)
+      const generator = buildPlugin({}, holder)
+      const resolveServer = server.configResolved as (config: ResolvedConfig) => void
+      const resolveGenerator = generator.configResolved as (config: ResolvedConfig) => void
 
-    ;(server.configResolved as (config: ResolvedConfig) => void)(config)
-    ;(generator.configResolved as (config: ResolvedConfig) => void)(config)
+      const devConfig = {
+        ...createResolvedConfig(),
+        logger: { warn: vi.fn() },
+      } as unknown as ResolvedConfig
+      resolveServer(devConfig)
+      resolveGenerator(devConfig)
+      resolveServer(devConfig)
 
-    expect(logger.warn).toHaveBeenCalledTimes(1)
+      // 同一个配置实例只解析一次，两个插件共享解析结果
+      // The same config instance is resolved once and shared by both plugins
+      expect(warnSpy).toHaveBeenCalledTimes(1)
+
+      // 同一个插件实例用于新的配置（如 dev → build）时必须重新解析，
+      // 不能把上一次（开发）配置的解析结果复用到当前流程
+      // A new config must be resolved again instead of reusing the previous (dev) result
+      const buildConfig = {
+        ...createResolvedConfig(),
+        logger: { warn: vi.fn() },
+      } as unknown as ResolvedConfig
+      resolveServer(buildConfig)
+      resolveGenerator(buildConfig)
+
+      expect(warnSpy).toHaveBeenCalledTimes(2)
+    } finally {
+      warnSpy.mockRestore()
+    }
   })
 })

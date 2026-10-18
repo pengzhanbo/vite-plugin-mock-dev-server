@@ -17,7 +17,19 @@ import { resolvePluginOptions, resolveRecordOptions } from './options.js'
  * 服务端插件与构建插件之间共享的解析结果
  */
 interface ResolvedOptionsHolder {
-  resolved?: ResolvedMockServerPluginOptions
+  /**
+   * Resolved options keyed by the resolved Vite config
+   *
+   * 以解析后的 Vite 配置为键缓存解析结果
+   *
+   * 按配置实例隔离是必要的：同一个插件实例可能先后用于不同的配置
+   * （如先 `vite dev` 再 `vite build`），复用上一次的结果会把开发配置带到构建中。
+   *
+   * Keying by the config instance is required: the same plugin instance may be reused
+   * with different configs (such as `vite dev` followed by `vite build`), reusing the
+   * previous result would leak the dev config into the build.
+   */
+  cache?: WeakMap<ResolvedConfig, ResolvedMockServerPluginOptions>
 }
 
 /**
@@ -160,7 +172,9 @@ export function serverPlugin(
  * 每个配置只解析一次插件选项
  *
  * 解析时会产生告警（如未配置 proxy）并创建 logger，重复解析会让同一告警输出多次，
- * 因此服务端插件与构建插件共享第一次的解析结果。
+ * 因此服务端插件与构建插件共享同一个配置实例的解析结果。
+ * 缓存以 `ResolvedConfig` 实例为键：同一个插件实例用于新的配置时必须重新解析，
+ * 避免把上一次（如开发）配置的解析结果复用到当前（如构建）流程。
  *
  * @param options - Plugin options / 插件配置项
  * @param config - Resolved Vite config / 解析后的 Vite 配置
@@ -172,11 +186,15 @@ function resolveOptionsOnce(
   config: ResolvedConfig,
   holder: ResolvedOptionsHolder,
 ): ResolvedMockServerPluginOptions {
-  if (!holder.resolved) {
-    holder.resolved = resolvePluginOptions(options, config)
-    suppressViteLogCleanup(config)
+  const cache = (holder.cache ??= new WeakMap())
+  const cached = cache.get(config)
+  if (cached) {
+    return cached
   }
-  return holder.resolved
+  const resolved = resolvePluginOptions(options, config)
+  cache.set(config, resolved)
+  suppressViteLogCleanup(config)
+  return resolved
 }
 
 /**
