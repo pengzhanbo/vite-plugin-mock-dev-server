@@ -3,8 +3,9 @@ import type { Http2SecureServer } from 'node:http2'
 import type { Connect, WebSocketServer } from 'vite'
 import type { ResolvedMockServerPluginOptions } from './options.js'
 import { Compiler } from '../compiler/index.js'
-import { createMatchingWeightSorter, createMockMiddleware } from '../mockHttp/index.js'
+import { createMockMiddleware } from '../mockHttp/index.js'
 import { mockWebSocket } from '../mockWebsocket/index.js'
+import { createMatchingWeightSorter } from './matchingWeight.js'
 
 /**
  * Initialize mock middlewares

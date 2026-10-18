@@ -1,5 +1,6 @@
 export * from './define.js'
 export * from './init.js'
 export * from './logger.js'
+export * from './matchingWeight.js'
 export * from './options.js'
 export * from './plugin.js'

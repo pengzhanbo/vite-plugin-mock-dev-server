@@ -4,7 +4,7 @@
  * Mock 服务器集成测试
  */
 import { describe, expect, it } from 'vitest'
-import { matchingWeight } from '../src/mockHttp/matchingWeight.js'
+import { matchingWeight } from '../src/core/matchingWeight.js'
 
 /**
  * Test suite for matching weight with complex scenarios

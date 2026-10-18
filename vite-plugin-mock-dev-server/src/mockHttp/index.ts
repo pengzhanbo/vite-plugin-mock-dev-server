@@ -1,6 +1,5 @@
 export * from './cors.js'
 export * from './matcher.js'
-export * from './matchingWeight.js'
 export * from './middleware.js'
 export * from './request.js'
 export * from './requestRecovery.js'

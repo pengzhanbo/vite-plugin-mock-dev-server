@@ -4,6 +4,7 @@ import type { CorsOptions } from 'cors'
 import type { ServerResponse } from 'node:http'
 import type { Connect } from 'vite'
 import type { Logger, ResolvedMockServerPluginOptions } from '../core/index.js'
+import type { MatchingWeightSorter } from '../core/matchingWeight.js'
 import type {
   ExtraRequest,
   MockHttpItem,
@@ -11,7 +12,6 @@ import type {
   MockRequest,
   MockResponse,
 } from '../types/index.js'
-import type { MatchingWeightSorter } from './matchingWeight.js'
 import {
   attempt,
   attemptAsync,
@@ -23,11 +23,11 @@ import {
 } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import Cookies from 'cookies'
+import { createMatchingWeightSorter } from '../core/matchingWeight.js'
 import { recordRequestWithRawReq, replayRecordedRequest } from '../recorder/index.js'
 import { doesProxyContextMatchUrl, isReadableStream, urlParse } from '../utils/index.js'
 import { createCors } from './cors.js'
 import { findMockData, hasMockMethod } from './matcher.js'
-import { createMatchingWeightSorter } from './matchingWeight.js'
 import { parseRequestBodyWithRaw, parseRequestParams, requestLog } from './request.js'
 import { cacheRequestBody } from './requestRecovery.js'
 import {

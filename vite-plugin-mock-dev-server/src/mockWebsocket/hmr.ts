@@ -12,7 +12,7 @@
  */
 
 import type { Compiler } from '../compiler/index.js'
-import type { MatchingWeightSorter } from '../mockHttp/index.js'
+import type { MatchingWeightSorter } from '../core/matchingWeight.js'
 import type { MockWebsocketItem } from '../types/index.js'
 import type { WebSocketServerPool } from './pool.js'
 import { objectKeys } from '@pengzhanbo/utils'

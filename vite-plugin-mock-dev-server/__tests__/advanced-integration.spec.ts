@@ -4,7 +4,7 @@
  * 高级集成测试
  */
 import { describe, expect, it } from 'vitest'
-import { matchingWeight } from '../src/mockHttp/matchingWeight.js'
+import { matchingWeight } from '../src/core/matchingWeight.js'
 import { parseRequestParams, requestValidate } from '../src/mockHttp/request.js'
 import {
   createMatcher,

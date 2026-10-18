@@ -5,12 +5,12 @@
  */
 import type { Connect } from 'vite'
 import type { Compiler } from '../src/compiler/index.js'
-import type { MatchingWeightSorter } from '../src/mockHttp/matchingWeight.js'
+import type { MatchingWeightSorter } from '../src/core/matchingWeight.js'
 import type { MockHttpItem, MockOptions } from '../src/types/index.js'
 import { Buffer } from 'node:buffer'
 import { Readable } from 'node:stream'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { createMatchingWeightSorter } from '../src/mockHttp/matchingWeight.js'
+import { createMatchingWeightSorter } from '../src/core/matchingWeight.js'
 import { createMockMiddleware } from '../src/mockHttp/middleware.js'
 import { replayRecordedRequest } from '../src/recorder/index.js'
 

@@ -4,7 +4,7 @@
  * 匹配权重功能测试
  */
 import { describe, expect, it } from 'vitest'
-import { createMatchingWeightSorter, matchingWeight } from '../src/mockHttp/matchingWeight.js'
+import { createMatchingWeightSorter, matchingWeight } from '../src/core/matchingWeight.js'
 
 /**
  * Test suite for matching weight

@@ -3,7 +3,7 @@
  *
  * Mock WebSocket 服务的规则匹配
  */
-import type { MatchingWeightSorter } from '../mockHttp/index.js'
+import type { MatchingWeightSorter } from '../core/matchingWeight.js'
 import type { MockMatchPriority, MockOptions, MockWebsocketItem } from '../types/index.js'
 import { objectKeys } from '@pengzhanbo/utils'
 import { isPathMatch, matchScene } from '../utils/index.js'

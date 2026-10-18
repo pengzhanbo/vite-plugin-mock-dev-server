@@ -124,8 +124,6 @@ const envPort = Number(process.env.PORT);
 const port = Number.isInteger(envPort) && envPort > 0 ? envPort : ${serverPort};
 const host = process.env.HOST || undefined;
 
-// 端口占用等启动错误不应变成未捕获异常，否则产物进程会以一段堆栈直接退出
-// Startup errors (such as a port already in use) must not become uncaught exceptions
 server.on('error', (error) => {
   logger.error(\`Failed to start the mock server on \${host ?? '0.0.0.0'}:\${port}: \${error}\`);
   process.exitCode = 1;
