@@ -123,9 +123,9 @@ vite-plugin-mock-server/
 ├── vite-plugin-mock-dev-server/
 │   ├── src/
 │   │   ├── index.ts         # Plugin entry + public re-exports
-│   │   ├── core/            # plugin.ts, options.ts (resolution), init.ts
+│   │   ├── core/            # plugin.ts, options.ts (resolution), init.ts, matchingWeight
 │   │   ├── compiler/        # Compiler (load, compile, watch), processData
-│   │   ├── mockHttp/        # Middleware, matcher, matchingWeight, request/response
+│   │   ├── mockHttp/        # Middleware, matcher, request/response
 │   │   ├── mockWebsocket/   # WSS creation, HMR restart, cleanup
 │   │   ├── helpers/         # defineMock, defineMockData, createSSEStream
 │   │   ├── recorder/        # Request recording (proxy hooks) and replay

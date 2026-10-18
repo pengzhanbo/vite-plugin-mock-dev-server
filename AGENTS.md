@@ -20,22 +20,22 @@ Request pipeline: **configure → compile → match → respond**
 
 ## Key Directories
 
-| Path                                             | Purpose                                                                                                                                 |
-| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `vite-plugin-mock-dev-server/src/`               | Plugin source (ESM, `.js` import suffixes, per-dir `index.ts` barrels)                                                                  |
-| `vite-plugin-mock-dev-server/src/core/`          | Plugin lifecycle: `plugin.ts`, `options.ts`, `init.ts`, `define.ts` (Vite define fork), `logger.ts`                                     |
-| `vite-plugin-mock-dev-server/src/compiler/`      | Mock-file bundling/loading/watch: `compiler.ts`, `esbuild.ts`, `rolldown.ts`, `compile.ts`, `processData.ts`                            |
-| `vite-plugin-mock-dev-server/src/mockHttp/`      | HTTP request pipeline: `middleware.ts`, `request.ts`, `response.ts`, `matcher.ts`, `matchingWeight.ts`, `cors.ts`, `requestRecovery.ts` |
-| `vite-plugin-mock-dev-server/src/mockWebsocket/` | WS mock server (`server.ts`)                                                                                                            |
-| `vite-plugin-mock-dev-server/src/helpers/`       | Public helpers: `defineMock.ts`, `defineMockData.ts`, `createSSEStream.ts`                                                              |
-| `vite-plugin-mock-dev-server/src/recorder/`      | Record/replay: `Recorder.ts`, `replay.ts`, `storage.ts`, `decompress.ts`, `helper.ts`                                                   |
-| `vite-plugin-mock-dev-server/src/build/`         | Standalone server generation (`generate.ts`, `serverEntryCode.ts`, `mockEntryCode.ts`)                                                  |
-| `vite-plugin-mock-dev-server/src/types/`         | Public types: `options.ts`, `httpConfig.ts`, `wsConfig.ts`, `record.ts`, `cookies.ts`, `http.ts`                                        |
-| `vite-plugin-mock-dev-server/src/utils/`         | Shared: `urlParse.ts`, `isPathMatch.ts`, `isObjectSubset.ts`, `createMatcher.ts`, `matchScene.ts`, `matchingWeight` helpers             |
-| `vite-plugin-mock-dev-server/__tests__/`         | Vitest specs (`*.spec.ts`)                                                                                                              |
-| `example/`                                       | Demo Vite app exercising every feature; `mock/` holds 27+ `*.mock.ts` files                                                             |
-| `docs/`                                          | VitePress site (root = English, `zh/` = Chinese)                                                                                        |
-| `.github/workflows/`                             | CI: `lint.yaml`, `test.yaml`, `release.yaml`                                                                                            |
+| Path                                             | Purpose                                                                                                                     |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `vite-plugin-mock-dev-server/src/`               | Plugin source (ESM, `.js` import suffixes, per-dir `index.ts` barrels)                                                      |
+| `vite-plugin-mock-dev-server/src/core/`          | Plugin lifecycle: `plugin.ts`, `options.ts`, `init.ts`, `define.ts` (Vite define fork), `logger.ts`, `matchingWeight.ts`    |
+| `vite-plugin-mock-dev-server/src/compiler/`      | Mock-file bundling/loading/watch: `compiler.ts`, `esbuild.ts`, `rolldown.ts`, `compile.ts`, `processData.ts`                |
+| `vite-plugin-mock-dev-server/src/mockHttp/`      | HTTP request pipeline: `middleware.ts`, `request.ts`, `response.ts`, `matcher.ts`, `cors.ts`, `requestRecovery.ts`          |
+| `vite-plugin-mock-dev-server/src/mockWebsocket/` | WS mock server (`server.ts`)                                                                                                |
+| `vite-plugin-mock-dev-server/src/helpers/`       | Public helpers: `defineMock.ts`, `defineMockData.ts`, `createSSEStream.ts`                                                  |
+| `vite-plugin-mock-dev-server/src/recorder/`      | Record/replay: `Recorder.ts`, `replay.ts`, `storage.ts`, `decompress.ts`, `helper.ts`                                       |
+| `vite-plugin-mock-dev-server/src/build/`         | Standalone server generation (`generate.ts`, `serverEntryCode.ts`, `mockEntryCode.ts`)                                      |
+| `vite-plugin-mock-dev-server/src/types/`         | Public types: `options.ts`, `httpConfig.ts`, `wsConfig.ts`, `record.ts`, `cookies.ts`, `http.ts`                            |
+| `vite-plugin-mock-dev-server/src/utils/`         | Shared: `urlParse.ts`, `isPathMatch.ts`, `isObjectSubset.ts`, `createMatcher.ts`, `matchScene.ts`, `matchingWeight` helpers |
+| `vite-plugin-mock-dev-server/__tests__/`         | Vitest specs (`*.spec.ts`)                                                                                                  |
+| `example/`                                       | Demo Vite app exercising every feature; `mock/` holds 27+ `*.mock.ts` files                                                 |
+| `docs/`                                          | VitePress site (root = English, `zh/` = Chinese)                                                                            |
+| `.github/workflows/`                             | CI: `lint.yaml`, `test.yaml`, `release.yaml`                                                                                |
 
 ## Development Commands
 
