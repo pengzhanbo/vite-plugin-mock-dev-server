@@ -435,10 +435,15 @@ export function mockWebSocket(
     }
     wss.close()
     wssContextMap.delete(wss)
+    // 只有 `pathname` 当前仍映射到该实例时才移除连接池条目：
+    // 旧服务可能仍在关闭过程中，而同一路径已被新服务接管，
+    // 此时删除条目会把新服务从连接池中移除
     const wssMap = poolMap.get(mockUrl)
-    wssMap?.delete(pathname)
-    if (wssMap?.size === 0) {
-      poolMap.delete(mockUrl)
+    if (wssMap?.get(pathname) === wss) {
+      wssMap.delete(pathname)
+      if (wssMap.size === 0) {
+        poolMap.delete(mockUrl)
+      }
     }
   }
 
@@ -645,7 +650,14 @@ export function mockWebSocket(
       // 插件自身的监听：每个 websocket 服务只注册一次，也不会被 mock 的清理移除
       // （它们不属于 mock）。`close` 监听用于在其他路径关闭服务时移除连接池条目，
       // 被删除 mock 的回收不依赖它 —— 那条路径由 `closeWssOfFile` 显式移除条目。
-      wss.on('close', () => wssMap.delete(pathname))
+      //
+      // 服务关闭是异步的，期间同一路径可能已被新服务接管：
+      // 只有 `pathname` 当前仍映射到该实例时才移除条目。
+      wss.on('close', () => {
+        if (wssMap.get(pathname) === wss) {
+          wssMap.delete(pathname)
+        }
+      })
       wss.on('error', (e) => {
         logger.error(
           `${ansis.red(`WebSocket mock error at ${wss.path}`)}\n${e}\n  at setup (${created.filepath})`,
@@ -690,8 +702,11 @@ export function mockWebSocket(
           (item) => item.ws === ws,
           (v) => remove(wssContext.connectionList, v),
         )
-        // 最后一个客户端也断开了：空闲一段时间后回收该服务（见 `scheduleIdleRecycle`）
-        if (wssContext.connectionList.length === 0) {
+        // 最后一个客户端也断开了：空闲一段时间后回收该服务（见 `scheduleIdleRecycle`）。
+        // 该实例可能已被回收、并由同路径的新服务接管（此时该上下文已不再登记在
+        // `wssContextMap` 中），只有上下文仍属于这个实例时才安排回收，
+        // 否则会把新服务当作旧服务回收
+        if (wssContext.connectionList.length === 0 && wssContextMap.get(wss) === wssContext) {
           scheduleIdleRecycle(mockUrl, pathname, wss, wssContext)
         }
       })
