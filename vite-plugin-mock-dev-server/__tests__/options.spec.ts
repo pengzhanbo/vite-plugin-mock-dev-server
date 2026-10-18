@@ -6,6 +6,7 @@
 import type { ResolvedConfig } from 'vite'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ensureProxies, resolveCorsOptions, resolvePluginOptions } from '../src/core/options.js'
+import { buildPlugin, serverPlugin } from '../src/core/plugin.js'
 
 /**
  * Create a minimal resolved Vite config for testing
@@ -101,9 +102,30 @@ describe('ensureProxies', () => {
  * resolveCorsOptions 函数测试套件
  */
 describe('resolveCorsOptions', () => {
-  it('should enable cors with empty options by default', () => {
-    expect(resolveCorsOptions(true)).toEqual({})
-    expect(resolveCorsOptions({})).toEqual({})
+  it('should fall back to the vite default origins when no origin is configured', () => {
+    // 没有来源限制时应收敛到 Vite 默认的 localhost 来源，而不是允许所有来源
+    // Without an origin restriction it falls back to the Vite default (localhost only)
+    for (const options of [
+      resolveCorsOptions(true),
+      resolveCorsOptions({}),
+      resolveCorsOptions(true, true),
+      resolveCorsOptions(true, { credentials: true }),
+    ]) {
+      expect(options).not.toBe(false)
+      const origin = (options as { origin?: unknown }).origin
+      expect(origin).toBeInstanceOf(RegExp)
+      expect((origin as RegExp).test('http://localhost:5173')).toBe(true)
+      expect((origin as RegExp).test('http://127.0.0.1:3000')).toBe(true)
+      expect((origin as RegExp).test('http://[::1]:3000')).toBe(true)
+      expect((origin as RegExp).test('https://example.com')).toBe(false)
+    }
+  })
+
+  it('should keep an explicitly configured origin', () => {
+    expect(resolveCorsOptions({ origin: '*' })).toEqual({ origin: '*' })
+    expect(resolveCorsOptions(true, { origin: 'https://vite.dev' })).toEqual({
+      origin: 'https://vite.dev',
+    })
   })
 
   it('should disable cors when either option disables it', () => {
@@ -195,5 +217,53 @@ describe('resolvePluginOptions', () => {
     const options = resolvePluginOptions({ prefix: ['/api'], cors: { origin: '*' } }, config)
 
     expect(options.cors).toEqual({ origin: '*', credentials: true })
+  })
+})
+
+/**
+ * Test suite for the shared option resolution of the two plugins
+ *
+ * 两个插件共享选项解析结果的测试套件
+ */
+describe('plugin option resolution', () => {
+  it('should resolve the options once per resolved config', () => {
+    // 未配置 proxy 时 `resolvePluginOptions` 每次解析都会输出一次告警，
+    // 用它来观察解析次数，不依赖 `suppressViteLogCleanup` 这个日志 hack
+    // Without proxies each resolution logs a warning; it is used to observe how many
+    // times the options are resolved, without depending on the log cleanup hack
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    try {
+      const holder = {}
+      const server = serverPlugin({}, holder)
+      const generator = buildPlugin({}, holder)
+      const resolveServer = server.configResolved as (config: ResolvedConfig) => void
+      const resolveGenerator = generator.configResolved as (config: ResolvedConfig) => void
+
+      const devConfig = {
+        ...createResolvedConfig(),
+        logger: { warn: vi.fn() },
+      } as unknown as ResolvedConfig
+      resolveServer(devConfig)
+      resolveGenerator(devConfig)
+      resolveServer(devConfig)
+
+      // 同一个配置实例只解析一次，两个插件共享解析结果
+      // The same config instance is resolved once and shared by both plugins
+      expect(warnSpy).toHaveBeenCalledTimes(1)
+
+      // 同一个插件实例用于新的配置（如 dev → build）时必须重新解析，
+      // 不能把上一次（开发）配置的解析结果复用到当前流程
+      // A new config must be resolved again instead of reusing the previous (dev) result
+      const buildConfig = {
+        ...createResolvedConfig(),
+        logger: { warn: vi.fn() },
+      } as unknown as ResolvedConfig
+      resolveServer(buildConfig)
+      resolveGenerator(buildConfig)
+
+      expect(warnSpy).toHaveBeenCalledTimes(2)
+    } finally {
+      warnSpy.mockRestore()
+    }
   })
 })

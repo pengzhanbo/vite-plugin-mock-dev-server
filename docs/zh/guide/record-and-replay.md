@@ -285,25 +285,30 @@ export default {
 ├── mock/
 │   ├── .recordings/              # 录制数据目录
 │   │   ├── .gitignore            # 自动生成的gitignore文件
-│   │   ├── api-users.json        # GET /api/users的录制数据
-│   │   ├── api-users-id.json     # GET /api/users/:id的录制数据
-│   │   └── api-login.json        # POST /api/login的录制数据
+│   │   ├── api-users-6654ad4d.json      # GET /api/users的录制数据
+│   │   ├── api-users-id-310c8b38.json   # GET /api/users/:id的录制数据
+│   │   └── api-login-6a17b494.json      # POST /api/login的录制数据
 │   └── *.mock.ts                 # mock文件
 └── vite.config.ts
 ```
 
 ### 文件命名规则
 
-录制文件使用请求路径的kebab-case格式命名：
+录制文件使用请求路径的 kebab-case 格式命名，并追加 pathname 的短哈希：
 
 ```txt
-规则：{kebab-case(pathname)}.json
+规则：{kebab-case(pathname)}-{sha1(pathname) 前 8 位}.json
+根路径 / 固定为 root.json
 
 示例：
-- /api/users          → api-users.json
-- /api/users/:id      → api-users-id.json
-- /api/user/profile   → api-user-profile.json
+- /api/users          → api-users-6654ad4d.json
+- /api/users/:id      → api-users-id-310c8b38.json
+- /api/user/profile   → api-user-profile-2d153012.json
+- /                   → root.json
 ```
+
+短哈希用于避免不同 pathname 生成同一个文件名（如 `/api/userProfile` 与
+`/api/user/profile` 的 kebab-case 结果相同）。
 
 ### 文件内容格式
 
@@ -313,7 +318,7 @@ export default {
     "meta": {
       "timestamp": 1704067200000,
       "createAt": "2024/1/1 00:00:00",
-      "filepath": "mock/.recordings/api-users.json",
+      "filepath": "mock/.recordings/api-users-6654ad4d.json",
       "referer": "http://localhost:5173/"
     },
     "req": {

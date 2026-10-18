@@ -72,6 +72,67 @@ function getPatternError(pattern: string): undefined | string {
   return error
 }
 
+/**
+ * 归一化并校验 mock 的 `delay` 配置
+ *
+ * `responseRealDelay` 会静默跳过非法值，使错误的配置（负数延迟、`min > max`、非法数组）
+ * 看起来已经生效。这里在编译阶段归一化并告警：负数按 `0` 处理，`min > max` 时交换区间，
+ * 无法解析的值直接丢弃（不延迟）。
+ *
+ * @param delay - Configured delay / 配置的延迟
+ * @param filepath - Path of the mock file / mock 文件路径
+ * @param logger - Logger instance / 日志实例
+ * @returns Normalized delay / 归一化后的延迟
+ */
+function normalizeDelay(
+  delay: unknown,
+  filepath: string | undefined,
+  logger?: Logger,
+): MockHttpItem['delay'] {
+  if (delay == null) {
+    return undefined
+  }
+
+  const warn = (message: string): void => {
+    logger?.warn(
+      `${ansis.yellow('Invalid delay')} ${message}${filepath ? `\n  at (${ansis.underline(filepath)})` : ''}`,
+    )
+  }
+
+  if (typeof delay === 'number') {
+    if (!Number.isFinite(delay)) {
+      warn(`${delay}, expected a finite number, the delay is ignored`)
+      return undefined
+    }
+    if (delay < 0) {
+      warn(`${delay}, a negative delay is treated as 0`)
+      return 0
+    }
+    return delay
+  }
+
+  if (
+    !isArray(delay) ||
+    delay.length !== 2 ||
+    !delay.every((item) => typeof item === 'number' && Number.isFinite(item))
+  ) {
+    warn(`${JSON.stringify(delay)}, expected \`[min, max]\`, the delay is ignored`)
+    return undefined
+  }
+
+  let [min, max] = delay as [number, number]
+  if (min > max) {
+    warn(`\`[${min}, ${max}]\`, \`min\` is greater than \`max\`, the range is swapped`)
+    ;[min, max] = [max, min]
+  }
+  if (min < 0 || max < 0) {
+    warn(`\`[${min}, ${max}]\`, negative values are treated as 0`)
+    min = Math.max(min, 0)
+    max = Math.max(max, 0)
+  }
+  return [min, max]
+}
+
 export function processMockData(
   mockList:
     | Map<string, MockHttpItem | MockWebsocketItem | MockOptions>
@@ -103,6 +164,9 @@ export function processMockData(
 
       const current = { ...mock, url: pathname }
       if (current.ws !== true) {
+        // 非法的 `delay` 配置（负数、`min > max`、非法数组）会让延迟静默失效，
+        // 在编译阶段归一化并告警，避免用户误以为配置已生效。
+        current.delay = normalizeDelay(current.delay, (mock as any).__filepath__, logger)
         const validator = current.validator
         if (!isEmptyObject(query)) {
           if (isFunction(validator)) {

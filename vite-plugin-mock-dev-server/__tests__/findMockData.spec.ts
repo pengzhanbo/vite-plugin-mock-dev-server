@@ -6,7 +6,7 @@
 
 import type { MockOptions } from 'vite-plugin-mock-dev-server'
 import { describe, expect, it, vi } from 'vitest'
-import { findMockData } from '../src/mockHttp/matcher.js'
+import { findMockData, hasMockMethod } from '../src/mockHttp/matcher.js'
 
 /**
  * Test suite for findMockData function
@@ -93,6 +93,34 @@ describe('findMockData', () => {
     })
     expect(getResult).toEqual(mockList[0])
     expect(putResult).toEqual(mockList[0])
+  })
+
+  it('should treat an empty method array as the default methods', () => {
+    // `method: []` 不是 nullish，若不兜底会让该 mock 永远无法匹配
+    // `method: []` is not nullish; without a fallback the mock would never match
+    const mockList = [
+      { url: '/api/users', method: [], body: { data: 'users' } },
+    ] as unknown as MockOptions
+    const createRequest = (method: string) =>
+      ({
+        pathname: '/api/users',
+        method,
+        request: {
+          query: {},
+          refererQuery: {},
+          body: {},
+          headers: {},
+        },
+        activeScene: [],
+      }) as any
+
+    expect(findMockData(mockList, logger, createRequest('GET'))).toEqual(mockList[0])
+    expect(findMockData(mockList, logger, createRequest('POST'))).toEqual(mockList[0])
+    expect(findMockData(mockList, logger, createRequest('PUT'))).toBeUndefined()
+
+    expect(hasMockMethod(mockList, 'GET')).toBe(true)
+    expect(hasMockMethod(mockList, 'POST')).toBe(true)
+    expect(hasMockMethod(mockList, 'PUT')).toBe(false)
   })
 
   it('should match a lowercase method name', () => {

@@ -289,25 +289,31 @@ project-root/
 ├── mock/
 │   ├── .recordings/              # Recording data directory
 │   │   ├── .gitignore            # Auto-generated gitignore file
-│   │   ├── api-users.json        # Recording data for GET /api/users
-│   │   ├── api-users-id.json     # Recording data for GET /api/users/:id
-│   │   └── api-login.json        # Recording data for POST /api/login
+│   │   ├── api-users-6654ad4d.json      # Recording data for GET /api/users
+│   │   ├── api-users-id-310c8b38.json   # Recording data for GET /api/users/:id
+│   │   └── api-login-6a17b494.json      # Recording data for POST /api/login
 │   └── *.mock.ts                 # Mock files
 └── vite.config.ts
 ```
 
 ### File Naming Convention
 
-Recording files are named using the kebab-case format of the request path:
+Recording files are named using the kebab-case format of the request path, followed by
+a short hash of the pathname:
 
 ```txt
-Rule: {kebab-case(pathname)}.json
+Rule: {kebab-case(pathname)}-{first 8 chars of sha1(pathname)}.json
+The root path / is always stored as root.json
 
 Examples:
-- /api/users          → api-users.json
-- /api/users/:id      → api-users-id.json
-- /api/user/profile   → api-user-profile.json
+- /api/users          → api-users-6654ad4d.json
+- /api/users/:id      → api-users-id-310c8b38.json
+- /api/user/profile   → api-user-profile-2d153012.json
+- /                   → root.json
 ```
+
+The short hash keeps different pathnames from sharing a file name (such as
+`/api/userProfile` and `/api/user/profile`, whose kebab-case forms are the same).
 
 ### File Content Format
 
@@ -317,7 +323,7 @@ Examples:
     "meta": {
       "timestamp": 1704067200000,
       "createAt": "1/1/2024, 00:00:00",
-      "filepath": "mock/.recordings/api-users.json",
+      "filepath": "mock/.recordings/api-users-6654ad4d.json",
       "referer": "http://localhost:5173/"
     },
     "req": {
