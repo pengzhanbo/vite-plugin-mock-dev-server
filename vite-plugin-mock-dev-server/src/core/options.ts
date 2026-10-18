@@ -168,16 +168,20 @@ export function isWebsocketProxyTarget(target: unknown): boolean {
 }
 
 /**
- * Resolve the cors options
+ * Vite 默认允许的来源（仅 localhost / 127.0.0.1 / [::1]）
  *
+ * Vite 的 `server.cors` 默认值即使用该正则。插件在没有拿到来源限制时（`server.cors`
+ * 为 `true` 或未配置 `origin`）以它为兜底，避免 mock 响应默认允许所有来源。
+ */
+const DEFAULT_ALLOWED_ORIGINS =
+  /^https?:\/\/(?:(?:[^:]+\.)?localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/
+
+/**
  * 解析 cors 配置
- *
- * CORS is enabled only when neither the plugin `cors` option nor the Vite
- * `server.cors` option disables it. The Vite `server.cors` options are used as
- * the base, and the plugin `cors` options take precedence over them.
  *
  * 仅当插件的 `cors` 选项与 Vite 的 `server.cors` 选项都未禁用 CORS 时才启用。
  * 以 Vite `server.cors` 的配置为基础，插件的 `cors` 配置优先于它。
+ * 基础配置没有来源限制时回退到 Vite 的默认值（仅 localhost），而不是允许所有来源。
  *
  * @param cors - Plugin cors option / 插件的 cors 配置
  * @param serverCors - Vite server.cors option / Vite 的 server.cors 配置
@@ -192,8 +196,15 @@ export function resolveCorsOptions(
   if (cors === false || serverCors === false) {
     return false
   }
+  const base: CorsOptions =
+    typeof serverCors === 'object' && serverCors.origin != null
+      ? serverCors
+      : {
+          ...(typeof serverCors === 'object' ? serverCors : {}),
+          origin: DEFAULT_ALLOWED_ORIGINS,
+        }
   return {
-    ...(typeof serverCors === 'object' ? serverCors : {}),
+    ...base,
     ...(typeof cors === 'object' ? cors : {}),
   }
 }

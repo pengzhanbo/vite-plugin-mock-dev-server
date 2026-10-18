@@ -1,6 +1,7 @@
 import type { IncomingMessage } from 'node:http'
 import type { RecordedReq, RecordedRes, ResolvedRecordOptions } from '../types/index.js'
 import { Buffer } from 'node:buffer'
+import { createHash } from 'node:crypto'
 import path from 'node:path'
 import {
   deepEqual,
@@ -172,10 +173,20 @@ export function createRecordMatcher(
 /**
  * 生成记录文件路径
  *
+ * `kebabCase` 会在不同的 pathname 之间产生碰撞（如 `/api/userProfile` 与
+ * `/api/user/profile`），并且根路径 `/` 会被转换为空字符串（生成隐藏文件 `.json`）。
+ * 因此在文件名后追加 pathname 的短哈希，根路径单独映射为 `root.json`。
+ *
  * @param pathname 请求路径
  * @param dir 记录目录
  * @returns 记录文件路径
  */
 export function getFilepath(pathname: string, dir: string): string {
-  return path.join(dir, `${kebabCase(pathname)}.json`)
+  const name = kebabCase(pathname)
+  // 根路径等无法生成文件名的路径，使用固定的 `root.json`
+  if (!name) {
+    return path.join(dir, 'root.json')
+  }
+  const hash = createHash('sha1').update(pathname).digest('hex').slice(0, 8)
+  return path.join(dir, `${name}-${hash}.json`)
 }

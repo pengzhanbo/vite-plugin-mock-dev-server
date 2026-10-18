@@ -42,10 +42,22 @@ export function hasMockMethod(
     if (!mock || mock.ws || !matchScene(activeScene, mock.scene)) {
       return false
     }
-    return toArray<Method>(mock.method ?? ['GET', 'POST'])
-      .map((item) => item.toUpperCase())
-      .includes(target)
+    return getMockMethods(mock.method).includes(target)
   })
+}
+
+/**
+ * 归一化 mock 允许的请求方法
+ *
+ * `method: []` 与未配置 `method` 语义一致，都回退到默认的 `GET`、`POST`：
+ * 空数组不是 nullish，若直接使用会让该 mock 永远无法匹配。
+ *
+ * @param method - Configured method(s) / 配置的请求方法
+ * @returns Upper-cased method list / 大写的方法列表
+ */
+function getMockMethods(method?: Method | Method[]): string[] {
+  const methods = toArray<Method>(method).map((item) => item.toUpperCase())
+  return methods.length ? methods : ['GET', 'POST']
 }
 
 /**
@@ -73,11 +85,8 @@ export function findMockData(
       return false
     }
 
-    const methods = toArray<Method>(mock.method ?? ['GET', 'POST']).map((item) =>
-      item.toUpperCase(),
-    )
     // 判断发起的请求方法是否符合当前 mock 允许的方法
-    if (!methods.includes(method)) {
+    if (!getMockMethods(mock.method).includes(method)) {
       return false
     }
 
@@ -94,10 +103,6 @@ export function findMockData(
       const validator = mock.validator
       // 函数校验器与对象校验器语义一致：校验器抛出的异常只记录日志，
       // 并视为「不匹配」，继续尝试后续规则，而不是冒泡成 500
-      //
-      // Function and object validators share the same semantics: an exception thrown
-      // by the validator is logged and treated as a mismatch, so that the following
-      // rules are still tried, instead of bubbling up as a 500 response.
       const [error, validated] = attempt(() =>
         isFunction(validator) ? validator(extraRequest) : requestValidate(extraRequest, validator),
       )

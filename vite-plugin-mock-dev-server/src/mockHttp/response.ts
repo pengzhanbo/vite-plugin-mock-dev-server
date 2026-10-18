@@ -153,7 +153,7 @@ export async function provideResponseHeaders(
     res.setHeader('Content-Type', contentType)
   }
 
-  res.setHeader('Cache-Control', 'no-cache,max-age=0')
+  res.setHeader('Cache-Control', 'no-cache, max-age=0')
   res.setHeader('X-Mock-Power-By', 'vite-plugin-mock-dev-server')
 
   if (filepath) {

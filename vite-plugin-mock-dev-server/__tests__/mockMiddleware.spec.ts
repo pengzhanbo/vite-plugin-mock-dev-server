@@ -778,7 +778,7 @@ describe('mockMiddleware', () => {
 
     await middleware(req, res, next)
 
-    expect(res.headers['Cache-Control']).toBe('no-cache,max-age=0')
+    expect(res.headers['Cache-Control']).toBe('no-cache, max-age=0')
     expect(res.headers['X-Mock-Power-By']).toBe('vite-plugin-mock-dev-server')
     expect(res.headers['X-File-Path']).toBe('test/mock.ts')
   })

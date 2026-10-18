@@ -15,9 +15,8 @@
  */
 
 import type { Buffer } from 'node:buffer'
-import type { Connect, UserConfig } from 'vite'
+import type { Connect } from 'vite'
 import type { ProxySetup } from '../utils/index.js'
-import { setupProxyConfigure } from '../utils/index.js'
 
 const cache = new WeakMap<Connect.IncomingMessage, Buffer>()
 
@@ -60,16 +59,4 @@ export const requestRecoverySetup: ProxySetup = (proxy) => {
       }
     }
   })
-}
-
-/**
- * Recover request for proxy
- *
- * vite 在 proxy 配置中，允许通过 configure 访问 http-proxy 实例，
- * 通过 http-proxy 的 proxyReq 事件，重新写入请求流
- *
- * @param config - Vite user config / Vite 用户配置
- */
-export function recoverRequest(config: UserConfig): void {
-  setupProxyConfigure(config, [requestRecoverySetup])
 }

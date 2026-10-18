@@ -12,6 +12,15 @@ import { initMockMiddlewares } from './init.js'
 import { resolvePluginOptions, resolveRecordOptions } from './options.js'
 
 /**
+ * Shared resolved options between the server plugin and the build plugin
+ *
+ * 服务端插件与构建插件之间共享的解析结果
+ */
+interface ResolvedOptionsHolder {
+  resolved?: ResolvedMockServerPluginOptions
+}
+
+/**
  * Create mock dev server plugin
  *
  * 创建 Mock 开发服务器插件
@@ -24,9 +33,12 @@ export function mockDevServerPlugin(options: MockServerPluginOptions = {}): Plug
     return []
   }
 
-  const plugins: Plugin[] = [serverPlugin(options)]
+  // 两个插件共享同一份解析结果：同一命令下若两者都执行 `configResolved`，
+  // 选项只会解析一次，避免重复告警（如 "No proxy configured"）与重复创建 logger。
+  const holder: ResolvedOptionsHolder = {}
+  const plugins: Plugin[] = [serverPlugin(options, holder)]
   if (options.build) {
-    plugins.push(buildPlugin(options))
+    plugins.push(buildPlugin(options, holder))
   }
 
   return plugins
@@ -38,9 +50,13 @@ export function mockDevServerPlugin(options: MockServerPluginOptions = {}): Plug
  * 创建构建插件
  *
  * @param options - Plugin options / 插件配置项
+ * @param holder - Shared resolved options between plugins / 插件间共享的解析结果
  * @returns Vite plugin object / Vite 插件对象
  */
-export function buildPlugin(options: MockServerPluginOptions): Plugin {
+export function buildPlugin(
+  options: MockServerPluginOptions,
+  holder: ResolvedOptionsHolder = {},
+): Plugin {
   let viteConfig = {} as ResolvedConfig
   let resolvedOptions!: ResolvedMockServerPluginOptions
   return {
@@ -49,8 +65,7 @@ export function buildPlugin(options: MockServerPluginOptions): Plugin {
     apply: 'build',
     configResolved(config) {
       viteConfig = config
-      resolvedOptions = resolvePluginOptions(options, config)
-      suppressViteLogCleanup(config)
+      resolvedOptions = resolveOptionsOnce(options, config, holder)
     },
     async buildEnd(error) {
       if (error || viteConfig.command !== 'build') {
@@ -68,9 +83,13 @@ export function buildPlugin(options: MockServerPluginOptions): Plugin {
  * 创建服务器插件
  *
  * @param options - Plugin options / 插件配置项
+ * @param holder - Shared resolved options between plugins / 插件间共享的解析结果
  * @returns Vite plugin object / Vite 插件对象
  */
-export function serverPlugin(options: MockServerPluginOptions): Plugin {
+export function serverPlugin(
+  options: MockServerPluginOptions,
+  holder: ResolvedOptionsHolder = {},
+): Plugin {
   let resolvedOptions!: ResolvedMockServerPluginOptions
   return {
     name: 'vite-plugin-mock-dev-server',
@@ -120,8 +139,7 @@ export function serverPlugin(options: MockServerPluginOptions): Plugin {
     },
 
     configResolved(config) {
-      resolvedOptions = resolvePluginOptions(options, config)
-      suppressViteLogCleanup(config)
+      resolvedOptions = resolveOptionsOnce(options, config, holder)
     },
 
     configureServer({ middlewares, httpServer, ws }) {
@@ -136,6 +154,29 @@ export function serverPlugin(options: MockServerPluginOptions): Plugin {
       middlewareList.forEach((middleware) => middlewares.use(middleware))
     },
   }
+}
+
+/**
+ * 每个配置只解析一次插件选项
+ *
+ * 解析时会产生告警（如未配置 proxy）并创建 logger，重复解析会让同一告警输出多次，
+ * 因此服务端插件与构建插件共享第一次的解析结果。
+ *
+ * @param options - Plugin options / 插件配置项
+ * @param config - Resolved Vite config / 解析后的 Vite 配置
+ * @param holder - Shared holder / 共享容器
+ * @returns Resolved plugin options / 解析后的插件配置
+ */
+function resolveOptionsOnce(
+  options: MockServerPluginOptions,
+  config: ResolvedConfig,
+  holder: ResolvedOptionsHolder,
+): ResolvedMockServerPluginOptions {
+  if (!holder.resolved) {
+    holder.resolved = resolvePluginOptions(options, config)
+    suppressViteLogCleanup(config)
+  }
+  return holder.resolved
 }
 
 /**

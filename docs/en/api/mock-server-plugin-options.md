@@ -156,6 +156,11 @@ mockDevServerPlugin({
 
 By default, inherits Vite's `server.cors` configuration. For detailed configuration, see [cors](https://github.com/expressjs/cors#configuration-options).
 
+When the inherited configuration has no origin restriction (`server.cors` is `true` or has no
+`origin`), mock responses only allow the Vite localhost origins (`localhost`, `127.0.0.1`,
+`[::1]`) by default instead of allowing every origin. Configure `origin` explicitly (such as
+`origin: '*'`) to allow other origins.
+
 ```ts
 mockDevServerPlugin({
   cors: {

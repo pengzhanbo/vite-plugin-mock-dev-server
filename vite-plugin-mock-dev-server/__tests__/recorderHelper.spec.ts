@@ -5,9 +5,10 @@
  */
 import type { IncomingMessage } from 'node:http'
 import type { RecordedReq } from '../src/types/index.js'
+import path from 'node:path'
 import { gzipSync } from 'node:zlib'
 import { describe, expect, it, vi } from 'vitest'
-import { createRecordMatcher, processRecordRes } from '../src/recorder/helper.js'
+import { createRecordMatcher, getFilepath, processRecordRes } from '../src/recorder/helper.js'
 
 /**
  * Create a recorded request
@@ -87,6 +88,26 @@ describe('recorder request filter', () => {
     expect(isMatch(createReq('/api/users/1'))).toBe(true)
     expect(isMatch(createReq('/api/auth/login'))).toBe(false)
     expect(isMatch(createReq('/api/users'))).toBe(false)
+  })
+})
+
+describe('getFilepath', () => {
+  it('should map different pathnames with the same kebab-case to different files', () => {
+    // `/api/userProfile` 与 `/api/user/profile` 的 kebab-case 结果相同，
+    // 短哈希保证它们不会落到同一个记录文件
+    // Both pathnames share the same kebab-case form, the short hash keeps them apart
+    expect(getFilepath('/api/userProfile', 'r')).not.toBe(getFilepath('/api/user/profile', 'r'))
+  })
+
+  it('should map the root path to root.json instead of a hidden file', () => {
+    expect(getFilepath('/', 'r')).toBe(path.join('r', 'root.json'))
+  })
+
+  it('should keep the kebab-case name and append a stable short hash', () => {
+    expect(getFilepath('/api/users', 'r')).toBe(path.join('r', 'api-users-6654ad4d.json'))
+    // 同一 pathname 始终得到同一个文件名
+    // The same pathname always maps to the same file name
+    expect(getFilepath('/api/users', 'r')).toBe(getFilepath('/api/users', 'r'))
   })
 })
 

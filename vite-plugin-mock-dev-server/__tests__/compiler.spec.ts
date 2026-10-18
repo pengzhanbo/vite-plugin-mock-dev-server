@@ -290,6 +290,39 @@ describe('processMockData', () => {
     expect(logger.error.mock.calls[1][0]).toContain('/api/users/:id*')
   })
 
+  it('should normalize invalid delay configs and warn', () => {
+    const logger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    }
+    const mockList = new Map<string, MockOptions>([
+      [
+        'file1.mock.ts',
+        [
+          { url: '/api/negative', delay: -100, body: {}, __filepath__: 'file1.mock.ts' },
+          { url: '/api/reversed', delay: [300, 100], body: {} },
+          { url: '/api/invalid', delay: [1, 2, 3], body: {} },
+          { url: '/api/ok', delay: [100, 300], body: {} },
+        ] as unknown as MockOptions,
+      ],
+    ])
+
+    const result = processMockData(mockList, logger)
+
+    // 负数按 0 处理、`min > max` 交换区间、无法解析的数组被丢弃
+    // Negative values become 0, a reversed range is swapped, malformed arrays are dropped
+    const delayOf = (url: string): unknown => (result[url][0] as any).delay
+    expect(delayOf('/api/negative')).toBe(0)
+    expect(delayOf('/api/reversed')).toEqual([100, 300])
+    expect(delayOf('/api/invalid')).toBeUndefined()
+    expect(delayOf('/api/ok')).toEqual([100, 300])
+    expect(logger.warn).toHaveBeenCalledTimes(3)
+    expect(String(logger.warn.mock.calls[1][0])).toContain('swapped')
+    expect(String(logger.warn.mock.calls[0][0])).toContain('at (file1.mock.ts)')
+  })
+
   it('should handle empty input', () => {
     const result = processMockData(new Map())
     expect(result).toEqual({})

@@ -158,6 +158,10 @@ mockDevServerPlugin({
 
 默认继承 Vite 的 `server.cors` 配置。详细配置见 [cors](https://github.com/expressjs/cors#configuration-options)。
 
+当继承到的配置没有来源限制时（`server.cors` 为 `true` 或未配置 `origin`），mock 响应默认仅允许
+Vite 的 localhost 来源（`localhost`、`127.0.0.1`、`[::1]`），而不是允许所有来源。
+如需允许其他来源，请显式配置 `origin`（如 `origin: '*'`）。
+
 ```ts
 mockDevServerPlugin({
   cors: {
