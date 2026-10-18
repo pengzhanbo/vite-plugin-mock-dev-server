@@ -7,13 +7,20 @@ import { isArray, isPlainObject } from '@pengzhanbo/utils'
  * 深度比较两个对象之间，target 是否属于 source 的子集，
  * 即 target 的所有属性和对应的值，都在 source 中
  *
- * @param source - The source object to compare.
+ * @param source - The source object to compare. May be `null` / `undefined`
+ * when the request has no such part (e.g. a GET request without body).
  * @param target - The target object to compare.
  * @returns True if target is a subset of source, false otherwise.
  */
-export function isObjectSubset<T extends object>(source: T, target?: T): boolean {
+export function isObjectSubset<T extends object>(
+  source: T | null | undefined,
+  target?: T,
+): boolean {
   if (!target) {
     return true
+  }
+  if (source == null) {
+    return Object.keys(target).length === 0
   }
   for (const key in target) {
     if (!isIncluded(source[key], target[key])) {

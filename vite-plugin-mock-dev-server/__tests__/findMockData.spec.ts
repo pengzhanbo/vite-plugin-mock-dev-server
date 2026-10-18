@@ -225,6 +225,68 @@ describe('findMockData', () => {
     expect(result).toEqual(mockList[0])
   })
 
+  it('should treat a throwing validator function as a mismatch', () => {
+    // 函数校验器抛出异常时应视为不匹配，而不是让请求失败
+    // A throwing validator function is a mismatch, not a failing request
+    const spyLogger = { error: vi.fn() } as any
+    const mockList: MockOptions = [
+      {
+        url: '/api/users',
+        method: 'GET',
+        validator: (req: any) => req.query.missing.id,
+        body: { data: 'user 123' },
+      },
+    ]
+    let result: ReturnType<typeof findMockData> = undefined
+    expect(() => {
+      result = findMockData(mockList, spyLogger, {
+        pathname: '/api/users',
+        method: 'GET',
+        request: {
+          query: {},
+          refererQuery: {},
+          body: {},
+          headers: {},
+        } as any,
+        activeScene: [],
+      })
+    }).not.toThrow()
+    expect(result).toBeUndefined()
+    expect(spyLogger.error).toHaveBeenCalledTimes(1)
+  })
+
+  it('should continue matching when a validator function throws', () => {
+    const spyLogger = { error: vi.fn() } as any
+    const mockList: MockOptions = [
+      {
+        url: '/api/users',
+        method: 'GET',
+        validator: () => {
+          throw new Error('validator exploded')
+        },
+        body: { data: 'first' },
+      },
+      {
+        url: '/api/users',
+        method: 'GET',
+        body: { data: 'fallback' },
+      },
+    ]
+    const result = findMockData(mockList, spyLogger, {
+      pathname: '/api/users',
+      method: 'GET',
+      request: {
+        query: {},
+        refererQuery: {},
+        body: {},
+        headers: {},
+      } as any,
+      activeScene: [],
+    })
+    expect(result).toEqual(mockList[1])
+    expect(spyLogger.error).toHaveBeenCalledTimes(1)
+  })
+
   it('should return undefined for websocket mock', () => {
     const mockList = [{ url: '/api/ws', ws: true, setup: vi.fn() }] as any
     const result = findMockData(mockList, logger, {
@@ -254,6 +316,56 @@ describe('findMockData', () => {
       activeScene: [],
     })
     expect(result).toBeUndefined()
+  })
+
+  it('should not log an error when validator.body is checked without request body', () => {
+    // GET 请求没有请求体时，对象校验器只应判定为不匹配，不应输出错误日志
+    // A GET request has no body: the object validator should just mismatch, without logging
+    const spyLogger = { error: vi.fn() } as any
+    const mockList: MockOptions = [
+      {
+        url: '/api/users',
+        method: 'GET',
+        validator: { body: { data: 'test' } },
+        body: { data: 'users' },
+      },
+    ]
+    const result = findMockData(mockList, spyLogger, {
+      pathname: '/api/users',
+      method: 'GET',
+      request: {
+        query: {},
+        refererQuery: {},
+        headers: {},
+      } as any,
+      activeScene: [],
+    })
+    expect(result).toBeUndefined()
+    expect(spyLogger.error).not.toHaveBeenCalled()
+  })
+
+  it('should match an empty validator.body without request body', () => {
+    const spyLogger = { error: vi.fn() } as any
+    const mockList: MockOptions = [
+      {
+        url: '/api/users',
+        method: 'GET',
+        validator: { body: {} },
+        body: { data: 'users' },
+      },
+    ]
+    const result = findMockData(mockList, spyLogger, {
+      pathname: '/api/users',
+      method: 'GET',
+      request: {
+        query: {},
+        refererQuery: {},
+        headers: {},
+      } as any,
+      activeScene: [],
+    })
+    expect(result).toEqual(mockList[0])
+    expect(spyLogger.error).not.toHaveBeenCalled()
   })
 
   it('should handle invalid mock data', () => {
