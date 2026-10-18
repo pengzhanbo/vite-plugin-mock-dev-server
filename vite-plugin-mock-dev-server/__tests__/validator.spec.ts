@@ -30,3 +30,20 @@ it('isObjectSubset', () => {
     true,
   )
 })
+
+/**
+ * Nullish source should be treated as a mismatch instead of throwing
+ *
+ * source 为空时应按不匹配处理，而不是抛出异常
+ */
+it('isObjectSubset with nullish source', () => {
+  expect(isObjectSubset(undefined)).toBe(true)
+  expect(isObjectSubset(null)).toBe(true)
+  expect(isObjectSubset(undefined, {})).toBe(true)
+  expect(isObjectSubset(null, {})).toBe(true)
+  expect(isObjectSubset(undefined, { a: 1 })).toBe(false)
+  expect(isObjectSubset(null, { a: 1 })).toBe(false)
+  expect(isObjectSubset(undefined, { a: { b: 1 } })).toBe(false)
+  expect(isObjectSubset(undefined, [])).toBe(true)
+  expect(isObjectSubset(undefined, [1])).toBe(false)
+})

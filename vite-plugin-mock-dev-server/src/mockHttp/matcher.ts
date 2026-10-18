@@ -90,22 +90,28 @@ export function findMockData(
 
     if (hasMock && mock.validator) {
       const params = parseRequestParams(mock.url, pathname)
-      if (isFunction(mock.validator)) {
-        return mock.validator({ params, ...request })
-      } else {
-        const [error, validated] = attempt(requestValidate, { params, ...request }, mock.validator)
-        if (error) {
-          const file = (mock as any).__filepath__
-          logger.error(
-            `${ansis.red(
-              `mock error at ${pathname}`,
-            )}\n${error}\n  at validator (${ansis.underline(file)})`,
-            mock.log,
-          )
-          return false
-        }
-        return validated
+      const extraRequest = { params, ...request }
+      const validator = mock.validator
+      // 函数校验器与对象校验器语义一致：校验器抛出的异常只记录日志，
+      // 并视为「不匹配」，继续尝试后续规则，而不是冒泡成 500
+      //
+      // Function and object validators share the same semantics: an exception thrown
+      // by the validator is logged and treated as a mismatch, so that the following
+      // rules are still tried, instead of bubbling up as a 500 response.
+      const [error, validated] = attempt(() =>
+        isFunction(validator) ? validator(extraRequest) : requestValidate(extraRequest, validator),
+      )
+      if (error) {
+        const file = (mock as any).__filepath__
+        logger.error(
+          `${ansis.red(
+            `mock error at ${pathname}`,
+          )}\n${error}\n  at validator (${ansis.underline(file)})`,
+          mock.log,
+        )
+        return false
       }
+      return validated
     }
     return hasMock
   }) as MockHttpItem | undefined

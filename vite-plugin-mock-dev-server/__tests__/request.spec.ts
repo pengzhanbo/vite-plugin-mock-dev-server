@@ -118,4 +118,19 @@ describe('requestValidate', () => {
       }),
     ).toBe(true)
   })
+
+  it('should treat a missing body as a mismatch instead of throwing', () => {
+    // GET 请求没有请求体时，request.body 为 undefined
+    // A GET request has no body, so `request.body` is undefined
+    const request = {
+      query: {},
+      params: {},
+      headers: {},
+      refererQuery: {},
+    } as any
+
+    expect(() => requestValidate(request, { body: { data: 'test' } })).not.toThrow()
+    expect(requestValidate(request, { body: { data: 'test' } })).toBe(false)
+    expect(requestValidate(request, { body: {} })).toBe(true)
+  })
 })
