@@ -1,5 +1,5 @@
 import type { Readable, Stream } from 'node:stream'
-import { LRUCache } from '@pengzhanbo/utils'
+import { LRUCache, attempt } from '@pengzhanbo/utils'
 import { customRequire } from './shared.js'
 
 export function isStream(stream: unknown): stream is Stream {
@@ -29,15 +29,10 @@ export function isPackageExists(mod: string): boolean {
   }
 
   let isExists = false
-  try {
-    // @ts-expect-error fallback for node
-    if (import.meta.resolve) {
-      isExists = !!import.meta.resolve(mod)
-    } else {
-      customRequire.resolve(mod)
-      isExists = true
-    }
-  } catch {}
+  const [err] = attempt(() => (isExists = !!import.meta.resolve?.(mod)))
+  if (err) {
+    attempt(() => (isExists = !!customRequire.resolve(mod)))
+  }
   PACKAGE_CACHE.set(mod, isExists)
   return isExists
 }
