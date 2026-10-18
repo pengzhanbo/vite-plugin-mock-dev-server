@@ -16,6 +16,7 @@ const tsdownConfig: UserConfig = defineConfig({
   dts: true,
   format: 'esm',
   fixedExtension: false,
+  exports: true,
   async onSuccess(config) {
     for await (const file of fs.glob('*.js', { cwd: config.outDir })) {
       const filepath = `${config.outDir}/${file}`
