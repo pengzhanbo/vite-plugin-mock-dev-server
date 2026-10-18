@@ -4,8 +4,14 @@
  * 选项解析函数测试
  */
 import type { ResolvedConfig } from 'vite'
+import path from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { ensureProxies, resolveCorsOptions, resolvePluginOptions } from '../src/core/options.js'
+import {
+  ensureProxies,
+  resolveCorsOptions,
+  resolvePluginOptions,
+  resolveRecordOptions,
+} from '../src/core/options.js'
 import { buildPlugin, serverPlugin } from '../src/core/plugin.js'
 
 /**
@@ -217,6 +223,78 @@ describe('resolvePluginOptions', () => {
     const options = resolvePluginOptions({ prefix: ['/api'], cors: { origin: '*' } }, config)
 
     expect(options.cors).toEqual({ origin: '*', credentials: true })
+  })
+})
+
+/**
+ * Test suite for resolveRecordOptions function
+ *
+ * resolveRecordOptions 函数测试套件
+ */
+describe('resolveRecordOptions', () => {
+  /**
+   * A recorded request used by the default filter
+   *
+   * 默认过滤器使用的请求记录
+   */
+  const req = {
+    method: 'GET',
+    pathname: '/api/users',
+    query: {},
+    body: undefined,
+    bodyType: '',
+  }
+
+  it('should keep recording disabled by default', () => {
+    const options = resolveRecordOptions('/root', 'mock')
+
+    expect(options.enabled).toBe(false)
+    expect(options.cwd).toBe('/root')
+    expect(options.dir).toBe(path.join('mock', '.recordings'))
+    expect(options.overwrite).toBe(true)
+    expect(options.status).toEqual([])
+    expect(options.gitignore).toBe(true)
+    // 默认永不过期 / never expires by default
+    expect(options.expires).toBe(Number.MAX_SAFE_INTEGER)
+    // 默认录制所有请求 / records every request by default
+    // `ResolvedRecordOptions` 的 filter 类型保留了函数与对象两种形式，解析结果一定是函数
+    // The filter type keeps both forms, while the resolved value is always a function
+    expect((options.filter as (recorded: typeof req) => boolean)(req)).toBe(true)
+  })
+
+  it('should convert the expires option from seconds to milliseconds', () => {
+    expect(resolveRecordOptions('/root', 'mock', { enabled: true, expires: 30 }).expires).toBe(
+      30_000,
+    )
+    expect(resolveRecordOptions('/root', 'mock', { enabled: true, expires: 0 }).expires).toBe(
+      Number.MAX_SAFE_INTEGER,
+    )
+  })
+
+  it('should accept a boolean record option', () => {
+    expect(resolveRecordOptions('/root', 'mock', true).enabled).toBe(true)
+    expect(resolveRecordOptions('/root', 'mock', false).enabled).toBe(false)
+  })
+
+  it('should normalize the status option and keep a custom directory', () => {
+    const options = resolveRecordOptions('/root', 'mock', {
+      enabled: true,
+      status: 404,
+      dir: '.records',
+      overwrite: false,
+      gitignore: false,
+    })
+
+    expect(options.status).toEqual([404])
+    expect(options.dir).toBe(path.join('mock', '.records'))
+    expect(options.overwrite).toBe(false)
+    expect(options.gitignore).toBe(false)
+  })
+
+  it('should keep a filter function as is', () => {
+    const filter = vi.fn(() => false)
+
+    expect(resolveRecordOptions('/root', 'mock', { enabled: true, filter }).filter).toBe(filter)
   })
 })
 
