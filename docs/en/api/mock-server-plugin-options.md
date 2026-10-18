@@ -243,6 +243,15 @@ mockDevServerPlugin({
 })
 ```
 
+The listening address of the generated server can be overridden at startup by environment
+variables: `PORT` overrides `serverPort`, and `HOST` sets the host to listen on (all interfaces
+by default). Startup errors such as a port already in use are logged and the process exits with
+a non-zero code instead of crashing with an uncaught exception.
+
+> Some options (such as a `RegExp` / function `cors.origin`, or functions inside
+> `formidableOptions`) cannot be serialized. They are reported with a build-time warning and
+> ignored in the generated server.
+
 ### activeScene
 
 - **Type**: `string | string[]`

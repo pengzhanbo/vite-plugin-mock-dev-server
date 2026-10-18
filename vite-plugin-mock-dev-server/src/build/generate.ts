@@ -1,4 +1,5 @@
 import type { Plugin } from 'vite'
+import type { TransformResult } from '../compiler/index.js'
 import type { ResolvedMockServerPluginOptions } from '../core/options.js'
 import type { ServerBuildOption } from '../types/index.js'
 import fs from 'node:fs'
@@ -34,11 +35,27 @@ export async function generateMockServer(
 
   const content = await generateMockEntryCode(cwd, dir, include, exclude)
   const mockEntry = path.join(cwd, `mock-data-${Date.now()}.js`)
-  await fsp.writeFile(mockEntry, content, 'utf-8')
 
-  const { code, externalDeps } = await transform(mockEntry, options)
+  let result: TransformResult
+  try {
+    await fsp.writeFile(mockEntry, content, 'utf-8')
+    result = await transform(mockEntry, options)
+  } finally {
+    // 无论转换成功还是抛错（例如既未安装 rolldown 也未安装 esbuild 时 `transform` 直接抛错），
+    // 都要删除临时入口文件，避免它残留在项目根目录、被误提交
+    await fsp.rm(mockEntry, { force: true })
+  }
+
+  const { code, externalDeps } = result
+  if (!code) {
+    // 转换失败时 `transformWithEsbuild` / `transformWithRolldown` 只记录日志并返回空产物，
+    // 若不中止构建，会生成一个启动即失败的空 `mock-data.js`
+    const message = 'Failed to generate mock server: the mock entry was not transformed'
+    options.logger.error(message)
+    throw new Error(message)
+  }
+
   const mockDeps = getMockDependencies(externalDeps, options.alias)
-  await fsp.unlink(mockEntry)
 
   const outputList = [
     {
