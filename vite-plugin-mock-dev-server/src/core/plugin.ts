@@ -193,23 +193,5 @@ function resolveOptionsOnce(
   }
   const resolved = resolvePluginOptions(options, config)
   cache.set(config, resolved)
-  suppressViteLogCleanup(config)
   return resolved
-}
-
-/**
- * Prevent Vite from nuking useful logs.
- *
- * 阻止 Vite 清理插件输出的有用日志。
- *
- * 这是一个 hack：Vite 在启动完成后会清理此前的日志输出，
- * 通过输出一条空字符串的 warn 日志可以绕过该清理逻辑。
- *
- * TODO: 当上游修复后移除该 hack
- * @see https://github.com/vitejs/vite/issues/9378
- *
- * @param config - Resolved Vite config / 解析后的 Vite 配置
- */
-function suppressViteLogCleanup(config: ResolvedConfig): void {
-  config.logger.warn('')
 }
