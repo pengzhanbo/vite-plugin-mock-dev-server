@@ -33,20 +33,20 @@ catalogs:
     esbuild: ^0.28.2
     js-tokens: ^10.0.0
     mockjs: ^1.1.0
-    rolldown: ^1.2.13
+    rolldown: ^1.2.14
     tsdown: ^0.23.1
     typescript: ^7.0.2
     vite: ^8.3.4
     vitepress: ^2.0.0-alpha.20
     vitepress-plugin-file-tree: ^0.12.2
-    vitepress-plugin-group-icons: ^1.7.7
+    vitepress-plugin-group-icons: ^1.8.1
     vitepress-plugin-llms: ^1.14.0
     vitepress-plugin-npm-to: ^0.12.2
     vitepress-tuck: ^0.12.2
-    vitest: ^5.0.4
+    vitest: ^5.0.5
     zstd-codec: ^0.1.5
-    oxfmt: '^0.72.0'
-    oxlint: '^1.87.0'
+    oxfmt: '^0.73.0'
+    oxlint: '^1.88.0'
     oxlint-tsgolint: '^7.0.2004'
   prod:
     '@pengzhanbo/utils': ^3.12.0
