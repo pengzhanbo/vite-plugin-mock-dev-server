@@ -50,6 +50,8 @@ export function generatorServerEntryCode({
   // 直接序列化到产物中，会让独立 mock server 在部署机器上把上传文件写入产物目录之外的位置
   // （若该路径不存在，则会静默写入失败）。因此仅在用户配置了 uploadDir 时，构建期将其
   // 重定位到产物目录下的同名目录，并输出构建期提示；生成代码在启动时创建该目录。
+  const serializableCors = resolveSerializableCors(cors, logger)
+
   const configuredUploadDir = pickUploadDir(formidableOptions)
   const uploadDirName = resolveUploadDirName(configuredUploadDir, cwd)
   if (configuredUploadDir && uploadDirName) {
@@ -89,7 +91,7 @@ const wsProxies = ${JSON.stringify(wsProxies)};
 const cookiesOptions = ${JSON.stringify(cookiesOptions)};
 const bodyParserOptions = ${JSON.stringify(bodyParserOptions)};
 const priority = ${JSON.stringify(priority)};
-const cors = ${JSON.stringify(cors)};
+const cors = ${JSON.stringify(serializableCors)};
 const activeScene = ${JSON.stringify(activeScene)};
 const formidableOptions = ${JSON.stringify(serializableFormidableOptions)};
 ${uploadDirCode}const record = {
@@ -118,23 +120,58 @@ app.use(createMockMiddleware(compiler, {
   activeScene,
 }, sortMockUrls));
 
-server.listen(${serverPort});
+const envPort = Number(process.env.PORT);
+const port = Number.isInteger(envPort) && envPort > 0 ? envPort : ${serverPort};
+const host = process.env.HOST || undefined;
 
-console.log('listen: http://localhost:${serverPort}');
+// 端口占用等启动错误不应变成未捕获异常，否则产物进程会以一段堆栈直接退出
+// Startup errors (such as a port already in use) must not become uncaught exceptions
+server.on('error', (error) => {
+  logger.error(\`Failed to start the mock server on \${host ?? '0.0.0.0'}:\${port}: \${error}\`);
+  process.exitCode = 1;
+});
+
+server.listen(port, host, () => {
+  console.log(\`listen: http://\${host ?? 'localhost'}:\${port}\`);
+});
 `
 }
 
 /**
- * Pick the serializable formidable options
+ * 解析可以序列化到产物中的 cors 配置
  *
+ * `cors` 允许 RegExp / function 形式的配置（如 `origin`），它们无法被 `JSON.stringify`
+ * 序列化：直接序列化会变成 `{}`，等价于「允许所有来源」，且没有任何提示。
+ * 这类配置会在构建期被忽略并输出警告，避免产物行为静默偏离用户配置。
+ *
+ * @param cors - Resolved cors options / 解析后的 cors 配置
+ * @param logger - Logger instance / 日志实例
+ * @returns The value serialized into the generated server / 写入产物的值
+ */
+function resolveSerializableCors(
+  cors: ResolvedMockServerPluginOptions['cors'],
+  logger: ResolvedMockServerPluginOptions['logger'],
+): false | Record<string, unknown> {
+  if (cors === false) {
+    return false
+  }
+
+  const { value, unsupportedKeys } = pickSerializableOptions(cors)
+  if (unsupportedKeys.length) {
+    const hint = unsupportedKeys.includes('origin')
+      ? `\n  Without ${ansis.bold('cors.origin')} the generated server allows ${ansis.yellow('all origins')}, use a string origin to keep the restriction.`
+      : ''
+    logger.warn(
+      `The following ${ansis.bold('cors')} options cannot be serialized and will be ignored in the generated mock server: ${unsupportedKeys
+        .map((key) => ansis.yellow(`cors.${key}`))
+        .join(', ')}.${hint}`,
+    )
+  }
+  return value
+}
+
+/**
  * 提取可序列化的 formidable 配置项
- *
- * `formidableOptions` supports functions (such as `filter`, `filename`),
- * they cannot be serialized into the generated code.
- * Such options are ignored with a warning during build.
- *
- * `uploadDir` (`uploaddir`) is not portable, it is excluded here and relocated
- * into the output directory by `generatorServerEntryCode` instead.
  *
  * `formidableOptions` 支持 function 类型的配置项（如 `filter`、`filename`），
  * 它们无法被序列化到生成的代码中，这类配置项会被忽略，并在构建期输出警告。
@@ -180,16 +217,10 @@ function pickUploadDir(options: formidable.Options): string | undefined {
 }
 
 /**
- * Resolve the relocated upload directory name for the generated mock server
- *
  * 解析生成产物中重定位后的上传目录名
  *
  * 仅保留用户配置路径的最后一段目录名，产物中该目录始终位于产物目录之下，
  * 因此不同机器上的绝对路径前缀不会泄漏到产物中。
- *
- * Only the last segment of the user configured path is kept, so the directory always
- * lives under the output directory and the machine specific path prefix never leaks
- * into the artifact.
  *
  * @param uploadDir - Configured upload directory / 用户配置的上传目录
  * @param cwd - Build working directory / 构建工作目录
@@ -206,6 +237,36 @@ function resolveUploadDirName(uploadDir: string | undefined, cwd: string): strin
 }
 
 /**
+ * 提取配置对象中可被序列化的配置项
+ *
+ * 不可序列化的值（function / RegExp / Date 等）会被忽略，其键会一并返回，
+ * 由调用方在构建期输出警告。
+ *
+ * @param options - Options object / 配置对象
+ * @returns Serializable options with the unsupported keys / 可序列化的配置项与不支持的键
+ */
+function pickSerializableOptions(options: object): {
+  value: Record<string, unknown>
+  unsupportedKeys: string[]
+} {
+  const value: Record<string, unknown> = {}
+  const unsupportedKeys: string[] = []
+
+  for (const [key, item] of Object.entries(options)) {
+    if (item == null) {
+      continue
+    }
+    if (isSerializableValue(item)) {
+      value[key] = item
+    } else {
+      unsupportedKeys.push(key)
+    }
+  }
+
+  return { value, unsupportedKeys }
+}
+
+/**
  * Check whether the value can be serialized by `JSON.stringify`
  *
  * 检查该配置项是否可以被 `JSON.stringify` 序列化
@@ -214,11 +275,15 @@ function resolveUploadDirName(uploadDir: string | undefined, cwd: string): strin
  * @returns Whether the value is serializable / 该值是否可被序列化
  */
 function isSerializableValue(value: unknown): boolean {
-  return (
-    typeof value === 'string' ||
-    typeof value === 'number' ||
-    typeof value === 'boolean' ||
-    isArray(value) ||
-    isPlainObject(value)
-  )
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return true
+  }
+  // 递归检查数组与普通对象，避免 `origin: ['http://a', /regex/]` 这类配置被部分序列化
+  if (isArray(value)) {
+    return value.every((item) => item == null || isSerializableValue(item))
+  }
+  if (isPlainObject(value)) {
+    return Object.values(value).every((item) => item == null || isSerializableValue(item))
+  }
+  return false
 }

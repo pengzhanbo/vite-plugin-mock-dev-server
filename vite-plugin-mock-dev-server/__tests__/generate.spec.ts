@@ -9,6 +9,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { generateMockServer } from '../src/build/generate.js'
+import { transform } from '../src/compiler/index.js'
 
 vi.mock('../src/compiler/index.js', () => ({
   aliasMatches: vi.fn(() => false),
@@ -207,6 +208,86 @@ describe('generateMockServer', () => {
       'const uploadDir = path.resolve(import.meta.dirname, "uploads");',
     )
     expect(vi.mocked(options.logger.warn)).toHaveBeenCalledTimes(1)
+  })
+
+  it('should warn about non-serializable cors options and keep the others', async () => {
+    const options = createOptions(cwd, { recordEnabled: false, includeRecord: false })
+    options.cors = { origin: /^https:\/\/example\.com$/, credentials: true }
+    const emitFile = vi.fn()
+
+    await generateMockServer({ emitFile } as any, options)
+
+    const entry = emitFile.mock.calls
+      .map(([asset]) => asset)
+      .find((asset) => asset.fileName === path.join('mockServer', 'index.js'))
+
+    // 可序列化的配置项被保留，RegExp 形式的 origin 被忽略
+    // Serializable options are kept, the RegExp `origin` is dropped
+    expect(entry.source).toContain('const cors = {"credentials":true};')
+
+    const warn = vi.mocked(options.logger.warn)
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0][0]).toContain('cors.origin')
+    expect(warn.mock.calls[0][0]).toContain('all origins')
+  })
+
+  it('should support PORT / HOST environment variables and handle listen errors', async () => {
+    const options = createOptions(cwd, { recordEnabled: false, includeRecord: false })
+    const emitFile = vi.fn()
+
+    await generateMockServer({ emitFile } as any, options)
+
+    const entry = emitFile.mock.calls
+      .map(([asset]) => asset)
+      .find((asset) => asset.fileName === path.join('mockServer', 'index.js'))
+
+    // 端口/主机可通过环境变量覆盖，且启动错误被记录而不是变成未捕获异常
+    // The port / host can be overridden by env variables, and startup errors are
+    // logged instead of becoming uncaught exceptions
+    expect(entry.source).toContain(
+      'const port = Number.isInteger(envPort) && envPort > 0 ? envPort : 8080;',
+    )
+    expect(entry.source).toContain('const host = process.env.HOST || undefined;')
+    expect(entry.source).toContain("server.on('error', (error) => {")
+    expect(entry.source).toContain('process.exitCode = 1;')
+    expect(entry.source).toContain('server.listen(port, host, () => {')
+  })
+
+  it('should remove the temporary entry when the transform fails', async () => {
+    vi.mocked(transform).mockRejectedValueOnce(new Error('rolldown or esbuild not found'))
+    const emitFile = vi.fn()
+    const options = createOptions(cwd, { recordEnabled: false, includeRecord: false })
+
+    // 既未安装 rolldown 也未安装 esbuild 时 `transform` 直接抛错
+    // `transform` throws when neither rolldown nor esbuild is installed
+    await expect(generateMockServer({ emitFile } as any, options)).rejects.toThrow(
+      'rolldown or esbuild not found',
+    )
+
+    // 临时入口文件不会残留在项目根目录
+    // The temporary entry does not stay in the project root
+    const files = await fs.readdir(cwd)
+    expect(files.filter((file) => file.startsWith('mock-data-'))).toEqual([])
+    expect(emitFile).not.toHaveBeenCalled()
+  })
+
+  it('should abort the build when the mock entry is not transformed', async () => {
+    vi.mocked(transform).mockResolvedValueOnce({ code: '', externalDeps: [], internalDeps: [] })
+    const emitFile = vi.fn()
+    const options = createOptions(cwd, { recordEnabled: false, includeRecord: false })
+
+    // 空产物不会被写出：构建明确失败，而不是产出一个启动即失败的 mock server
+    // No empty artifact is emitted: the build fails explicitly instead of producing a
+    // mock server that fails on startup
+    await expect(generateMockServer({ emitFile } as any, options)).rejects.toThrow(
+      /the mock entry was not transformed/,
+    )
+    expect(emitFile).not.toHaveBeenCalled()
+    expect(vi.mocked(options.logger.error)).toHaveBeenCalledWith(
+      expect.stringContaining('the mock entry was not transformed'),
+    )
+    const files = await fs.readdir(cwd)
+    expect(files.filter((file) => file.startsWith('mock-data-'))).toEqual([])
   })
 
   it('should keep the server entry untouched when uploadDir is not configured', async () => {

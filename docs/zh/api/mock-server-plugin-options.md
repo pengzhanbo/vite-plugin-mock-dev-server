@@ -245,6 +245,12 @@ mockDevServerPlugin({
 })
 ```
 
+产物服务的监听地址可在启动时通过环境变量覆盖：`PORT` 覆盖 `serverPort`，`HOST` 指定监听的主机
+（默认为所有网卡）。端口占用等启动错误会被记录日志并以非零退出码结束，不会因未捕获异常直接崩溃。
+
+> 部分配置项（如 `cors.origin` 的 `RegExp` / 函数形式、`formidableOptions` 中的函数）无法被序列化，
+> 构建期会输出警告并在产物中忽略它们。
+
 ### activeScene
 
 - **类型**: `string | string[]`
