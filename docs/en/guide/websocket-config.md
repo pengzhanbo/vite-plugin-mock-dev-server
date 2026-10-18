@@ -110,6 +110,15 @@ with `onCleanup` are executed, and the pooled server instances are dropped. Once
 created again, the next connection rebuilds the servers from the latest mock data and runs
 `setup()` anew. The connections created by mock files that were not deleted are unaffected.
 
+A WebSocket server is created for each request pathname, so a dynamic rule such as
+`/ws/room/:id` gets an independent server (and an independent `setup()` execution) for every
+`:id`. After the last client of such a server disconnects, the server is kept for a while
+(60 seconds by default) so that page reloads and short reconnects reuse it; if no new client
+arrives, the `onCleanup` callbacks are executed, the server is closed and its pool entry is
+dropped, and the next connection rebuilds it. Changing the `url` of a WebSocket mock (or
+removing the rule) by hot update recycles the servers it created as well, so a client never
+keeps talking to a stale `setup()`.
+
 ## Configuration Options
 
 ### `ws` Option

@@ -164,26 +164,58 @@ describe('mockWebSocket', () => {
     return client
   }
 
-  it('should not throw when the hmr recorded mock url has been removed', async () => {
+  it('should recycle the websocket server when the mock url is changed', async () => {
     const setup = vi.fn()
     const mockData: Record<string, MockOptions> = { [MOCK_URL]: [createMockItem(setup)] }
-    const { compiler, port } = await start(mockData)
+    const { compiler, port } = await start(mockData, { wsProxies: ['/ws'] })
     const client = await connect(port)
 
     expect(setup).toHaveBeenCalledTimes(1)
 
-    // Simulate deleting the mock file or changing its `url`
-    // 模拟删除 mock 文件或其 `url` 被修改
+    // 把 mock 的 `url` 从 `/ws/demo` 改成 `/ws/renamed`
+    // Change the `url` of the mock from `/ws/demo` to `/ws/renamed`
+    mockData['/ws/renamed'] = [createMockItem(setup, '/ws/renamed')]
     delete mockData[MOCK_URL]
-    expect(() => compiler.emit('mock:update-end', FILEPATH)).not.toThrow()
-    expect(client.readyState).toBe(WebSocket.OPEN)
-
-    // The stale hmr record has been removed, so restoring the mock url
-    // must not restart the websocket server again
-    // 失效的热更新记录已被移除，恢复 mock url 后不应再次重启 websocket 服务
-    mockData[MOCK_URL] = [createMockItem(setup)]
     compiler.emit('mock:update-end', FILEPATH)
+
+    // 旧服务已没有对应的规则：客户端被断开、服务被回收，
+    // 而不是继续用已被删除的 `setup` 逻辑响应连接
+    // The old server has no matching rule anymore: its clients are disconnected and the
+    // server is recycled, instead of keeping serving the deleted `setup` logic
+    await vi.waitFor(() => expect(client.readyState).toBe(WebSocket.CLOSED))
+
+    // 新 url 的连接会重建服务并重新执行 setup
+    // A connection to the new url rebuilds the server and runs setup again
+    const reconnected = await connect(port, '/ws/renamed')
+    expect(reconnected.readyState).toBe(WebSocket.OPEN)
+    expect(setup).toHaveBeenCalledTimes(2)
+  })
+
+  it('should recycle the server when the url pattern is renamed', async () => {
+    const setup = vi.fn()
+    const mockData: Record<string, MockOptions> = {
+      '/ws/:room': [createMockItem(setup, '/ws/:room')],
+    }
+    const { compiler, port } = await start(mockData, { wsProxies: ['/ws'] })
+    const client = await connect(port, '/ws/lobby')
+
     expect(setup).toHaveBeenCalledTimes(1)
+
+    // 规则被重命名（`/ws/:room` → `/ws/:name`）：旧规则不再存在，
+    // 其服务与连接需要被回收，而不是继续使用旧的 `setup` 逻辑
+    // The rule is renamed (`/ws/:room` → `/ws/:name`): the old rule no longer exists, so
+    // its server and clients are recycled instead of keeping the stale `setup` logic
+    mockData['/ws/:name'] = [createMockItem(setup, '/ws/:name')]
+    delete mockData['/ws/:room']
+    compiler.emit('mock:update-end', FILEPATH)
+
+    await vi.waitFor(() => expect(client.readyState).toBe(WebSocket.CLOSED))
+
+    // 新规则下的连接重建服务并重新执行 setup
+    // A connection under the new rule rebuilds the server and runs setup again
+    const reconnected = await connect(port, '/ws/lobby')
+    expect(reconnected.readyState).toBe(WebSocket.OPEN)
+    expect(setup).toHaveBeenCalledTimes(2)
   })
 
   it('should remove the hmr record when the mock file is deleted', async () => {
@@ -384,6 +416,62 @@ describe('mockWebSocket', () => {
       const reconnected = await connect(port)
 
       expect(reconnected.readyState).toBe(WebSocket.OPEN)
+      expect(setup).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  // 动态路径（如 `/ws/room/:id`）会为每个实际路径创建一个 websocket 服务。
+  // 客户端全部断开后，服务需要在一段时间后被回收，否则会无限累积；
+  // 但短暂重连（页面刷新等）应继续复用同一个服务。
+  // Dynamic paths (e.g. `/ws/room/:id`) create a websocket server per request pathname.
+  // The server must be recycled some time after its last client leaves, otherwise they
+  // accumulate forever; short reconnects (page reload, ...) must reuse the same server.
+  describe('idle reclamation', () => {
+    it('should keep the server for a quick reconnect and recycle it when idle', async () => {
+      let wssRef: WebSocketServer | undefined
+      const setup = vi.fn((wss: WebSocketServer) => {
+        wssRef = wss
+      })
+      const mockData: Record<string, MockOptions> = {
+        '/ws/:room': [createMockItem(setup, '/ws/:room')],
+      }
+      const { port } = await start(mockData, { wsProxies: ['/ws'] })
+
+      const first = await connect(port, '/ws/lobby')
+      expect(setup).toHaveBeenCalledTimes(1)
+
+      // 短暂断开后立刻重连：复用同一个服务，`setup` 不会重新执行
+      // A quick reconnect after disconnecting reuses the same server
+      const firstClosed = new Promise<void>((resolve) => first.once('close', () => resolve()))
+      first.close()
+      await firstClosed
+      const second = await connect(port, '/ws/lobby')
+      expect(setup).toHaveBeenCalledTimes(1)
+
+      // 断开后超过空闲时长仍无新连接：服务被回收
+      // No new connection within the idle timeout: the server is recycled
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      try {
+        const secondClosed = new Promise<void>((resolve) => second.once('close', () => resolve()))
+        second.close()
+        await secondClosed
+        // 等待服务端完成连接关闭处理并调度空闲回收定时器
+        // （`setImmediate` 没有被假定时器接管）
+        // Wait until the server side handles the close and schedules the idle timer
+        // (`setImmediate` is not faked)
+        for (let i = 0; i < 50 && wssRef?.clients.size !== 0; i++) {
+          await new Promise<void>((resolve) => setImmediate(resolve))
+        }
+        await new Promise<void>((resolve) => setImmediate(resolve))
+        await vi.advanceTimersByTimeAsync(120_000)
+      } finally {
+        vi.useRealTimers()
+      }
+
+      // 服务已被丢弃：新连接重建服务并重新执行 setup
+      // The server was dropped: the next connection rebuilds it and runs setup again
+      const third = await connect(port, '/ws/lobby')
+      expect(third.readyState).toBe(WebSocket.OPEN)
       expect(setup).toHaveBeenCalledTimes(2)
     })
   })
