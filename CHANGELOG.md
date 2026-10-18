@@ -1,3 +1,26 @@
+# [2.6.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.5.0...v2.6.0) (2026-10-18)
+
+### Bug Fixes
+
+- `parse` instead of `pathToRegexp` ([#240](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/240)) ([5b5428c](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/5b5428cfc310ceb8aaade549fb9cd7df19493e3f))
+- fix ws not being reclaimed when mock changes or idle ([#238](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/238)) ([2b80aad](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/2b80aad848bba39cb7b870e4c5d630cab8894f39))
+- fix case sensitivity with request method ([428fb1b](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/428fb1b01263e48e9ea58a3debac603d685375bd))
+- fix CORS default to allowing all origins, record file name conflicts ([#241](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/241)) ([524cee1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/524cee1c71fcc9748206087391bbeeeacb949351))
+- fix CORS preflight requests causing middleware to hang ([#235](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/235)) ([6868404](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/6868404f9295de60a70292b25bfd6aab0f363fda))
+- fix generation service startup error crash ([#239](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/239)) ([ef64c4f](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/ef64c4f213b79620e6ed42340ed1bee59385cfc1))
+- fix incorrect package exists ([dae575d](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/dae575d05028aa8fae2b18ee32734aef44a777a7))
+- fix incorrect request validator ([#237](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/237)) ([d2d41a2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/d2d41a2513d67ac5a59931892ae48f2b61292e66))
+- fix incorrect response headers when recording and replaying compressed responses cause clients to hang ([#233](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/233)) ([3e31752](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/3e317528bd8cf963749510c62dfab6070bf7990e))
+- fix only first rule was promoted when multiple special rules matched ([#231](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/231)) ([4fed6dc](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/4fed6dc943289544cea4881063bdc09bebb2ab0c))
+- fix record loss caused by concurrent responses to the same pathname ([#232](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/232)) ([ed5a2ae](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/ed5a2aebba18eb88fbd666e2c2bc6b2d157cb662))
+- fix sensitivity in request headers validation ([#229](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/229)) ([8e7fe2c](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/8e7fe2cafe4b60a40ce3f23deaa6860ade76f297))
+- fix temporary files are not deleted sync when process exits ([e17f184](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/e17f184e150d0046bab3cd77fc5a3210dc7e4854))
+- fix unhandled source stream errors in streaming responses cause ([#234](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/234)) ([1eee77d](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/1eee77dbdd558a74066fca5d5df3a0cf69716b85))
+
+### Performance Improvements
+
+- support lazy eval of log messages and cache mock URL keys ([#230](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/230)) ([46e93d5](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/46e93d55af8aa22e5a78a64f5266077a9329c3b4))
+
 # [2.5.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.4.2...v2.5.0) (2026-10-16)
 
 ### Bug Fixes
