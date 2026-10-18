@@ -52,6 +52,18 @@ type WSSContextMap = WeakMap<WebSocketServer, WSSContext>
  */
 const VITE_HMR_PROTOCOLS = ['vite-hmr', 'vite-ping']
 
+/**
+ * 无客户端连接后保留 websocket 服务的时长（毫秒）
+ *
+ * 每个实际请求路径都会创建一个 websocket 服务（动态规则如 `/ws/room/:id` 会为每个
+ * `:id` 创建独立的服务），若不回收会随着开发过程不断累积 `WebSocketServer`、
+ * `setup()` 注册的定时器与房间状态。
+ *
+ * 采用延时回收而不是「最后一个客户端断开即回收」，是为了让页面刷新、短暂断网重连
+ * 等场景继续复用同一个服务，保留 mock 在 `setup()` 中维护的状态。
+ */
+const WSS_IDLE_TIMEOUT = 60 * 1000
+
 interface Connection {
   req: MockRequest
   ws: WebSocket
@@ -76,6 +88,10 @@ interface WSSContext {
    * 当前为该 websocket 服务提供 `setup` 的 mock 配置
    */
   mock: MockWebsocketItem
+  /**
+   * 空闲回收定时器：最后一个客户端断开后开始计时，期间有新连接则取消
+   */
+  idleTimer?: ReturnType<typeof setTimeout>
 }
 
 /**
@@ -95,6 +111,18 @@ const getWss = (wssMap: WSSMap, pathname: string): WebSocketServer => {
   }
 
   return wss
+}
+
+/**
+ * 取消空闲回收定时器
+ *
+ * @param wssContext - Context of the websocket server / websocket 服务的上下文
+ */
+function clearIdleTimer(wssContext: WSSContext): void {
+  if (wssContext.idleTimer) {
+    clearTimeout(wssContext.idleTimer)
+    wssContext.idleTimer = undefined
+  }
 }
 
 /**
@@ -375,82 +403,165 @@ export function mockWebSocket(
   }
 
   /**
-   * 被删除的 mock 文件是这些服务 `setup` 的唯一来源：若保留它们，客户端会一直与
-   * 已被删除的 mock 逻辑通信，直到开发服务停止。这里执行清理回调（含该 mock 注册的
-   * 监听）、断开客户端、关闭服务并丢弃它们的连接池条目。
+   * 回收一个 websocket 服务
    *
-   * 条目也必须丢弃：已关闭的服务无法复用（`handleUpgrade` 在非运行状态的服务上会失败），
-   * 因此后续连接需要基于当时的 mock 数据重建服务 —— 这也正是该 mock 文件被重新创建后
-   * 能够重新生效的原因。
+   * 执行 mock 的清理回调（含其在各连接上注册的监听）、断开客户端、关闭服务，
+   * 并丢弃连接池条目：已关闭的服务无法复用（`handleUpgrade` 在非运行状态的服务上会失败），
+   * 后续连接会基于当时的 mock 数据重建服务。
    *
-   * @param filepath - Path of the deleted mock file / 已删除的 mock 文件路径
+   * @param mockUrl - Key of the mock url / mock url 的键
+   * @param pathname - Request pathname / 请求路径
+   * @param wss - Websocket server to recycle / 需要回收的 websocket 服务
    */
-  const closeWssOfFile = (filepath: string): void => {
-    for (const [mockUrl, wssMap] of poolMap) {
-      for (const [pathname, wss] of [...wssMap]) {
-        const wssContext = wssContextMap.get(wss)
-        // 只回收 `setup` 来自该已删除文件的服务：归属其他 mock 文件的服务不受影响。
-        if (wssContext?.filepath !== filepath) {
-          continue
+  const closeWss = (mockUrl: string, pathname: string, wss: WebSocketServer): void => {
+    const wssContext = wssContextMap.get(wss)
+    if (wssContext) {
+      clearIdleTimer(wssContext)
+      // 释放 `setup()` 注册的循环 / 定时器 / 监听。
+      // 清理回调抛出的异常会被记录且不会中断后续步骤，因此无论单个清理是否出错，
+      // 下方的断开客户端 / 关闭服务 / 丢弃连接池条目都会照常执行。
+      runCleanup(wssContext)
+      // mock 已不存在，因此断开客户端，而不是把它们留在逻辑已被删除的服务上
+      // （状态码 1001：服务端离开）。
+      wssContext.connectionList.forEach(({ ws }) => {
+        // mock 的监听此时已被移除，而关闭连接仍可能在其上触发 `error`：
+        // 保留一个兜底监听，避免回收过程变成未捕获异常
+        if (ws.listenerCount('error') === 0) {
+          ws.on('error', () => {})
         }
-        // 释放 `setup()` 注册的循环 / 定时器 / 监听。
-        // 清理回调抛出的异常会被记录且不会中断后续步骤，因此无论单个清理是否出错，
-        // 下方的断开客户端 / 关闭服务 / 丢弃连接池条目都会照常执行。
-        runCleanup(wssContext)
-        // mock 已不存在，因此断开客户端，而不是把它们留在逻辑已被删除的服务上
-        // （状态码 1001：服务端离开）。
-        wssContext.connectionList.forEach(({ ws }) => {
-          // mock 的监听此时已被移除，而关闭连接仍可能在其上触发 `error`：
-          // 保留一个兜底监听，避免回收过程变成未捕获异常
-          if (ws.listenerCount('error') === 0) {
-            ws.on('error', () => {})
-          }
-          ws.close(1001)
-        })
-        wss.close()
-        wssContextMap.delete(wss)
-        wssMap.delete(pathname)
-      }
+        ws.close(1001)
+      })
+      wssContext.connectionList.length = 0
+    }
+    wss.close()
+    wssContextMap.delete(wss)
+    // 只有 `pathname` 当前仍映射到该实例时才移除连接池条目：
+    // 旧服务可能仍在关闭过程中，而同一路径已被新服务接管，
+    // 此时删除条目会把新服务从连接池中移除
+    const wssMap = poolMap.get(mockUrl)
+    if (wssMap?.get(pathname) === wss) {
+      wssMap.delete(pathname)
       if (wssMap.size === 0) {
         poolMap.delete(mockUrl)
       }
     }
   }
 
+  /**
+   * 收集由指定 mock 文件创建的 websocket 服务
+   *
+   * @param filepath - Path of the mock file / mock 文件路径
+   * @returns Services created by the mock file / 该文件创建的服务
+   */
+  const collectWssOfFile = (
+    filepath: string,
+  ): { mockUrl: string; pathname: string; wss: WebSocketServer; wssContext: WSSContext }[] => {
+    const list: {
+      mockUrl: string
+      pathname: string
+      wss: WebSocketServer
+      wssContext: WSSContext
+    }[] = []
+    for (const [mockUrl, wssMap] of poolMap) {
+      for (const [pathname, wss] of wssMap) {
+        const wssContext = wssContextMap.get(wss)
+        // 只处理 `setup` 来自该文件的服务：归属其他 mock 文件的服务不受影响。
+        if (wssContext?.filepath === filepath) {
+          list.push({ mockUrl, pathname, wss, wssContext })
+        }
+      }
+    }
+    return list
+  }
+
+  /**
+   * 回收指定 mock 文件创建的全部 websocket 服务
+   *
+   * 被删除的 mock 文件是这些服务 `setup` 的唯一来源：若保留它们，客户端会一直与
+   * 已被删除的 mock 逻辑通信，直到开发服务停止。
+   *
+   * @param filepath - Path of the deleted mock file / 已删除的 mock 文件路径
+   */
+  const closeWssOfFile = (filepath: string): void => {
+    for (const { mockUrl, pathname, wss } of collectWssOfFile(filepath)) {
+      closeWss(mockUrl, pathname, wss)
+    }
+  }
+
+  /**
+   * 在最后一个客户端断开后安排空闲回收
+   *
+   * 每个实际请求路径都会创建一个 websocket 服务，动态规则（如 `/ws/room/:id`）
+   * 会为每个 `:id` 创建独立服务。空闲一段时间后回收它们，避免长时间开发时
+   * `WebSocketServer`、`setup()` 注册的定时器与房间状态无限累积；
+   * 后续连接会重建服务并重新执行 `setup()`。
+   *
+   * @param mockUrl - Key of the mock url / mock url 的键
+   * @param pathname - Request pathname / 请求路径
+   * @param wss - Websocket server / websocket 服务
+   * @param wssContext - Context of the websocket server / websocket 服务的上下文
+   */
+  const scheduleIdleRecycle = (
+    mockUrl: string,
+    pathname: string,
+    wss: WebSocketServer,
+    wssContext: WSSContext,
+  ): void => {
+    clearIdleTimer(wssContext)
+    const timer = setTimeout(() => {
+      wssContext.idleTimer = undefined
+      // 计时期间可能建立了新连接：插件的 close 监听不会重复调度，这里再校验一次
+      if (wssContext.connectionList.length > 0 || wss.clients.size > 0) {
+        return
+      }
+      closeWss(mockUrl, pathname, wss)
+    }, WSS_IDLE_TIMEOUT)
+    // 定时器不应成为阻止进程退出 / 测试结束的句柄
+    ;(timer as { unref?: () => void }).unref?.()
+    wssContext.idleTimer = timer
+  }
+
   // mock 数据热更新后，候选规则集合会变化，此前缓存的排序结果随之失效
   compiler.on?.('mock:update-end', sortMockUrls.clear)
 
-  // 检测 ws 相关的 mock 文件更新
-  // 如果当前的 ws 配置已建立 wss 连接，则重启该 wss 连接
+  // 检测 ws 相关的 mock 文件更新：更新该文件提供的规则，
+  // 重启仍然有效的 websocket 服务，并回收因 `url` 被修改而失去规则的服务。
   compiler.on?.('mock:update-end', (filepath: string) => {
-    const mockUrlList = hmrMap.get(filepath)
-    if (!mockUrlList) {
-      return
-    }
-    for (const mockUrl of mockUrlList) {
-      if (!compiler.mockData[mockUrl]) {
-        mockUrlList.delete(mockUrl)
-      }
-    }
-    if (mockUrlList.size === 0) {
-      hmrMap.delete(filepath)
+    const services = collectWssOfFile(filepath)
+    // 该文件既不提供任何服务、也没有热更新记录：不含 ws mock，无需扫描 mock 数据
+    if (services.length === 0 && !hmrMap.has(filepath)) {
       return
     }
 
-    for (const mockUrl of mockUrlList) {
+    // 该文件当前提供的 ws 规则；`url` / `ws` 被修改后，旧规则不再存在
+    const provided: { mockUrl: string; mock: MockWebsocketItem }[] = []
+    for (const mockUrl of objectKeys(compiler.mockData)) {
       for (const mock of compiler.mockData[mockUrl]) {
-        if (!mock.ws || (mock as any).__filepath__ !== filepath) {
+        if (!mock || !mock.ws || (mock as any).__filepath__ !== filepath) {
           continue
         }
-        const wssMap = getWssMap(mockUrl)
-        for (const wss of wssMap.values()) {
-          const wssContext = wssContextMap.get(wss)
-          if (!wssContext) {
-            continue
-          }
-          restartWss(wss, wssContext, mock, filepath)
-        }
-        return
+        provided.push({ mockUrl, mock })
+      }
+    }
+
+    // 热更新记录与该文件当前提供的规则保持一致
+    if (provided.length === 0) {
+      hmrMap.delete(filepath)
+    } else {
+      hmrMap.set(filepath, new Set(provided.map((item) => item.mockUrl)))
+    }
+
+    for (const { mockUrl, pathname, wss, wssContext } of services) {
+      // 规则仍然存在、且仍能匹配该连接的路径时，用新配置重启服务；
+      // 否则（`url` 被修改、或 ws 规则被移除）回收服务及其客户端，
+      // 避免旧服务继续用已被删除的 `setup` 逻辑响应连接
+      const next = provided.find(
+        (item) => item.mockUrl === mockUrl && isPathMatch(item.mock.url, pathname),
+      )
+      if (next) {
+        restartWss(wss, wssContext, next.mock, filepath)
+      } else {
+        closeWss(mockUrl, pathname, wss)
       }
     }
   })
@@ -539,7 +650,14 @@ export function mockWebSocket(
       // 插件自身的监听：每个 websocket 服务只注册一次，也不会被 mock 的清理移除
       // （它们不属于 mock）。`close` 监听用于在其他路径关闭服务时移除连接池条目，
       // 被删除 mock 的回收不依赖它 —— 那条路径由 `closeWssOfFile` 显式移除条目。
-      wss.on('close', () => wssMap.delete(pathname))
+      //
+      // 服务关闭是异步的，期间同一路径可能已被新服务接管：
+      // 只有 `pathname` 当前仍映射到该实例时才移除条目。
+      wss.on('close', () => {
+        if (wssMap.get(pathname) === wss) {
+          wssMap.delete(pathname)
+        }
+      })
       wss.on('error', (e) => {
         logger.error(
           `${ansis.red(`WebSocket mock error at ${wss.path}`)}\n${e}\n  at setup (${created.filepath})`,
@@ -570,6 +688,9 @@ export function mockWebSocket(
       const connection: Connection = { req: request, ws, cleanupList: [] }
       wssContext.connectionList.push(connection)
 
+      // 有新连接建立：取消可能在计时中的空闲回收
+      clearIdleTimer(wssContext)
+
       // 插件自身的监听：每条连接只注册一次，也不会被 mock 的清理移除
       // （它负责让 `connectionList` 保持同步）
       ws.on('close', () => {
@@ -581,6 +702,13 @@ export function mockWebSocket(
           (item) => item.ws === ws,
           (v) => remove(wssContext.connectionList, v),
         )
+        // 最后一个客户端也断开了：空闲一段时间后回收该服务（见 `scheduleIdleRecycle`）。
+        // 该实例可能已被回收、并由同路径的新服务接管（此时该上下文已不再登记在
+        // `wssContextMap` 中），只有上下文仍属于这个实例时才安排回收，
+        // 否则会把新服务当作旧服务回收
+        if (wssContext.connectionList.length === 0 && wssContextMap.get(wss) === wssContext) {
+          scheduleIdleRecycle(mockUrl, pathname, wss, wssContext)
+        }
       })
 
       emitConnection(wss, connection)
@@ -592,6 +720,7 @@ export function mockWebSocket(
       for (const wss of wssMap.values()) {
         const wssContext = wssContextMap.get(wss)
         if (wssContext) {
+          clearIdleTimer(wssContext)
           runCleanup(wssContext)
         }
         wss.close()
