@@ -17,6 +17,29 @@ export function getDirname(importMetaUrl: string): string {
 
 export const debug: Debugger = createDebug('vite:mock', { useColors: true })
 
+/**
+ * Marker used by the compiler for temporary ESM/CJS files.
+ *
+ * These files are created next to the mock file so that `import.meta.url` and
+ * relative imports keep working, but they must be ignored by the Vite watcher and
+ * the mock watcher. Otherwise every initial mock load looks like dozens of project
+ * file changes and stalls Vite's HMR graph.
+ *
+ * 编译器生成临时 ESM/CJS 文件时使用的标记。
+ *
+ * 临时文件需要放在 mock 文件旁边，保证 `import.meta.url` 与相对导入仍然可用；
+ * 但必须被 Vite watcher 与 mock watcher 忽略，否则首次加载 mock 会被当成大量
+ * 项目文件变更，阻塞 Vite 的 HMR 图更新。
+ */
+export const MOCK_TEMP_FILE_MARK = '.vite-mock-tmp-'
+
+/**
+ * Match temporary mock files created by the compiler
+ *
+ * 匹配编译器生成的临时 mock 文件
+ */
+export const MOCK_TEMP_FILE_RE = /\.vite-mock-tmp-[a-f0-9]+\.(?:mjs|cjs)$/
+
 const windowsSlashRE = /\\/g
 const isWindows = os.platform() === 'win32'
 

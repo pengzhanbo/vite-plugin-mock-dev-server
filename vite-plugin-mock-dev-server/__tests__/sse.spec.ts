@@ -69,6 +69,28 @@ describe('sSE', () => {
     expect(req.socket.setTimeout).toHaveBeenCalledWith(0)
   })
 
+  it('should use chunked framing so a finite stream can end on a keep-alive connection', () => {
+    const req = createMockReq()
+    const res = new PassThrough() as any
+    const writeHead = vi.fn()
+    const flushHeaders = vi.fn()
+    res.writeHead = writeHead
+    res.flushHeaders = flushHeaders
+
+    const sse = createSSEStream(req, res)
+
+    expect(writeHead).toHaveBeenCalledWith(
+      200,
+      expect.objectContaining({
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Transfer-Encoding': 'chunked',
+      }),
+    )
+    expect(flushHeaders).toHaveBeenCalled()
+
+    sse.end()
+  })
+
   it('should transform message with data', async () => {
     const req = createMockReq()
     const res = new PassThrough()

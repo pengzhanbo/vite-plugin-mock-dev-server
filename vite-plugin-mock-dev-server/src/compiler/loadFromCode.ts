@@ -4,7 +4,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 import { attempt, attemptAsync } from '@pengzhanbo/utils'
-import { formatError, getHash } from '../utils/index.js'
+import { formatError, getHash, MOCK_TEMP_FILE_MARK } from '../utils/index.js'
 
 interface LoadFromCodeOptions {
   filepath: string
@@ -33,7 +33,7 @@ export async function loadFromCode<T = any>({
 }: LoadFromCodeOptions): Promise<T | { [key: string]: T }> {
   filepath = path.resolve(cwd, filepath)
   const ext = isESM ? '.mjs' : '.cjs'
-  const filepathTmp = `${filepath}.${getHash(code)}${ext}`
+  const filepathTmp = `${filepath}${MOCK_TEMP_FILE_MARK}${getHash(code)}${ext}`
   await fsp.writeFile(filepathTmp, code, 'utf8')
   TEMP_FILES.add(filepathTmp)
   const [error, mod] = await attemptAsync<any>(importDefault, String(pathToFileURL(filepathTmp)))

@@ -13,7 +13,7 @@
  * 一起覆盖，而不是用伪造的 `req` / `res` 代替。
  */
 import type { AddressInfo } from 'node:net'
-import type { ServerOptions, ViteDevServer } from 'vite'
+import type { InlineConfig, Plugin, ServerOptions, ViteDevServer } from 'vite'
 import type { MockServerPluginOptions } from '../../src/types/index.js'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -139,16 +139,25 @@ export async function createProject(files: Record<string, string> = {}): Promise
  * @param options.root - Project root / 项目根目录
  * @param options.pluginOptions - Options passed to the plugin / 传给插件的配置
  * @param options.serverOptions - Extra Vite server options / 额外的 Vite server 配置
+ * @param options.define - Vite `define` entries / Vite `define` 配置
+ * @param options.resolve - Vite `resolve` options / Vite `resolve` 配置
+ * @param options.plugins - Extra Vite plugins / 额外的 Vite 插件
  * @returns The running server / 运行中的服务器
  */
 export async function startMockServer({
   root,
   pluginOptions = {},
   serverOptions = {},
+  define,
+  resolve,
+  plugins = [],
 }: {
   root: string
   pluginOptions?: MockServerPluginOptions
   serverOptions?: ServerOptions
+  define?: InlineConfig['define']
+  resolve?: InlineConfig['resolve']
+  plugins?: Plugin[]
 }): Promise<RunningServer> {
   const server = await createServer({
     configFile: false,
@@ -156,6 +165,8 @@ export async function startMockServer({
     logLevel: 'silent',
     appType: 'custom',
     optimizeDeps: { noDiscovery: true, include: [] },
+    ...(define ? { define } : {}),
+    ...(resolve ? { resolve } : {}),
     server: {
       host: '127.0.0.1',
       port: 0,
@@ -165,7 +176,10 @@ export async function startMockServer({
       hmr: false,
       ...serverOptions,
     },
-    plugins: [mockDevServerPlugin({ cwd: root, dir: 'mock', log: 'error', ...pluginOptions })],
+    plugins: [
+      ...plugins,
+      mockDevServerPlugin({ cwd: root, dir: 'mock', log: 'error', ...pluginOptions }),
+    ],
   })
 
   await server.listen()
@@ -178,6 +192,12 @@ export async function startMockServer({
     origin,
     request: (pathname, init) => fetch(`${origin}${pathname}`, init),
     close: async () => {
+      // SSE / WebSocket 用例会留下 keep-alive 连接，直接等待 `server.close()`
+      // 可能一直挂起；先强制关闭所有连接，保证用例退出稳定。
+      // SSE / WebSocket specs leave keep-alive connections behind; waiting for
+      // `server.close()` alone can hang. Force-close connections first.
+      const httpServer = server.httpServer as unknown as { closeAllConnections?: () => void } | null
+      httpServer?.closeAllConnections?.()
       await server.close()
     },
   }
@@ -237,7 +257,7 @@ export async function waitFor<T>(
  * @returns The first successful response / 首个成功的响应
  */
 export async function waitForMock(
-  server: RunningServer,
+  server: Pick<RunningServer, 'request'>,
   pathname: string,
   init?: RequestInit,
 ): Promise<Response> {

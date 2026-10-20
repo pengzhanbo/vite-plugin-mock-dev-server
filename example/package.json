@@ -7,10 +7,25 @@
     "dev": "vite dev",
     "build": "vite build"
   },
+  "dependencies": {
+    "@base-ui/react": "catalog:prod",
+    "class-variance-authority": "catalog:prod",
+    "clsx": "catalog:prod",
+    "lucide-react": "catalog:prod",
+    "react": "catalog:prod",
+    "react-dom": "catalog:prod",
+    "tailwind-merge": "catalog:prod"
+  },
   "devDependencies": {
+    "@tailwindcss/vite": "catalog:dev",
     "@types/mockjs": "catalog:dev",
+    "@types/react": "catalog:dev",
+    "@types/react-dom": "catalog:dev",
+    "@vitejs/plugin-react": "catalog:dev",
+    "launch-editor": "catalog:dev",
     "mime-types": "catalog:prod",
     "mockjs": "catalog:dev",
+    "tailwindcss": "catalog:dev",
     "vite": "catalog:dev",
     "vite-plugin-mock-dev-server": "workspace:*"
   }

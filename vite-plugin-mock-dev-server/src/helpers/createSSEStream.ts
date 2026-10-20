@@ -121,7 +121,14 @@ class SSEStream extends Transform {
     if (destination.writeHead) {
       destination.writeHead(200, {
         'Content-Type': 'text/event-stream; charset=utf-8',
-        'Transfer-Encoding': 'identity',
+        // SSE 必须使用 chunked 分帧。`identity` 不带 Content-Length 时，
+        // 客户端只能等待连接关闭才能知道响应体结束；有限长度的 SSE 在
+        // keep-alive 连接上会一直挂起到服务端超时。
+        // SSE must use chunked framing. With `identity` and no Content-Length,
+        // the client can only detect the end of the body when the connection
+        // closes; a finite SSE stream on a keep-alive connection would hang
+        // until the server timeout.
+        'Transfer-Encoding': 'chunked',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive',
       })

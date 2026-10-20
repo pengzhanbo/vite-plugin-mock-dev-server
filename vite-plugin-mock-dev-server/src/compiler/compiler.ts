@@ -9,7 +9,13 @@ import { promiseParallel } from '@pengzhanbo/utils'
 import { watch } from 'chokidar'
 import { loadPackageJSONSync } from 'local-pkg'
 import { glob } from 'tinyglobby'
-import { createMatcher, debug, formatError, normalizePath } from '../utils/index.js'
+import {
+  createMatcher,
+  debug,
+  formatError,
+  MOCK_TEMP_FILE_MARK,
+  normalizePath,
+} from '../utils/index.js'
 import { compile } from './compile.js'
 import { processMockData, processRawData } from './processData.js'
 
@@ -391,7 +397,7 @@ export class Compiler extends EventEmitter {
       ignoreInitial: true,
       cwd: this.cwd,
       ignored: (filepath, stats) => {
-        if (filepath.includes('node_modules')) {
+        if (filepath.includes('node_modules') || filepath.includes(MOCK_TEMP_FILE_MARK)) {
           return true
         }
         // 规范化路径以确保跨平台兼容性（Windows）

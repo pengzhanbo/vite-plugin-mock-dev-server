@@ -7,7 +7,7 @@ import { toArray } from '@pengzhanbo/utils'
 import { generateMockServer } from '../build/index.js'
 import { requestRecoverySetup } from '../mockHttp/index.js'
 import { Recorder } from '../recorder/index.js'
-import { setupProxyConfigure } from '../utils/index.js'
+import { MOCK_TEMP_FILE_RE, setupProxyConfigure } from '../utils/index.js'
 import { initMockMiddlewares } from './init.js'
 import { resolvePluginOptions, resolveRecordOptions } from './options.js'
 
@@ -109,6 +109,24 @@ export function serverPlugin(
     apply: 'serve',
 
     config(config) {
+      // mock 编译器会在 mock 文件旁写临时文件用于动态 import，必须让 Vite
+      // watcher 忽略它们，否则首次加载 mock 会被当成大量项目文件变更。
+      // The mock compiler writes temporary files next to mock files for dynamic
+      // import; Vite's watcher must ignore them, otherwise the initial mock load
+      // looks like dozens of project changes.
+      const watch = ((config.server ??= {}).watch ??= {})
+      const ignored = watch.ignored
+      watch.ignored = [
+        // Vite 的默认忽略项在插件写入 `ignored` 后不会再补全，需要显式保留
+        // Vite's default ignore entries are not re-applied once a plugin sets
+        // `ignored`, so keep them explicitly
+        '**/.git/**',
+        '**/node_modules/**',
+        '**/test-results/**',
+        ...(Array.isArray(ignored) ? ignored : ignored ? [ignored] : []),
+        MOCK_TEMP_FILE_RE,
+      ]
+
       // 如果启用了 websocket mock，根据 wsPrefix 重新配置 server.proxy，
       // 可以避免 wss 初始化时的冲突，带来潜在的影响是，可能存在指定了 `wsPrefix`，
       // 但在实际的 mock 中没有对该规则进行配置，从而导致默认的 websocket 代理失效。

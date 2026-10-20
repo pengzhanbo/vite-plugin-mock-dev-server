@@ -220,7 +220,7 @@ export default defineMock({
       }
     }, 1000)
 
-    req.on('close', () => {
+    res.on('close', () => {
       clearInterval(interval)
     })
   },

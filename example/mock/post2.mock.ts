@@ -1,4 +1,4 @@
-import post from './data/post.js'
+import post, { initialPosts } from './data/post.js'
 import { defineAPIMock } from './shared.js'
 
 /**
@@ -18,6 +18,27 @@ export const fetchPostList = defineAPIMock({
       message: 'success',
       result: {
         list: getPost(),
+      },
+    }
+  },
+})
+
+/**
+ * 重置共享数据，便于反复演示删除 / 列表联动
+ *
+ * Reset the shared data so the delete / list demo can be replayed.
+ */
+export const resetPostList = defineAPIMock({
+  url: '/post/reset',
+  method: 'POST',
+  body() {
+    const [, setPost] = post
+    setPost([...initialPosts])
+    return {
+      code: 200,
+      message: 'success',
+      result: {
+        list: post.value,
       },
     }
   },

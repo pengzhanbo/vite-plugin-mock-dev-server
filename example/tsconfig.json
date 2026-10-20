@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "jsx": "preserve",
-    "lib": ["DOM", "ESNext"],
+    "jsx": "react-jsx",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
@@ -12,8 +12,20 @@
     "noUnusedLocals": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@mock-shared": ["./mock/shared"],
+      "@mock-shared/*": ["./mock/shared/*"]
+    }
   },
-  "include": ["./src", "./mock", "./vite.config.ts"],
+  "include": [
+    "./env.d.ts",
+    "./src",
+    "./mock",
+    "./vite.config.ts",
+    "./plugin-options.ts",
+    "./plugins"
+  ],
   "exclude": ["./**/*.mjs", "./**/*.cjs", "./**/*.js"]
 }

@@ -89,7 +89,7 @@ export default defineMock({
     }, 1000)
 
     // 客户端断开时清理
-    req.on('close', () => {
+    res.on('close', () => {
       clearInterval(timer)
     })
   },
@@ -127,7 +127,7 @@ export default defineMock({
 
     sendNotification()
 
-    req.on('close', () => {
+    res.on('close', () => {
       index = notifications.length // 停止发送
     })
   },
@@ -168,7 +168,7 @@ export default defineMock({
       sse.end()
     }, 10000)
 
-    req.on('close', () => {
+    res.on('close', () => {
       clearInterval(interval)
     })
   },
@@ -202,7 +202,7 @@ export default defineMock({
       })
     }, 3000)
 
-    req.on('close', () => {
+    res.on('close', () => {
       clearInterval(timer)
     })
   },

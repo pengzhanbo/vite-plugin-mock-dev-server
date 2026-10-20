@@ -27,6 +27,7 @@ pnpm-debug.log*
 .gemini/
 .codex/
 .workbuddy/
+.codebuddy/
 .trae/
 .windsurf/
 .opencode/

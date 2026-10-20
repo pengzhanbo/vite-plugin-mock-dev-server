@@ -1,15 +1,5 @@
 import { defineMockData } from 'vite-plugin-mock-dev-server'
 
-export default defineMockData('posts', [
-  { title: '1' },
-  { title: '2' },
-  { title: '3' },
-  { title: '4' },
-  { title: '5' },
-  { title: '6' },
-  { title: '7' },
-  { title: '8' },
-  { title: '9' },
-  { title: '10' },
-  { title: '310' },
-])
+export const initialPosts: string[] = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '310']
+
+export default defineMockData('posts', initialPosts)

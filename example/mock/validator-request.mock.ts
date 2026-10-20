@@ -12,6 +12,12 @@ export default defineMock([
     },
   },
   {
+    url: '/api/validator-check-cookie',
+    body: {
+      message: 'token valid.',
+    },
+  },
+  {
     url: '/api/validator-body-include',
     validator(request) {
       const ids = request.body.ids ?? []
@@ -20,6 +26,13 @@ export default defineMock([
     body: {
       code: 200,
       message: 'ids must be include 1001',
+    },
+  },
+  {
+    url: '/api/validator-body-include',
+    body: {
+      code: 200,
+      message: 'ids include 1001',
     },
   },
 ])

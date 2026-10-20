@@ -165,7 +165,10 @@ describe('e2e: http mock pipeline', () => {
     })
     server = await startMockServer({
       root: project.root,
-      pluginOptions: { prefix: ['/api'] },
+      // 这些用例会主动制造流错误与非法 URL，错误日志是预期行为
+      // These specs intentionally trigger stream errors and invalid URLs; the
+      // error logs are expected
+      pluginOptions: { prefix: ['/api'], log: 'silent' },
     })
     await waitForMock(server, '/api/users')
   })
