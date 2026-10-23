@@ -14,6 +14,7 @@ export interface TransformResult {
   code: string
   externalDeps: string[]
   internalDeps: string[]
+  error?: Error
 }
 
 export interface CompilerResult {

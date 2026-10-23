@@ -46,13 +46,13 @@ export async function generateMockServer(
     await fsp.rm(mockEntry, { force: true })
   }
 
-  const { code, externalDeps } = result
-  if (!code) {
+  const { code, externalDeps, error } = result
+  if (error || !code) {
     // 转换失败时 `transformWithEsbuild` / `transformWithRolldown` 只记录日志并返回空产物，
     // 若不中止构建，会生成一个启动即失败的空 `mock-data.js`
     const message = 'Failed to generate mock server: the mock entry was not transformed'
-    options.logger.error(message)
-    throw new Error(message)
+    options.logger.error(error ? `${message}\n${formatError(error)}` : message)
+    throw new Error(message, { cause: error })
   }
 
   const mockDeps = getMockDependencies(externalDeps, options.alias)

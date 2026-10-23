@@ -113,6 +113,10 @@ mockDevServerPlugin({
 })
 ```
 
+**4. Check Whether the Mock File Failed to Compile**
+
+When a mock file fails to compile, the plugin keeps the rules of its last successful compilation and shows the error overlay in the browser (the terminal also prints `Failed to compile mock file ...`). The rules therefore look stale: fix the compilation error first, the overlay closes automatically and the new rules take effect immediately.
+
 ### Path Matching Failed
 
 #### Symptoms
