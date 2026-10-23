@@ -58,7 +58,7 @@ catalogs:
     '@base-ui/react': ^1.9.0
     '@pengzhanbo/utils': ^3.12.0
     ansis: ^4.4.0
-    chokidar: ^5.0.0
+    chokidar: ^6.0.0
     class-variance-authority: ^0.7.1
     clsx: ^2.1.1
     co-body: ^6.2.0
