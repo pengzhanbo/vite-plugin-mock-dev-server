@@ -8,6 +8,28 @@ export type BodyParserOptions = COBodyOptions & {
   jsonLimit?: string | number
   formLimit?: string | number
   textLimit?: string | number
+  /**
+   * Max size of the raw request body, applied while the body is being read.
+   *
+   * `co-body` limits (`limit` / `jsonLimit` / `formLimit` / `textLimit`) only take
+   * effect after the whole body has been buffered, so they cannot protect the memory
+   * of the dev server. This option is checked while reading, the request is rejected
+   * with `413` once it is exceeded. The smaller one of this option and the matching
+   * `co-body` limit is used.
+   *
+   * Set it to `0` to disable the limit.
+   *
+   * 原始请求体的最大字节数，在读取请求体时生效。
+   *
+   * `co-body` 的限制项（`limit` / `jsonLimit` / `formLimit` / `textLimit`）只在请求体
+   * 被完整缓冲后才生效，无法保护 dev server 的内存；该选项在读取过程中校验，
+   * 超出后直接以 `413` 结束请求。实际取该项与对应 `co-body` 限制中较小的值。
+   *
+   * 配置为 `0` 表示不限制。
+   *
+   * @default '50mb'
+   */
+  maxBodySize?: string | number
 }
 
 export type LogType = 'info' | 'warn' | 'error' | 'debug'

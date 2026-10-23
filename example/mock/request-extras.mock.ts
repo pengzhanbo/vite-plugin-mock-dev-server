@@ -46,9 +46,11 @@ export default defineMock([
     url: '/api/request/body-parser',
     method: 'POST',
     body: (request) => ({
-      // 超过 `bodyParserOptions.jsonLimit` 时解析失败，body 为 undefined
-      // When the body exceeds `bodyParserOptions.jsonLimit` the parse fails and
-      // `body` is undefined
+      // 超过大小上限的请求体在读取阶段就会以 413 拒绝（见 `bodyParserOptions`），
+      // 只有无法解析的请求体（如非法 JSON）才会让这里的 body 为 undefined
+      // Bodies exceeding the size limit are rejected with 413 while being read
+      // (see `bodyParserOptions`), only unparsable bodies (such as invalid JSON)
+      // leave `body` undefined here
       parsed: request.body !== undefined,
       body: request.body ?? null,
     }),

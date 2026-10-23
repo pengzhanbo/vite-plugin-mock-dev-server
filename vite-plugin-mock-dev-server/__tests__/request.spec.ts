@@ -43,6 +43,15 @@ describe('parseRequestParams', () => {
     expect(params1).toEqual({ id: '123' })
     expect(params2).toEqual({ id: '456' })
   })
+
+  it('should not throw on malformed percent-encoded parameters', () => {
+    // `100%` cannot be decoded by `decodeURIComponent`: the raw value must be kept,
+    // otherwise the request fails with 500 (or even crashes the upgrade handler)
+    // `100%` 无法被 `decodeURIComponent` 解码：应保留原始值，
+    // 否则请求会变成 500（在 upgrade 处理器中甚至会导致进程崩溃）
+    const params = parseRequestParams('/api/users/:id', '/api/users/100%')
+    expect(params).toEqual({ id: '100%' })
+  })
 })
 
 /**

@@ -1,17 +1,21 @@
 // oxlint-disable max-lines-per-function
 
 import type { CorsOptions } from 'cors'
+import type formidable from 'formidable'
 import type { ServerResponse } from 'node:http'
 import type { Connect } from 'vite'
 import type { Logger, ResolvedMockServerPluginOptions } from '../core/index.js'
 import type { MatchingWeightSorter } from '../core/matchingWeight.js'
 import type {
+  BodyParserOptions,
   ExtraRequest,
   MockHttpItem,
   MockOptions,
   MockRequest,
   MockResponse,
+  ResolvedRecordOptions,
 } from '../types/index.js'
+import type { ParsedRequestBody, RequestBodyError } from './request.js'
 import {
   attempt,
   attemptAsync,
@@ -28,10 +32,16 @@ import { recordRequestWithRawReq, replayRecordedRequest } from '../recorder/inde
 import { doesProxyContextMatchUrl, isReadableStream, urlParse } from '../utils/index.js'
 import { createCors } from './cors.js'
 import { findMockData, hasMockMethod } from './matcher.js'
-import { parseRequestBodyWithRaw, parseRequestParams, requestLog } from './request.js'
+import {
+  isRequestBodyError,
+  parseRequestBodyWithRaw,
+  parseRequestParams,
+  requestLog,
+} from './request.js'
 import { cacheRequestBody } from './requestRecovery.js'
 import {
   attachStreamHandlers,
+  getHTTPStatusText,
   pipeStreamData,
   provideResponseCookies,
   provideResponseHeaders,
@@ -210,12 +220,17 @@ export function createMockMiddleware(
     }
 
     const cookies = new Cookies(req, res, cookiesOptions)
-    const { body: parsedBody, rawBody } = await parseRequestBodyWithRaw(
+    const requestBody = await readRequestBodySafely(
       req,
+      res,
       logger,
       formidableOptions,
       bodyParserOptions,
     )
+    if (!requestBody) {
+      return
+    }
+    const { body: parsedBody, rawBody } = requestBody
     cacheRequestBody(req, rawBody)
 
     let mock: MockHttpItem | undefined
@@ -249,17 +264,7 @@ export function createMockMiddleware(
     }
 
     if (!mock) {
-      // 请求体录制时，需要记录请求体，以便后续回放时使用
-      if (record.enabled) {
-        recordRequestWithRawReq(req, pathname, extraReq.body)
-      }
-      const matched = mockUrls
-        .map((m) => (m === _mockUrl ? ansis.underline.bold(m) : ansis.dim(m)))
-        .join(', ')
-      if (matched.length > 0) {
-        logger.warn(`${ansis.green(pathname)} matches ${matched}, but mock data is not found.`)
-      }
-
+      handleMissingMock(req, pathname, mockUrls, extraReq.body, { logger, record })
       return next()
     }
 
@@ -389,6 +394,124 @@ export function createMockMiddleware(
       next(error)
     }
   }
+}
+
+/**
+ * Record the request and log it when no mock rule matches
+ *
+ * 未命中 mock 规则时记录请求并输出日志
+ *
+ * Requests that match a mock url but no rule are still candidates of record / replay,
+ * so the body is stored before the request is passed to the following middleware.
+ *
+ * 命中 mock url 但没有可用规则的请求仍然是录制 / 回放的候选，
+ * 因此在交给后续中间件之前需要保存请求体。
+ *
+ * @param req - Request object / 请求对象
+ * @param pathname - Request pathname / 请求路径
+ * @param mockUrls - Mock urls matching the pathname / 命中路径的 mock url
+ * @param body - Parsed request body / 解析后的请求体
+ * @param context - Logger and record options / 日志与录制配置
+ */
+function handleMissingMock(
+  req: Connect.IncomingMessage,
+  pathname: string,
+  mockUrls: string[],
+  body: unknown,
+  context: { logger: Logger; record: ResolvedRecordOptions },
+): void {
+  // 请求体录制时，需要记录请求体，以便后续回放时使用
+  if (context.record.enabled) {
+    recordRequestWithRawReq(req, pathname, body)
+  }
+
+  if (mockUrls.length > 0) {
+    const matched = mockUrls.map((mockUrl) => ansis.dim(mockUrl)).join(', ')
+    context.logger.warn(`${ansis.green(pathname)} matches ${matched}, but mock data is not found.`)
+  }
+}
+
+/**
+ * Read the request body and answer the request when it cannot be read
+ *
+ * 读取请求体，无法读取时直接结束请求
+ *
+ * An oversized body / aborted request is an expected client error: it is answered with
+ * the matching status code and `undefined` is returned, while any other error still
+ * bubbles up to the error boundary of the middleware.
+ *
+ * 请求体超限 / 客户端中断是可预期的客户端错误：以对应状态码结束请求并返回 `undefined`；
+ * 其余异常仍向上抛出，由中间件的统一错误处理兜底。
+ *
+ * @param req - Request object / 请求对象
+ * @param res - Response object / 响应对象
+ * @param logger - Logger instance / 日志实例
+ * @param formidableOptions - Formidable options / formidable 配置项
+ * @param bodyParserOptions - Body parser options / 请求体解析配置项
+ * @returns Parsed body, `undefined` when the request has been answered / 解析后的请求体，已结束请求时为 `undefined`
+ */
+async function readRequestBodySafely(
+  req: Connect.IncomingMessage,
+  res: ServerResponse,
+  logger: Logger,
+  formidableOptions: formidable.Options,
+  bodyParserOptions: BodyParserOptions,
+): Promise<ParsedRequestBody | undefined> {
+  try {
+    return await parseRequestBodyWithRaw(req, logger, formidableOptions, bodyParserOptions)
+  } catch (error) {
+    if (isRequestBodyError(error)) {
+      handleRequestBodyError(req, res, logger, error)
+      return undefined
+    }
+    throw error
+  }
+}
+
+/**
+ * Answer a request whose body could not be read
+ *
+ * 结束请求体无法读取的请求
+ *
+ * `BODY_TOO_LARGE` is answered with `413` so the client gets an explicit error instead
+ * of a mock response built from a truncated body; an aborted request is only logged,
+ * since its connection is already gone.
+ *
+ * `BODY_TOO_LARGE` 以 `413` 明确响应，避免客户端拿到基于不完整请求体构建的 mock 响应；
+ * 客户端中断的请求只记录日志，因为连接已经不存在。
+ *
+ * @param req - Request object / 请求对象
+ * @param res - Response object / 响应对象
+ * @param logger - Logger instance / 日志实例
+ * @param error - Body read error / 请求体读取错误
+ */
+function handleRequestBodyError(
+  req: Connect.IncomingMessage,
+  res: ServerResponse,
+  logger: Logger,
+  error: RequestBodyError,
+): void {
+  if (error.code === 'REQUEST_ABORTED') {
+    logger.debug(`${ansis.yellow('mock request aborted')} ${req.url ?? ''}`)
+    return
+  }
+
+  logger.warn(`${ansis.yellow('mock request body rejected')} ${req.url ?? ''}\n  ${error.message}`)
+
+  if (res.writableEnded || res.destroyed) {
+    return
+  }
+  // 响应已开始发送时无法再改写状态码，只能销毁连接
+  // The response has started, so the status cannot be changed anymore: destroy it
+  if (res.headersSent) {
+    res.destroy()
+    return
+  }
+
+  res.statusCode = error.statusCode
+  res.statusMessage = getHTTPStatusText(error.statusCode)
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+  res.end(error.message)
 }
 
 const keysCache = new WeakMap<Record<string, MockOptions>, string[]>()

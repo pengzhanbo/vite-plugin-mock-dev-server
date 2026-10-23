@@ -209,11 +209,19 @@ mockDevServerPlugin({
 
 详细配置见 [co-body](https://github.com/cojs/co-body#options)。
 
+此外提供 `maxBodySize` 配置原始请求体的上限，默认 `'50mb'`，配置为 `0` 表示不限制。
+
+`co-body` 的 `limit` / `jsonLimit` / `formLimit` / `textLimit` 只在请求体被完整缓冲后生效，
+无法阻止内存占用，因此插件在读取请求体时会同时校验该上限（取两者中较小的值），
+超出后直接返回 `413 Payload Too Large`，不会再把不完整的请求体交给 mock。
+
 ```ts
 mockDevServerPlugin({
   bodyParserOptions: {
     jsonLimit: '10mb',
     formLimit: '10mb',
+    // 原始请求体上限，超出返回 413；`0` 表示不限制
+    maxBodySize: '50mb',
   },
 })
 ```

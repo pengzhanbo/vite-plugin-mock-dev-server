@@ -77,7 +77,7 @@ export function RequestDetails({
       {request.largeJson && (
         <Alert variant="warning">
           <AlertDescription>
-            Request body: 约 70KB JSON，超过 bodyParserOptions.jsonLimit: 64kb。
+            Request body: 约 70KB JSON，超过 bodyParserOptions.jsonLimit: 64kb，服务将返回 413。
           </AlertDescription>
         </Alert>
       )}

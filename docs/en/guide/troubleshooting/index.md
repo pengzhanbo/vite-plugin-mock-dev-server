@@ -330,9 +330,13 @@ mockDevServerPlugin({
     jsonLimit: '10mb', // JSON request body size limit
     formLimit: '10mb', // Form request body size limit
     textLimit: '10mb', // Text request body size limit
+    maxBodySize: '50mb', // Raw body limit, `0` disables it
   },
 })
 ```
+
+Requests exceeding the limit are answered with `413 Payload Too Large` while being read,
+instead of matching the mock with a truncated body.
 
 **3. Check Request Body Format**
 

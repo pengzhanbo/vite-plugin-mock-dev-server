@@ -208,11 +208,21 @@ mockDevServerPlugin({
 
 For detailed configuration, see [co-body](https://github.com/cojs/co-body#options).
 
+`maxBodySize` limits the raw request body, it defaults to `'50mb'` and `0` disables it.
+
+The `limit` / `jsonLimit` / `formLimit` / `textLimit` options of `co-body` only take effect
+after the body has been fully buffered, so they cannot protect the memory of the dev server.
+The plugin therefore checks the size while reading (the smaller one of both limits is used)
+and answers `413 Payload Too Large` once it is exceeded, instead of passing a truncated body
+to the mock.
+
 ```ts
 mockDevServerPlugin({
   bodyParserOptions: {
     jsonLimit: '10mb',
     formLimit: '10mb',
+    // Raw body limit, exceeded requests get 413; `0` disables it
+    maxBodySize: '50mb',
   },
 })
 ```
