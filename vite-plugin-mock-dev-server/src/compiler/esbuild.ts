@@ -144,6 +144,11 @@ export async function transformWithEsbuild(
     }
   } catch (e) {
     logger.error(`Failed to transform ${ansis.yellow.underline(filepath)}\n${formatError(e)}`)
+    return {
+      code: '',
+      externalDeps: [],
+      internalDeps: [],
+      error: e instanceof Error ? e : new Error(String(e)),
+    }
   }
-  return { code: '', externalDeps: [], internalDeps: [] }
 }

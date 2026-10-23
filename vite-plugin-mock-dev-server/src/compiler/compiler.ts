@@ -6,6 +6,7 @@ import EventEmitter from 'node:events'
 import path from 'node:path'
 import process from 'node:process'
 import { promiseParallel } from '@pengzhanbo/utils'
+import ansis from 'ansis'
 import { watch } from 'chokidar'
 import { loadPackageJSONSync } from 'local-pkg'
 import { glob } from 'tinyglobby'
@@ -23,6 +24,23 @@ import { processMockData, processRawData } from './processData.js'
  * Mock file loading and compilation, converting to Mock data
  *
  * Mock 文件加载编译，并转换为 Mock 数据
+ *
+ * Events:
+ *
+ * - `mock:update` / `mock:unlink` — watch events carrying the mock file path
+ * - `mock:update-end` — a mock file was compiled and applied, carrying its path
+ * - `mock:error` — a compilation failed, carrying `{ filepath, error }`; the rules of the
+ *   last successful compilation are kept
+ * - `mock:recovered` — a previously failing file compiled successfully, carrying its path
+ * - `update:deps` — the dependency mapping changed
+ *
+ * 事件：
+ *
+ * - `mock:update` / `mock:unlink` — 文件监视事件，携带 mock 文件路径
+ * - `mock:update-end` — mock 文件编译并已应用，携带其路径
+ * - `mock:error` — 编译失败，携带 `{ filepath, error }`；上一次成功编译的规则被保留
+ * - `mock:recovered` — 之前失败的文件重新编译成功，携带其路径
+ * - `update:deps` — 依赖映射发生变化
  */
 export class Compiler extends EventEmitter {
   /**
@@ -40,14 +58,7 @@ export class Compiler extends EventEmitter {
   private moduleDeps: Map<string, Set<string>> = new Map()
 
   /**
-   * Dependencies whose file has been deleted but whose reverse references are kept
-   *
    * 文件已删除、但反向引用仍然保留的依赖
-   *
-   * Deleting a dependency does not remove the mock files that import it from the
-   * mapping: as long as they are there, the dependency can be created again and
-   * those mock files can be re-compiled with its new content. This set tells the
-   * deps watcher which of the tracked dependencies are currently absent.
    *
    * 删除依赖不会把引用它的 mock 文件从映射中移除：只要这些引用关系还在，
    * 依赖重新创建后就能用新内容重新编译它们。该集合用于标记
@@ -56,20 +67,22 @@ export class Compiler extends EventEmitter {
   private missingDeps: Set<string> = new Set()
 
   /**
-   * Tokens of the compilations that are currently in flight, keyed by mock file
-   *
    * 正在进行中的编译令牌，以 mock 文件为键
-   *
-   * Compilation is asynchronous, so a slow compilation may finish after the mock
-   * file has been deleted or re-compiled. Every compilation takes a token and
-   * only applies its result while the token is still the current one, otherwise
-   * a stale result would resurrect a deleted mock file in the caches.
    *
    * 编译是异步的，一次较慢的编译可能在 mock 文件被删除或重新编译之后才完成。
    * 每次编译都会取得一个令牌，只有令牌仍然是最新的才会写入结果，
    * 否则过期结果会让已删除的 mock 文件在缓存中「复活」。
    */
   private loadTokens: Map<string, symbol> = new Map()
+
+  /**
+   * 最近一次编译失败的 mock 文件及其错误
+   *
+   * 编译失败时保留上一次成功编译的规则：把规则替换为空会让请求静默透传到真实后端，
+   * 很难被发现。错误记录在这里，用于识别并上报恢复（`mock:recovered`），
+   * 以及在同一文件再次失败时继续上报。
+   */
+  private loadErrors: Map<string, Error> = new Map()
 
   /**
    * Current working directory
@@ -198,6 +211,8 @@ export class Compiler extends EventEmitter {
       // 取消该文件可能仍在进行中的编译，否则 `load()` 完成后会把已删除的模块
       // 写回缓存（见 `loadTokens`）。
       this.loadTokens.delete(filepath)
+      // 删除文件也意味着该文件的编译错误已被消除（错误浮层需要随之关闭）
+      this.clearLoadError(filepath)
       this.removeModuleDeps(filepath, true)
       // 被删除的 mock 文件也可能被其他 mock 文件引用：继续监视它，
       // 以便它重新创建时恢复这些引用方。
@@ -216,6 +231,7 @@ export class Compiler extends EventEmitter {
   close(): void {
     void this.mockWatcher?.close()
     void this.depsWatcher?.close()
+    this.loadErrors.clear()
   }
 
   /**
@@ -280,14 +296,17 @@ export class Compiler extends EventEmitter {
       }
       this.moduleCache.set(filepath, processRawData(data, filepath))
       this.updateModuleDeps(filepath, internalDeps)
+      this.clearLoadError(filepath)
       return true
     } catch (e) {
       // 已被取消的编译失败属于预期情况（文件被有意删除），此时不必报错。
       if (this.loadTokens.get(filepath) !== token) {
         return false
       }
-      this.options.logger.error(`Failed to load mock file ${filepath}:\n${formatError(e)}`)
-      return true
+      this.failLoad(filepath, e)
+      // 返回 `false`：本次结果未被应用（旧规则仍然保留），
+      // 因此不应触发 `mock:update-end` 的整页刷新 / WS 重启。
+      return false
     } finally {
       if (this.loadTokens.get(filepath) === token) {
         this.loadTokens.delete(filepath)
@@ -302,6 +321,44 @@ export class Compiler extends EventEmitter {
    */
   private updateMockData(): void {
     this._mockData = processMockData(this.moduleCache, this.options.logger)
+  }
+
+  /**
+   * 记录并上报一次编译失败
+   *
+   * 上一次成功编译的规则会被有意保留在缓存中：清空它们会让请求静默透传到真实后端。
+   * 错误被记录下来以便 `clearLoadError` 上报恢复，并通过 `mock:error` 抛出，
+   * 供开发服务展示错误浮层。
+   *
+   * @param filepath - Path to the mock file / Mock 文件路径
+   * @param error - Error thrown by the compilation / 编译抛出的错误
+   */
+  private failLoad(filepath: string, error: unknown): void {
+    const normalized = error instanceof Error ? error : new Error(String(error))
+    const kept = this.moduleCache.has(filepath)
+
+    this.options.logger.error(
+      `${ansis.red(`Failed to compile mock file ${filepath}`)}\n  ${normalized.message}\n  ${
+        kept
+          ? ansis.dim('The rules of the last successful compilation are kept.')
+          : ansis.dim('No mock rule is provided by this file until it compiles.')
+      }`,
+    )
+
+    this.loadErrors.set(filepath, normalized)
+    this.emit('mock:error', { filepath, error: normalized })
+  }
+
+  /**
+   * 清除文件的加载错误并上报恢复
+   *
+   * @param filepath - Path to the mock file / Mock 文件路径
+   */
+  private clearLoadError(filepath: string): void {
+    if (!this.loadErrors.delete(filepath)) {
+      return
+    }
+    this.emit('mock:recovered', filepath)
   }
 
   /**

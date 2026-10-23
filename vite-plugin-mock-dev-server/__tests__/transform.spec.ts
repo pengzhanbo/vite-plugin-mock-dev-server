@@ -54,7 +54,10 @@ describe('transform error logging', () => {
       expect(loggerError.mock.calls[0][0]).toContain('Failed to transform')
       expect(loggerError.mock.calls[0][0]).toContain('boom')
       expect(consoleError).not.toHaveBeenCalled()
-      expect(result).toEqual({ code: '', externalDeps: [], internalDeps: [] })
+      expect(result).toMatchObject({ code: '', externalDeps: [], internalDeps: [] })
+      // 失败必须显式上报：仅凭空 `code` 无法与「合法空产物」区分
+      expect(result.error).toBeInstanceOf(Error)
+      expect(result.error?.message).toBe('boom')
 
       consoleError.mockRestore()
     },

@@ -127,6 +127,11 @@ export async function transformWithRolldown(
     }
   } catch (e) {
     logger.error(`Failed to transform ${ansis.yellow.underline(filepath)}\n${formatError(e)}`)
+    return {
+      code: '',
+      internalDeps: [],
+      externalDeps: [],
+      error: e instanceof Error ? e : new Error(String(e)),
+    }
   }
-  return { code: '', internalDeps: [], externalDeps: [] }
 }

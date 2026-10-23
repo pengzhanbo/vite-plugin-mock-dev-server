@@ -38,10 +38,14 @@ export async function compile(filepath: string, options: CompilerOptions): Promi
     isESM = options.isESM ?? false
   }
 
-  const { code, externalDeps, internalDeps } = await transform(filepath, {
+  const { code, externalDeps, internalDeps, error } = await transform(filepath, {
     ...options,
     isESM,
   })
+  if (error) {
+    throw error
+  }
+
   const data: MockRawData = await loadFromCode({
     filepath,
     code,

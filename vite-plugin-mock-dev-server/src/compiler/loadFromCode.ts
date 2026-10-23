@@ -4,6 +4,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 import { attempt, attemptAsync } from '@pengzhanbo/utils'
+import ansis from 'ansis'
 import { formatError, getHash, MOCK_TEMP_FILE_MARK } from '../utils/index.js'
 
 interface LoadFromCodeOptions {
@@ -39,7 +40,10 @@ export async function loadFromCode<T = any>({
   const [error, mod] = await attemptAsync<any>(importDefault, String(pathToFileURL(filepathTmp)))
   await attemptAsync(unlink, filepathTmp)
   if (error) {
-    logger.error(`Failed to load mock configuration from code:\n${formatError(error)}`)
+    logger.error(
+      `Failed to load mock configuration from ${ansis.yellow.underline(filepath)}:\n${formatError(error)}`,
+    )
+    throw error
   }
   return mod
 }

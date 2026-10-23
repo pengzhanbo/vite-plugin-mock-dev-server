@@ -50,6 +50,31 @@ export function initMockMiddlewares(
     }
   })
 
+  /**
+   * 编译失败时通过 vite 的错误浮层展示错误
+   *
+   * 失败的文件会保留上一次成功编译的规则（见 `Compiler.failLoad`），
+   * 若不主动提示，使用者只会看到规则没有更新，难以定位问题。
+   */
+  compiler.on('mock:error', ({ filepath, error }: { filepath: string; error: Error }) => {
+    ws?.send({
+      type: 'error',
+      err: {
+        message: `Failed to compile mock file ${filepath}\n${error.message}`,
+        stack: error.stack ?? '',
+        id: filepath,
+        plugin: 'vite-plugin-mock-dev-server',
+      },
+    })
+  })
+
+  /**
+   * 编译恢复后清除错误浮层
+   */
+  compiler.on('mock:recovered', () => {
+    ws?.send({ type: 'update', updates: [] })
+  })
+
   server?.on('close', () => compiler.close())
 
   /**
