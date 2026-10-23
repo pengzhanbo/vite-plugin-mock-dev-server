@@ -26,16 +26,19 @@
  * 比较合适的方案还是提供 `wsPrefix` 配置项给用户自定义，并由用户确保 `wsPrefix` 中的项不存在
  * 于 `server.proxy` 中，避免 vite 内的 http-proxy ws 与 插件的 ws 的冲突。
  */
+
 import type { Server } from 'node:http'
 import type { Http2SecureServer } from 'node:http2'
+import type { Duplex } from 'node:stream'
 import type { Compiler } from '../compiler/index.js'
 import type { ResolvedMockServerPluginOptions } from '../core/options.js'
 import type { UpgradeHandlerOptions } from './upgrade.js'
 import { toArray } from '@pengzhanbo/utils'
+import ansis from 'ansis'
 import { createMatchingWeightSorter } from '../core/matchingWeight.js'
 import { registerHmrHandlers } from './hmr.js'
 import { WebSocketServerPool } from './pool.js'
-import { handleUpgradeRequest } from './upgrade.js'
+import { abortUpgrade, handleUpgradeRequest } from './upgrade.js'
 
 /**
  * Mock WebSocket server
@@ -116,11 +119,44 @@ export function mockWebSocket(
   }
 
   server?.on('upgrade', (req, socket, head) => {
-    handleUpgradeRequest(upgradeOptions, req, socket, head)
+    try {
+      handleUpgradeRequest(upgradeOptions, req, socket, head)
+    } catch (error) {
+      logger.error(
+        `${ansis.red('WebSocket mock upgrade error')} ${ansis.underline(req.url ?? '')}\n  ${error}`,
+      )
+      rejectUpgrade(socket, 'Internal mock websocket error')
+    }
   })
 
   server?.on('close', () => {
     pool.closeAll()
     hmrMap.clear()
   })
+}
+
+/**
+ * Reject an upgrade request after an unexpected handshake error
+ *
+ * 在握手发生非预期错误后拒绝升级请求
+ *
+ * @param socket - Socket of the upgrade request / 升级请求的 socket
+ * @param message - Error message / 错误信息
+ */
+function rejectUpgrade(socket: Duplex, message: string): void {
+  if (socket.destroyed) {
+    return
+  }
+
+  const bytesWritten = (socket as Duplex & { bytesWritten?: number }).bytesWritten ?? 0
+  if (bytesWritten > 0 || !socket.writable) {
+    socket.destroy()
+    return
+  }
+
+  try {
+    abortUpgrade(socket, 500, message)
+  } catch {
+    socket.destroy()
+  }
 }

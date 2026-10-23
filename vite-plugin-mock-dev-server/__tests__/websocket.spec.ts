@@ -164,6 +164,75 @@ describe('mockWebSocket', () => {
     return client
   }
 
+  /**
+   * Send a raw websocket upgrade request and read its status code
+   *
+   * 发送原始 websocket 升级请求并读取状态码
+   *
+   * @param port - Server port / 服务端口
+   * @param pathname - Request pathname / 请求路径
+   * @returns Response status code / 响应状态码
+   */
+  function requestUpgrade(port: number, pathname: string): Promise<number> {
+    return new Promise((resolve, reject) => {
+      const req = http.request({
+        host: '127.0.0.1',
+        port,
+        path: pathname,
+        headers: {
+          'Connection': 'Upgrade',
+          'Upgrade': 'websocket',
+          'Sec-WebSocket-Version': '13',
+          'Sec-WebSocket-Key': 'dGhlIHNhbXBsZSBub25jZQ==',
+        },
+      })
+      req.on('upgrade', (res, socket) => {
+        socket.destroy()
+        resolve(res.statusCode ?? 101)
+      })
+      req.on('response', (res) => {
+        res.resume()
+        resolve(res.statusCode ?? 0)
+      })
+      req.on('error', reject)
+      req.end()
+    })
+  }
+
+  it('should complete the handshake for a malformed percent-encoded path', async () => {
+    const setup = vi.fn()
+    const mockData: Record<string, MockOptions> = {
+      '/ws/:room': [createMockItem(setup, '/ws/:room')],
+    }
+    const { port } = await start(mockData, { wsProxies: ['/ws'] })
+
+    // `/ws/100%25` 解码后的参数包含未编码的 `%`，`decodeURIComponent` 会抛出 URIError；
+    // 参数解析必须保留原始值，而不是让 upgrade 处理器抛出未捕获异常
+    // The decoded parameter of `/ws/100%25` contains a bare `%`, which makes
+    // `decodeURIComponent` throw; the params parsing must keep the raw value instead of
+    // letting the upgrade handler throw an uncaught exception
+    await expect(requestUpgrade(port, '/ws/100%25')).resolves.toBe(101)
+    expect(setup).toHaveBeenCalledTimes(1)
+
+    // 服务仍然可用，后续连接正常工作
+    // The server is still alive, later connections keep working
+    const client = await connect(port, '/ws/lobby')
+    expect(client.readyState).toBe(WebSocket.OPEN)
+    expect(setup).toHaveBeenCalledTimes(2)
+  })
+
+  it('should reject the upgrade with 500 instead of crashing when the handler throws', async () => {
+    const logger = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+    // 非法的正则 prefix（`^[`）会在 upgrade 链路中抛出 SyntaxError，
+    // 用于验证 `upgrade` 监听器的异常边界：返回 500 而不是终止进程
+    // An invalid regexp prefix (`^[`) throws a SyntaxError in the upgrade path, which
+    // verifies the exception boundary of the `upgrade` listener: answer 500, not exit
+    const { port } = await start({}, { wsProxies: ['^['], logger })
+
+    await expect(requestUpgrade(port, '/ws/demo')).resolves.toBe(500)
+    expect(logger.error).toHaveBeenCalledTimes(1)
+  })
+
   it('should recycle the websocket server when the mock url is changed', async () => {
     const setup = vi.fn()
     const mockData: Record<string, MockOptions> = { [MOCK_URL]: [createMockItem(setup)] }
