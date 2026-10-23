@@ -749,15 +749,21 @@ export const scenarioGroups: ScenarioGroup[] = [
       {
         id: 'request-body-limit',
         title: '请求体超过上限',
-        description: '超过 bodyParserOptions.jsonLimit 时解析失败，body 为 undefined。',
-        hint: '请求体约 70KB，超过 jsonLimit: 64kb；服务端会记录 PayloadTooLargeError。',
+        description: '超过 bodyParserOptions.jsonLimit 的请求在读取阶段被拒绝，返回 413。',
+        hint: '请求体约 70KB，超过 jsonLimit: 64kb；插件在读取请求体时即返回 413 Payload Too Large，不会把不完整的请求体交给 mock。',
         request: {
           url: '/api/request/body-parser',
           method: 'POST',
           largeJson: true,
         },
         expect: {
-          body: (body) => assert(body.parsed === false, 'expected the body parse to fail'),
+          status: 413,
+          contentType: 'text/plain',
+          body: (body) =>
+            assert(
+              typeof body === 'string' && body.includes('exceeds'),
+              'expected the 413 body about the exceeded limit',
+            ),
         },
       },
     ],

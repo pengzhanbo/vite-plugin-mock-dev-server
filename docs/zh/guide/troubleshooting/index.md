@@ -331,9 +331,12 @@ mockDevServerPlugin({
     jsonLimit: '10mb', // JSON 请求体大小限制
     formLimit: '10mb', // Form 请求体大小限制
     textLimit: '10mb', // Text 请求体大小限制
+    maxBodySize: '50mb', // 原始请求体上限，`0` 表示不限制
   },
 })
 ```
+
+超过限制的请求会在读取阶段直接返回 `413 Payload Too Large`，而不会以不完整的请求体继续匹配 mock。
 
 **3. 检查请求体格式**
 
