@@ -13,7 +13,11 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { getFilepath } from '../src/recorder/helper.js'
 import { Recorder } from '../src/recorder/Recorder.js'
-import { readRecordStorage, recordRequestWithRawReq } from '../src/recorder/storage.js'
+import {
+  originalReqCache,
+  readRecordStorage,
+  recordRequestWithRawReq,
+} from '../src/recorder/storage.js'
 
 /**
  * Create resolved record options for testing
@@ -49,6 +53,27 @@ function createRequest(url: string): IncomingMessage {
 }
 
 /**
+ * Create a proxy response that can be driven manually
+ *
+ * 创建可手动驱动的代理响应
+ *
+ * @param proxy - Proxy instance / 代理实例
+ * @param req - Recorded request / 已登记的请求
+ * @returns Proxy response emitter / 代理响应 emitter
+ */
+function createProxyResponse(proxy: EventEmitter, req: IncomingMessage): EventEmitter {
+  const proxyRes = new EventEmitter()
+  Object.assign(proxyRes, {
+    headers: { 'content-type': 'text/plain' },
+    statusCode: 200,
+    statusMessage: 'OK',
+  })
+
+  proxy.emit('proxyRes', proxyRes, req)
+  return proxyRes
+}
+
+/**
  * Emit a complete proxy response for a request
  *
  * 为请求发送一次完整的代理响应
@@ -58,12 +83,7 @@ function createRequest(url: string): IncomingMessage {
  * @param body - Response body / 响应体
  */
 function emitProxyResponse(proxy: EventEmitter, req: IncomingMessage, body = 'ok'): void {
-  const proxyRes = new EventEmitter() as any
-  proxyRes.headers = { 'content-type': 'text/plain' }
-  proxyRes.statusCode = 200
-  proxyRes.statusMessage = 'OK'
-
-  proxy.emit('proxyRes', proxyRes, req)
+  const proxyRes = createProxyResponse(proxy, req)
   proxyRes.emit('data', Buffer.from(body))
   proxyRes.emit('end')
 }
@@ -180,5 +200,45 @@ describe('recorder', () => {
 
     expect(records).toHaveLength(1)
     expect(records[0].res.body).toBe('second')
+  })
+
+  it('should skip and release an aborted proxy response', async () => {
+    const req = createRequest('/api/users?aborted=1')
+    recordRequestWithRawReq(req, '/api/users', { ok: true })
+    const proxyRes = createProxyResponse(proxy, req)
+
+    proxyRes.emit('data', Buffer.from('partial'))
+    proxyRes.emit('aborted')
+
+    // 已缓冲的分片、监听与原始请求体缓存都被释放
+    // The buffered chunks, the listeners and the cached request body are all released
+    expect(originalReqCache.has(req)).toBe(false)
+    expect(proxyRes.listenerCount('data')).toBe(0)
+    expect(proxyRes.listenerCount('end')).toBe(0)
+    expect(proxyRes.listenerCount('aborted')).toBe(0)
+    expect(proxyRes.listenerCount('error')).toBe(0)
+
+    // 中断之后即使再收到数据 / `end` 也不会录制不完整的响应
+    // Data / `end` arriving after the abort must not record an incomplete response
+    proxyRes.emit('data', Buffer.from('more'))
+    proxyRes.emit('end')
+
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(await readRecordStorage(filepath)).toEqual([])
+  })
+
+  it('should skip and release a failed proxy response', async () => {
+    const req = createRequest('/api/users?failed=1')
+    recordRequestWithRawReq(req, '/api/users', { ok: true })
+    const proxyRes = createProxyResponse(proxy, req)
+
+    proxyRes.emit('data', Buffer.from('partial'))
+    proxyRes.emit('error', new Error('upstream reset'))
+
+    expect(originalReqCache.has(req)).toBe(false)
+    expect(proxyRes.listenerCount('data')).toBe(0)
+
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(await readRecordStorage(filepath)).toEqual([])
   })
 })
