@@ -15,7 +15,7 @@ import type { Compiler } from '../compiler/index.js'
 import type { MatchingWeightSorter } from '../core/matchingWeight.js'
 import type { MockWebsocketItem } from '../types/index.js'
 import type { WebSocketServerPool } from './pool.js'
-import { objectKeys } from '@pengzhanbo/utils'
+import { objectKeys, toArray } from '@pengzhanbo/utils'
 import { isPathMatch } from '../utils/index.js'
 
 /**
@@ -55,7 +55,7 @@ export function registerHmrHandlers({ compiler, pool, sorter, hmrMap }: HmrHandl
 
   // 检测 ws 相关的 mock 文件更新：更新该文件提供的规则，
   // 重启仍然有效的 websocket 服务，并回收因 `url` 被修改而失去规则的服务。
-  compiler.on?.('mock:update-end', (filepath: string) => {
+  function handleUpdateEnd(filepath: string): void {
     const services = pool.collect(filepath)
     // 该文件既不提供任何服务、也没有热更新记录：不含 ws mock，无需扫描 mock 数据
     if (services.length === 0 && !hmrMap.has(filepath)) {
@@ -92,6 +92,11 @@ export function registerHmrHandlers({ compiler, pool, sorter, hmrMap }: HmrHandl
       } else {
         pool.recycle(mockUrl, pathname, wss)
       }
+    }
+  }
+  compiler.on?.('mock:update-end', (filepaths: string[]) => {
+    for (const filepath of toArray(filepaths)) {
+      handleUpdateEnd(filepath)
     }
   })
 
