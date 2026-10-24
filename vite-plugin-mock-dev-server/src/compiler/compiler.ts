@@ -28,7 +28,7 @@ import { processMockData, processRawData } from './processData.js'
  * Events:
  *
  * - `mock:update` / `mock:unlink` — watch events carrying the mock file path
- * - `mock:update-end` — a mock file was compiled and applied, carrying its path
+ * - `mock:update-end` — a mock(s) file was compiled and applied, carrying its path(s)
  * - `mock:error` — a compilation failed, carrying `{ filepath, error }`; the rules of the
  *   last successful compilation are kept
  * - `mock:recovered` — a previously failing file compiled successfully, carrying its path
@@ -174,6 +174,7 @@ export class Compiler extends EventEmitter {
     this.watchDeps()
 
     let timer: NodeJS.Immediate | null = null
+    const updatedFilepaths: Set<string> = new Set()
 
     this.on('mock:update', async (filepath: string) => {
       filepath = normalizePath(filepath)
@@ -188,13 +189,13 @@ export class Compiler extends EventEmitter {
       if (!applied) {
         return
       }
-      if (timer) {
-        clearImmediate(timer)
-      }
 
+      updatedFilepaths.add(filepath)
+      timer && clearImmediate(timer)
       timer = setImmediate(() => {
         this.updateMockData()
-        this.emit('mock:update-end', normalizePath(filepath))
+        this.emit('mock:update-end', [...updatedFilepaths])
+        updatedFilepaths.clear()
         timer = null
       })
     })
@@ -219,7 +220,7 @@ export class Compiler extends EventEmitter {
       this.watchDepReturn(filepath)
       this.emit('update:deps')
       this.updateMockData()
-      this.emit('mock:update-end', filepath)
+      this.emit('mock:update-end', [filepath])
     })
   }
 
