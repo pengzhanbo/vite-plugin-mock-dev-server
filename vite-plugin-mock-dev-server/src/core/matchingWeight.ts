@@ -54,7 +54,7 @@ function getTokens(rule: string): PathToken[] {
     return cached
   }
   const res: PathToken[] = []
-  const flatten = (tokens: Token[], group = false): void => {
+  const flatten = (tokens: readonly Token[], group = false): void => {
     for (const token of tokens) {
       if (token.type === 'text') {
         const sub = token.value.split('/').filter(Boolean)
