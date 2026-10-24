@@ -272,6 +272,35 @@ describe('mockMiddleware', () => {
     expect(next).toHaveBeenCalled()
   })
 
+  it('should log a malformed request URL and pass through', async () => {
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }
+    const middleware = createMockMiddleware(createMockCompiler({}), {
+      proxies: ['/api'],
+      logger: logger as any,
+      cors: false,
+      record: { enabled: false },
+      replay: false,
+    } as any)
+
+    // `/api/100%` 的路径名包含非法的百分号编码，`decodeURIComponent` 会抛出 URIError
+    // The pathname of `/api/100%` holds an illegal percent-encoding, which makes
+    // `decodeURIComponent` throw a URIError
+    const req = createMockRequest({ url: '/api/100%' })
+    const res = createMockResponse()
+    const next = vi.fn()
+
+    await middleware(req, res, next)
+
+    // 请求仍交给后续中间件（与改动前一致），但必须留下日志，
+    // 否则与「未命中 mock」无法区分
+    // The request is still forwarded (as before), but a log entry is required,
+    // otherwise it is indistinguishable from "no mock matched"
+    expect(next).toHaveBeenCalled()
+    expect(res.ended).toBe(false)
+    expect(logger.warn).toHaveBeenCalledTimes(1)
+    expect(logger.warn.mock.calls[0][0]).toContain('Malformed request URL')
+  })
+
   it('should return mock response for matching request', async () => {
     const mockItem: MockHttpItem = {
       url: '/api/users',

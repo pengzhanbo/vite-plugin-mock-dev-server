@@ -326,6 +326,27 @@ describe('processMockData', () => {
     expect(String(logger.warn.mock.calls[0][0])).toContain('file1.mock.ts')
   })
 
+  it('should report an unparsable mock url with the parse reason', () => {
+    const logger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    }
+    const mockList = new Map<string, MockOptions>([
+      ['file1.mock.ts', [{ url: '/api/100%', body: {} }] as MockOptions],
+    ])
+
+    // 非法的百分号编码无法解析为路径，规则被跳过而不是被静默丢弃
+    // An illegal percent-encoding cannot be parsed into a pathname, the rule is
+    // skipped with an explicit error instead of being dropped silently
+    const result = processMockData(mockList, logger)
+
+    expect(result).toEqual({})
+    expect(logger.error).toHaveBeenCalledTimes(1)
+    expect(String(logger.error.mock.calls[0][0])).toContain('Invalid mock url')
+  })
+
   it('should handle empty input', () => {
     const result = processMockData(new Map())
     expect(result).toEqual({})

@@ -3,7 +3,7 @@
  *
  * 工具函数测试
  */
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   createMatcher,
   doesProxyContextMatchUrl,
@@ -52,6 +52,24 @@ describe('urlParse', () => {
     const result = urlParse('/api/users?')
     expect(result.pathname).toBe('/api/users')
     expect(result.query).toEqual({})
+  })
+
+  it('should return the parse error without logging', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    // 非法的百分号编码会让 `decodeURIComponent` 抛出 URIError
+    // An illegal percent-encoding makes `decodeURIComponent` throw a URIError
+    const result = urlParse('/api/100%')
+
+    expect(result.pathname).toBe('')
+    expect(result.query).toEqual({})
+    expect(result.error).toBeInstanceOf(Error)
+    // 错误由调用方通过插件 logger 上报，工具函数本身不再直接输出日志
+    // The error is reported by the caller through the plugin logger,
+    // the helper itself no longer prints anything
+    expect(consoleError).not.toHaveBeenCalled()
+
+    consoleError.mockRestore()
   })
 })
 

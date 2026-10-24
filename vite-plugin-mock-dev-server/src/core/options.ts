@@ -9,10 +9,10 @@ import type {
 import type { Logger } from './logger.js'
 import path from 'node:path'
 import process from 'node:process'
-import { isArray, isBoolean, toArray, uniq } from '@pengzhanbo/utils'
+import { isArray, toArray, uniq } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import { viteDefine } from './define.js'
-import { createLogger } from './logger.js'
+import { createMockLogger } from './logger.js'
 
 export type ResolvedMockServerPluginOptions = Required<
   Omit<MockServerPluginOptions, 'build' | 'cors' | 'wsPrefix' | 'prefix' | 'record' | 'activeScene'>
@@ -52,7 +52,7 @@ export function resolvePluginOptions(
   config: ResolvedConfig,
 ): ResolvedMockServerPluginOptions {
   const cwd = rawCwd ?? process.cwd()
-  const logger = createLogger('vite:mock', isBoolean(log) ? (log ? 'info' : 'error') : log)
+  const logger = createMockLogger(log)
 
   const { httpProxies } = ensureProxies(config.server.proxy ?? {})
   const proxies = uniq([...toArray(prefix), ...httpProxies])

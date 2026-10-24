@@ -112,7 +112,16 @@ export function handleUpgradeRequest(
   head: Buffer,
 ): void {
   const url = req.url ?? ''
-  const { pathname, query } = urlParse(url)
+  const { pathname, query, error: urlError } = urlParse(url)
+
+  // 无法解析的 URL 不可能匹配到任何 ws mock，放行给 vite 自身的 upgrade 处理器。
+  if (urlError) {
+    logger.warn(
+      `${ansis.yellow('Malformed websocket upgrade URL')} ${ansis.underline(url)}\n  ${urlError.message}`,
+    )
+    return
+  }
+
   if (
     !pathname ||
     proxies.length === 0 ||

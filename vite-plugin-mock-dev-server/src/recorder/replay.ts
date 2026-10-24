@@ -1,4 +1,5 @@
 import type { IncomingMessage } from 'node:http'
+import type { Logger } from '../core/logger.js'
 import type { MockHttpItem, RecordedRequest, ResolvedRecordOptions } from '../types/index.js'
 import { Buffer } from 'node:buffer'
 import path from 'node:path'
@@ -44,6 +45,7 @@ export function normalizeReplayHeaders(headers: Record<string, string>): Record<
  * @param pathname The request pathname / 请求路径名
  * @param body The request body / 请求体
  * @param options Record options / 录制配置项
+ * @param logger Logger instance, used to report storage failures / 日志实例，用于上报存储错误
  * @returns The recorded request object if found, otherwise undefined / 如果找到记录的请求对象，则返回该对象，否则返回 undefined
  */
 export async function replayRecordedRequest(
@@ -51,12 +53,13 @@ export async function replayRecordedRequest(
   pathname: string,
   body: unknown,
   options: ResolvedRecordOptions,
+  logger?: Logger,
 ): Promise<MockHttpItem | undefined> {
   const req = processRecordReq(rawReq, pathname, body)
   const filepath = path.join(options.cwd, getFilepath(req.pathname, options.dir))
   const timestamp = Date.now()
 
-  const records = await readRecordStorage(filepath)
+  const records = await readRecordStorage(filepath, logger)
   const matchedList = records.filter(
     (item) => timestamp - item.meta.timestamp < options.expires && isSameRecord(item.req, req),
   )

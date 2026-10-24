@@ -9,6 +9,7 @@ import { requestRecoverySetup } from '../mockHttp/index.js'
 import { Recorder } from '../recorder/index.js'
 import { MOCK_TEMP_FILE_RE, setupProxyConfigure } from '../utils/index.js'
 import { initMockMiddlewares } from './init.js'
+import { createMockLogger } from './logger.js'
 import { resolvePluginOptions, resolveRecordOptions } from './options.js'
 
 /**
@@ -111,15 +112,9 @@ export function serverPlugin(
     config(config) {
       // mock 编译器会在 mock 文件旁写临时文件用于动态 import，必须让 Vite
       // watcher 忽略它们，否则首次加载 mock 会被当成大量项目文件变更。
-      // The mock compiler writes temporary files next to mock files for dynamic
-      // import; Vite's watcher must ignore them, otherwise the initial mock load
-      // looks like dozens of project changes.
       const watch = ((config.server ??= {}).watch ??= {})
       const ignored = watch.ignored
       watch.ignored = [
-        // Vite 的默认忽略项在插件写入 `ignored` 后不会再补全，需要显式保留
-        // Vite's default ignore entries are not re-applied once a plugin sets
-        // `ignored`, so keep them explicitly
         '**/.git/**',
         '**/node_modules/**',
         '**/test-results/**',
@@ -157,7 +152,9 @@ export function serverPlugin(
         options.record,
       )
       if (recordOptions.enabled) {
-        const recorder = new Recorder(recordOptions)
+        // `configure` 只能在 `config` 阶段挂载，此时插件选项尚未在 `configResolved`
+        // 中解析；录制存储错误同样需要走插件日志通道，因此按同一套规则创建 logger
+        const recorder = new Recorder(recordOptions, createMockLogger(options.log))
         setups.push(recorder.createProxySetup())
         // 仅在存在 server 配置时添加 .gitignore 文件
         if (config.server) {

@@ -1,9 +1,12 @@
 import type { Stats } from 'node:fs'
 import type http from 'node:http'
+import type { Logger } from '../core/logger.js'
 import type { RecordedRequest } from '../types/index.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import { LRUCache } from '@pengzhanbo/utils'
+import ansis from 'ansis'
+import { formatError } from '../utils/index.js'
 
 interface RecordStorageEntry {
   /** 记录数据 / recorded data */
@@ -47,9 +50,13 @@ function getFileSignature(stats: Stats): string {
  * 缓存命中时会比较文件身份签名，文件被外部修改、替换或删除后会自动重新读取
  *
  * @param filepath 记录文件路径
+ * @param logger 日志实例 / logger instance
  * @returns 记录的请求数组
  */
-export async function readRecordStorage(filepath: string): Promise<RecordedRequest[]> {
+export async function readRecordStorage(
+  filepath: string,
+  logger?: Logger,
+): Promise<RecordedRequest[]> {
   try {
     const stats = await fs.promises.stat(filepath)
     const signature = getFileSignature(stats)
@@ -65,10 +72,10 @@ export async function readRecordStorage(filepath: string): Promise<RecordedReque
   } catch (error) {
     // 记录文件不存在时无需报错 / a missing record file is not an error
     if ((error as NodeJS.ErrnoException)?.code !== 'ENOENT') {
-      console.error(`Error reading record file ${filepath}:`, error)
+      logger?.error(
+        `Failed to read the record file ${ansis.underline(filepath)}\n  ${formatError(error)}`,
+      )
     }
-    // 文件被删除时同步清理缓存，避免残留过期数据
-    // Clear the cache when the file is deleted to avoid stale data
     storage.delete(filepath)
     return []
   }
@@ -79,17 +86,21 @@ export async function readRecordStorage(filepath: string): Promise<RecordedReque
  *
  * @param filepath 记录文件路径
  * @param records 记录的请求数组
+ * @param logger 日志实例 / logger instance
  */
 export async function writeRecordStorage(
   filepath: string,
   records: RecordedRequest[],
+  logger?: Logger,
 ): Promise<void> {
   try {
     storage.delete(filepath)
     await fs.promises.mkdir(path.dirname(filepath), { recursive: true })
     await fs.promises.writeFile(filepath, JSON.stringify(records, null, 2), 'utf-8')
   } catch (error) {
-    console.error(`Error writing record file ${filepath}:`, error)
+    logger?.error(
+      `Failed to write the record file ${ansis.underline(filepath)}\n  ${formatError(error)}`,
+    )
   }
 }
 
