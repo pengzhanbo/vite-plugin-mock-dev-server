@@ -51,6 +51,7 @@ export const requestRecoverySetup: ProxySetup = (proxy) => {
        * https://github.com/http-party/node-http-proxy/issues/1287
        */
       if (!proxyReq.headersSent) {
+        proxyReq.removeHeader('transfer-encoding')
         proxyReq.setHeader('Content-Length', buffer.byteLength)
       }
 
