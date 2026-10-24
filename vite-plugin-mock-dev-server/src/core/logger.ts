@@ -121,3 +121,16 @@ export function createLogger(prefix: string, defaultLevel: LogLevel = 'info'): L
 
   return logger
 }
+
+/**
+ * 根据插件的 `log` 配置项创建日志实例
+ *
+ * 插件的多个环节（选项解析、请求录制）在不同生命周期中需要同一个语义的 logger，
+ * 集中在此处解析，避免各自重复解释 `log` 的布尔值含义。
+ *
+ * @param log - `log` option of the plugin / 插件的 `log` 配置项
+ * @returns Logger instance / 日志实例
+ */
+export function createMockLogger(log?: boolean | LogLevel): Logger {
+  return createLogger('vite:mock', isBoolean(log) ? (log ? 'info' : 'error') : log)
+}

@@ -1,4 +1,5 @@
 import type { IncomingMessage } from 'node:http'
+import type { Logger } from '../core/logger.js'
 import type { RecordedReq, RecordedRequest, ResolvedRecordOptions } from '../types/index.js'
 import type { ProxySetup } from '../utils/index.js'
 import { Buffer } from 'node:buffer'
@@ -29,10 +30,12 @@ const writeQueue: Map<string, Promise<void>> = new Map()
 export class Recorder {
   private options: ResolvedRecordOptions
   private filter: (req: RecordedReq) => boolean
+  private logger?: Logger
 
-  constructor(options: ResolvedRecordOptions) {
+  constructor(options: ResolvedRecordOptions, logger?: Logger) {
     this.options = options
     this.filter = createRecordMatcher(options.filter)
+    this.logger = logger
   }
 
   /**
@@ -188,11 +191,10 @@ export class Recorder {
 
     const task = previous
       // 前一次写入失败不应阻断后续写入
-      // A failed write must not block the following ones
       .catch(() => undefined)
       .then(async () => {
-        const records = update(await readRecordStorage(filepath))
-        return writeRecordStorage(filepath, records)
+        const records = update(await readRecordStorage(filepath, this.logger))
+        return writeRecordStorage(filepath, records, this.logger)
       })
 
     writeQueue.set(filepath, task)

@@ -174,14 +174,10 @@ export function createMockMiddleware(
     next: Connect.NextFunction,
   ): Promise<void> {
     const startTime = timestamp()
-    const { query, pathname } = urlParse(req.url!)
+    const { query, pathname, error: urlError } = urlParse(req.url!)
 
-    // 预先过滤不符合路径前缀的请求
-    if (
-      !pathname ||
-      proxies.length === 0 ||
-      !proxies.some((context) => doesProxyContextMatchUrl(context, req.url!))
-    ) {
+    // 预先过滤无法解析的 URL 与不符合路径前缀的请求
+    if (shouldPassThrough(req, pathname, urlError, proxies, logger)) {
       return next()
     }
 
@@ -260,7 +256,7 @@ export function createMockMiddleware(
 
     // 如果没有匹配到 mock 数据，且回放功能已启用，则尝试从录制记录中回放
     if (replay && !mock) {
-      mock = await replayRecordedRequest(req, pathname, extraReq.body, record)
+      mock = await replayRecordedRequest(req, pathname, extraReq.body, record, logger)
     }
 
     if (!mock) {
@@ -394,6 +390,42 @@ export function createMockMiddleware(
       next(error)
     }
   }
+}
+
+/**
+ * 请求是否应直接交给后续中间件
+ *
+ * 在进入匹配流程之前过滤两类请求：
+ * - URL 无法解析（如路径中存在非法的百分号编码），此时不可能匹配到任何 mock，
+ *   必须记录原因，否则与「未命中 mock」无法区分；
+ * - 请求不在插件的任何代理前缀内。
+ *
+ * @param req - Request object / 请求对象
+ * @param pathname - Parsed pathname, empty when parsing failed / 解析后的路径名，解析失败时为空
+ * @param urlError - Parse error / 解析错误
+ * @param proxies - Proxy prefixes / 代理前缀
+ * @param logger - Logger instance / 日志实例
+ * @returns Whether to call `next()` / 是否调用 `next()`
+ */
+function shouldPassThrough(
+  req: Connect.IncomingMessage,
+  pathname: string,
+  urlError: Error | undefined,
+  proxies: string[],
+  logger: Logger,
+): boolean {
+  if (urlError) {
+    logger.warn(
+      `${ansis.yellow('Malformed request URL')} ${ansis.underline(req.url ?? '')}, the request is forwarded without mock\n  ${urlError.message}`,
+    )
+    return true
+  }
+
+  return (
+    !pathname ||
+    proxies.length === 0 ||
+    !proxies.some((context) => doesProxyContextMatchUrl(context, req.url!))
+  )
 }
 
 /**

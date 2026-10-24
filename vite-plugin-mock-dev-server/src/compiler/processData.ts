@@ -151,7 +151,13 @@ export function processMockData(
   list
     .filter((mock) => isPlainObject(mock) && mock.enabled !== false && mock.url)
     .forEach((mock) => {
-      const { pathname, query } = urlParse(mock.url)
+      const { pathname, query, error: urlError } = urlParse(mock.url)
+      if (urlError) {
+        logger?.error(
+          `${ansis.red('Invalid mock url')} ${ansis.yellow(mock.url)}\n  ${urlError.message}\n  at (${ansis.underline.gray((mock as any).__filepath__ ?? 'unknown')})`,
+        )
+        return
+      }
       const patternError = getPatternError(pathname)
       // 跳过非法 url 模式的 mock，避免在请求匹配阶段抛出异常
       if (patternError) {

@@ -11,6 +11,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { readRecordStorage, writeRecordStorage } from '../src/recorder/storage.js'
 
 /**
+ * Create a logger whose output can be asserted
+ *
+ * 创建可断言输出的日志实例
+ *
+ * @returns Mock logger / 模拟日志实例
+ */
+function createMockLogger() {
+  return { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+}
+
+/**
  * Create a recorded request
  *
  * 构造一条录制数据
@@ -119,12 +130,33 @@ describe('recorder storage', () => {
 
   it('should return an empty array when the file content is invalid', async () => {
     const filepath = path.join(dir, 'api-users.json')
-    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const logger = createMockLogger()
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     fs.writeFileSync(filepath, '{invalid json', 'utf-8')
 
-    await expect(readRecordStorage(filepath)).resolves.toEqual([])
-    expect(error).toHaveBeenCalled()
+    await expect(readRecordStorage(filepath, logger)).resolves.toEqual([])
 
-    error.mockRestore()
+    // 存储错误统一走插件 logger，不再绕过它直接打印
+    // Storage failures go through the plugin logger instead of being printed directly
+    expect(logger.error).toHaveBeenCalledTimes(1)
+    expect(logger.error.mock.calls[0][0]).toContain('Failed to read the record file')
+    expect(consoleError).not.toHaveBeenCalled()
+
+    consoleError.mockRestore()
+  })
+
+  it('should log through the logger when writing fails', async () => {
+    const logger = createMockLogger()
+    // 以文件作为目录的父级，写入时 `mkdir` 会以 ENOTDIR 失败
+    // Using a file as the parent directory makes `mkdir` fail with ENOTDIR
+    const blocker = path.join(dir, 'blocker')
+    fs.writeFileSync(blocker, 'not a directory', 'utf-8')
+
+    await expect(
+      writeRecordStorage(path.join(blocker, 'record.json'), [createRecord('/api/users')], logger),
+    ).resolves.toBeUndefined()
+
+    expect(logger.error).toHaveBeenCalledTimes(1)
+    expect(logger.error.mock.calls[0][0]).toContain('Failed to write the record file')
   })
 })
