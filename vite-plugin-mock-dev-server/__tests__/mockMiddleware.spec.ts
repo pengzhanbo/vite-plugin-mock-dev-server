@@ -6,7 +6,7 @@
 import type { Connect } from 'vite'
 import type { Compiler } from '../src/compiler/index.js'
 import type { MatchingWeightSorter } from '../src/core/matchingWeight.js'
-import type { MockHttpItem, MockOptions } from '../src/types/index.js'
+import type { MockHttpItem, MockOptions, MockRequest, MockResponse } from '../src/types/index.js'
 import { Buffer } from 'node:buffer'
 import { Readable } from 'node:stream'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -718,6 +718,114 @@ describe('mockMiddleware', () => {
     expect(responseFn).toHaveBeenCalled()
     expect(res.headers['X-Custom']).toBe('value')
     expect(JSON.parse(res.data)).toEqual({ custom: true })
+  })
+
+  it('should answer an empty 500 when the body function throws', async () => {
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }
+    const mockItem = {
+      url: '/api/body-boom',
+      method: 'GET',
+      body: () => {
+        throw new Error('body boom')
+      },
+      headers: { 'content-length': '100' },
+      __filepath__: 'test.mock.ts',
+    } as unknown as MockHttpItem
+
+    const middleware = createMockMiddleware(createMockCompiler({ '/api/body-boom': [mockItem] }), {
+      proxies: ['/api'],
+      logger: logger as any,
+      cors: false,
+      record: { enabled: false },
+      replay: false,
+    } as any)
+
+    const req = createMockRequest({ url: '/api/body-boom' })
+    const res = createMockResponse()
+    const next = vi.fn()
+
+    await middleware(req, res, next)
+
+    expect(next).not.toHaveBeenCalled()
+    expect(res.statusCode).toBe(500)
+    expect(res.ended).toBe(true)
+    // mock 配置的 content-length 与实际写出的空响应体不一致，必须移除
+    // The configured content-length does not match the empty body, it must be dropped
+    expect(res.headers['content-length']).toBeUndefined()
+    expect(logger.error).toHaveBeenCalledTimes(1)
+    expect(String(logger.error.mock.calls[0][0])).toContain('at body')
+  })
+
+  it('should destroy a response whose headers were already sent when it fails', async () => {
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }
+    const mockItem = {
+      url: '/api/late-boom',
+      method: 'GET',
+      response(_req: MockRequest, _res: MockResponse) {
+        throw new Error('late boom')
+      },
+      __filepath__: 'test.mock.ts',
+    } as unknown as MockHttpItem
+
+    const middleware = createMockMiddleware(createMockCompiler({ '/api/late-boom': [mockItem] }), {
+      proxies: ['/api'],
+      logger: logger as any,
+      cors: false,
+      record: { enabled: false },
+      replay: false,
+    } as any)
+
+    const req = createMockRequest({ url: '/api/late-boom' })
+    const res = createMockResponse()
+    // 模拟 mock 代码已经写出响应头后才抛错
+    // Mimic the mock code having sent the headers before throwing
+    res.headersSent = true
+    const next = vi.fn()
+
+    await middleware(req, res, next)
+
+    // 状态码已无法改写，销毁连接让客户端感知响应不完整
+    // The status can no longer be changed: destroy the connection so the client
+    // notices the incomplete response
+    expect(res.destroyed).toBe(true)
+    expect(res.ended).toBe(false)
+    expect(logger.error).toHaveBeenCalledTimes(1)
+    expect(String(logger.error.mock.calls[0][0])).toContain('at response')
+  })
+
+  it('should not write to an already ended response when the response function throws', async () => {
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }
+    const mockItem = {
+      url: '/api/ended-boom',
+      method: 'GET',
+      response(_req: MockRequest, res: MockResponse) {
+        res.end('done')
+        throw new Error('boom after end')
+      },
+      __filepath__: 'test.mock.ts',
+    } as unknown as MockHttpItem
+
+    const middleware = createMockMiddleware(createMockCompiler({ '/api/ended-boom': [mockItem] }), {
+      proxies: ['/api'],
+      logger: logger as any,
+      cors: false,
+      record: { enabled: false },
+      replay: false,
+    } as any)
+
+    const req = createMockRequest({ url: '/api/ended-boom' })
+    const res = createMockResponse()
+    const next = vi.fn()
+    const endSpy = vi.spyOn(res, 'end')
+
+    await middleware(req, res, next)
+
+    // 向已结束的响应再次 `end()` 会抛出 ERR_STREAM_WRITE_AFTER_END
+    // Calling `end()` on a finished response throws ERR_STREAM_WRITE_AFTER_END
+    expect(endSpy).toHaveBeenCalledTimes(1)
+    expect(res.data).toBe('done')
+    expect(res.statusCode).not.toBe(500)
+    expect(logger.error).toHaveBeenCalledTimes(1)
   })
 
   it('should handle validator matching', async () => {
