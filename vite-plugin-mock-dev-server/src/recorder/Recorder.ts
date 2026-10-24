@@ -4,6 +4,7 @@ import type { ProxySetup } from '../utils/index.js'
 import { Buffer } from 'node:buffer'
 import fs, { promises as fsp } from 'node:fs'
 import path from 'node:path'
+import { debug, formatError } from '../utils/index.js'
 import {
   createRecordMatcher,
   getFilepath,
@@ -47,12 +48,70 @@ export class Recorder {
     return (proxy) => {
       proxy.on('proxyRes', (proxyRes, req) => {
         // Capture response body
-        let chunks: Buffer[] | null = []
-        proxyRes.on('data', (chunk) => chunk && chunks!.push(chunk))
-        proxyRes.on('end', async () => {
-          await recordRequest(req, proxyRes, Buffer.concat(chunks!))
-          chunks = null
-        })
+        const chunks: Buffer[] = []
+        let settled = false
+
+        /**
+         * 停止收集响应体并释放已缓冲的分片
+         *
+         * 通过移除监听并清空数组，使分片在本函数返回后即可被回收；
+         * `settled` 保证 `end` / `aborted` / `error` 中只有第一个生效。
+         */
+        function release(): void {
+          settled = true
+          proxyRes.removeListener('data', onData)
+          proxyRes.removeListener('end', onEnd)
+          proxyRes.removeListener('aborted', onAborted)
+          proxyRes.removeListener('error', onError)
+          chunks.length = 0
+        }
+
+        function onData(chunk: Buffer | string): void {
+          if (settled) {
+            return
+          }
+          chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+        }
+
+        function onEnd(): void {
+          if (settled) {
+            return
+          }
+          // 先取出完整的响应体，再释放缓冲区
+          const body = Buffer.concat(chunks)
+          release()
+          void recordRequest(req, proxyRes, body).catch((error: unknown) => {
+            debug('recorder: failed to record %s\n%s', req.url ?? '', formatError(error))
+          })
+        }
+
+        function onAborted(): void {
+          skip('the proxy response was aborted')
+        }
+
+        function onError(error: Error): void {
+          skip(`the proxy response failed: ${error.message}`)
+        }
+
+        /**
+         * 丢弃本次录制
+         *
+         * @param reason - Reason of the skip / 跳过原因
+         */
+        function skip(reason: string): void {
+          if (settled) {
+            return
+          }
+          release()
+          // 响应不完整，原始请求的请求体不会再有消费者
+          originalReqCache.delete(req)
+          debug('recorder: skip %s, %s', req.url ?? '', reason)
+        }
+
+        proxyRes.on('data', onData)
+        proxyRes.on('end', onEnd)
+        proxyRes.on('aborted', onAborted)
+        proxyRes.on('error', onError)
       })
     }
   }
