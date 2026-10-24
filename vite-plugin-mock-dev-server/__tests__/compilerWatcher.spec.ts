@@ -269,8 +269,10 @@ describe('compiler watcher', () => {
       await writeMock(`${DIR}/b.mock.ts`, mockFileCode('/api/b', { name: 'b' }))
       const instance = await start(['/api/a', '/api/b'])
 
+      // `mock:update-end` carries the batch of applied file paths
+      // `mock:update-end` 携带本次应用的文件路径批次
       const updateEvents: string[] = []
-      instance.on('mock:update-end', (filepath: string) => updateEvents.push(filepath))
+      instance.on('mock:update-end', (filepaths: string[]) => updateEvents.push(...filepaths))
 
       await unlink(path.join(cwd, DIR, 'a.mock.ts'))
       await waitFor(() => !instance.mockData['/api/a'], 'the deleted mock rule to be dropped')
@@ -323,8 +325,10 @@ describe('compiler watcher', () => {
       await writeMock(`${DIR}/b.mock.ts`, mockFileCode('/api/b', { name: 'b' }))
       const instance = await start(['/api/a', '/api/b'])
       const { moduleCache } = instance as unknown as { moduleCache: Map<string, unknown> }
+      // `mock:update-end` carries the batch of applied file paths
+      // `mock:update-end` 携带本次应用的文件路径批次
       const updateEvents: string[] = []
-      instance.on('mock:update-end', (filepath: string) => updateEvents.push(filepath))
+      instance.on('mock:update-end', (filepaths: string[]) => updateEvents.push(...filepaths))
 
       // Hold the compilation triggered by the next change, so that the deletion
       // happens while the compilation is still in flight
@@ -513,6 +517,11 @@ describe('compiler watcher', () => {
 
       await unlink(path.join(cwd, SHARED_MOCK))
       await waitFor(() => missingDeps.has(SHARED_MOCK), 'the deleted mock file to be tracked')
+      // `missingDeps` is also filled by the dependency watcher, which does not
+      // refresh the mock data, so the refresh of the rule set is awaited separately
+      // `missingDeps` 同样会被依赖监视器填充，而它不会刷新 mock 数据，
+      // 因此需要单独等待规则集合的刷新
+      await waitFor(() => !instance.mockData['/api/shared'], 'the deleted mock rule to be dropped')
       // Only the rule of the deleted file itself is gone: its dependents keep
       // the last-good rules until it is created again
       // 只有被删除文件自身的规则消失：引用方保留 last-good 规则直到文件重新创建
