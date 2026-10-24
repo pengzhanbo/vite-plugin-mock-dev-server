@@ -345,8 +345,7 @@ export function createMockMiddleware(
           `${ansis.red(`mock error at ${pathname}`)}\n  ${error}\n  at body (${ansis.underline.gray(filepath)})`,
           logLevel,
         )
-        provideResponseStatus(response, 500)
-        res.end('')
+        abortMockResponse(res)
       }
       return
     }
@@ -363,8 +362,7 @@ export function createMockMiddleware(
           )}\n  ${error}\n  at response (${ansis.underline.gray(filepath)})`,
           logLevel,
         )
-        provideResponseStatus(response, 500)
-        res.end('')
+        abortMockResponse(res)
       }
       return
     }
@@ -544,6 +542,27 @@ function handleRequestBodyError(
   res.statusMessage = getHTTPStatusText(error.statusCode)
   res.setHeader('Content-Type', 'text/plain; charset=utf-8')
   res.end(error.message)
+}
+
+/**
+ * Answer a request whose mock response failed
+ *
+ * 兜底处理 mock 响应执行失败
+ *
+ * @param res - Response object / 响应对象
+ */
+function abortMockResponse(res: ServerResponse): void {
+  if (res.writableEnded || res.destroyed) {
+    return
+  }
+  if (res.headersSent) {
+    res.destroy()
+    return
+  }
+
+  res.removeHeader('content-length')
+  provideResponseStatus(res as MockResponse, 500)
+  res.end('')
 }
 
 const keysCache = new WeakMap<Record<string, MockOptions>, string[]>()
