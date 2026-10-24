@@ -126,7 +126,7 @@ export async function transformWithRolldown(
       externalDeps: [...output.imports, ...output.dynamicImports],
     }
   } catch (e) {
-    logger.error(`Failed to transform ${ansis.yellow.underline(filepath)}\n${formatError(e)}`)
+    logger.error(`Failed to transform ${ansis.yellow.underline(entryPoint)}\n${formatError(e)}`)
     return {
       code: '',
       internalDeps: [],

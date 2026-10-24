@@ -32,9 +32,9 @@ export async function loadFromCode<T = any>({
   cwd,
   logger,
 }: LoadFromCodeOptions): Promise<T | { [key: string]: T }> {
-  filepath = path.resolve(cwd, filepath)
+  const dirname = path.dirname(path.resolve(cwd, filepath))
   const ext = isESM ? '.mjs' : '.cjs'
-  const filepathTmp = `${filepath}${MOCK_TEMP_FILE_MARK}${getHash(code)}${ext}`
+  const filepathTmp = `${dirname}/${MOCK_TEMP_FILE_MARK}${getHash(code)}${ext}`
   await fsp.writeFile(filepathTmp, code, 'utf8')
   TEMP_FILES.add(filepathTmp)
   const [error, mod] = await attemptAsync<any>(importDefault, String(pathToFileURL(filepathTmp)))

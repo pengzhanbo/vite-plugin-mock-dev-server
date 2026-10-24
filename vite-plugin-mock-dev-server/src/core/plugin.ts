@@ -115,9 +115,6 @@ export function serverPlugin(
       const watch = ((config.server ??= {}).watch ??= {})
       const ignored = watch.ignored
       watch.ignored = [
-        '**/.git/**',
-        '**/node_modules/**',
-        '**/test-results/**',
         ...(Array.isArray(ignored) ? ignored : ignored ? [ignored] : []),
         MOCK_TEMP_FILE_RE,
       ]

@@ -189,7 +189,7 @@ function safe<T>(read: () => T): T | undefined {
  *
  * `largeJson` 使用的超限请求体大小
  */
-export const LARGE_BODY_SIZE = 70 * 1024
+export const LARGE_BODY_SIZE: number = 70 * 1024
 
 export const scenarioGroups: ScenarioGroup[] = [
   {
