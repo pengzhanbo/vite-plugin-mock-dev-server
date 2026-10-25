@@ -5,7 +5,9 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { parseRequestParams, requestLog, requestValidate } from '../src/mockHttp/request.js'
+import { requestLog } from '../src/mockHttp/request-log.js'
+import { parseRequestParams } from '../src/mockHttp/request-params.js'
+import { requestValidate } from '../src/mockHttp/request-validate.js'
 
 describe('parseRequestParams', () => {
   it('should parse simple parameter', () => {

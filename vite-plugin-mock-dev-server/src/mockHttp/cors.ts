@@ -1,6 +1,11 @@
 import type http from 'node:http'
+import type { ServerResponse } from 'node:http'
 import type { Connect } from 'vite'
+import type { Logger } from '../core/logger.js'
+import type { MockOptions } from '../types/index.js'
+import { attemptAsync, toArray } from '@pengzhanbo/utils'
 import cors from 'cors'
+import { hasMockMethod } from './matcher.js'
 
 /**
  * Create CORS middleware
@@ -48,4 +53,69 @@ export function createCors(
         done(error)
       }
     })
+}
+
+export interface CorsPreflightOptions {
+  cors: ReturnType<typeof createCors>
+  corsOptions: cors.CorsOptions | false
+  mockData: Record<string, MockOptions>
+  mockUrls: string[]
+  scene: string[]
+}
+
+/**
+ * 在匹配 mock 数据之前处理 CORS 预检请求
+ *
+ * 预检请求（`OPTIONS` + `Access-Control-Request-Method`）不对应任何 mock 规则，
+ * `cors` 又会直接结束响应而不调用 `next`，因此不能放在「匹配到 mock 之后」处理。
+ * 仅当该路径存在支持预检方法、且场景匹配（与正常匹配相同的 `activeScene`）的 mock
+ * 时才由插件响应，否则交回后续中间件（如代理）。
+ *
+ * @param req - Request object / 请求对象
+ * @param res - Response object / 响应对象
+ * @param next - Next middleware / 下一个中间件
+ * @param options - CORS preflight options / CORS 预检选项
+ * @param logger - Logger instance / 日志实例
+ * @returns Whether the preflight request is handled / 预检请求是否已被处理
+ */
+export async function handleCorsPreflight(
+  req: Connect.IncomingMessage,
+  res: ServerResponse,
+  next: Connect.NextFunction,
+  { cors: corsMiddleware, corsOptions, mockData, mockUrls, scene }: CorsPreflightOptions,
+  logger: Logger,
+): Promise<boolean> {
+  if (!corsMiddleware || req.method?.toUpperCase() !== 'OPTIONS') {
+    return false
+  }
+
+  const preflightMethod = (toArray(req.headers['access-control-request-method'])[0] ?? '')
+    .trim()
+    .toUpperCase()
+  if (
+    !preflightMethod ||
+    !mockUrls.some((mockUrl) => hasMockMethod(mockData[mockUrl], preflightMethod, scene))
+  ) {
+    return false
+  }
+
+  const [corsError] = await attemptAsync(corsMiddleware, req, res)
+  if (corsError) {
+    logger.error(`CORS error: ${corsError}`)
+    next(corsError)
+    return true
+  }
+
+  // 默认配置下 `cors` 已结束预检响应；
+  // `preflightContinue: true` 时 `cors` 只设置响应头并调用 next，
+  // 这里同样将请求交给后续 handler，保持与 cors 一致的语义。
+  if (typeof corsOptions === 'object' && corsOptions.preflightContinue) {
+    next()
+  } else if (!res.writableEnded) {
+    const optionsSuccessStatus =
+      typeof corsOptions === 'object' ? corsOptions.optionsSuccessStatus : undefined
+    res.statusCode = optionsSuccessStatus ?? 204
+    res.end()
+  }
+  return true
 }

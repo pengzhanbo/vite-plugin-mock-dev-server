@@ -121,7 +121,7 @@ export async function transformWithRolldown(
       code: output.code,
       internalDeps: [...new Set([...output.moduleIds, ...parsedIds])]
         // 虚拟模块（`\0` 前缀）与入口文件自身不属于 mock 文件的依赖。
-        .filter((id) => !id.startsWith('\0') && path.basename(id) !== filename)
+        .filter((id) => !id.startsWith('\0') && id !== filepath)
         .map((id) => normalizePath(path.relative(cwd, id))),
       externalDeps: [...output.imports, ...output.dynamicImports],
     }

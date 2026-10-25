@@ -10,16 +10,12 @@ import { Socket } from 'node:net'
 import { Readable } from 'node:stream'
 import Cookies from 'cookies'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import {
-  attachStreamHandlers,
-  getHTTPStatusText,
-  pipeStreamData,
-  provideResponseCookies,
-  provideResponseHeaders,
-  provideResponseStatus,
-  responseRealDelay,
-  sendResponseData,
-} from '../src/mockHttp/response.js'
+import { sendResponseData } from '../src/mockHttp/response-body.js'
+import { provideResponseCookies } from '../src/mockHttp/response-cookie.js'
+import { responseRealDelay } from '../src/mockHttp/response-delay.js'
+import { provideResponseHeaders } from '../src/mockHttp/response-header.js'
+import { getHTTPStatusText, provideResponseStatus } from '../src/mockHttp/response-status.js'
+import { attachStreamHandlers, pipeStreamData } from '../src/mockHttp/response-stream.js'
 
 /**
  * Test suite for getHTTPStatusText function

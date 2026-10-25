@@ -70,5 +70,7 @@ function cleanupTempFiles(): void {
   TEMP_FILES.clear()
 }
 
-// 在进程退出时，清理临时文件
+// 在进程意外 退出/终止 时，清理临时文件
 process.on('exit', cleanupTempFiles)
+process.once('SIGINT', cleanupTempFiles)
+process.once('SIGTERM', cleanupTempFiles)

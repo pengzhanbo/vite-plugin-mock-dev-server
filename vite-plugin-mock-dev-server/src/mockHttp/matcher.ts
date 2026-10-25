@@ -3,7 +3,8 @@ import type { ExtraRequest, Method, MockHttpItem, MockOptions } from '../types/i
 import { attempt, isFunction, toArray } from '@pengzhanbo/utils'
 import ansis from 'ansis'
 import { isPathMatch, matchScene } from '../utils/index.js'
-import { parseRequestParams, requestValidate } from './request.js'
+import { parseRequestParams } from './request-params.js'
+import { requestValidate } from './request-validate.js'
 
 interface FindMockDataOptions {
   pathname: string

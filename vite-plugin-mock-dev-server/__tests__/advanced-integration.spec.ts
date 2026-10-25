@@ -5,7 +5,8 @@
  */
 import { describe, expect, it } from 'vitest'
 import { matchingWeight } from '../src/core/matchingWeight.js'
-import { parseRequestParams, requestValidate } from '../src/mockHttp/request.js'
+import { parseRequestParams } from '../src/mockHttp/request-params.js'
+import { requestValidate } from '../src/mockHttp/request-validate.js'
 import {
   createMatcher,
   doesProxyContextMatchUrl,

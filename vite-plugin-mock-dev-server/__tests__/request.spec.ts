@@ -4,7 +4,8 @@
  * 请求处理函数测试
  */
 import { describe, expect, it } from 'vitest'
-import { parseRequestParams, requestValidate } from '../src/mockHttp/request.js'
+import { parseRequestParams } from '../src/mockHttp/request-params.js'
+import { requestValidate } from '../src/mockHttp/request-validate.js'
 
 /**
  * Test suite for parseRequestParams function

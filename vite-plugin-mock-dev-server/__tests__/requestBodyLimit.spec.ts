@@ -13,7 +13,7 @@
 import { Buffer } from 'node:buffer'
 import { describe, expect, it, vi } from 'vitest'
 import { createMockMiddleware } from '../src/mockHttp/middleware.js'
-import { parseRequestBodyWithRaw } from '../src/mockHttp/request.js'
+import { parseRequestBodyWithRaw } from '../src/mockHttp/request-body.js'
 
 type Listener = (...args: any[]) => void
 

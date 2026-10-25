@@ -6,7 +6,7 @@
 import type { Connect, UserConfig } from 'vite'
 import { Buffer } from 'node:buffer'
 import { describe, expect, it, vi } from 'vitest'
-import { cacheRequestBody, requestRecoverySetup } from '../src/mockHttp/requestRecovery.js'
+import { cacheRequestBody, requestRecoverySetup } from '../src/mockHttp/request-recovery.js'
 import { setupProxyConfigure } from '../src/utils/index.js'
 
 interface FakeProxyReq {

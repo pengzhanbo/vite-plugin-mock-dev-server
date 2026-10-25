@@ -1,21 +1,17 @@
 // oxlint-disable max-lines-per-function
 
 import type { CorsOptions } from 'cors'
-import type formidable from 'formidable'
 import type { ServerResponse } from 'node:http'
 import type { Connect } from 'vite'
 import type { Logger, ResolvedMockServerPluginOptions } from '../core/index.js'
 import type { MatchingWeightSorter } from '../core/matchingWeight.js'
 import type {
-  BodyParserOptions,
   ExtraRequest,
   MockHttpItem,
   MockOptions,
   MockRequest,
   MockResponse,
-  ResolvedRecordOptions,
 } from '../types/index.js'
-import type { ParsedRequestBody, RequestBodyError } from './request.js'
 import {
   attempt,
   attemptAsync,
@@ -28,27 +24,24 @@ import {
 import ansis from 'ansis'
 import Cookies from 'cookies'
 import { createMatchingWeightSorter } from '../core/matchingWeight.js'
-import { recordRequestWithRawReq, replayRecordedRequest } from '../recorder/index.js'
-import { doesProxyContextMatchUrl, isReadableStream, urlParse } from '../utils/index.js'
-import { createCors } from './cors.js'
-import { findMockData, hasMockMethod } from './matcher.js'
-import {
-  isRequestBodyError,
-  parseRequestBodyWithRaw,
-  parseRequestParams,
-  requestLog,
-} from './request.js'
-import { cacheRequestBody } from './requestRecovery.js'
-import {
-  attachStreamHandlers,
-  getHTTPStatusText,
-  pipeStreamData,
-  provideResponseCookies,
-  provideResponseHeaders,
-  provideResponseStatus,
-  responseRealDelay,
-  sendResponseData,
-} from './response.js'
+import { replayRecordedRequest } from '../recorder/index.js'
+import { isReadableStream, urlParse } from '../utils/index.js'
+import { createCors, handleCorsPreflight } from './cors.js'
+import { findMockData } from './matcher.js'
+import { handleMissingMock } from './missing-mock.js'
+import { getMockUrls } from './mock-urls.js'
+import { readRequestBodySafely } from './read-request-body-safely.js'
+import { requestLog } from './request-log.js'
+import { parseRequestParams } from './request-params.js'
+import { cacheRequestBody } from './request-recovery.js'
+import { abortMockResponse } from './response-abort.js'
+import { sendResponseData } from './response-body.js'
+import { provideResponseCookies } from './response-cookie.js'
+import { responseRealDelay } from './response-delay.js'
+import { provideResponseHeaders } from './response-header.js'
+import { provideResponseStatus } from './response-status.js'
+import { attachStreamHandlers, pipeStreamData } from './response-stream.js'
+import { shouldPassThrough } from './should-pass-through.js'
 
 export interface MockDataProvider {
   mockData: Record<string, MockOptions>
@@ -109,65 +102,6 @@ export function createMockMiddleware(
 ) => Promise<void> {
   const cors = createCors(corsOptions)
 
-  /**
-   * 在匹配 mock 数据之前处理 CORS 预检请求
-   *
-   * 预检请求（`OPTIONS` + `Access-Control-Request-Method`）不对应任何 mock 规则，
-   * `cors` 又会直接结束响应而不调用 `next`，因此不能放在「匹配到 mock 之后」处理。
-   * 仅当该路径存在支持预检方法、且场景匹配（与正常匹配相同的 `activeScene`）的 mock
-   * 时才由插件响应，否则交回后续中间件（如代理）。
-   *
-   * @param req - Request object / 请求对象
-   * @param res - Response object / 响应对象
-   * @param next - Next middleware / 下一个中间件
-   * @param mockData - Mock data / Mock 数据
-   * @param mockUrls - Mock URLs matching the request pathname / 命中请求路径的 Mock URL
-   * @param scene - Active scene / 当前激活的场景
-   * @returns Whether the preflight request is handled / 预检请求是否已被处理
-   */
-  async function handleCorsPreflight(
-    req: Connect.IncomingMessage,
-    res: ServerResponse,
-    next: Connect.NextFunction,
-    mockData: Record<string, MockOptions>,
-    mockUrls: string[],
-    scene: string[],
-  ): Promise<boolean> {
-    if (!cors || req.method?.toUpperCase() !== 'OPTIONS') {
-      return false
-    }
-
-    const preflightMethod = (toArray(req.headers['access-control-request-method'])[0] ?? '')
-      .trim()
-      .toUpperCase()
-    if (
-      !preflightMethod ||
-      !mockUrls.some((mockUrl) => hasMockMethod(mockData[mockUrl], preflightMethod, scene))
-    ) {
-      return false
-    }
-
-    const [corsError] = await attemptAsync(cors, req, res)
-    if (corsError) {
-      logger.error(`CORS error: ${corsError}`)
-      next(corsError)
-      return true
-    }
-
-    // 默认配置下 `cors` 已结束预检响应；
-    // `preflightContinue: true` 时 `cors` 只设置响应头并调用 next，
-    // 这里同样将请求交给后续 handler，保持与 cors 一致的语义。
-    if (typeof corsOptions === 'object' && corsOptions.preflightContinue) {
-      next()
-    } else if (!res.writableEnded) {
-      const optionsSuccessStatus =
-        typeof corsOptions === 'object' ? corsOptions.optionsSuccessStatus : undefined
-      res.statusCode = optionsSuccessStatus ?? 204
-      res.end()
-    }
-    return true
-  }
-
   async function handleMockRequest(
     req: Connect.IncomingMessage,
     res: ServerResponse,
@@ -211,7 +145,15 @@ export function createMockMiddleware(
       : activeScene
 
     // 预检请求需要在匹配 mock 之前处理，详见 `handleCorsPreflight`
-    if (await handleCorsPreflight(req, res, next, mockData, mockUrls, effectiveScene)) {
+    if (
+      await handleCorsPreflight(
+        req,
+        res,
+        next,
+        { mockData, mockUrls, scene: effectiveScene, cors, corsOptions },
+        logger,
+      )
+    ) {
       return
     }
 
@@ -371,207 +313,21 @@ export function createMockMiddleware(
   }
 
   return async function mockMiddleware(req, res, next) {
-    try {
-      await handleMockRequest(req, res, next)
-    } catch (error) {
-      logger.error(
-        `${ansis.red(`mock middleware error at ${ansis.underline(req.url!)}`)}\n  ${error}\n  at ${ansis.underline.gray('vite-plugin-mock-dev-server')}`,
-      )
-      if (res.writableEnded) {
-        return
-      }
-      // 响应已经开始发送，无法再输出错误页，直接结束本次响应
-      if (res.headersSent) {
-        res.end()
-        return
-      }
-      next(error)
+    const [error] = await attemptAsync(handleMockRequest, req, res, next)
+    if (!error) {
+      return
     }
-  }
-}
-
-/**
- * 请求是否应直接交给后续中间件
- *
- * 在进入匹配流程之前过滤两类请求：
- * - URL 无法解析（如路径中存在非法的百分号编码），此时不可能匹配到任何 mock，
- *   必须记录原因，否则与「未命中 mock」无法区分；
- * - 请求不在插件的任何代理前缀内。
- *
- * @param req - Request object / 请求对象
- * @param pathname - Parsed pathname, empty when parsing failed / 解析后的路径名，解析失败时为空
- * @param urlError - Parse error / 解析错误
- * @param proxies - Proxy prefixes / 代理前缀
- * @param logger - Logger instance / 日志实例
- * @returns Whether to call `next()` / 是否调用 `next()`
- */
-function shouldPassThrough(
-  req: Connect.IncomingMessage,
-  pathname: string,
-  urlError: Error | undefined,
-  proxies: string[],
-  logger: Logger,
-): boolean {
-  if (urlError) {
-    logger.warn(
-      `${ansis.yellow('Malformed request URL')} ${ansis.underline(req.url ?? '')}, the request is forwarded without mock\n  ${urlError.message}`,
+    logger.error(
+      `${ansis.red(`mock middleware error at ${ansis.underline(req.url!)}`)}\n  ${error}\n  at ${ansis.underline.gray('vite-plugin-mock-dev-server')}`,
     )
-    return true
-  }
-
-  return (
-    !pathname ||
-    proxies.length === 0 ||
-    !proxies.some((context) => doesProxyContextMatchUrl(context, req.url!))
-  )
-}
-
-/**
- * Record the request and log it when no mock rule matches
- *
- * 未命中 mock 规则时记录请求并输出日志
- *
- * Requests that match a mock url but no rule are still candidates of record / replay,
- * so the body is stored before the request is passed to the following middleware.
- *
- * 命中 mock url 但没有可用规则的请求仍然是录制 / 回放的候选，
- * 因此在交给后续中间件之前需要保存请求体。
- *
- * @param req - Request object / 请求对象
- * @param pathname - Request pathname / 请求路径
- * @param mockUrls - Mock urls matching the pathname / 命中路径的 mock url
- * @param body - Parsed request body / 解析后的请求体
- * @param context - Logger and record options / 日志与录制配置
- */
-function handleMissingMock(
-  req: Connect.IncomingMessage,
-  pathname: string,
-  mockUrls: string[],
-  body: unknown,
-  context: { logger: Logger; record: ResolvedRecordOptions },
-): void {
-  // 请求体录制时，需要记录请求体，以便后续回放时使用
-  if (context.record.enabled) {
-    recordRequestWithRawReq(req, pathname, body)
-  }
-
-  if (mockUrls.length > 0) {
-    const matched = mockUrls.map((mockUrl) => ansis.dim(mockUrl)).join(', ')
-    context.logger.warn(`${ansis.green(pathname)} matches ${matched}, but mock data is not found.`)
-  }
-}
-
-/**
- * Read the request body and answer the request when it cannot be read
- *
- * 读取请求体，无法读取时直接结束请求
- *
- * An oversized body / aborted request is an expected client error: it is answered with
- * the matching status code and `undefined` is returned, while any other error still
- * bubbles up to the error boundary of the middleware.
- *
- * 请求体超限 / 客户端中断是可预期的客户端错误：以对应状态码结束请求并返回 `undefined`；
- * 其余异常仍向上抛出，由中间件的统一错误处理兜底。
- *
- * @param req - Request object / 请求对象
- * @param res - Response object / 响应对象
- * @param logger - Logger instance / 日志实例
- * @param formidableOptions - Formidable options / formidable 配置项
- * @param bodyParserOptions - Body parser options / 请求体解析配置项
- * @returns Parsed body, `undefined` when the request has been answered / 解析后的请求体，已结束请求时为 `undefined`
- */
-async function readRequestBodySafely(
-  req: Connect.IncomingMessage,
-  res: ServerResponse,
-  logger: Logger,
-  formidableOptions: formidable.Options,
-  bodyParserOptions: BodyParserOptions,
-): Promise<ParsedRequestBody | undefined> {
-  try {
-    return await parseRequestBodyWithRaw(req, logger, formidableOptions, bodyParserOptions)
-  } catch (error) {
-    if (isRequestBodyError(error)) {
-      handleRequestBodyError(req, res, logger, error)
-      return undefined
+    if (res.writableEnded) {
+      return
     }
-    throw error
+    // 响应已经开始发送，无法再输出错误页，直接结束本次响应
+    if (res.headersSent) {
+      res.end()
+      return
+    }
+    next(error)
   }
-}
-
-/**
- * Answer a request whose body could not be read
- *
- * 结束请求体无法读取的请求
- *
- * `BODY_TOO_LARGE` is answered with `413` so the client gets an explicit error instead
- * of a mock response built from a truncated body; an aborted request is only logged,
- * since its connection is already gone.
- *
- * `BODY_TOO_LARGE` 以 `413` 明确响应，避免客户端拿到基于不完整请求体构建的 mock 响应；
- * 客户端中断的请求只记录日志，因为连接已经不存在。
- *
- * @param req - Request object / 请求对象
- * @param res - Response object / 响应对象
- * @param logger - Logger instance / 日志实例
- * @param error - Body read error / 请求体读取错误
- */
-function handleRequestBodyError(
-  req: Connect.IncomingMessage,
-  res: ServerResponse,
-  logger: Logger,
-  error: RequestBodyError,
-): void {
-  if (error.code === 'REQUEST_ABORTED') {
-    logger.debug(`${ansis.yellow('mock request aborted')} ${req.url ?? ''}`)
-    return
-  }
-
-  logger.warn(`${ansis.yellow('mock request body rejected')} ${req.url ?? ''}\n  ${error.message}`)
-
-  if (res.writableEnded || res.destroyed) {
-    return
-  }
-  // 响应已开始发送时无法再改写状态码，只能销毁连接
-  // The response has started, so the status cannot be changed anymore: destroy it
-  if (res.headersSent) {
-    res.destroy()
-    return
-  }
-
-  res.statusCode = error.statusCode
-  res.statusMessage = getHTTPStatusText(error.statusCode)
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-  res.end(error.message)
-}
-
-/**
- * Answer a request whose mock response failed
- *
- * 兜底处理 mock 响应执行失败
- *
- * @param res - Response object / 响应对象
- */
-function abortMockResponse(res: ServerResponse): void {
-  if (res.writableEnded || res.destroyed) {
-    return
-  }
-  if (res.headersSent) {
-    res.destroy()
-    return
-  }
-
-  res.removeHeader('content-length')
-  provideResponseStatus(res as MockResponse, 500)
-  res.end('')
-}
-
-const keysCache = new WeakMap<Record<string, MockOptions>, string[]>()
-
-function getMockUrls(mockData: Record<string, MockOptions>): string[] {
-  let mockUrls = keysCache.get(mockData)
-  if (!mockUrls) {
-    mockUrls = Object.keys(mockData)
-    keysCache.set(mockData, mockUrls)
-  }
-  return mockUrls
 }
