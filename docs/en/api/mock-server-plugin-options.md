@@ -14,6 +14,7 @@ interface MockServerPluginOptions {
   include?: string | string[]
   exclude?: string | string[]
   reload?: boolean
+  awaitInitialLoad?: boolean
   log?: boolean | LogLevel
   cors?: boolean | CorsOptions
   formidableOptions?: formidable.Options
@@ -132,6 +133,29 @@ By default, Mock file modifications only update data content without refreshing 
 ```ts
 mockDevServerPlugin({
   reload: true,
+})
+```
+
+### awaitInitialLoad
+
+- **Type**: `boolean`
+- **Default**: `true` in a test environment (`NODE_ENV=test`, Vitest or Jest), otherwise `false`
+- **Description**: Whether to wait for the initial mock files to be compiled before the dev server starts serving requests
+
+Mock files are compiled in the background by default: the dev server starts listening immediately and the
+first requests after a cold start may arrive before the compilation finished, falling through to the real
+proxy (or a 404). Enable this option to delay the startup until all mock files are loaded, so that the first
+request always hits the mock. The trade-off is a slower startup, proportional to the number of mock files.
+
+The middlewares are registered before the wait, so requests arriving during it still go through the mock
+layer (they hit the rules already loaded and fall through otherwise).
+
+The default is `true` under a test runner, because tests usually send a request right after the server is
+created (such as `page.goto`), which would otherwise be flaky.
+
+```ts
+mockDevServerPlugin({
+  awaitInitialLoad: true,
 })
 ```
 

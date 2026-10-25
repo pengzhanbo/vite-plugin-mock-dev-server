@@ -5,7 +5,27 @@ import type { ResolvedMockServerPluginOptions } from './options.js'
 import { Compiler } from '../compiler/index.js'
 import { createMockMiddleware } from '../mockHttp/index.js'
 import { mockWebSocket } from '../mockWebsocket/index.js'
+import { formatError } from '../utils/index.js'
 import { createMatchingWeightSorter } from './matchingWeight.js'
+
+/**
+ * Mock middlewares and the readiness of the initial mock load
+ *
+ * mock 中间件与初始加载的就绪状态
+ */
+export interface MockMiddlewares {
+  /**
+   * Connect middleware functions to register / 需要注册的 Connect 中间件函数
+   */
+  middlewares: Connect.NextHandleFunction[]
+  /**
+   * 初始 mock 文件加载完成后 resolve
+   *
+   * 由 `awaitInitialLoad` 决定是否等待：关闭时立即 resolve（加载仍在后台进行），
+   * 开启时在加载完成后 resolve。
+   */
+  ready: Promise<void>
+}
 
 /**
  * Initialize mock middlewares
@@ -15,7 +35,7 @@ import { createMatchingWeightSorter } from './matchingWeight.js'
  * @param options - Resolved plugin options / 解析后的插件配置项
  * @param server - HTTP server instance / HTTP 服务器实例
  * @param ws - WebSocket server instance / WebSocket 服务器实例
- * @returns Array of connect middleware functions / Connect 中间件函数数组
+ * @returns Middleware functions and the readiness of the initial load / 中间件函数与初始加载的就绪状态
  */
 export function initMockMiddlewares(
   options: ResolvedMockServerPluginOptions,
@@ -23,7 +43,7 @@ export function initMockMiddlewares(
   // https://github.com/vitejs/vite/pull/14834
   server: Server | Http2SecureServer | null,
   ws?: WebSocketServer,
-): Connect.NextHandleFunction[] {
+): MockMiddlewares {
   /**
    * 加载 mock 文件, 包括监听 mock 文件的依赖文件变化，
    * 并注入 vite `define` / `alias`
@@ -102,7 +122,13 @@ export function initMockMiddlewares(
     createMockMiddleware(compiler, options, sortMockUrls),
   )
 
-  compiler.run(!!server)
+  const initialLoad = compiler.run(!!server)
 
-  return middlewares
+  if (options.awaitInitialLoad) {
+    return { middlewares, ready: initialLoad }
+  }
+
+  void initialLoad.catch((error: unknown) => options.logger.error(formatError(error)))
+
+  return { middlewares, ready: Promise.resolve() }
 }

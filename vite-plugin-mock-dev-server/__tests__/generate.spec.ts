@@ -41,6 +41,7 @@ function createOptions(cwd: string, options: GenerateCase): ResolvedMockServerPl
     exclude: [],
     context: cwd,
     reload: false,
+    awaitInitialLoad: false,
     cors: false,
     cookiesOptions: {},
     log: 'error',

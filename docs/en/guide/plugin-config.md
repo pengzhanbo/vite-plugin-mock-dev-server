@@ -31,6 +31,7 @@ export default defineConfig({
 | [include](../api/mock-server-plugin-options#include)                     | `string \| string[]`           | `['**/*.mock.{js,ts,cjs,mjs,json,json5}']` | Included file patterns             |
 | [exclude](../api/mock-server-plugin-options#exclude)                     | `string \| string[]`           | `['**/node_modules/**']`                   | Excluded file patterns             |
 | [reload](../api/mock-server-plugin-options#reload)                       | `boolean`                      | `false`                                    | Refresh page on hot update         |
+| [awaitInitialLoad](../api/mock-server-plugin-options#awaitinitialload)   | `boolean`                      | `true` in tests, otherwise `false`         | Wait for the initial mock load     |
 | [log](../api/mock-server-plugin-options#log)                             | `boolean \| LogLevel`          | `'info'`                                   | Log level                          |
 | [cors](../api/mock-server-plugin-options#cors)                           | `boolean \| CorsOptions`       | `true`                                     | CORS configuration                 |
 | [formidableOptions](../api/mock-server-plugin-options#formidableoptions) | `formidable.Options`           | -                                          | File upload configuration          |

@@ -11,6 +11,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { isArray, toArray, uniq } from '@pengzhanbo/utils'
 import ansis from 'ansis'
+import { isTestEnvironment } from '../utils/index.js'
 import { viteDefine } from './define.js'
 import { createMockLogger } from './logger.js'
 
@@ -48,6 +49,7 @@ export function resolvePluginOptions(
     activeScene = [],
     record = false,
     replay,
+    awaitInitialLoad = isTestEnvironment(),
   }: MockServerPluginOptions,
   config: ResolvedConfig,
 ): ResolvedMockServerPluginOptions {
@@ -97,6 +99,7 @@ export function resolvePluginOptions(
     exclude,
     context: config.root,
     reload,
+    awaitInitialLoad,
     cors: resolvedCors,
     cookiesOptions,
     log,

@@ -31,6 +31,7 @@ export default defineConfig({
 | [include](../api/mock-server-plugin-options#include)                     | `string \| string[]`           | `['**/*.mock.{js,ts,cjs,mjs,json,json5}']` | 包含的文件模式          |
 | [exclude](../api/mock-server-plugin-options#exclude)                     | `string \| string[]`           | `['**/node_modules/**']`                   | 排除的文件模式          |
 | [reload](../api/mock-server-plugin-options#reload)                       | `boolean`                      | `false`                                    | 热更新时刷新页面        |
+| [awaitInitialLoad](../api/mock-server-plugin-options#awaitinitialload)   | `boolean`                      | 测试环境下 `true`，其他环境 `false`        | 是否等待初始 mock 加载  |
 | [log](../api/mock-server-plugin-options#log)                             | `boolean \| LogLevel`          | `'info'`                                   | 日志级别                |
 | [cors](../api/mock-server-plugin-options#cors)                           | `boolean \| CorsOptions`       | `true`                                     | CORS 配置               |
 | [formidableOptions](../api/mock-server-plugin-options#formidableoptions) | `formidable.Options`           | -                                          | 文件上传配置            |

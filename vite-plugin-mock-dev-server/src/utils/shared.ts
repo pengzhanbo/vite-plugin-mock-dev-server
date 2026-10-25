@@ -62,6 +62,18 @@ export function getHash(str: unknown): string {
 }
 
 /**
+ * Whether the current process runs under a test runner
+ *
+ * 当前进程是否运行在测试运行器中
+ *
+ * @param env - Environment variables to inspect / 需要检查的环境变量
+ * @returns Whether it is a test environment / 是否是测试环境
+ */
+export function isTestEnvironment(env: NodeJS.ProcessEnv = process.env): boolean {
+  return env.NODE_ENV === 'test' || env.VITEST != null || env.JEST_WORKER_ID != null
+}
+
+/**
  * Format an unknown error into a readable message, including its stack if available.
  *
  * 将未知错误格式化为可读信息，若存在堆栈则一并包含。

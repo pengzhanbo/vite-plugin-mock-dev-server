@@ -166,16 +166,26 @@ export function serverPlugin(
       resolvedOptions = resolveOptionsOnce(options, config, holder)
     },
 
-    configureServer({ middlewares, httpServer, ws }) {
-      const middlewareList = initMockMiddlewares(resolvedOptions, httpServer, ws)
+    async configureServer({ middlewares, httpServer, ws }) {
+      const { middlewares: middlewareList, ready } = initMockMiddlewares(
+        resolvedOptions,
+        httpServer,
+        ws,
+      )
       middlewareList.forEach((middleware) => middlewares.use(middleware))
+      // `awaitInitialLoad` 关闭时 `ready` 立即 resolve，不会影响启动速度
+      await ready
     },
 
-    configurePreviewServer({ middlewares, httpServer }) {
+    async configurePreviewServer({ middlewares, httpServer }) {
       // feat: use preview server parameter in preview server hook #11647
       // https://github.com/vitejs/vite/pull/11647
-      const middlewareList = initMockMiddlewares(resolvedOptions, httpServer)
+      const { middlewares: middlewareList, ready } = initMockMiddlewares(
+        resolvedOptions,
+        httpServer,
+      )
       middlewareList.forEach((middleware) => middlewares.use(middleware))
+      await ready
     },
   }
 }

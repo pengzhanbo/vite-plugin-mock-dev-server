@@ -224,6 +224,26 @@ describe('resolvePluginOptions', () => {
 
     expect(options.cors).toEqual({ origin: '*', credentials: true })
   })
+
+  it('should wait for the initial load by default in a test environment', () => {
+    // 测试环境默认等待初始加载，避免首个请求在 mock 就绪前穿透到真实代理
+    // The initial load is awaited by default in tests, otherwise the first request may
+    // fall through to the real proxy before the mocks are ready
+    const options = resolvePluginOptions({ prefix: ['/api'] }, createResolvedConfig())
+
+    expect(options.awaitInitialLoad).toBe(true)
+  })
+
+  it('should respect an explicit awaitInitialLoad option', () => {
+    expect(
+      resolvePluginOptions({ prefix: ['/api'], awaitInitialLoad: false }, createResolvedConfig())
+        .awaitInitialLoad,
+    ).toBe(false)
+    expect(
+      resolvePluginOptions({ prefix: ['/api'], awaitInitialLoad: true }, createResolvedConfig())
+        .awaitInitialLoad,
+    ).toBe(true)
+  })
 })
 
 /**
