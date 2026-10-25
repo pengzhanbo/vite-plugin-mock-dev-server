@@ -45,6 +45,8 @@
 - 📤 Support `multipart` content-type, mock upload file.
 - 📥 Support mock download file.
 - ⚜️ Support `WebSocket Mock` and `Server-Sent Events Mock`
+- 🎭 Support switching mock data by scene.
+- 🎲 Support random error simulation for a mock.
 - 📝 Support **recording** and **replay requests**
 - 🗂 Support building small independent deployable mock services.
 
@@ -73,6 +75,11 @@ yarn add vite-plugin-mock-dev-server
 pnpm add -D vite-plugin-mock-dev-server
 ```
 
+> [!NOTE]
+>
+> - Node.js `^20.19.0 || >=22` and Vite `>=5` are required.
+> - Mock files are bundled by [`rolldown`](https://rolldown.rs/) when it is installed, otherwise by [`esbuild`](https://esbuild.github.io/).
+
 ## Usage
 
 `vite.config.ts`
@@ -94,9 +101,21 @@ export default defineConfig({
 })
 ```
 
-The plugin will read the configuration of `server.proxy` or `options.prefix`, and enable mock matching for matched URLs.
+The plugin enables mock matching for requests whose path matches a `server.proxy` key (WebSocket proxies are excluded) or an `options.prefix` entry.
 
-The plugin will also read the `define` configuration, which supports direct use in mock files.
+WebSocket mocks are matched by `options.wsPrefix` only. Entries configured in `wsPrefix` are removed from `server.proxy` by the plugin, to avoid conflicts between the Vite WebSocket proxy and the mock WebSocket server.
+
+```ts
+export default defineConfig({
+  plugins: [
+    mockDevServerPlugin({
+      wsPrefix: ['/socket.io'],
+    }),
+  ],
+})
+```
+
+The plugin also reads `define`, `resolve.alias` and `env`, which can be used directly in mock files.
 
 ## Edit Mock File
 
@@ -113,11 +132,26 @@ export default defineMock({
 })
 ```
 
+A mock file can export a single mock item, an array of items (recommended), or an object whose values are items. `defineMock()` is only a type helper: it returns the configuration as is.
+
+```ts
+export default defineMock([
+  { url: '/api/users', body: [] },
+  { url: '/api/users/:id', body: ({ params }) => ({ id: params.id }) },
+])
+```
+
+Mock files are bundled by `rolldown` / `esbuild`, so TypeScript and ESM syntax, `node:` built-in modules and third-party packages are all available. `viteConfig.define`, `viteConfig.env` and `viteConfig.resolve.alias` are injected as well.
+
+A mock file, and every local file it imports, is watched. Editing them re-compiles only the affected rules; set [`reload`](#reload) to `true` if the page should be refreshed after the update.
+
+`.json` / `.json5` mock files only support static data: function fields such as `body(request)` and `response` cannot be used.
+
 ## Methods
 
 ### mockDevServerPlugin(pluginOptions)
 
-vite plugin
+Vite plugin. It returns an array of plugins (`Plugin[]`); when `options.enabled` is `false`, an empty array is returned and the mock server is disabled.
 
 `vite.config.ts`
 
@@ -132,7 +166,7 @@ export default defineConfig({
 
 ### defineMock(mockOptions)
 
-Mock Options Type Helper
+Mock Options Type Helper. It accepts a single mock item, an array of items, or an object of items.
 
 ```ts
 import { defineMock } from 'vite-plugin-mock-dev-server'
@@ -146,6 +180,8 @@ export default defineMock({
 ### createDefineMock(transformer)
 
 Return a custom defineMock function to support preprocessing of mock config.
+
+The `transformer` receives each mock item, may mutate it in place or return a new item, and is applied to every item when an array is passed.
 
 ```ts
 import path from 'node:path'
@@ -161,9 +197,15 @@ export default defineApiMock({
 })
 ```
 
+### defineMockData(key, initialData, options)
+
+Create a data source shared by all mock files. See [Share Mock Data](#share-mock-data).
+
 ### createSSEStream(req, res)
 
 Create a `Server-sent events` write stream to support mocking `EventSource`.
+
+`sse.write()` accepts `{ data, event, id, retry, comment }`; object `data` is serialized as JSON. Call `sse.end()` when the stream is finished.
 
 ```ts
 import { createSSEStream, defineMock } from 'vite-plugin-mock-dev-server'
@@ -178,6 +220,10 @@ export default defineMock({
 })
 ```
 
+### Types
+
+The public types (`MockServerPluginOptions`, `MockHttpItem`, `MockWebsocketItem`, `MockOptions`, `MockRequest`, `MockResponse`, `FormidableFile`, ...) are exported from the package root, and are also available from the `vite-plugin-mock-dev-server/types` subpath.
+
 ## Plugin Options
 
 ### enabled
@@ -186,7 +232,7 @@ export default defineMock({
 - **Default:** `true`
 - **Details:**
 
-  Whether to enable mock server, if set to `false`, the plugin will not work.
+  Whether to enable mock server. If set to `false`, no plugin is registered (an empty array is returned) and the mock server will not work.
 
 ### prefix
 
@@ -210,6 +256,8 @@ export default defineMock({
 
   > Different from using `viteConfig.server.proxy` by default for http mock, `websocket mock` does not use the ws-related configuration in `viteConfig.server.proxy`. Also, rules configured in `wsPrefix` cannot be configured simultaneously in `viteConfig.server.proxy`, as it will cause conflicts when starting the vite server because multiple instances of WebSocketServer cannot be implemented for the same request.
   > This conflict is neither a problem with Vite nor with the plugin; it belongs to a reasonable error type. When switching between WebSocket Mock and WebSocket Proxy, please pay attention to avoid duplicate configurations that may cause conflicts.
+  >
+  > To avoid the conflict, the plugin removes the entries of `wsPrefix` from `server.proxy` before the Vite server starts. Proxies declared with `ws: true` in `server.proxy` are not used for mock matching (neither HTTP nor WebSocket).
 
 ### cwd
 
@@ -230,18 +278,20 @@ export default defineMock({
 ### include
 
 - **Type:** `string | string[]`
-- **Default：** `['**/*.mock.{js,ts,cjs,mjs,json,json5}']`
+- **Default:** `['**/*.mock.{js,ts,cjs,mjs,json,json5}']`
 - **Details:**
 
   Configure to read mock files, which can be a directory, glob, or an array.
 
+  Patterns starting with `!` are treated as exclusions, and files inside `node_modules` are always ignored.
+
 ### exclude
 
 - **Type:** `string | string[]`
-- **Default：** `['**/node_modules/**']`
+- **Default:** `[]`
 - **Details:**
 
-  When reading mock files for configuration, the files that need to be excluded can be a directory, glob, or array.
+  When reading mock files for configuration, the files that need to be excluded can be a directory, glob, or array. Files inside `node_modules` are always ignored, even when they are not listed here.
 
 ### reload
 
@@ -251,10 +301,22 @@ export default defineMock({
 
   When the mock resource is hot updated, only the data content is updated, but the page is not refreshed by default. If you want to refresh the page every time you modify the mock file, you can open this option.
 
+### awaitInitialLoad
+
+- **Type:** `boolean`
+- **Default:** `true` in a test environment (`NODE_ENV=test`, Vitest or Jest), otherwise `false`
+- **Details:**
+
+  Whether to wait for the initial mock files to be compiled before the dev server starts serving requests.
+
+  Mock files are compiled in the background by default, so the first requests after a cold start may arrive before the compilation has finished and fall through to the real proxy (or return a 404). Enabling this option delays the startup until every mock file is loaded; the trade-off is a slower startup, proportional to the number of mock files. It is useful for integrations that send requests immediately after the server is created, such as `page.goto` in end-to-end tests.
+
+  The middleware is registered before the wait, so requests arriving during the initial load still pass through the mock layer.
+
 ### activeScene
 
 - **Type:** `string | string[]`
-- **Default:** `''`
+- **Default:** `[]`
 - **Details:**
 
   Active scenario(s) for filtering mocks.
@@ -267,17 +329,19 @@ export default defineMock({
 - **Default:** `true`
 - **Details:**
 
-  Enable by default.
+  Enable by default. Configure to `cors`, see [cors](https://github.com/expressjs/cors#configuration-options).
 
-  Configure to `cors`, see [cors](https://github.com/expressjs/cors#configuration-options)
+  The plugin inherits Vite's `server.cors` configuration, and disabling either `cors` or `server.cors` (setting it to `false`) turns CORS off. When the inherited configuration does not restrict the origin (`server.cors` is `true` or has no `origin`), mock responses only allow Vite's default localhost origins (`localhost`, `127.0.0.1`, `[::1]`) instead of every origin; set `origin` explicitly (such as `origin: '*'`) to allow other origins.
+
+  CORS preflight requests (`OPTIONS` with `Access-Control-Request-Method`) are answered by the plugin when the path has a mock that supports the requested method, and are passed through otherwise.
 
 ### log
 
 - **Type:** `boolean | 'info' | 'warn' | 'error' | 'silent' | 'debug'`
-- **Default:** `info`
+- **Default:** `'info'`
 - **Details:**
 
-  Enable log and configure log level.
+  Enable log and configure log level. `false` is equivalent to `'silent'`.
 
 ### formidableOptions
 
@@ -289,7 +353,7 @@ export default defineMock({
   example: Configure to file upload dir
 
   ```ts
-  MockDevServerPlugin({
+  mockDevServerPlugin({
     formidableOptions: {
       uploadDir: path.join(process.cwd(), 'uploads'),
     },
@@ -298,7 +362,7 @@ export default defineMock({
 
 ### cookiesOptions
 
-- **Type:** `CookiesOptions`
+- **Type:** `CookiesOption`
 - **Details:**
 
   Configure to `cookies`, see [cookies](https://github.com/pillarjs/cookies#new-cookiesrequest-response--options)
@@ -308,25 +372,37 @@ export default defineMock({
 - **Type:** `BodyParserOptions`
 - **Details:**
 
-  Configure to `co-body`, see [co-body](https://github.com/cojs/co-body#options)
+  Configure to `co-body`, see [co-body](https://github.com/cojs/co-body#options).
+
+  The `limit` / `jsonLimit` / `formLimit` / `textLimit` options of `co-body` only take effect after the whole body has been buffered, so they cannot protect the memory of the dev server. `maxBodySize` (default `'50mb'`, `0` disables it) limits the raw request body while it is being read; requests exceeding it are answered with `413 Payload Too Large`. The smaller one of `maxBodySize` and the matching `co-body` limit is used.
+
+  ```ts
+  mockDevServerPlugin({
+    bodyParserOptions: {
+      jsonLimit: '10mb',
+      // Raw body limit, exceeded requests get 413; `0` disables it
+      maxBodySize: '32mb',
+    },
+  })
+  ```
 
 ### build
 
-- **Type:** `boolean | ServerBuildOptions`
+- **Type:** `boolean | ServerBuildOption`
 - **Default:** `false`
 - **Details:**
 
   The configuration needed to build a small, independently deployable mock service.
 
   ```ts
-  interface ServerBuildOptions {
+  interface ServerBuildOption {
     /**
      * server port
      * @default 8080
      */
     serverPort?: number
     /**
-     * build output dir
+     * build output dir, resolved against Vite `build.outDir` when relative
      * @default 'mockServer'
      */
     dist?: string
@@ -335,8 +411,19 @@ export default defineMock({
      * @default 'error'
      */
     log?: LogLevel
+    /**
+     * Whether to bundle recorded request files into the output
+     * Independent of `record.enabled`, so existing recordings can be
+     * included when only replay is enabled.
+     * @default the resolved `replay` option (which follows `record.enabled`)
+     */
+    includeRecord?: boolean
   }
   ```
+
+  The generated server listens on `serverPort` by default; the `PORT` environment variable overrides it and `HOST` sets the host to listen on (all interfaces by default).
+
+  Options that cannot be serialized (such as a `RegExp` / function `cors.origin`, or functions inside `formidableOptions`) are reported with a build-time warning and ignored in the generated server. A configured `formidableOptions.uploadDir` is relocated to a directory inside the output by the same name, so the generated server stays portable.
 
 ### record
 
@@ -346,8 +433,11 @@ export default defineMock({
 
   Whether to enable the request recording feature. Once enabled, the plugin will record all request data for subsequent request playback.
 
-  Based on `vite.server.proxy`, the plugin records request data proxied by `http-proxy`.
-  After receiving a response, the plugin will record the request data and response data to the specified directory.
+  Based on `vite.server.proxy`, the plugin records request data proxied by `http-proxy` (non-WebSocket proxies only). After receiving a response, the plugin writes the request data and response data to the specified directory.
+
+  Recordings are stored as pretty-printed JSON, one file per pathname (for example `mock/.recordings/api-users-1a2b3c4d.json`, the suffix is a short hash of the pathname). A `.gitignore` containing `*` is created in the recording directory by default; set `gitignore: false` to disable it.
+
+  Compressed text responses (`gzip` / `deflate` / `br` / `zstd`) are decompressed before being stored, so the recordings stay readable. `zstd` uses built-in `zlib` on Node.js `>=22.15`, otherwise it requires the optional `zstd-codec` package.
 
   ````ts
   interface RecordOptions {
@@ -380,6 +470,8 @@ export default defineMock({
            *
            * String: Glob pattern or path-to-regexp pattern
            * (Use the mode option to set the mode, default is glob)
+           *
+           * When omitted, all requests are included, and only `exclude` filters.
            */
           include?: string | string[]
           /**
@@ -399,7 +491,7 @@ export default defineMock({
 
     /**
      * Directory to store recorded data
-     * Relative to project root
+     * Relative to the `dir` option (default `mock`)
      * @default 'mock/.recordings'
      */
     dir?: string
@@ -437,10 +529,12 @@ export default defineMock({
 ### replay
 
 - **Type:** `boolean`
-- **Default:** `false`
+- **Default:** `false` (automatically `true` when `record.enabled` is `true`; set it to `false` explicitly to disable replay)
 - **Details：**
 
   Whether to enable the request playback feature. Once enabled, the plugin will simulate responses based on the recorded request data.
+
+  Replay is only used when no mock rule matches the request. Expired recordings (`record.expires`) are ignored, and when `record.status` is not configured a recording with status `200` is preferred.
 
   Replay works independently of recording, `replay: true` can be used with `record: { enabled: false }` to reuse existing recordings. A warning is printed at startup when recording is disabled.
 
@@ -483,7 +577,18 @@ export default defineMock({
 - **Type:** `string`
 - **Details:**
 
-  The interface address that needs to be mocked, supported by [path-to-regexp](https://github.com/pillarjs/path-to-regexp) for path matching.
+  The interface address that needs to be mocked, supported by [`path-to-regexp`](https://github.com/pillarjs/path-to-regexp) for path matching.
+
+  ```txt
+  /api/login
+  /api/post/:id
+  /api/users{/:id}    # optional segment
+  /api/files/*path    # wildcard
+  ```
+
+  A query string included in `url` (such as `/api/test?a=1`) is parsed into the [`validator.query`](#optionsvalidator) of the mock.
+
+  When several rules match the same request, static rules win over dynamic ones, then rules with fewer parameters, and wildcards have the lowest priority.
 
 ### options.enabled
 
@@ -494,6 +599,14 @@ export default defineMock({
   Whether to enable mock for this interface. In most scenarios, we only need to mock some interfaces instead of all requests that have been configured with mock.
   Therefore, it is important to be able to configure whether to enable it or not.
 
+### options.log
+
+- **Type:** `boolean | 'info' | 'warn' | 'error' | 'silent' | 'debug'`
+- **Default:** follows the plugin [`log`](#log) option
+- **Details:**
+
+  Configure the log level for this mock only. Useful to silence a mock that is requested very frequently.
+
 ### options.scene
 
 - **Type:** `string | string[]`
@@ -502,39 +615,44 @@ export default defineMock({
 
   Scenario identifier for this mock.
 
-  When not configured, the mock is universal and always matches regardless of active scenario.When configured, the mock only matches when at least one of its scenarios matches one of the active scenarios.
+  When not configured, the mock is universal and always matches regardless of active scenario. When configured, the mock only matches when at least one of its scenarios matches one of the active scenarios (the [`activeScene`](#activescene) option or the `X-Mock-Scene` header).
+
+  For the same `url`, mocks with a `scene` are matched before mocks without one, so a matching scene takes precedence over a validator of a universal mock.
 
 ### options.method
 
 - **Type:** `Method | Method[]`
 
   ```ts
-  type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS' | 'HEAD' | 'PATCH'
+  type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'TRACE' | 'OPTIONS'
   ```
 
 - **Default:** `['GET', 'POST']`
 - **Details:**
 
-  The interface allows request methods
+  The request methods allowed by the interface. Method names are case-insensitive (`'get'` is equivalent to `'GET'`), and an empty array falls back to the default.
 
 ### options.type
 
 - **Type:** `'text' | 'json' | 'buffer' | string`
+- **Default:** `'json'`
 - **Details:**
 
-  Response body data type. And also support types included in [mime-db](https://github.com/jshttp/mime-db).
+  Response body data type. It determines the `Content-Type` header, and also supports types included in [mime-db](https://github.com/jshttp/mime-db).
 
   When the response body returns a file and you are not sure which type to use,
   you can pass the file name as the value. The plugin will internally search for matching
-  `content-type` based on the file name suffix.
+  `content-type` based on the file name suffix. For a TypeScript file such as `a.ts`, pass `a.js` instead, otherwise it may not be recognized as a JavaScript file.
 
 ### options.headers
 
 - **Type:** `object | (request: MockRequest) => object | Promise<object>`
-- **Default:** `{ 'Content-Type': 'application/json' }`
+- **Default:** `{ 'Content-Type': <resolved from type> }`
 - **Details:**
 
-  Configure the response body headers
+  Configure the response headers. The function form can be asynchronous.
+
+  The plugin always sets `Content-Type` from [`type`](#optionstype), `Cache-Control: no-cache, max-age=0`, `X-Mock-Power-By: vite-plugin-mock-dev-server` and `X-File-Path` (path of the mock file); values returned by `headers` override them. Invalid header names or values are logged and skipped.
 
 ### options.status
 
@@ -547,7 +665,7 @@ export default defineMock({
 ### options.statusText
 
 - **Type:** `string`
-- **Default:** `"OK"`
+- **Default:** resolved from `status` (for example `OK` for `200`, `Not Found` for `404`)
 - **Details:**
 
   Configure response header status text
@@ -560,6 +678,8 @@ export default defineMock({
 
   Configure response delay time, If an array is passed in, it represents the range of delay time.
 
+  The delay is measured from the request start time, and the time already spent on request parsing is deducted; if the parsing time already exceeds the configured delay (the upper bound for the array form), the response is sent immediately. Invalid values (negative numbers, `min > max`, malformed arrays) are normalized or ignored at compile time with a warning.
+
   unit: `ms`
 
 ### options.body
@@ -567,12 +687,14 @@ export default defineMock({
 - **Type:** `Body | (request: MockRequest) => Body | Promise<Body>`
 
   ```ts
-  type Body = string | object | Buffer | Readable
+  type Body = string | number | object | any[] | Buffer | Readable | null
   ```
 
 - **Details:**
 
   Configure response body data content. `body` takes precedence over `response`.
+
+  When `type` is `buffer`, the content is converted to a `Buffer`; a `Readable` stream is piped to the response, which supports simulating file downloads.
 
 ### options.response
 
@@ -587,6 +709,8 @@ export default defineMock({
   In `req`, you can also get parsed request information such as
   `query`, `params`, `body` and `refererQuery`.
 
+  Errors thrown by `response` are logged, and the current response is aborted instead of crashing the dev server.
+
 ### options.cookies
 
 - **Type:** `CookiesOptions | (request: MockRequest) => CookiesOptions | Promise<CookiesOptions>`
@@ -594,12 +718,12 @@ export default defineMock({
   ```ts
   type CookiesOptions = Record<string, CookieValue>
 
-  type CookieValue = string | [string, SetCookie]
+  type CookieValue = string | [string, SetCookieOption]
   ```
 
 - **Details:**
 
-  Configure response body cookies
+  Configure response body cookies. An array value is `[value, options]`, where `options` is the [`cookies` set option](https://github.com/pillarjs/cookies#cookiessetname--values--options). Invalid cookie names or options are logged and skipped without affecting the other cookies.
 
 ### options.validator
 
@@ -642,20 +766,27 @@ export default defineMock({
   The function of a validator allows you to configure multiple mocks with
   the same URL simultaneously and determine which mock should be used through validation.
 
+  All fields are optional. An object validator performs a deep subset comparison: only the declared fields (and nested keys) are compared, and header names are case-insensitive. For arrays, the declared items only need to exist in the request array (containment, order-independent). Query parameters written in `url` (such as `/api/test?a=1`) are merged into `validator.query`. A function validator receives the request and returns a boolean.
+
+  A validator that throws is logged and treated as a non-match, so the next rule is tried instead of failing the request.
+
+  For the same URL, mocks are tried in this order: mocks with `scene`, then a function validator, then object validators (more keys first), and finally mocks without a validator as the fallback.
+
 ### options.ws
 
 - **Type:** `boolean`
 - **Default:** `false`
 - **Details:**
 
-  Enable WebSocket interface simulation
+  Enable WebSocket interface simulation. With `ws: true`, the item is handled by the mock WebSocket server (its HTTP response fields are ignored), `scene` and the matching priority rules apply as well, and the path must be covered by [`wsPrefix`](#wsprefix).
 
 ### options.setup
 
 - **Type:** `(wss: WebSocketServer, ctx: WebSocketSetupContext) => void`
+- **Required:** yes, when `ws` is `true`
 - **Details:**
 
-  Configure Websocket Server
+  Configure Websocket Server. `setup()` is re-executed when the mock file is updated; use `onCleanup()` to clear timers and listeners created by the previous run.
 
 ```ts
 interface WebSocketSetupContext {
@@ -715,19 +846,24 @@ type Request = http.IncomingMessage & {
   params: object
   body: any
   refererQuery: object
-  getCookie: (name: string, option?: Cookies.GetOption) => string | undefined
+  headers: Headers
+  getCookie: (name: string, option?: GetCookieOption) => string | void
 }
 ```
+
+The request body is parsed according to `Content-Type`: `application/json`, `application/x-www-form-urlencoded`, `text/plain`, and `multipart/form-data` (via `formidable`, files are exposed as `formidable.File`). Requests exceeding [`bodyParserOptions.maxBodySize`](#bodyparseroptions) are answered with `413`.
 
 **In Response:**
 
-The original type of `response` is `http.ServerResponse<http.IncomingMessage>`. The plugin adds `setCookie(name, value)` method for configuration cookies on this basis.
+The original type of `response` is `http.ServerResponse<http.IncomingMessage>`. The plugin adds `setCookie(name, value, option?)` method for configuration cookies on this basis.
 
 ```ts
 type Response = http.ServerResponse<http.IncomingMessage> & {
-  setCookie: (name: string, value?: string | null, option?: Cookies.SetOption) => void
+  setCookie: (name: string, value: string, option?: SetCookieOption) => void
 }
 ```
+
+When using `response(req, res, next)`, you must either end the response (`res.end()`) or call `next()` yourself.
 
 ## Share Mock Data
 
@@ -744,6 +880,10 @@ type defineMockData<T> = (
   }, // options
 ) => [getter, setter] & { value: T }
 ```
+
+The returned tuple is callable: call it without arguments to read the current value, or call it with a new value (or an updater function) to write it. `.value` provides direct get/set access.
+
+`persistOnHMR` defaults to `false`: when a mock file is hot updated, the data is reset to the newly compiled `initialData` if it changed. Set it to `true` to keep the current value across hot updates.
 
 ### Examples
 
@@ -771,7 +911,7 @@ export default defineMock([
   },
   {
     url: '/api/posts/delete/:id',
-    body: (params) => {
+    body: ({ params }) => {
       const id = params.id
       posts.value = posts.value.filter((post) => post.id !== id)
       return { success: true }
@@ -780,14 +920,53 @@ export default defineMock([
 ])
 ```
 
+The setter accepts a value or an updater function:
+
+```ts
+posts([...posts.value, newPost])
+posts((list) => [...list, newPost])
+```
+
 > **Tips：**
 >
 > The `defineMockData` function relies solely on the shared data support provided by `memory`.
 > If persistent mock data is required, it is recommended to use a `nosql` database like `lowdb` or `level`.
 
+## Scenes
+
+Use [`scene`](#optionsscene) to keep several variants of the same API and switch between them globally or per request.
+
+`mock/user.mock.ts`
+
+```ts
+export default defineMock([
+  { url: '/api/user', body: { name: 'default' } },
+  { url: '/api/user', scene: 'test', body: { name: 'test user' } },
+  { url: '/api/user', scene: ['dev', 'staging'], body: { name: 'dev user' } },
+])
+```
+
+Activate scenes with the plugin option:
+
+```ts
+mockDevServerPlugin({
+  activeScene: ['test'],
+})
+```
+
+Or override it for a single request with the `X-Mock-Scene` header (comma-separated values are supported):
+
+```sh
+curl -H 'X-Mock-Scene: test' http://localhost:5173/api/user
+```
+
+A mock whose scene does not match is skipped, falling back to the universal mock of the same URL.
+
 ## Custom-Path-Matching-Priority
 
 > Custom rules only affect links with dynamic parameters, such as: `/api/user/:id`
+
+The built-in order is: static rules first, then rules with fewer dynamic parameters, optional parameters rank lower than required ones, and wildcards rank last.
 
 The priority of the path matching rules built into the plugin can already meet most needs, but if you need more flexible customization of the matching rule priority, you can use the `priority` parameter.
 
@@ -795,11 +974,11 @@ Exp：
 
 ```ts
 import { defineConfig } from 'vite'
-import mockPlugin from 'vite-plugin-mock-dev-server'
+import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server'
 
 export default defineConfig({
   plugins: [
-    mockPlugin({
+    mockDevServerPlugin({
       priority: {
         // The priority of matching rules is global.
         // The rules declared in this option will take priority over the default rules.
@@ -825,6 +1004,8 @@ export default defineConfig({
   ],
 })
 ```
+
+When a request satisfies several `special` rules at once, all of them are promoted to the front (not only the first one), and the declaration order is preserved.
 
 > **Tip:**
 >
@@ -1249,24 +1430,63 @@ es.addEventListener('count', (e) => {
 
 </details>
 
+## Record and Replay
+
+Record responses forwarded by `server.proxy`, then replay them when no mock rule matches — useful for working offline, debugging, or sharing responses with teammates.
+
+`vite.config.ts`
+
+```ts
+export default defineConfig({
+  plugins: [
+    mockDevServerPlugin({
+      record: true,
+    }),
+  ],
+})
+```
+
+Recordings are stored as JSON files under `mock/.recordings`. Replay is enabled automatically together with recording; to reuse existing recordings without recording new requests:
+
+```ts
+mockDevServerPlugin({
+  record: { enabled: false },
+  replay: true,
+})
+```
+
+Notes:
+
+- Only responses of non-WebSocket proxies are recorded.
+- `record.filter`, `record.status`, `record.expires` and `record.overwrite` control what is recorded and how long it is kept.
+- Compressed responses are decompressed before being stored, so recordings stay readable.
+- A recording is replayed only when no mock rule matches the request; otherwise the mock rule wins.
+
+See [`record`](#record) and [`replay`](#replay) for all options.
+
 ## Mock Services
 
 In some scenarios, it may be necessary to use the data provided by mock services for display purposes, but the project may have already been packaged, built and deployed without support from `Vite` and this plugin's mock service. Since this plugin supports importing various `node` modules in mock files at the design stage, the mock file cannot be inline into client build code.
 
 To meet such scenarios, on one hand, the plugin provides support under `vite preview`, and on the other hand, it also builds a small independent mock service application that can be deployed to relevant environments during `vite build`. This can then be forwarded through other HTTP servers like Nginx to actual ports for mock support.
 
-The default output is built into the directory `dist/mockServer`, generating files as follows:
+The default output is built into the directory `dist/mockServer` (the `build.dist` option, resolved against Vite's `build.outDir` when relative), generating files as follows:
 
 ```sh
 ./mockServer
 ├── index.js
 ├── mock-data.js
-└── package.json
+├── package.json
+└── mock/.recordings/...   # only when `build.includeRecord` is enabled
 ```
 
 In this directory, execute `npm install` to install dependencies, and then execute `npm start` to start the mock server.
 
-The default port is `8080`.
+The default port is `8080`. The `PORT` environment variable overrides it, and `HOST` sets the host to listen on (all interfaces by default):
+
+```sh
+PORT=9000 HOST=127.0.0.1 npm start
+```
 
 You can access related `mock` interfaces through `localhost:8080/`.
 
