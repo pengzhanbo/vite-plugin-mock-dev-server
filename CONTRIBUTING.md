@@ -31,8 +31,8 @@ This project adheres to the [Contributor Covenant Code of Conduct](./CODE_OF_CON
 
 ### Prerequisites
 
-- **Node.js**: Version `^20 || >=22`
-- **pnpm**: Version `>=10.30.1` (this project uses pnpm workspaces)
+- **Node.js**: `^20.19.0 || >=22` (CI runs Node 24)
+- **pnpm**: Version `12.x` — the repository pins `pnpm@12.15.0` via `packageManager`. Run `corepack enable` (or `corepack use pnpm@12`) so the pinned version is used instead of a globally installed one
 - **Git**: For version control
 
 ### Repository Setup
@@ -57,11 +57,14 @@ This project adheres to the [Contributor Covenant Code of Conduct](./CODE_OF_CON
 4. **Verify setup**
 
    ```bash
-   # Run linting
+   # Build once: type-aware lint and the example app resolve the package through `dist`
+   pnpm build
+
+   # Type-aware lint + format check
    pnpm lint
 
-   # Run tests
-   pnpm test
+   # Single test run (the default `pnpm test` is watch mode)
+   pnpm test:run
    ```
 
 ## Development Workflow
@@ -72,70 +75,97 @@ This is a monorepo managed by pnpm workspaces:
 
 ```txt
 vite-plugin-mock-dev-server/
-├── vite-plugin-mock-dev-server/    # Core plugin package
+├── vite-plugin-mock-dev-server/    # Core plugin package (the only published artifact)
 │   ├── src/                        # Source code
-│   │   ├── build/                  # Standalone mock server build
-│   │   ├── compiler/               # Mock file compiler (esbuild/rolldown)
-│   │   ├── cookies/                # Cookie handling
-│   │   ├── core/                   # Core plugin logic
-│   │   ├── helpers/                # Helper functions
-│   │   ├── mockHttp/               # HTTP mock middleware
-│   │   ├── mockWebsocket/          # WebSocket mock support
-│   │   ├── types/                  # TypeScript type definitions
-│   │   └── utils/                  # Utility functions
-│   ├── __tests__/                  # Unit tests
+│   │   ├── build/                  # Standalone mock server generation
+│   │   ├── compiler/               # Mock file bundling, loading and watching
+│   │   ├── core/                   # Plugin lifecycle, options, define, logger
+│   │   ├── helpers/                # Public helpers (defineMock, defineMockData, createSSEStream)
+│   │   ├── mockHttp/               # HTTP mock pipeline (matching, request/response handling)
+│   │   ├── mockWebsocket/          # WebSocket mock server
+│   │   ├── recorder/               # Request recording and replay
+│   │   ├── types/                  # Public TypeScript types
+│   │   ├── utils/                  # Shared utilities
+│   │   ├── index.ts                # Public entry
+│   │   └── server.ts               # Standalone server entry
+│   ├── __tests__/                  # Vitest specs, including `e2e/`
+│   ├── tsdown.config.ts            # Package build config
 │   └── package.json
-├── docs/                           # VitePress documentation site
-├── example/                        # Example project for testing
-├── package.json                    # Root package.json
-└── pnpm-workspace.yaml             # pnpm workspace configuration
+├── docs/                           # VitePress site (`en/` English, `zh/` Chinese)
+├── example/                        # Demo Vite app exercising the plugin (`mock/`)
+├── .github/workflows/              # lint / test / release CI
+├── oxlint.config.ts                # Type-aware lint config
+├── oxfmt.config.ts                 # Formatting config
+├── vitest.config.ts                # Test runner config
+├── tsconfig.json                   # Shared TypeScript config
+├── pnpm-workspace.yaml             # Workspace + dependency catalogs
+└── package.json                    # Root scripts and dev dependencies
 ```
+
+Third-party dependencies are declared through pnpm catalogs in `pnpm-workspace.yaml`. Reference them as `catalog:dev` / `catalog:prod` in package manifests instead of hardcoding versions; workspace packages are linked with `workspace:*`.
 
 ### Development Commands
 
 ```bash
-# Build the plugin
+# Install dependencies
+pnpm install
+
+# Build the plugin with tsdown
 pnpm build
 
-# Start development mode with example project
+# Run the example app with `vite dev`
 pnpm dev
 
-# Build example project
+# Build the example app
 pnpm example:build
 
-# Run documentation site in development mode
+# Run the example end-to-end spec
+pnpm example:test
+
+# Documentation site (VitePress)
 pnpm docs:dev
-
-# Build documentation site
 pnpm docs:build
+pnpm docs:preview
 
-# Run linting
+# Lint: type-aware oxlint + oxfmt check
 pnpm lint
 
-# Run tests
+# Auto-fix lint issues and format the whole repository
+pnpm format
+
+# Tests (watch mode by default)
 pnpm test
 
-# Run tests in watch mode
-pnpm test --watch
+# Single CI-style test run
+pnpm test:run
 ```
+
+Run `pnpm build` at least once after cloning, and again after changing plugin source: the example app (including the end-to-end specs that run it) and type-aware lint resolve `vite-plugin-mock-dev-server` through its `dist` output.
+
+The docs site has two locales: `docs/en/` (English) and `docs/zh/` (Chinese). Keep both in sync when changing documentation. `example/mock/` is the canonical set of mock-file examples, so update it whenever the exported mock shape changes.
 
 ### Running Tests
 
-The project uses [Vitest](https://vitest.dev/) for testing.
+The project uses [Vitest](https://vitest.dev/) for testing. Specs live in `vite-plugin-mock-dev-server/__tests__/` (end-to-end specs in `__tests__/e2e/`); `vitest.config.ts` only includes `vite-plugin-mock-dev-server/__tests__/**/*.spec.ts`, uses the Node environment and a 20s timeout. No coverage provider is configured.
 
 ```bash
-# Run all tests
+# Watch mode (useful during development)
 pnpm test
 
-# Run tests with coverage
-pnpm test --coverage
+# Run all tests once
+pnpm test:run
 
-# Run tests in watch mode (useful during development)
-pnpm test --watch
+# Run a specific spec
+pnpm test:run vite-plugin-mock-dev-server/__tests__/compiler.spec.ts
 
-# Run specific test file
-pnpm test src/__tests__/compiler.spec.ts
+# Filter by test name
+pnpm test:run -t "matching weight"
+
+# Run the example end-to-end spec only
+pnpm example:test
 ```
+
+CI runs `pnpm vitest run --retry=1` on Node 24 for every push and pull request to `main`.
 
 ### Debugging
 
@@ -153,11 +183,13 @@ To debug the plugin during development:
 
 2. **Adding debug logs**
 
-   The project uses the `debug` package. Enable debug logs:
+   The plugin uses [`obug`](https://github.com/unjs/obug) with the `vite:mock` namespace for internal tracing:
 
    ```bash
-   DEBUG=vite-plugin-mock-dev-server pnpm dev
+   DEBUG=vite:mock pnpm dev
    ```
+
+   Normal plugin output is controlled by the plugin's [`log`](./README.md#log) option (default `'info'`). Use the `debug` level (`log: 'debug'`) when you need the request-level logs without enabling `DEBUG`.
 
 3. **VS Code debugging**
 
@@ -184,34 +216,37 @@ To debug the plugin during development:
 
 ### Code Style
 
-This project uses ESLint with `@pengzhanbo/eslint-config` for code linting.
+The project is linted and formatted with [oxlint](https://oxc.rs/docs/guide/usage/linter.html) (type-aware) and [oxfmt](https://oxc.rs/docs/guide/usage/formatter.html), configured through `@pengzhanbo/oxc-config`. ESLint, Prettier, Jest and Mocha are intentionally not used — do not add them.
 
 ```bash
-# Check code style
+# Check lint + formatting (what CI runs)
 pnpm lint
 
-# Auto-fix linting issues
-pnpm lint -- --fix
+# Auto-fix lint issues and format the repository
+pnpm format
 ```
 
-Key style rules:
+Do not hand-format code or manually reorder imports: `.vscode/settings.json` configures the `oxc.oxc-vscode` extension as the default formatter with format-on-save, and `source.organizeImports` is disabled because oxfmt handles import sorting.
 
-- Use single quotes for strings
-- No trailing semicolons
-- 2 spaces indentation
-- Maximum line length: 120 characters
+Key conventions:
+
+- ESM only (`"type": "module"`); relative imports in TypeScript source need an explicit `.js` suffix
+- Single quotes, no semicolons, 2-space indentation, LF line endings, trailing commas
+- Every `src/` subdirectory has an `index.ts` barrel; `src/index.ts` is the public entry
+- camelCase for files and functions, PascalCase for class files (such as `Recorder.ts`)
 
 ### TypeScript Guidelines
 
-- **Strict mode enabled**: All code must be type-safe
-- **Explicit return types**: Public APIs should have explicit return type annotations
-- **No `any`**: Avoid using `any` type; use `unknown` with type guards when necessary
+- **Strict mode enabled**, together with `noUnusedLocals`
+- **`isolatedDeclarations: true`**: every exported symbol needs an explicit type annotation, including exported constants and inferred return types
+- **Prefer `unknown` over `any`** and narrow it with type guards; catch variables are the exception — `useUnknownInCatchVariables` is disabled, so `catch (error)` is typed `any`
+- Public option/data types belong in `src/types/`; internal helpers stay in their feature directory
 
 ### JSDoc Documentation
 
-All public APIs must include JSDoc comments in the following format:
+All public APIs must include bilingual JSDoc comments in the following format (`oxlint` is configured to prefer `@type` over `@typedef`):
 
-```typescript
+````typescript
 /**
  * English description
  *
@@ -220,26 +255,34 @@ All public APIs must include JSDoc comments in the following format:
  * @param paramName - English description / 中文描述
  * @returns English description / 中文描述
  * @example
+ * ```ts
+ * example()
+ * ```
  */
-```
+````
 
 Example:
 
 ````typescript
 /**
- * Define mock data that can be shared across multiple mock files
+ * Define mock data with memory-based sharing mechanism
  *
- * 定义可在多个 mock 文件间共享的 mock 数据
+ * 定义带有基于内存的共享机制的 Mock 数据
  *
- * @param key - Unique identifier for the data / 数据的唯一标识符
- * @param initialData - Initial value of the data / 数据的初始值
- * @returns A mock data object with getter, setter, and value properties / 包含 getter、setter 和 value 属性的 mock 数据对象
+ * @param key - Unique key for mock data / Mock 数据的唯一键
+ * @param initialData - Initial data value / 初始数据值
+ * @param options - Options / 选项
+ * @returns MockData object with getter, setter, and value property / 带有 getter、setter 和 value 属性的 MockData 对象
  * @example
  * ```ts
  * export default defineMockData('posts', [])
  * ```
  */
-export function defineMockData<T>(key: string, initialData: T): MockData<T>
+export function defineMockData<T = any>(
+  key: string,
+  initialData: T,
+  options?: DefineMockDataOptions,
+): MockData<T>
 ````
 
 ## Commit Convention
@@ -262,12 +305,17 @@ Types:
 - `build`: Build system changes
 - `ci`: CI/CD changes
 - `chore`: Other changes
+- `revert`: Revert a previous commit
+
+Add `!` after the type or scope to mark a breaking change, and keep the subject within 50 characters.
 
 Examples:
 
 ```txt
 feat(compiler): add support for json5 files
 fix(http): resolve cookie parsing issue
+perf(build)!: remove 'foo' option
+revert: feat(compiler): add 'comments' option
 docs: update API documentation
 ```
 
@@ -284,9 +332,9 @@ docs: update API documentation
 2. **Make your changes**
 
    - Write clear, concise code
-   - Add tests for new features
-   - Update documentation if needed
-   - Ensure all tests pass
+   - Add tests for new features and bug fixes
+   - Keep the English and Chinese docs in sync, and update `example/mock/` when the mock-file shape changes
+   - Run `pnpm build`, `pnpm lint` and `pnpm test:run` locally
 
 3. **Commit your changes**
 
@@ -306,10 +354,9 @@ docs: update API documentation
    - Go to the original repository on GitHub
    - Click "New Pull Request"
    - Select your fork and branch
-   - Fill in the PR template with:
-     - Clear description of changes
-     - Related issue numbers (if any)
-     - Screenshots (if UI changes)
+   - Describe the change clearly, and include related issue numbers and screenshots for UI changes
+
+   CI runs the `Lint` and `Test` workflows (Node 24) on every pull request targeting `main`; both must pass before merging.
 
 6. **PR Review**
 
@@ -324,12 +371,18 @@ docs: update API documentation
 The project uses [bumpp](https://github.com/antfu/bumpp) for version management and [conventional-changelog](https://github.com/conventional-changelog/conventional-changelog) for changelog generation.
 
 ```bash
-# Bump version, generate changelog, commit, tag, and push
+# Bump versions (root, plugin, docs, example), generate CHANGELOG.md,
+# commit, create the `v*` tag and push it
 pnpm release
 
-# Publish to npm
+# Regenerate CHANGELOG.md only
+pnpm release:changelog
+
+# Publish workspace packages (normally executed by CI, not locally)
 pnpm release:publish
 ```
+
+Publishing is automated: pushing a `v*` tag triggers `.github/workflows/release.yaml`, which re-runs the test workflow, builds the plugin, publishes with npm provenance, and creates the GitHub release notes. `pnpm release:publish` maps to `pnpm -r publish` and is only needed for a manual recovery.
 
 ---
 

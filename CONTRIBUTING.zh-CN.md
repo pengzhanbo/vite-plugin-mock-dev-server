@@ -31,9 +31,9 @@
 
 ### 环境要求
 
-- **Node.js**: 版本 `^20 || >=22`
-- **pnpm**: 版本 `>=10.30.1`（本项目使用 pnpm 工作区）
-- **Git**: 用于版本控制
+- **Node.js**：`^20.19.0 || >=22`（CI 使用 Node 24）
+- **pnpm**：`12.x` —— 仓库通过 `packageManager` 固定为 `pnpm@12.15.0`。建议执行 `corepack enable`（或 `corepack use pnpm@12`），以使用固定版本而不是全局安装的 pnpm
+- **Git**：用于版本控制
 
 ### 仓库设置
 
@@ -57,11 +57,14 @@
 4. **验证设置**
 
    ```bash
-   # 运行代码检查
+   # 先构建一次：类型感知检查与示例应用都通过 `dist` 解析本包
+   pnpm build
+
+   # 类型感知的代码检查 + 格式检查
    pnpm lint
 
-   # 运行测试
-   pnpm test
+   # 单次运行测试（`pnpm test` 默认为监视模式）
+   pnpm test:run
    ```
 
 ## 开发工作流
@@ -72,70 +75,97 @@
 
 ```txt
 vite-plugin-mock-dev-server/
-├── vite-plugin-mock-dev-server/    # 核心插件包
+├── vite-plugin-mock-dev-server/    # 核心插件包（唯一发布产物）
 │   ├── src/                        # 源代码
-│   │   ├── build/                  # 独立 mock 服务器构建
-│   │   ├── compiler/               # Mock 文件编译器（esbuild/rolldown）
-│   │   ├── cookies/                # Cookie 处理
-│   │   ├── core/                   # 核心插件逻辑
-│   │   ├── helpers/                # 辅助函数
-│   │   ├── mockHttp/               # HTTP mock 中间件
-│   │   ├── mockWebsocket/          # WebSocket mock 支持
-│   │   ├── types/                  # TypeScript 类型定义
-│   │   └── utils/                  # 工具函数
-│   ├── __tests__/                  # 单元测试
+│   │   ├── build/                  # 独立 mock 服务生成
+│   │   ├── compiler/               # mock 文件打包、加载与监听
+│   │   ├── core/                   # 插件生命周期、选项、define、日志
+│   │   ├── helpers/                # 公共 helper（defineMock、defineMockData、createSSEStream）
+│   │   ├── mockHttp/               # HTTP mock 管线（匹配、请求/响应处理）
+│   │   ├── mockWebsocket/          # WebSocket mock 服务
+│   │   ├── recorder/               # 请求录制与回放
+│   │   ├── types/                  # 公共 TypeScript 类型
+│   │   ├── utils/                  # 共享工具
+│   │   ├── index.ts                # 公共入口
+│   │   └── server.ts               # 独立服务入口
+│   ├── __tests__/                  # Vitest 测试（包含 `e2e/`）
+│   ├── tsdown.config.ts            # 包构建配置
 │   └── package.json
-├── docs/                           # VitePress 文档站点
-├── example/                        # 用于测试的示例项目
-├── package.json                    # 根 package.json
-└── pnpm-workspace.yaml             # pnpm 工作区配置
+├── docs/                           # VitePress 站点（`en/` 英文，`zh/` 中文）
+├── example/                        # 演示插件能力的 Vite 应用（`mock/`）
+├── .github/workflows/              # lint / test / release CI
+├── oxlint.config.ts                # 类型感知的 lint 配置
+├── oxfmt.config.ts                 # 格式化配置
+├── vitest.config.ts                # 测试运行配置
+├── tsconfig.json                   # 共享 TypeScript 配置
+├── pnpm-workspace.yaml             # 工作区 + 依赖 catalog
+└── package.json                    # 根脚本与开发依赖
 ```
+
+第三方依赖都通过 `pnpm-workspace.yaml` 中的 pnpm catalog 声明。在 package.json 中使用 `catalog:dev` / `catalog:prod` 引用，不要硬编码版本号；工作区内的包通过 `workspace:*` 关联。
 
 ### 开发命令
 
 ```bash
-# 构建插件
+# 安装依赖
+pnpm install
+
+# 使用 tsdown 构建插件
 pnpm build
 
-# 使用示例项目启动开发模式
+# 以 `vite dev` 启动示例应用
 pnpm dev
 
-# 构建示例项目
+# 构建示例应用
 pnpm example:build
 
-# 以开发模式运行文档站点
+# 运行示例的端到端测试
+pnpm example:test
+
+# 文档站点（VitePress）
 pnpm docs:dev
-
-# 构建文档站点
 pnpm docs:build
+pnpm docs:preview
 
-# 运行代码检查
+# 代码检查：类型感知 oxlint + oxfmt 检查
 pnpm lint
 
-# 运行测试
+# 自动修复 lint 问题并格式化整个仓库
+pnpm format
+
+# 测试（默认为监视模式）
 pnpm test
 
-# 以监视模式运行测试
-pnpm test --watch
+# CI 风格的单次测试
+pnpm test:run
 ```
+
+克隆仓库后请至少执行一次 `pnpm build`；修改插件源码后也需要重新构建：示例应用（包括运行它的端到端测试）以及类型感知检查都通过 `dist` 产物解析 `vite-plugin-mock-dev-server`。
+
+文档站点包含两种语言：`docs/en/`（英文）与 `docs/zh/`（中文），修改文档时请保持同步。`example/mock/` 是 mock 文件示例的权威集合，当导出的 mock 结构发生变化时请一并更新。
 
 ### 运行测试
 
-本项目使用 [Vitest](https://vitest.dev/) 进行测试。
+本项目使用 [Vitest](https://vitest.dev/) 进行测试。测试文件位于 `vite-plugin-mock-dev-server/__tests__/`（端到端测试在 `__tests__/e2e/`）；`vitest.config.ts` 仅匹配 `vite-plugin-mock-dev-server/__tests__/**/*.spec.ts`，使用 Node 环境，超时时间为 20 秒，且未配置覆盖率提供器。
 
 ```bash
-# 运行所有测试
+# 监视模式（开发时很有用）
 pnpm test
 
-# 运行测试并生成覆盖率报告
-pnpm test --coverage
-
-# 以监视模式运行测试（开发时很有用）
-pnpm test --watch
+# 单次运行全部测试
+pnpm test:run
 
 # 运行特定测试文件
-pnpm test src/__tests__/compiler.spec.ts
+pnpm test:run vite-plugin-mock-dev-server/__tests__/compiler.spec.ts
+
+# 按测试名称过滤
+pnpm test:run -t "matching weight"
+
+# 仅运行示例的端到端测试
+pnpm example:test
 ```
+
+每次向 `main` 推送或提交 Pull Request 时，CI 都会在 Node 24 上执行 `pnpm vitest run --retry=1`。
 
 ### 调试
 
@@ -153,11 +183,13 @@ pnpm test src/__tests__/compiler.spec.ts
 
 2. **添加调试日志**
 
-   项目使用 `debug` 包。启用调试日志：
+   插件内部使用 [`obug`](https://github.com/unjs/obug)，命名空间为 `vite:mock`：
 
    ```bash
-   DEBUG=vite-plugin-mock-dev-server pnpm dev
+   DEBUG=vite:mock pnpm dev
    ```
+
+   常规插件日志由插件的 [`log`](./README.zh-CN.md#log) 配置控制（默认 `'info'`）。如果不希望开启 `DEBUG`，可将 `log` 设为 `'debug'` 查看请求级日志。
 
 3. **VS Code 调试**
 
@@ -184,34 +216,37 @@ pnpm test src/__tests__/compiler.spec.ts
 
 ### 代码风格
 
-本项目使用 ESLint 配合 `@pengzhanbo/eslint-config` 进行代码检查。
+本项目使用 [oxlint](https://oxc.rs/docs/guide/usage/linter.html)（类型感知）与 [oxfmt](https://oxc.rs/docs/guide/usage/formatter.html) 进行代码检查和格式化，配置来自 `@pengzhanbo/oxc-config`。项目有意不使用 ESLint、Prettier、Jest 和 Mocha，请不要引入它们。
 
 ```bash
-# 检查代码风格
+# 检查 lint 与格式（CI 执行的内容）
 pnpm lint
 
-# 自动修复代码风格问题
-pnpm lint -- --fix
+# 自动修复 lint 问题并格式化仓库
+pnpm format
 ```
 
-主要风格规则：
+请不要手动格式化代码或手动调整 import 顺序：`.vscode/settings.json` 已将 `oxc.oxc-vscode` 配置为默认格式化器并开启保存时格式化；`source.organizeImports` 被关闭，因为 import 排序由 oxfmt 负责。
 
-- 字符串使用单引号
-- 不使用尾随分号
-- 2 个空格缩进
-- 最大行长度：120 个字符
+主要约定：
+
+- 仅使用 ESM（`"type": "module"`）；TypeScript 源码中的相对导入必须带 `.js` 后缀
+- 字符串使用单引号，不使用分号，2 个空格缩进，LF 换行，尾随逗号
+- 每个 `src/` 子目录都有 `index.ts` 汇总导出；`src/index.ts` 是公共入口
+- 文件名和函数使用 camelCase，类文件使用 PascalCase（如 `Recorder.ts`）
 
 ### TypeScript 规范
 
-- **启用严格模式**：所有代码必须是类型安全的
-- **显式返回类型**：公共 API 应该有显式的返回类型注解
-- **不使用 `any`**：避免使用 `any` 类型；必要时使用 `unknown` 配合类型守卫
+- **启用严格模式**，同时开启 `noUnusedLocals`
+- **`isolatedDeclarations: true`**：每个导出符号都需要显式类型注解，包括导出的常量和推导出的返回类型
+- **优先使用 `unknown` 而不是 `any`**，并通过类型守卫收窄；catch 变量是例外 —— `useUnknownInCatchVariables` 已关闭，因此 `catch (error)` 的类型为 `any`
+- 公共选项/数据类型放在 `src/types/`，内部辅助代码留在对应功能目录
 
 ### JSDoc 文档规范
 
-所有公共 API 必须包含 JSDoc 注释，格式如下：
+所有公共 API 必须包含中英双语的 JSDoc 注释，格式如下（`oxlint` 已配置优先使用 `@type` 而不是 `@typedef`）：
 
-```typescript
+````typescript
 /**
  * English description
  *
@@ -220,26 +255,34 @@ pnpm lint -- --fix
  * @param paramName - English description / 中文描述
  * @returns English description / 中文描述
  * @example
+ * ```ts
+ * example()
+ * ```
  */
-```
+````
 
 示例：
 
 ````typescript
 /**
- * Define mock data that can be shared across multiple mock files
+ * Define mock data with memory-based sharing mechanism
  *
- * 定义可在多个 mock 文件间共享的 mock 数据
+ * 定义带有基于内存的共享机制的 Mock 数据
  *
- * @param key - Unique identifier for the data / 数据的唯一标识符
- * @param initialData - Initial value of the data / 数据的初始值
- * @returns A mock data object with getter, setter, and value properties / 包含 getter、setter 和 value 属性的 mock 数据对象
+ * @param key - Unique key for mock data / Mock 数据的唯一键
+ * @param initialData - Initial data value / 初始数据值
+ * @param options - Options / 选项
+ * @returns MockData object with getter, setter, and value property / 带有 getter、setter 和 value 属性的 MockData 对象
  * @example
  * ```ts
  * export default defineMockData('posts', [])
  * ```
  */
-export function defineMockData<T>(key: string, initialData: T): MockData<T>
+export function defineMockData<T = any>(
+  key: string,
+  initialData: T,
+  options?: DefineMockDataOptions,
+): MockData<T>
 ````
 
 ## 提交规范
@@ -262,12 +305,17 @@ export function defineMockData<T>(key: string, initialData: T): MockData<T>
 - `build`: 构建系统更改
 - `ci`: CI/CD 更改
 - `chore`: 其他更改
+- `revert`: 回滚之前的提交
+
+在 type 或 scope 后添加 `!` 表示破坏性变更，subject 请控制在 50 个字符以内。
 
 示例：
 
 ```txt
 feat(compiler): add support for json5 files
 fix(http): resolve cookie parsing issue
+perf(build)!: remove 'foo' option
+revert: feat(compiler): add 'comments' option
 docs: update API documentation
 ```
 
@@ -284,9 +332,9 @@ docs: update API documentation
 2. **进行更改**
 
    - 编写清晰、简洁的代码
-   - 为新功能添加测试
-   - 如有需要，更新文档
-   - 确保所有测试通过
+   - 为新功能和缺陷修复添加测试
+   - 保持中英文文档同步；当 mock 文件结构发生变化时更新 `example/mock/`
+   - 在本地执行 `pnpm build`、`pnpm lint` 和 `pnpm test:run`
 
 3. **提交更改**
 
@@ -306,9 +354,9 @@ docs: update API documentation
    - 前往 GitHub 上的原始仓库
    - 点击 "New Pull Request"
    - 选择您的 Fork 和分支
-   - 填写 PR 模板：
-     - 清晰描述更改内容
-     - 相关 issue 编号（如果有）
+   - 清晰描述更改内容，并附上相关 issue 编号；涉及 UI 的改动请提供截图
+
+   针对 `main` 的每个 Pull Request 都会触发 `Lint` 与 `Test` 工作流（Node 24），二者都需通过后才能合并。
 
 6. **PR 审核**
 
@@ -323,12 +371,18 @@ docs: update API documentation
 项目使用 [bumpp](https://github.com/antfu/bumpp) 进行版本管理，使用 [conventional-changelog](https://github.com/conventional-changelog/conventional-changelog) 生成变更日志。
 
 ```bash
-# 升级版本、生成变更日志、提交、打标签并推送
+# 升级版本（根目录、插件、docs、example），生成 CHANGELOG.md，
+# 提交、创建 `v*` 标签并推送
 pnpm release
 
-# 发布到 npm
+# 仅重新生成 CHANGELOG.md
+pnpm release:changelog
+
+# 发布工作区包（通常由 CI 执行，而非本地）
 pnpm release:publish
 ```
+
+发布是自动化的：推送 `v*` 标签会触发 `.github/workflows/release.yaml`，它会重新运行测试工作流、构建插件、以 npm provenance 发布，并生成 GitHub Release 说明。`pnpm release:publish` 对应 `pnpm -r publish`，仅在需要人工补救时使用。
 
 ---
 
