@@ -107,7 +107,7 @@ export function findMockData(
         isFunction(validator) ? validator(extraRequest) : requestValidate(extraRequest, validator),
       )
       if (error) {
-        const file = (mock as any).__filepath__
+        const file = mock.__filepath__
         logger.error(
           `${ansis.red(
             `mock error at ${pathname}`,

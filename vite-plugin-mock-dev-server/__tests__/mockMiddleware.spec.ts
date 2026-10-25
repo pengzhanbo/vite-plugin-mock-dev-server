@@ -308,7 +308,7 @@ describe('mockMiddleware', () => {
       body: { id: 1, name: 'Test User' },
       status: 200,
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/users': [mockItem],
@@ -341,7 +341,7 @@ describe('mockMiddleware', () => {
       body: { success: true },
       status: 201,
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/users': [mockItem],
@@ -385,7 +385,7 @@ describe('mockMiddleware', () => {
       body: (request) => ({ hasFile: Boolean(request.body?.file) }),
       status: 200,
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/upload': [mockItem],
@@ -423,7 +423,7 @@ describe('mockMiddleware', () => {
       method: 'GET',
       body: { id: 1 },
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/users': [mockItem],
@@ -453,7 +453,7 @@ describe('mockMiddleware', () => {
       method: 'GET',
       body: { userId: 'dynamic' },
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/users/:id': [mockItem],
@@ -483,7 +483,7 @@ describe('mockMiddleware', () => {
       body: 'Hello World',
       type: 'text',
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/text': [mockItem],
@@ -513,7 +513,7 @@ describe('mockMiddleware', () => {
       method: 'GET',
       body: (req) => ({ query: req.query }),
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/dynamic': [mockItem],
@@ -552,7 +552,7 @@ describe('mockMiddleware', () => {
       body: () => stream,
       type: 'text',
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
     const compiler = createMockCompiler({ '/api/stream': [mockItem] })
     const middleware = createMockMiddleware(compiler, {
       proxies: ['/api'],
@@ -589,7 +589,7 @@ describe('mockMiddleware', () => {
       body: {},
       headers: { 'X-Custom-Header': 'test-value' },
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/custom-headers': [mockItem],
@@ -622,7 +622,7 @@ describe('mockMiddleware', () => {
         user: ['john', { path: '/' }],
       },
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/cookies': [mockItem],
@@ -660,7 +660,7 @@ describe('mockMiddleware', () => {
         statusText: 'Internal Server Error',
       },
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/error': [mockItem],
@@ -695,7 +695,7 @@ describe('mockMiddleware', () => {
       method: 'GET',
       response: responseFn,
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/custom-response': [mockItem],
@@ -758,14 +758,14 @@ describe('mockMiddleware', () => {
 
   it('should destroy a response whose headers were already sent when it fails', async () => {
     const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }
-    const mockItem = {
+    const mockItem: MockHttpItem = {
       url: '/api/late-boom',
       method: 'GET',
       response(_req: MockRequest, _res: MockResponse) {
         throw new Error('late boom')
       },
       __filepath__: 'test.mock.ts',
-    } as unknown as MockHttpItem
+    }
 
     const middleware = createMockMiddleware(createMockCompiler({ '/api/late-boom': [mockItem] }), {
       proxies: ['/api'],
@@ -835,7 +835,7 @@ describe('mockMiddleware', () => {
       body: { version: 1 },
       validator: { query: { version: '1' } },
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/validated': [mockItem],
@@ -866,7 +866,7 @@ describe('mockMiddleware', () => {
       body: { version: 1 },
       validator: { query: { version: '1' } },
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/validated': [mockItem],
@@ -895,7 +895,7 @@ describe('mockMiddleware', () => {
       method: 'GET',
       body: {},
       __filepath__: 'test/mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/users': [mockItem],
@@ -926,7 +926,7 @@ describe('mockMiddleware', () => {
       method: 'GET',
       body: { source: 'dynamic' },
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/:id': [dynamicItem],
@@ -970,7 +970,7 @@ describe('mockMiddleware', () => {
       method: 'GET',
       body: { source: 'static' },
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
     ;(compiler as any).mockData = { '/api/users': [staticItem] }
     sortMockUrls.clear()
 
@@ -987,7 +987,7 @@ describe('mockMiddleware', () => {
       method: 'GET',
       body: { source: 'users' },
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
     const compiler = createMockCompiler({ '/api/users': [usersItem] })
     const sortMockUrls = createMatchingWeightSorter()
 
@@ -1017,7 +1017,7 @@ describe('mockMiddleware', () => {
       method: 'GET',
       body: { source: 'posts' },
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
     ;(compiler as any).mockData = { '/api/posts': [postsItem] }
     sortMockUrls.clear()
 
@@ -1040,7 +1040,7 @@ describe('mockMiddleware', () => {
       method: 'GET',
       body: { id: 1 },
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const middleware = createMockMiddleware(createMockCompiler({ '/api/users': [mockItem] }), {
       proxies: ['/api'],
@@ -1070,7 +1070,7 @@ describe('mockMiddleware', () => {
       method: 'GET',
       body: { id: 1 },
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     // `build: true` 生成的独立 mock server 只向中间件提供 mock 数据，
     // 不具备 `Compiler` 的事件能力，中间件不应依赖编译器的任何事件方法
@@ -1104,7 +1104,7 @@ describe('mockMiddleware', () => {
       method: 'GET',
       body: '',
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/empty': [mockItem],
@@ -1134,7 +1134,7 @@ describe('mockMiddleware', () => {
       method: 'GET',
       body: [{ id: 1 }, { id: 2 }],
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/list': [mockItem],
@@ -1170,7 +1170,7 @@ describe('mockMiddleware', () => {
       method: 'GET',
       body: { ok: 1 },
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/:id*': [mockItem],
@@ -1203,7 +1203,7 @@ describe('mockMiddleware', () => {
       method: 'GET',
       body: { ok: 1 },
       __filepath__: 'test.mock.ts',
-    } as MockHttpItem
+    }
 
     const compiler = createMockCompiler({
       '/api/error': [mockItem],
@@ -1258,7 +1258,7 @@ describe('mockMiddleware / replay', () => {
     body: Buffer.from(JSON.stringify({ ok: 1 })),
     type: 'buffer',
     __filepath__: 'mock/.recordings/api-replay-only.json',
-  } as MockHttpItem
+  }
 
   beforeEach(() => {
     vi.mocked(replayRecordedRequest).mockReset()
@@ -1374,7 +1374,7 @@ describe('mockMiddleware / cors preflight', () => {
     method: 'POST',
     body: { ok: true },
     __filepath__: 'test.mock.ts',
-  } as MockHttpItem
+  }
 
   it('should answer preflight requests before matching mock data', async () => {
     // 预检请求没有对应的 mock，且 cors 会直接结束响应而不调用 next

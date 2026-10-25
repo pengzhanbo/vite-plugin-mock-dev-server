@@ -1,4 +1,4 @@
-import type { MockHttpItem, MockOptions, MockWebsocketItem } from '../types/index.js'
+import type { MockHttpItem, MockWebsocketItem, MockOptions } from '../types/index.js'
 import { isArray } from '@pengzhanbo/utils'
 
 /**

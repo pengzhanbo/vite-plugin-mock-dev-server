@@ -161,7 +161,7 @@ export function handleUpgradeRequest(
   }
 
   const { mockUrl, mock } = match
-  const filepath = (mock as any).__filepath__
+  const filepath = mock.__filepath__ as string
 
   onMatched(filepath, mockUrl)
 

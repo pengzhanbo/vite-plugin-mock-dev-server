@@ -27,7 +27,7 @@ export function processRawData(
   if (isArray(raw)) {
     res = raw.map((item) => ({ ...item, __filepath__ }))
   } else if ('url' in raw) {
-    res = { ...raw, __filepath__ } as unknown as MockHttpItem
+    res = { ...raw, __filepath__ } as MockHttpItem
   } else {
     res = []
     objectKeys(raw).forEach((key) => {
@@ -35,7 +35,7 @@ export function processRawData(
       if (isArray(data)) {
         ;(res as MockOptions).push(...data.map((item) => ({ ...item, __filepath__ })))
       } else {
-        ;(res as MockOptions).push({ ...data, __filepath__ } as unknown as MockHttpItem)
+        ;(res as MockOptions).push({ ...data, __filepath__ })
       }
     })
   }
@@ -154,7 +154,7 @@ export function processMockData(
       const { pathname, query, error: urlError } = urlParse(mock.url)
       if (urlError) {
         logger?.error(
-          `${ansis.red('Invalid mock url')} ${ansis.yellow(mock.url)}\n  ${urlError.message}\n  at (${ansis.underline.gray((mock as any).__filepath__ ?? 'unknown')})`,
+          `${ansis.red('Invalid mock url')} ${ansis.yellow(mock.url)}\n  ${urlError.message}\n  at (${ansis.underline.gray(mock.__filepath__ ?? 'unknown')})`,
         )
         return
       }
@@ -162,7 +162,7 @@ export function processMockData(
       // 跳过非法 url 模式的 mock，避免在请求匹配阶段抛出异常
       if (patternError) {
         logger?.error(
-          `${ansis.red('Invalid mock url pattern')} ${ansis.yellow(mock.url)}\n  ${patternError}\n  at (${ansis.underline.gray((mock as any).__filepath__ ?? 'unknown')})`,
+          `${ansis.red('Invalid mock url pattern')} ${ansis.yellow(mock.url)}\n  ${patternError}\n  at (${ansis.underline.gray(mock.__filepath__ ?? 'unknown')})`,
         )
         return
       }
@@ -172,7 +172,7 @@ export function processMockData(
       if (current.ws !== true) {
         // 非法的 `delay` 配置（负数、`min > max`、非法数组）会让延迟静默失效，
         // 在编译阶段归一化并告警，避免用户误以为配置已生效。
-        current.delay = normalizeDelay(current.delay, (mock as any).__filepath__, logger)
+        current.delay = normalizeDelay(current.delay, mock.__filepath__, logger)
         const validator = current.validator
         if (!isEmptyObject(query)) {
           if (isFunction(validator)) {
@@ -279,8 +279,8 @@ function countValidatorKeys(mock: MockHttpItem | MockWebsocketItem): number {
     return 0
   }
   let count = 0
-  for (const key of Object.keys(validator)) {
-    count += keysCount(validator[key as keyof typeof validator])
+  for (const key of objectKeys(validator)) {
+    count += keysCount(validator[key])
   }
   return count
 }

@@ -83,6 +83,6 @@ export async function replayRecordedRequest(
       body: Buffer.from(matched.res.body, isText ? 'utf-8' : 'base64'),
       type: 'buffer',
       __filepath__: matched.meta.filepath,
-    } as MockHttpItem
+    }
   }
 }

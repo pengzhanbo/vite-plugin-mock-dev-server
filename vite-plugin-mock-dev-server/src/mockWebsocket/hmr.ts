@@ -66,7 +66,7 @@ export function registerHmrHandlers({ compiler, pool, sorter, hmrMap }: HmrHandl
     const provided: { mockUrl: string; mock: MockWebsocketItem }[] = []
     for (const mockUrl of objectKeys(compiler.mockData)) {
       for (const mock of compiler.mockData[mockUrl]) {
-        if (!mock || !mock.ws || (mock as any).__filepath__ !== filepath) {
+        if (!mock || !mock.ws || mock.__filepath__ !== filepath) {
           continue
         }
         provided.push({ mockUrl, mock })

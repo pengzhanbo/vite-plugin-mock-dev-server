@@ -66,4 +66,10 @@ export interface MockBaseItem {
    * 配置后，只有 scene 中任意一项与 activeScene 中任意一项匹配时，该 mock 才会激活。
    */
   scene?: string | string[]
+
+  /**
+   * 内部字段，记录 mock 文件的路径，用于日志输出
+   * @internal
+   * */
+  readonly __filepath__?: string
 }

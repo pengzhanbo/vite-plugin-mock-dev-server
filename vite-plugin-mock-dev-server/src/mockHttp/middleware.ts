@@ -290,7 +290,7 @@ export function createMockMiddleware(
       log: logLevel,
       error: errorConfig,
       __filepath__: filepath,
-    } = mock as MockHttpItem & { __filepath__: string }
+    } = mock
     let { body, status = 200, statusText } = mock
 
     // 计算是否需要使接口返回错误
@@ -308,7 +308,7 @@ export function createMockMiddleware(
     await provideResponseHeaders(request, response, mock, logger)
     await provideResponseCookies(request, response, mock, logger)
 
-    logger.info(() => requestLog(request, filepath, shouldSimulateError), logLevel)
+    logger.info(() => requestLog(request, filepath!, shouldSimulateError), logLevel)
     logger.debug(
       () =>
         `${ansis.magenta('DEBUG')} ${ansis.underline(pathname)} matches: [ ${mockUrls

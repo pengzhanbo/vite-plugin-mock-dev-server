@@ -139,7 +139,7 @@ export async function provideResponseHeaders(
   logger: Logger,
 ): Promise<void> {
   const { headers, type = 'json' } = mock
-  const filepath = (mock as any).__filepath__ as string
+  const filepath = mock.__filepath__ as string
   const contentType = mime.contentType(type) || mime.contentType(mime.lookup(type) || '')
   const context: HeaderContext = {
     res,
@@ -199,7 +199,7 @@ export async function provideResponseCookies(
     return
   }
 
-  const filepath = (mock as any).__filepath__ as string
+  const filepath = mock.__filepath__ as string
   const url = req.url!.split('?')[0]
   const [error, data] = await attemptAsync(async () =>
     isFunction(cookies) ? cookies(req) : cookies,
