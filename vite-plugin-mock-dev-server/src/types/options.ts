@@ -263,6 +263,30 @@ export interface MockServerPluginOptions {
   reload?: boolean
 
   /**
+   * Whether to wait for the initial mock files to be compiled before the dev server
+   * starts serving requests.
+   *
+   * Mock files are compiled in the background by default, so the first requests after a
+   * cold start may arrive before the compilation finished and then fall through to the
+   * real proxy (or a 404). Enable this option to delay the server startup until all mock
+   * files are loaded, which increases the startup time proportionally to the number of
+   * mock files. It is also useful for integrations that send requests right after the
+   * server is created (such as `page.goto` in end-to-end tests).
+   *
+   * Default `true` in a test environment (`NODE_ENV=test`, Vitest or Jest), otherwise `false`
+   *
+   * 是否在开发服务器开始处理请求之前，等待初始 mock 文件编译完成。
+   *
+   * 默认情况下 mock 文件在后台编译，冷启动后的首批请求可能早于编译完成，
+   * 从而穿透到真实代理（或返回 404）。开启该选项后，服务器会等待所有 mock 文件
+   * 加载完成后再开始服务，代价是启动时间随 mock 文件数量增加；对于在服务器创建后
+   * 立即发起请求的集成场景（如端到端测试中的 `page.goto`）很有帮助。
+   *
+   * 测试环境（`NODE_ENV=test`、Vitest 或 Jest）下为 `true`，其他环境为 `false`
+   */
+  awaitInitialLoad?: boolean
+
+  /**
    * Configure to `cors`
    *
    * 配置 `cors`

@@ -8,6 +8,7 @@ import {
   createMatcher,
   doesProxyContextMatchUrl,
   isPathMatch,
+  isTestEnvironment,
   matchScene,
   urlParse,
 } from '../src/utils/index.js'
@@ -191,5 +192,25 @@ describe('matchScene', () => {
     expect(() => matchScene(undefined as unknown as string[], 'dev')).not.toThrow()
     expect(matchScene(undefined as unknown as string[], 'dev')).toBe(false)
     expect(matchScene(undefined as unknown as string[], undefined)).toBe(true)
+  })
+})
+/**
+ * Test suite for isTestEnvironment function
+ *
+ * isTestEnvironment 函数测试套件
+ */
+describe('isTestEnvironment', () => {
+  it('should detect the common test runner environments', () => {
+    // vitest / jest 都会设置 `NODE_ENV=test` 或各自的标识
+    // Both vitest and jest set `NODE_ENV=test` or their own marker
+    expect(isTestEnvironment({ NODE_ENV: 'test' })).toBe(true)
+    expect(isTestEnvironment({ NODE_ENV: 'development', VITEST: 'true' })).toBe(true)
+    expect(isTestEnvironment({ NODE_ENV: 'development', JEST_WORKER_ID: '1' })).toBe(true)
+  })
+
+  it('should treat a dev / production process as a non-test environment', () => {
+    expect(isTestEnvironment({ NODE_ENV: 'development' })).toBe(false)
+    expect(isTestEnvironment({ NODE_ENV: 'production' })).toBe(false)
+    expect(isTestEnvironment({})).toBe(false)
   })
 })

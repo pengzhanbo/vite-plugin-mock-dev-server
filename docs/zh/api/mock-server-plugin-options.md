@@ -14,6 +14,7 @@ interface MockServerPluginOptions {
   include?: string | string[]
   exclude?: string | string[]
   reload?: boolean
+  awaitInitialLoad?: boolean
   log?: boolean | LogLevel
   cors?: boolean | CorsOptions
   formidableOptions?: formidable.Options
@@ -134,6 +135,28 @@ mockDevServerPlugin({
 ```ts
 mockDevServerPlugin({
   reload: true,
+})
+```
+
+### awaitInitialLoad
+
+- **类型**: `boolean`
+- **默认值**: 测试环境（`NODE_ENV=test`、Vitest 或 Jest）下为 `true`，其他环境为 `false`
+- **描述**: 是否在开发服务器开始处理请求之前，等待初始 mock 文件编译完成
+
+默认情况下 mock 文件在后台编译：开发服务器会立即开始监听，冷启动后的首批请求可能早于编译完成，
+从而穿透到真实代理（或返回 404）。开启该选项后，服务器会等待所有 mock 文件加载完成后再开始服务，
+保证首个请求必定命中 mock；代价是启动时间随 mock 文件数量增加。
+
+中间件会在等待之前完成注册，因此等待期间到达的请求仍然会经过 mock 层（命中已加载的规则，
+未命中则继续透传），不会被完全绕过。
+
+在测试运行器中默认值为 `true`：测试通常在服务器创建后立即发起请求（如 `page.goto`），
+否则容易出现偶发失败。
+
+```ts
+mockDevServerPlugin({
+  awaitInitialLoad: true,
 })
 ```
 

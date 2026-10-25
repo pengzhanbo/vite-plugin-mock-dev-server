@@ -160,13 +160,16 @@ export class Compiler extends EventEmitter {
    * 运行编译器
    *
    * @param isWatch - Whether to watch for file changes / 是否监视文件变化
+   * @returns Resolves after the initial mock files are loaded / 初始 mock 文件加载完成后 resolve
    */
-  run(isWatch?: boolean): void {
+  async run(isWatch?: boolean): Promise<void> {
     const { include, exclude } = this.options
     const { pattern, ignore, isMatch } = createMatcher(include, exclude)
-    this.loadAll(pattern, ignore)
+
+    const initialLoad = this.loadAll(pattern, ignore)
 
     if (!isWatch) {
+      await initialLoad
       return
     }
 
@@ -222,6 +225,8 @@ export class Compiler extends EventEmitter {
       this.updateMockData()
       this.emit('mock:update-end', [filepath])
     })
+
+    await initialLoad
   }
 
   /**
@@ -242,9 +247,14 @@ export class Compiler extends EventEmitter {
    *
    * @param pattern - Glob pattern to match mock files / 匹配 Mock 文件的 glob 模式
    * @param ignore - Glob pattern to ignore files / 忽略文件的 glob 模式
+   * @returns Resolves after all matched mock files are loaded / 所有匹配到的 mock 文件加载完成后 resolve
    */
-  private loadAll(pattern: string[], ignore: string[]): void {
-    glob(pattern, { ignore, cwd: normalizePath(path.join(this.cwd, this.options.dir)) })
+  private async loadAll(pattern: string[], ignore: string[]): Promise<void> {
+    try {
+      const files = await glob(pattern, {
+        ignore,
+        cwd: normalizePath(path.join(this.cwd, this.options.dir)),
+      })
       /**
        * 控制 文件编译 并发 数量。
        * 当使用 Promise.all 时，可能在一些比较大型的项目中，过多的 mock 文件
@@ -252,12 +262,14 @@ export class Compiler extends EventEmitter {
        * 性能开销，从而影响编译速度。
        * 实测在控制并发数的前提下，总编译时间 差异不大，但内存开销更小更加稳定。
        */
-      .then((files) =>
-        files.map((file) => () => this.load(normalizePath(path.join(this.options.dir, file)))),
+      const loaders = files.map(
+        (file) => () => this.load(normalizePath(path.join(this.options.dir, file))),
       )
-      .then((loaders) => promiseParallel(loaders, 64))
-      .then(() => this.updateMockData())
-      .catch((e) => this.options.logger.error(formatError(e)))
+      await promiseParallel(loaders, 64)
+      this.updateMockData()
+    } catch (e) {
+      this.options.logger.error(formatError(e))
+    }
   }
 
   /**

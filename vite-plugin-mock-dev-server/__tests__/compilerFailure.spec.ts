@@ -153,7 +153,7 @@ describe('compiler failure', () => {
       logger,
     } as unknown as ResolvedMockServerPluginOptions)
     compiler = instance
-    instance.run(true)
+    void instance.run(true)
     const { mockWatcher } = instance as unknown as { mockWatcher: FSWatcher }
     await new Promise<void>((resolve) => mockWatcher.once('ready', () => resolve()))
     await waitFor(() => !!instance.mockData['/api/a'], 'the mock data to be loaded')
@@ -286,7 +286,7 @@ describe('compilation error overlay', () => {
 
   it('should send the error to the overlay and clear it after the recovery', async () => {
     const ws = { send: vi.fn() }
-    const middlewares = initMockMiddlewares(
+    const { middlewares } = initMockMiddlewares(
       createOptions(),
       server as unknown as Server,
       ws as unknown as WebSocketServer,

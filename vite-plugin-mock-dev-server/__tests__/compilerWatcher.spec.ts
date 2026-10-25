@@ -252,7 +252,7 @@ describe('compiler watcher', () => {
   async function start(expectUrls: string[]): Promise<Compiler> {
     const instance = new Compiler(createOptions(cwd, logger))
     compiler = instance
-    instance.run(true)
+    void instance.run(true)
     const { mockWatcher } = instance as unknown as { mockWatcher: FSWatcher }
     await waitForReady(mockWatcher)
     await waitFor(
@@ -261,6 +261,26 @@ describe('compiler watcher', () => {
     )
     return instance
   }
+
+  it(
+    'should resolve run() after the initial mock files are applied',
+    async () => {
+      await writeMock(`${DIR}/a.mock.ts`, mockFileCode('/api/a', { name: 'a' }))
+      await writeMock(`${DIR}/b.mock.ts`, mockFileCode('/api/b', { name: 'b' }))
+      const instance = new Compiler(createOptions(cwd, logger))
+      compiler = instance
+
+      // 不等待监视器就绪 / 不轮询：`run()` 的 Promise 必须在其完成后才 resolve，
+      // 这是 `awaitInitialLoad` 的依据
+      // No watcher readiness or polling: the `run()` promise must only resolve after the
+      // initial load finished, which is what `awaitInitialLoad` relies on
+      await instance.run(true)
+
+      expect(instance.mockData['/api/a']).toBeDefined()
+      expect(instance.mockData['/api/b']).toBeDefined()
+    },
+    TEST_TIMEOUT,
+  )
 
   it(
     'should drop the mock rules of a deleted mock file',
