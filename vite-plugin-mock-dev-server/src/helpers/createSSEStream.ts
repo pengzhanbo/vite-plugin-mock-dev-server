@@ -124,10 +124,6 @@ class SSEStream extends Transform {
     const socket = req.socket
     if (socket) {
       this.#socket = socket
-      // SSE 需要没有空闲超时的 socket，但该 socket 通常是 keep-alive 连接，
-      // 会被后续 HTTP 请求复用。因此先记录当前超时，在流结束后还原。
-      // `setKeepAlive` / `setNoDelay` 只影响当前连接的 TCP 选项且没有读取接口，
-      // 无法还原；空闲超时才是会影响同一连接后续请求的设置。
       if (typeof socket.timeout === 'number') {
         this.#socketTimeout = socket.timeout
       }
@@ -135,7 +131,6 @@ class SSEStream extends Transform {
       socket.setNoDelay(true)
       socket.setTimeout(0)
     }
-    this.once('finish', () => this.#restoreSocket())
   }
 
   /**
@@ -199,6 +194,7 @@ class SSEStream extends Transform {
     }
     // Some clients (Safari) don't trigger onopen until the first frame is received.
     destination.write(':ok\n\n')
+    destination.once('finish', () => this.#restoreSocket())
     return super.pipe(destination, options)
   }
 
@@ -301,6 +297,7 @@ class SSEStream extends Transform {
         super.destroy()
       }
     })
+    this.resume()
     return this
   }
 }

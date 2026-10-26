@@ -230,16 +230,17 @@ describe('sSE', () => {
     expect(res.read()?.toString()).toContain('event: error\ndata: test error\n')
   })
 
-  it('should restore the socket idle timeout after the stream ends', async () => {
+  it('should restore the socket idle timeout after the destination response finished', async () => {
     const req = createMockReq({ timeout: 60_000 })
     const res = new PassThrough()
     const sse = createSSEStream(req, res as any)
 
     expect(req.socket.setTimeout).toHaveBeenCalledWith(0)
 
-    const finished = once(sse, 'finish')
+    // The timeout is restored only once the response has been flushed
+    const responseFinished = once(res, 'finish')
     sse.end()
-    await finished
+    await responseFinished
 
     expect(req.socket.setTimeout).toHaveBeenLastCalledWith(60_000)
   })
@@ -262,9 +263,8 @@ describe('sSE', () => {
     const res = new PassThrough()
     const sse = createSSEStream(req, res as any)
 
-    const finished = once(sse, 'finish')
     sse.end()
-    await finished
+    await once(res, 'finish')
 
     expect(req.socket.setTimeout).toHaveBeenCalledTimes(1)
     expect(req.socket.setTimeout).toHaveBeenCalledWith(0)
@@ -286,23 +286,50 @@ describe('sSE', () => {
     expect(errorSpy).not.toHaveBeenCalled()
   })
 
+  it('should finish destroying when the destination response is already closed', async () => {
+    const req = createMockReq({ timeout: 60_000 })
+    const res = new PassThrough() as any
+    res.writeHead = vi.fn()
+    res.flushHeaders = vi.fn()
+    const sse = createSSEStream(req, res)
+
+    // The client disconnects: the destination closes and `pipe()` detaches, so
+    // nothing consumes the readable side any more.
+    const responseClosed = once(res, 'close')
+    res.destroy()
+    await responseClosed
+
+    // Buffered frames can no longer be delivered, they must not block teardown
+    sse.write({ data: 'buffered' })
+
+    const closePromise = once(sse, 'close')
+    sse.destroy()
+    await closePromise
+
+    expect(sse.destroyed).toBe(true)
+    expect(req.socket.setTimeout).toHaveBeenLastCalledWith(60_000)
+  })
+
   it('should restore the socket timeout of a real keep-alive connection', async () => {
-    const observed: Array<number | undefined> = []
+    const applied: number[] = []
+    let finalTimeout: number | undefined
     const done = new Promise<void>((resolve) => {
       const server = createServer((req, res) => {
         const socket = req.socket
-        // 1. timeout configured by the server before the SSE stream starts
-        observed.push(socket.timeout)
+        const applyTimeout = socket.setTimeout.bind(socket)
+        // record every idle-timeout change instead of relying on listener order,
+        // because Node applies its own keep-alive timeout once the response ends
+        socket.setTimeout = (msecs: number, callback?: () => void) => {
+          applied.push(msecs)
+          return applyTimeout(msecs, callback)
+        }
         const sse = createSSEStream(req, res)
-        // 2. SSE optimises the socket for streaming
-        observed.push(socket.timeout)
-        sse.once('finish', () => {
-          // 3. the stream must restore the previous timeout once it is over
-          observed.push(socket.timeout)
-        })
         sse.write({ data: 'hello' })
         sse.end()
-        res.once('close', resolve)
+        res.once('close', () => {
+          finalTimeout = socket.timeout
+          resolve()
+        })
       })
       // Simulate a server with an idle timeout configured, e.g. `server.timeout`
       server.on('connection', (socket) => socket.setTimeout(60_000))
@@ -323,6 +350,11 @@ describe('sSE', () => {
 
     await done
 
-    expect(observed).toEqual([60_000, 0, 60_000])
+    // SSE disables the idle timeout while streaming ...
+    expect(applied[0]).toBe(0)
+    // ... and restores the timeout captured before the stream started
+    expect(applied).toContain(60_000)
+    // the idle keep-alive connection still has an idle timeout afterwards
+    expect(finalTimeout).toBeGreaterThan(0)
   })
 })
