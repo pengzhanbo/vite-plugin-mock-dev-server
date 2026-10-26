@@ -1,4 +1,7 @@
+import type { AddressInfo } from 'node:net'
 import { Buffer } from 'node:buffer'
+import { once } from 'node:events'
+import { Agent, createServer, request } from 'node:http'
 import { PassThrough, Writable } from 'node:stream'
 import { describe, expect, it, vi } from 'vitest'
 import { createSSEStream } from '../src/helpers/index.js'
@@ -14,14 +17,17 @@ import { createSSEStream } from '../src/helpers/index.js'
  *
  * 创建带有 socket 的模拟请求对象
  *
+ * @param options - Socket options / socket 选项
  * @returns - 带有 socket 的模拟请求对象
  */
-function createMockReq() {
+function createMockReq(options: { timeout?: number } = {}) {
   return {
     socket: {
       setKeepAlive: vi.fn(),
       setNoDelay: vi.fn(),
       setTimeout: vi.fn(),
+      destroyed: false,
+      ...options,
     },
   } as any
 }
@@ -191,9 +197,14 @@ describe('sSE', () => {
     const sse = createSSEStream(req, res as any)
 
     const endSpy = vi.spyOn(sse, 'end')
-    sse.destroy()
+    const closePromise = once(sse, 'close')
+    const returned = sse.destroy()
 
     expect(endSpy).toHaveBeenCalled()
+    expect(returned).toBe(sse)
+
+    await closePromise
+    expect(sse.destroyed).toBe(true)
   })
 
   it('should destroy SSE stream with error', async () => {
@@ -203,9 +214,115 @@ describe('sSE', () => {
 
     const writeSpy = vi.spyOn(sse, 'write')
     const endSpy = vi.spyOn(sse, 'end')
+    const errorSpy = vi.fn()
+    sse.on('error', errorSpy)
+
+    const closePromise = once(sse, 'close')
     sse.destroy(new Error('test error'))
 
     expect(writeSpy).toHaveBeenCalledWith({ event: 'error', data: 'test error' })
     expect(endSpy).toHaveBeenCalled()
+
+    await closePromise
+    // An 'error' event on the source stream is never forwarded by `pipe()` and
+    // would crash the process when unhandled, so the error is sent as a frame.
+    expect(errorSpy).not.toHaveBeenCalled()
+    expect(res.read()?.toString()).toContain('event: error\ndata: test error\n')
+  })
+
+  it('should restore the socket idle timeout after the stream ends', async () => {
+    const req = createMockReq({ timeout: 60_000 })
+    const res = new PassThrough()
+    const sse = createSSEStream(req, res as any)
+
+    expect(req.socket.setTimeout).toHaveBeenCalledWith(0)
+
+    const finished = once(sse, 'finish')
+    sse.end()
+    await finished
+
+    expect(req.socket.setTimeout).toHaveBeenLastCalledWith(60_000)
+  })
+
+  it('should restore the socket idle timeout after the stream is destroyed', async () => {
+    const req = createMockReq({ timeout: 60_000 })
+    const res = new PassThrough()
+    const sse = createSSEStream(req, res as any)
+
+    const closePromise = once(sse, 'close')
+    sse.destroy()
+    await closePromise
+
+    expect(req.socket.setTimeout).toHaveBeenLastCalledWith(60_000)
+  })
+
+  it('should not touch the socket state again when it is already closed', async () => {
+    const req = createMockReq({ timeout: 60_000 })
+    req.socket.destroyed = true
+    const res = new PassThrough()
+    const sse = createSSEStream(req, res as any)
+
+    const finished = once(sse, 'finish')
+    sse.end()
+    await finished
+
+    expect(req.socket.setTimeout).toHaveBeenCalledTimes(1)
+    expect(req.socket.setTimeout).toHaveBeenCalledWith(0)
+  })
+
+  it('should be safe to destroy after the stream ended', async () => {
+    const req = createMockReq()
+    const res = new PassThrough()
+    const sse = createSSEStream(req, res as any)
+    const errorSpy = vi.fn()
+    sse.on('error', errorSpy)
+
+    const finished = once(sse, 'finish')
+    sse.end()
+    await finished
+
+    // Writing an error frame after `end()` would raise `ERR_STREAM_WRITE_AFTER_END`
+    expect(() => sse.destroy(new Error('too late'))).not.toThrow()
+    expect(errorSpy).not.toHaveBeenCalled()
+  })
+
+  it('should restore the socket timeout of a real keep-alive connection', async () => {
+    const observed: Array<number | undefined> = []
+    const done = new Promise<void>((resolve) => {
+      const server = createServer((req, res) => {
+        const socket = req.socket
+        // 1. timeout configured by the server before the SSE stream starts
+        observed.push(socket.timeout)
+        const sse = createSSEStream(req, res)
+        // 2. SSE optimises the socket for streaming
+        observed.push(socket.timeout)
+        sse.once('finish', () => {
+          // 3. the stream must restore the previous timeout once it is over
+          observed.push(socket.timeout)
+        })
+        sse.write({ data: 'hello' })
+        sse.end()
+        res.once('close', resolve)
+      })
+      // Simulate a server with an idle timeout configured, e.g. `server.timeout`
+      server.on('connection', (socket) => socket.setTimeout(60_000))
+      server.listen(0, '127.0.0.1', () => {
+        const { port } = server.address() as AddressInfo
+        const agent = new Agent({ keepAlive: true })
+        const clientReq = request({ host: '127.0.0.1', port, path: '/events', agent }, (res) => {
+          res.resume()
+          res.once('end', () => {
+            agent.destroy()
+            server.close()
+            server.closeAllConnections()
+          })
+        })
+        clientReq.end()
+      })
+    })
+
+    await done
+
+    expect(observed).toEqual([60_000, 0, 60_000])
   })
 })
