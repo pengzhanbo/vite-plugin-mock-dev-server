@@ -1,4 +1,5 @@
 import type { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from 'node:http'
+import type { Socket } from 'node:net'
 import { Transform } from 'node:stream'
 
 /**
@@ -93,6 +94,34 @@ export type HeaderStream = NodeJS.WritableStream & WriteHeaders
  */
 class SSEStream extends Transform {
   /**
+   * Socket owning the SSE connection. Cleared once its state is restored.
+   *
+   * 承载 SSE 连接的 socket，状态还原后清空。
+   */
+  #socket: Socket | null = null
+  /**
+   * Socket idle timeout captured before SSE optimised the socket.
+   *
+   * SSE 优化 socket 之前捕获的空闲超时。
+   */
+  #socketTimeout: number | undefined
+  /**
+   * Whether the socket state has already been restored, to keep it idempotent.
+   *
+   * socket 状态是否已还原，保证还原操作幂等。
+   */
+  #socketRestored = false
+  /**
+   * Whether the teardown was requested explicitly (`destroy()`) or by an abort,
+   * so the socket state is restored immediately instead of waiting for the
+   * destination response to emit `finish`.
+   *
+   * 是否为显式 `destroy()` 或中止触发的销毁；此时立即还原 socket 状态，
+   * 而不是等待目标响应 `finish`。
+   */
+  #explicitTeardown = false
+
+  /**
    * Constructor
    *
    * 构造函数
@@ -101,9 +130,56 @@ class SSEStream extends Transform {
    */
   constructor(req: IncomingMessage) {
     super({ objectMode: true })
-    req.socket.setKeepAlive(true)
-    req.socket.setNoDelay(true)
-    req.socket.setTimeout(0)
+    const socket = req.socket
+    if (socket) {
+      this.#socket = socket
+      if (typeof socket.timeout === 'number') {
+        this.#socketTimeout = socket.timeout
+      }
+      socket.setKeepAlive(true)
+      socket.setNoDelay(true)
+      socket.setTimeout(0)
+    }
+  }
+
+  /**
+   * Restore the socket state and complete the stream teardown
+   *
+   * 还原 socket 状态并完成流销毁
+   *
+   * @param error - Destroy error / 销毁错误
+   * @param callback - Destroy callback / 销毁回调
+   */
+  _destroy(error: Error | null, callback: (error?: Error | null) => void): void {
+    // 正常 autoDestroy（流已正常结束）时响应可能仍在写出，还原交给 `pipe()` 中
+    // 目标响应的 `finish` 监听器；显式销毁、目标中止与错误路径立即还原。
+    // A normal `autoDestroy` may still be flushing into the destination, so the
+    // restore is deferred to the `finish` listener registered in `pipe()`;
+    // aborts and explicit `destroy()` calls restore right away.
+    const completedNormally =
+      !error && !this.#explicitTeardown && this.writableFinished && this.readableEnded
+    if (!completedNormally) {
+      this.#restoreSocket()
+    }
+    callback(error)
+  }
+
+  /**
+   * Restore the socket idle timeout captured in the constructor
+   *
+   * 还原构造函数中捕获的 socket 空闲超时
+   */
+  #restoreSocket(): void {
+    if (this.#socketRestored) {
+      return
+    }
+    this.#socketRestored = true
+    const socket = this.#socket
+    this.#socket = null
+    if (!socket || socket.destroyed || this.#socketTimeout === undefined) {
+      return
+    }
+    socket.setTimeout(this.#socketTimeout)
   }
 
   /**
@@ -136,6 +212,7 @@ class SSEStream extends Transform {
     }
     // Some clients (Safari) don't trigger onopen until the first frame is received.
     destination.write(':ok\n\n')
+    destination.once('finish', () => this.#restoreSocket())
     return super.pipe(destination, options)
   }
 
@@ -219,10 +296,29 @@ class SSEStream extends Transform {
    * @returns This stream / 此流
    */
   destroy(error?: Error): this {
-    if (error) {
+    if (this.destroyed) {
+      return this
+    }
+    if (error && !this.writableEnded) {
       this.write({ event: 'error', data: error.message })
     }
-    this.end()
+
+    if (this.writableFinished && this.readableEnded) {
+      return super.destroy()
+    }
+
+    this.#explicitTeardown = true
+    if (!this.writableEnded) {
+      this.end()
+    }
+    // 立即销毁会丢弃缓冲区中的数据，并使 `pipe()` 无法结束目标响应，因此等数据
+    // 全部被消费后再销毁；常规 `end()` 路径由 `autoDestroy` 负责。
+    this.once('end', () => {
+      if (!this.destroyed) {
+        super.destroy()
+      }
+    })
+    this.resume()
     return this
   }
 }
