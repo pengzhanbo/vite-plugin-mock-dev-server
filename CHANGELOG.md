@@ -1,3 +1,22 @@
+# [2.7.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.6.0...v2.7.0) (2026-10-26)
+
+### Bug Fixes
+
+- batch merge `mock:update-end` events ([#254](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/254)) ([f87f7db](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/f87f7db32f4e7bc0a0293e4c750bbdced60bd926))
+- drop `transfer-encoding` header when replay ([#251](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/251)) ([f2a4b9a](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/f2a4b9afec1437268e5e9e6bac4618b3a41d141e))
+- fix temp file path and log output ([e2128ef](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/e2128efc60d05efd9eed2609a91fcf3aa02baa98))
+- handle mock response execution errors safely ([#253](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/253)) ([c2306a9](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/c2306a9c42ee1b668073ee95ffc0d3a63eff5f8e))
+- handle ws handshake exceptions ([93a2e54](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/93a2e54f42b3a9f907722e1a61c2fa84c5cc5bee))
+- improve logger ([#252](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/252)) ([dc5a07d](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/dc5a07d56965c2e9549516ab89675215e904aaa1))
+- restore socket idle timeout after SSE stream ends ([#256](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/256)) ([ee141da](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/ee141dac1a05ddef844cbe973b73517b33f3cfc8))
+
+### Features
+
+- add `awaitInitialLoad` option to wait for initial mock loaded ([#255](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/255)) ([9ba7cf0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/9ba7cf01d179b649fdd8ee8e86d1a1293019f731))
+- request entity too large returned 413 ([#244](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/244)) ([e8c4d44](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/e8c4d44539628365a159da00dbd45433e7d7921d))
+- retain mock rules that failed to compile and display error overlay ([#247](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/247)) ([16b8694](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/16b86948f9242f4b97fd2dd7ed68eb4056c8124f))
+- skip and release interrupted or failed response record ([#250](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/250)) ([717a567](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/717a5670f09175b4d70a41cd50bba154c6c0beb4))
+
 # [2.6.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.5.0...v2.6.0) (2026-10-18)
 
 ### Bug Fixes
