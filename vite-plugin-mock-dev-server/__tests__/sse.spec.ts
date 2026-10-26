@@ -286,6 +286,40 @@ describe('sSE', () => {
     expect(errorSpy).not.toHaveBeenCalled()
   })
 
+  it('should drain buffered frames before destroying the stream', async () => {
+    const req = createMockReq({ timeout: 60_000 })
+    const chunks: string[] = []
+    const res = new Writable({
+      // A tiny highWaterMark forces the destination into backpressure
+      highWaterMark: 1,
+      write(chunk, _encoding, callback) {
+        chunks.push(chunk.toString())
+        setTimeout(callback, 1)
+      },
+    }) as any
+    res.writeHead = vi.fn()
+    res.flushHeaders = vi.fn()
+    const sse = createSSEStream(req, res)
+
+    sse.write({ data: 'first' })
+    sse.write({ data: 'second' })
+    const writableFinished = once(sse, 'finish')
+    sse.end()
+    await writableFinished
+
+    // The writable side is done, the readable side is still buffered
+    expect(sse.readableEnded).toBe(false)
+
+    const closePromise = once(sse, 'close')
+    sse.destroy()
+    await closePromise
+
+    expect(sse.destroyed).toBe(true)
+    // Buffered frames are flushed instead of being dropped by an eager destroy
+    expect(chunks.join('')).toContain('data: second\n')
+    expect(req.socket.setTimeout).toHaveBeenLastCalledWith(60_000)
+  })
+
   it('should finish destroying when the destination response is already closed', async () => {
     const req = createMockReq({ timeout: 60_000 })
     const res = new PassThrough() as any

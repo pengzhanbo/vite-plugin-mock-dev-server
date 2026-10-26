@@ -111,6 +111,15 @@ class SSEStream extends Transform {
    * socket 状态是否已还原，保证还原操作幂等。
    */
   #socketRestored = false
+  /**
+   * Whether the teardown was requested explicitly (`destroy()`) or by an abort,
+   * so the socket state is restored immediately instead of waiting for the
+   * destination response to emit `finish`.
+   *
+   * 是否为显式 `destroy()` 或中止触发的销毁；此时立即还原 socket 状态，
+   * 而不是等待目标响应 `finish`。
+   */
+  #explicitTeardown = false
 
   /**
    * Constructor
@@ -142,7 +151,16 @@ class SSEStream extends Transform {
    * @param callback - Destroy callback / 销毁回调
    */
   _destroy(error: Error | null, callback: (error?: Error | null) => void): void {
-    this.#restoreSocket()
+    // 正常 autoDestroy（流已正常结束）时响应可能仍在写出，还原交给 `pipe()` 中
+    // 目标响应的 `finish` 监听器；显式销毁、目标中止与错误路径立即还原。
+    // A normal `autoDestroy` may still be flushing into the destination, so the
+    // restore is deferred to the `finish` listener registered in `pipe()`;
+    // aborts and explicit `destroy()` calls restore right away.
+    const completedNormally =
+      !error && !this.#explicitTeardown && this.writableFinished && this.readableEnded
+    if (!completedNormally) {
+      this.#restoreSocket()
+    }
     callback(error)
   }
 
@@ -284,11 +302,14 @@ class SSEStream extends Transform {
     if (error && !this.writableEnded) {
       this.write({ event: 'error', data: error.message })
     }
+
+    if (this.writableFinished && this.readableEnded) {
+      return super.destroy()
+    }
+
+    this.#explicitTeardown = true
     if (!this.writableEnded) {
       this.end()
-    }
-    if (this.writableFinished) {
-      return super.destroy()
     }
     // 立即销毁会丢弃缓冲区中的数据，并使 `pipe()` 无法结束目标响应，因此等数据
     // 全部被消费后再销毁；常规 `end()` 路径由 `autoDestroy` 负责。
