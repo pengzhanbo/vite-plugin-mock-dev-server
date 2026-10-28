@@ -1,6 +1,6 @@
 import type { Readable, Stream } from 'node:stream'
 import { LRUCache, attempt } from '@pengzhanbo/utils'
-import { customRequire, normalizePackageName } from './shared.js'
+import { customRequire } from './shared.js'
 
 export function isStream(stream: unknown): stream is Stream {
   return stream != null && typeof stream === 'object' && typeof (stream as any).pipe === 'function'
@@ -24,7 +24,6 @@ const PACKAGE_CACHE = new LRUCache<string, boolean>({ maxSize: 1024 })
  * @returns 包是否存在
  */
 export function isPackageExists(mod: string): boolean {
-  mod = normalizePackageName(mod)
   if (PACKAGE_CACHE.has(mod)) {
     return PACKAGE_CACHE.get(mod)!
   }
