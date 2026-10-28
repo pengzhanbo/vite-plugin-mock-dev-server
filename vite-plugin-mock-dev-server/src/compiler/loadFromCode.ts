@@ -72,5 +72,3 @@ function cleanupTempFiles(): void {
 
 // 在进程意外 退出/终止 时，清理临时文件
 process.on('exit', cleanupTempFiles)
-process.once('SIGINT', cleanupTempFiles)
-process.once('SIGTERM', cleanupTempFiles)
