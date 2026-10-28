@@ -28,9 +28,9 @@ export function isPackageExists(mod: string): boolean {
     return PACKAGE_CACHE.get(mod)!
   }
 
-  let isExists = false
-  const [err] = attempt(() => (isExists = !!import.meta.resolve?.(mod)))
-  if (err) {
+  const [err, resolved] = attempt(() => import.meta.resolve(mod))
+  let isExists = err ? false : !!resolved
+  if (!isExists) {
     attempt(() => (isExists = !!customRequire.resolve(mod)))
   }
   PACKAGE_CACHE.set(mod, isExists)

@@ -7,7 +7,7 @@ import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { name as __PACKAGE_NAME__, version as __PACKAGE_VERSION__ } from '../../package.json'
 import { aliasMatches } from '../compiler/index.js'
-import { customRequire } from '../utils/index.js'
+import { customRequire, normalizePackageName } from '../utils/index.js'
 
 /**
  * 从 mock 文件的 importers 中获取依赖
@@ -45,14 +45,6 @@ export function getMockDependencies(
     }
   })
   return Array.from(list)
-}
-
-function normalizePackageName(dep: string): string {
-  const [scope, name] = dep.split('/')
-  if (scope[0] === '@') {
-    return `${scope}/${name}`
-  }
-  return scope
 }
 
 export function generatePackageJson(
