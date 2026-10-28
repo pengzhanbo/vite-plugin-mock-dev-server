@@ -72,3 +72,13 @@ function cleanupTempFiles(): void {
 
 // 在进程意外 退出/终止 时，清理临时文件
 process.on('exit', cleanupTempFiles)
+process.on('SIGINT', () => {
+  cleanupTempFiles()
+  process.kill(process.pid, 'SIGINT')
+  process.exit(130)
+})
+process.on('SIGTERM', () => {
+  cleanupTempFiles()
+  process.kill(process.pid, 'SIGTERM')
+  process.exit(143)
+})
