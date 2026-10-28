@@ -2,14 +2,13 @@ import type { Debugger } from 'obug'
 import { Buffer } from 'node:buffer'
 import { createHash } from 'node:crypto'
 import { createRequire } from 'node:module'
-import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
-import { isPrimitive } from '@pengzhanbo/utils'
+import { isPrimitive, slash } from '@pengzhanbo/utils'
 import { createDebug } from 'obug'
 
-export const customRequire: NodeJS.Require = createRequire(process.cwd())
+export const customRequire: NodeJS.Require = createRequire(path.join(process.cwd(), 'fake.js'))
 
 export function getDirname(importMetaUrl: string): string {
   return path.dirname(fileURLToPath(importMetaUrl))
@@ -40,14 +39,8 @@ export const MOCK_TEMP_FILE_MARK: string = '.vite-mock-tmp-'
  */
 export const MOCK_TEMP_FILE_RE: RegExp = /\.vite-mock-tmp-[a-f0-9]+\.(?:mjs|cjs)$/
 
-const windowsSlashRE = /\\/g
-const isWindows = os.platform() === 'win32'
-
-export function slash(p: string): string {
-  return p.replace(windowsSlashRE, '/')
-}
 export function normalizePath(id: string): string {
-  return path.posix.normalize(isWindows ? slash(id) : id)
+  return slash(path.normalize(id))
 }
 
 export function getHash(str: unknown): string {
@@ -86,4 +79,20 @@ export function formatError(error: unknown): string {
     return error.stack ?? error.message
   }
   return String(error)
+}
+
+/**
+ * Normalize a package name.
+ *
+ * 规范化包名。
+ *
+ * @param dep - Package name / 包名
+ * @returns Normalized package name / 规范化后的包名
+ */
+export function normalizePackageName(dep: string): string {
+  const [scope, name] = dep.split('/')
+  if (scope[0] === '@') {
+    return `${scope}/${name}`
+  }
+  return scope
 }
