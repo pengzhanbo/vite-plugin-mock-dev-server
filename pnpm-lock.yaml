@@ -166,7 +166,7 @@ catalogs:
   dev:
     '@pengzhanbo/oxc-config':
       specifier: ^2.13.0
-      version: 2.13.0
+      version: 2.14.0
     '@tailwindcss/vite':
       specifier: ^4.3.3
       version: 4.3.3
@@ -352,7 +352,7 @@ importers:
     devDependencies:
       '@pengzhanbo/oxc-config':
         specifier: catalog:dev
-        version: 2.13.0(eslint@10.11.0(jiti@2.7.0))(oxfmt@0.74.0)(oxlint-tsgolint@7.0.2005)(oxlint@1.89.0(oxlint-tsgolint@7.0.2005))
+        version: 2.14.0(eslint@10.11.0(jiti@2.7.0))(oxfmt@0.74.0)(oxlint-tsgolint@7.0.2005)(oxlint@1.89.0(oxlint-tsgolint@7.0.2005))
       '@types/co-body':
         specifier: catalog:dev
         version: 6.1.3
@@ -1186,12 +1186,12 @@ packages:
   '@paralleldrive/cuid2@2.3.1':
     resolution: {integrity: sha512-XO7cAxhnTZl0Yggq6jOgjiOHhbgcO4NqFqwSmQpjK3b6TEE6Uj/jfSk6wzYyemh3+I0sHirKSetjQwn5cZktFw==}
 
-  '@pengzhanbo/oxc-config@2.13.0':
-    resolution: {integrity: sha512-luTcV/1hi49nUqtL8hBcwTeobskYwKopZnnXu800lrSyCbJDEAfy4qzkq4UmDlnVctGZK0PDLx1Pto8d6R2BSw==}
+  '@pengzhanbo/oxc-config@2.14.0':
+    resolution: {integrity: sha512-OCXiaIM0bqmclh2+AlFkTE1wjtQi1RXx2h2NN7UMgbz/yqFXgr/k9xk+Nrh/CqnQG5WGziOtaVNEoKPGwp8RCQ==}
     peerDependencies:
       oxfmt: ^0.74.0
       oxlint: ^1.89.0
-      oxlint-tsgolint: ^7.0.2004
+      oxlint-tsgolint: ^7.0.2005
 
   '@pengzhanbo/utils@3.12.0':
     resolution: {integrity: sha512-7FO3v0z0FcAmWbVaG0UTd0nrKAtR+FdJ3Uoa7CGAO790Y9bsTyoDGn/FHhFZq5bNRWaq9FiwyA7SiKD4fdwm9Q==}
@@ -3939,7 +3939,7 @@ snapshots:
     dependencies:
       '@noble/hashes': 1.8.0
 
-  '@pengzhanbo/oxc-config@2.13.0(eslint@10.11.0(jiti@2.7.0))(oxfmt@0.74.0)(oxlint-tsgolint@7.0.2005)(oxlint@1.89.0(oxlint-tsgolint@7.0.2005))':
+  '@pengzhanbo/oxc-config@2.14.0(eslint@10.11.0(jiti@2.7.0))(oxfmt@0.74.0)(oxlint-tsgolint@7.0.2005)(oxlint@1.89.0(oxlint-tsgolint@7.0.2005))':
     dependencies:
       eslint-plugin-regexp: 3.3.1(eslint@10.11.0(jiti@2.7.0))
       oxfmt: 0.74.0
