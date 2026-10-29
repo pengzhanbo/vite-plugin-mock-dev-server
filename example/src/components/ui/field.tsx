@@ -190,7 +190,11 @@ function FieldError({
 
     return (
       <ul className="ml-4 flex list-disc flex-col gap-1">
-        {uniqueErrors.map((error, index) => error?.message && <li key={index}>{error.message}</li>)}
+        {uniqueErrors.map(
+          (error, index) =>
+            // oxlint-disable-next-line react/no-array-index-key
+            error?.message && <li key={`${error?.message ?? 'err'}-${index}`}>{error.message}</li>,
+        )}
       </ul>
     )
   }, [children, errors])

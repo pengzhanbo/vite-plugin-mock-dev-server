@@ -60,6 +60,7 @@ export default function App(): React.ReactNode {
     }
     element.scrollIntoView({ behavior: 'smooth', block: 'start' })
     window.history.replaceState(null, '', `#${pendingTarget}`)
+    // oxlint-disable-next-line react/set-state-in-effect
     setPendingTarget(null)
   }, [pendingTarget, visibleGroups])
 

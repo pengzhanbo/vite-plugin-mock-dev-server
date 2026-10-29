@@ -10,13 +10,14 @@ import { Button } from '@/components/ui/button.js'
  * @returns Record panel content / 录制面板内容
  */
 export function RecordPanel(): React.ReactNode {
-  const [token, setToken] = useState(String(Date.now()))
+  const [token, setToken] = useState('')
   const [result, setResult] = useState('')
   const [busy, setBusy] = useState(false)
 
   const request = async (): Promise<void> => {
     setBusy(true)
     setResult('requesting…')
+    setToken(String(Date.now()))
     try {
       const response = await fetch(`/api-record/demo?token=${encodeURIComponent(token)}`)
       const text = await response.text()

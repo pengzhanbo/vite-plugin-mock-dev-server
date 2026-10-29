@@ -30,6 +30,7 @@ function ToggleGroup({
     spacing?: number
     orientation?: 'horizontal' | 'vertical'
   }): React.JSX.Element {
+  const data = { variant, size, spacing, orientation }
   return (
     <ToggleGroupPrimitive
       data-slot="toggle-group"
@@ -44,9 +45,7 @@ function ToggleGroup({
       )}
       {...props}
     >
-      <ToggleGroupContext.Provider value={{ variant, size, spacing, orientation }}>
-        {children}
-      </ToggleGroupContext.Provider>
+      <ToggleGroupContext.Provider value={data}>{children}</ToggleGroupContext.Provider>
     </ToggleGroupPrimitive>
   )
 }

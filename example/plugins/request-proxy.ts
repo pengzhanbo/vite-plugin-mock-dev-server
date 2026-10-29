@@ -1,4 +1,5 @@
 import type { Plugin } from 'vite'
+import { Buffer } from 'node:buffer'
 
 interface ProxyPayload {
   url?: unknown
