@@ -54,17 +54,18 @@ catalogs:
     oxlint: '^1.89.0'
     oxlint-tsgolint: '^7.0.2005'
     tailwindcss: ^4.3.3
+    taze: ^21.3.0
   prod:
     '@base-ui/react': ^1.9.0
     '@pengzhanbo/utils': ^3.12.0
     ansis: ^4.4.0
-    chokidar: ^6.0.0
+    chokidar: ^5.0.0
     class-variance-authority: ^0.7.1
     clsx: ^2.1.1
     co-body: ^6.2.0
     cookies: ^0.9.2
     cors: ^2.8.6
-    formidable: 3.5.4
+    formidable: ^3.5.4
     http-status: ^2.1.0
     json5: ^2.2.3
     local-pkg: ^1.2.1
