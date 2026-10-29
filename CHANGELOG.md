@@ -1,3 +1,10 @@
+## [2.7.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.7.0...v2.7.1) (2026-10-29)
+
+### Bug Fixes
+
+- downgrade `chokidar` to `v5`, close [#258](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/258) ([#264](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/264)) ([9be643d](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/9be643d2fe884fe837b7a6cd56950627f54ea129))
+- improve `SIGINT/SIGTERM` listener, close [#259](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/259) ([#263](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/issues/263)) ([3703466](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/370346668d9e84b4d8b97f9fb88c4960899fd6b2))
+
 # [2.7.0](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.6.0...v2.7.0) (2026-10-26)
 
 ### Bug Fixes
