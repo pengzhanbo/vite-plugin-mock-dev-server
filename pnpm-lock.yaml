@@ -344,7 +344,7 @@ catalogs:
       version: 0.2.17
     ws:
       specifier: ^8.22.0
-      version: 8.22.0
+      version: 8.22.2
 
 overrides:
   esbuild: ^0.28.2
@@ -542,7 +542,7 @@ importers:
         version: 0.2.17
       ws:
         specifier: catalog:prod
-        version: 8.22.0
+        version: 8.22.2
     devDependencies:
       esbuild:
         specifier: ^0.28.2
@@ -3528,8 +3528,8 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
-  ws@8.22.0:
-    resolution: {integrity: sha512-Ydggc987+RO0AnWtZ/7Wq9FtNvcrL1b/RO0ud9mWjUPgDrsAAwQSF51sm2hm1XofbU/4jkpGEsLFsZZxU+1DOg==}
+  ws@8.22.2:
+    resolution: {integrity: sha512-/rEZ2ejown2N5gxVTHUu9bVVC7ttu0/Tgzf5hbTOixR3Fs7mbbXgn2DbdbcKgJOmpQMtrIUWivtYuVMnp/W/yA==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -6314,7 +6314,7 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  ws@8.22.0: {}
+  ws@8.22.2: {}
 
   y18n@5.0.8: {}
 
