@@ -1,3 +1,9 @@
+## [2.7.2](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.7.1...v2.7.2) (2026-11-22)
+
+### Bug Fixes
+
+- fix recording file path matching on Windows ([816d9b5](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/commit/816d9b5e6196f6fa363c720a0b1cdd652c4f60fb))
+
 ## [2.7.1](https://github.com/pengzhanbo/vite-plugin-mock-dev-server/compare/v2.7.0...v2.7.1) (2026-10-29)
 
 ### Bug Fixes
