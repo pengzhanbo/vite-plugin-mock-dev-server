@@ -125,7 +125,7 @@ export async function createProject(files: Record<string, string> = {}): Promise
     write,
     read: async (file) => readFile(path.join(root, file), 'utf-8'),
     cleanup: async () => {
-      await rm(root, { recursive: true, force: true })
+      await rm(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 })
     },
   }
 }
