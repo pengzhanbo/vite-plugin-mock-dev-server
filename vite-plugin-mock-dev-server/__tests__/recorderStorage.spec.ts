@@ -91,6 +91,8 @@ describe('recorder storage', () => {
     // `/api/aaaa` 与 `/api/bbbb` 长度相同，生成的 JSON 文件大小也相同
     // `/api/aaaa` and `/api/bbbb` have the same length, so do the generated JSON files
     await writeRecordStorage(filepath, [createRecord('/api/aaaa')])
+    const seconds = Math.floor(Date.now() / 1000)
+    fs.utimesSync(filepath, seconds, seconds)
     const { mtimeMs, size } = fs.statSync(filepath)
     expect(await readRecordStorage(filepath)).toHaveLength(1)
 
