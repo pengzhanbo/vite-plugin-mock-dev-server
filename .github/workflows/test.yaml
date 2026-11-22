@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: unit-test (${{ matrix.os }})
+    name: unit-test (${{ matrix.os }} / node@${{ matrix.node-version }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
 
