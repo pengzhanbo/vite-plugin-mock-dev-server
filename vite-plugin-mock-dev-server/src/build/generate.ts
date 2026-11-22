@@ -11,7 +11,7 @@ import ansis from 'ansis'
 import { loadPackageJSON } from 'local-pkg'
 import { glob } from 'tinyglobby'
 import { transform } from '../compiler/index.js'
-import { formatError } from '../utils/index.js'
+import { formatError, normalizePath } from '../utils/index.js'
 import { generateMockEntryCode } from './mockEntryCode.js'
 import { generatePackageJson, getMockDependencies } from './packageJson.js'
 import { generatorServerEntryCode } from './serverEntryCode.js'
@@ -76,7 +76,7 @@ export async function generateMockServer(
   // 由 `includeRecord` 独立控制：即使未开启录制功能（`record.enabled` 为 `false`），
   // 只要 `includeRecord` 为 `true`，已有的录制文件依然会被打包到产物中（用于仅回放的场景）。
   if (buildOptions.includeRecord) {
-    const files = await glob(path.join(options.record.dir, '**/*.json'), {
+    const files = await glob(normalizePath(path.join(options.record.dir, '**/*.json')), {
       cwd: options.cwd,
       dot: true,
     })
