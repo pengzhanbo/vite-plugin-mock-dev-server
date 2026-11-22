@@ -45,6 +45,7 @@
     "taze": "catalog:dev",
     "tsdown": "catalog:dev",
     "typescript": "catalog:dev",
+    "unrun": "catalog:dev",
     "vitest": "catalog:dev"
   },
   "packageManager": "pnpm@12.21.0"

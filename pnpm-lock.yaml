@@ -257,6 +257,9 @@ catalogs:
     typescript:
       specifier: ^7.0.2
       version: 7.0.2
+    unrun:
+      specifier: ^0.3.1
+      version: 0.3.1
     vite:
       specifier: ^8.3.8
       version: 8.3.8
@@ -415,10 +418,13 @@ importers:
         version: 21.3.0
       tsdown:
         specifier: catalog:dev
-        version: 0.23.7(typescript@7.0.2)
+        version: 0.23.7(typescript@7.0.2)(unrun@0.3.1)
       typescript:
         specifier: catalog:dev
         version: 7.0.2
+      unrun:
+        specifier: catalog:dev
+        version: 0.3.1
       vitest:
         specifier: catalog:dev
         version: 5.1.1(@types/node@26.6.6)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
@@ -3394,6 +3400,16 @@ packages:
       webpack:
         optional: true
 
+  unrun@0.3.1:
+    resolution: {integrity: sha512-onIck/oNnCaytwths1ZVp1LK2Gq2hPoyFhiHebObuUXqR3S0uHuLLaBK8K6mRRgV7Ptip8AnNvaUsgzwWwBZuA==}
+    engines: {node: ^22.13.0 || >=24.0.0}
+    hasBin: true
+    peerDependencies:
+      synckit: ^0.11.11
+    peerDependenciesMeta:
+      synckit:
+        optional: true
+
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
 
@@ -6041,7 +6057,7 @@ snapshots:
 
   trough@2.2.0: {}
 
-  tsdown@0.23.7(typescript@7.0.2):
+  tsdown@0.23.7(typescript@7.0.2)(unrun@0.3.1):
     dependencies:
       cac: 7.1.0
       defu: 6.1.7
@@ -6059,6 +6075,7 @@ snapshots:
       verkit: 0.5.0
     optionalDependencies:
       typescript: 7.0.2
+      unrun: 0.3.1
     transitivePeerDependencies:
       - '@volar/typescript'
       - '@vue/language-core'
@@ -6213,6 +6230,10 @@ snapshots:
       esbuild: 0.28.2
       rolldown: 1.3.3
       vite: 8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
+
+  unrun@0.3.1:
+    dependencies:
+      rolldown: 1.3.3
 
   uri-js@4.4.1:
     dependencies:

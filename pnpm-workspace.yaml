@@ -55,6 +55,7 @@ catalogs:
     oxlint-tsgolint: '^7.0.2008'
     tailwindcss: ^4.3.5
     taze: ^21.3.0
+    unrun: ^0.3.1
   prod:
     '@base-ui/react': ^1.9.0
     '@pengzhanbo/utils': ^3.12.0
