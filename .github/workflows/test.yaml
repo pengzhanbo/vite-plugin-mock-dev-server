@@ -17,6 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [20.19.0, 22.12.0, 24, 26]
 
     steps:
       - uses: actions/checkout@v7
@@ -27,7 +28,7 @@ jobs:
       - name: Set Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 26
+          node-version: ${{ matrix.node-version }}
 
       - name: Install
         run: pnpm i
