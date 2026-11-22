@@ -59,6 +59,31 @@ function collectStreamOutput(sseStream: any): Promise<string> {
 }
 
 /**
+ * Drain every buffered chunk of a paused readable
+ *
+ * 排空暂停状态可读流中的所有缓冲数据
+ *
+ * Node 26 changed `readable.read()` without a size to return a single buffered
+ * chunk instead of concatenating the whole buffer, so a single `read()` call is
+ * not guaranteed to observe all written frames any more.
+ *
+ * Node 26 改变了 `readable.read()` 不带参数时的行为：只返回一个缓冲块，
+ * 而不是拼接整个缓冲区，因此单次 `read()` 调用不再能拿到全部已写入的帧。
+ *
+ * @param readable - Readable stream / 可读流
+ * @returns - Concatenated buffered content / 拼接后的缓冲内容
+ */
+function readAll(readable: PassThrough): string {
+  const chunks: Buffer[] = []
+  let chunk = readable.read() as Buffer | null
+  while (chunk != null) {
+    chunks.push(chunk)
+    chunk = readable.read() as Buffer | null
+  }
+  return Buffer.concat(chunks).toString()
+}
+
+/**
  * Test suite for SSE functionality
  *
  * SSE 功能测试套件
@@ -227,7 +252,7 @@ describe('sSE', () => {
     // An 'error' event on the source stream is never forwarded by `pipe()` and
     // would crash the process when unhandled, so the error is sent as a frame.
     expect(errorSpy).not.toHaveBeenCalled()
-    expect(res.read()?.toString()).toContain('event: error\ndata: test error\n')
+    expect(readAll(res)).toContain('event: error\ndata: test error\n')
   })
 
   it('should restore the socket idle timeout after the destination response finished', async () => {
