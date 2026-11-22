@@ -476,9 +476,9 @@ export function updateUserStatus(id: number, status: 'active' | 'inactive') {
 </template>
 
 <script setup lang="ts">
+import type { User, UserListParams, UserListResponse } from './api/users'
 import { ref, reactive, onMounted } from 'vue'
 import { getUsers, deleteUser, updateUserStatus } from './api/users'
-import type { User, UserListParams, UserListResponse } from './api/users'
 
 const users = ref<User[]>([])
 const pagination = reactive({
