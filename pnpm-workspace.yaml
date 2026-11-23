@@ -50,7 +50,7 @@ catalogs:
     vitepress-tuck: ^0.12.2
     vitest: ^5.1.1
     zstd-codec: ^0.1.5
-    oxfmt: '^0.79.0'
+    oxfmt: '^0.80.0'
     oxlint: '^1.94.0'
     oxlint-tsgolint: '^7.0.2008'
     tailwindcss: ^4.3.5
