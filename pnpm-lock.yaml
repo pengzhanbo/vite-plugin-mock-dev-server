@@ -226,7 +226,7 @@ catalogs:
       version: 9.4.0
     js-tokens:
       specifier: ^10.0.1
-      version: 10.0.1
+      version: 10.0.2
     launch-editor:
       specifier: ^2.14.2
       version: 2.14.2
@@ -403,7 +403,7 @@ importers:
         version: 9.4.0
       js-tokens:
         specifier: catalog:dev
-        version: 10.0.1
+        version: 10.0.2
       oxfmt:
         specifier: catalog:dev
         version: 0.79.0
@@ -2546,8 +2546,8 @@ packages:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
 
-  js-tokens@10.0.1:
-    resolution: {integrity: sha512-XMt+uh+yEs6srFvEb/pEe4IMvbtoXVdNxF7lZFU+I9sdWI641L97L+gXQMTGm1x3RjPUVizNVjHueclXr0U7sw==}
+  js-tokens@10.0.2:
+    resolution: {integrity: sha512-DXL98F5NsFBwDz7kcb4UUlrg9ePDgBCPjK4inUYi5gahxsTrKNW8Oh6F3WAuh7hntbP41EL/DkUYccRsDfLQLQ==}
 
   js-yaml@5.5.0:
     resolution: {integrity: sha512-paNr4LFIFPjeeSmwNYdrb8FafLLG/Cr2Af3GjbsHJ5CxIjH4r0c2emlmRdAtpPAieP1gRVzk6buBbVP5gBMGAg==}
@@ -5206,7 +5206,7 @@ snapshots:
 
   jiti@2.7.0: {}
 
-  js-tokens@10.0.1: {}
+  js-tokens@10.0.2: {}
 
   js-yaml@5.5.0:
     dependencies:
